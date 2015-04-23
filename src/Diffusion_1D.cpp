@@ -64,7 +64,7 @@ bool Diffusion_1D(	Matrix1D<double> &psd,
 				matr_A[id1][in] = -1 / dh;
 			} else {
 				printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_LBC_type.c_str());
-				abort();
+				exit(EXIT_FAILURE);
 			}
 
 		} else if (ix == x_size - 1 && x_size >= 3) {
@@ -83,7 +83,7 @@ bool Diffusion_1D(	Matrix1D<double> &psd,
 				matr_A[id1][in] = -1 / dh;
 			} else {
 				printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_UBC_type.c_str());
-				abort();
+				exit(EXIT_FAILURE);
 			}
 
 		} else {

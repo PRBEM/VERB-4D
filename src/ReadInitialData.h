@@ -31,7 +31,7 @@ using namespace std;
 //bool ReadInitialData(string InputFolder,
 //		int &P_size, int &R_size, int &I_size, int &K_size, int &L_size,
 //		long int &it_total, double &dt, double &output_time, double &total_time, int &output_step);
-bool ReadInitialData(string InputFolder, int argc, char* argv[],
+bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* argv[],
 		double &total_time, double &dt, double &output_time, double &time_first, long int &it_first, int &max_threads,
 		string &inversion_method,
 		Matrix4D<double> &PSD,

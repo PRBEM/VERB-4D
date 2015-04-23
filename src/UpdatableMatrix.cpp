@@ -405,7 +405,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 		// Check if the current array was even initialized
 		if (!this->initialized) {
 			cout << "Error - using uninitialized matrix" << endl;
-			abort();
+			exit(EXIT_FAILURE);
 		}
 		MatrixAllocateMemory(this->original_arr, q1, q2, q3, q4);
 		// Save current array as original array
@@ -738,7 +738,7 @@ string GetCurrentTimeValue(string filename, double current_time, double &update_
 	//if (input == NULL || input.eof()) {
 	if (!input.is_open() || input.eof()) {
 		cout << "Error reading file " << filename.c_str() << endl;
-		abort();
+		exit(EXIT_FAILURE);
 	}
 
 	// //////////////////////////////////////////////////////
@@ -777,7 +777,7 @@ string GetCurrentTimeValue(string filename, double current_time, double &update_
 
 	if (return_value == "") {
 		cout << "ERROR: Scale factor for " << current_time << " wasn't found in " << filename << endl;
-		abort();
+		exit(EXIT_FAILURE);
 	}
 
 	// Use the last time we've read as update_time

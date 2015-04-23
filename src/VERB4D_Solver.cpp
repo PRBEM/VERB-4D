@@ -138,15 +138,25 @@ int main(int argc, char* argv[]) {
 	string outputFolder = "./VERB4D_output/";
 	string inversion_method = "Lapack";
 
+	bool initialLoad = false; // Check the load of the initial files
+		 
+
 	// Read all the inputs
 	// TODO: create structures for parameters, so there would be no need to pass them one by one
-	ReadInitialData(inputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
+	initialLoad = ReadInitialData(inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
 			inversion_method, PSD,
 			P, R, V, K, L,
 			P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
 			Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
 			Vu_BC_type, Kl_BC_type, Ku_BC_type, Ll_BC_type, Lu_BC_type, DLL, DVV, DKK, DVK, VP, VR, G_local, G_radial,
 			Sources, Losses);
+
+	// Check that all nesesarry files were loaded
+	if (!initialLoad){
+		cout << "Error: ReadInitialData return false. Check the intial files." << endl;
+		exit(EXIT_FAILURE);		
+	}
+
 
 	// Copy L-star so we can later interpolate PSD to a new L-star,
 	// to account for adiabatic transport if L-star changes
@@ -161,7 +171,7 @@ int main(int argc, char* argv[]) {
 	cout << "Output each " << output_step << " step. " << endl;
 
 	// Save initial conditions
-	PSD.writeToFile(outputFolder + "PSD0.dat", P, R, V, K);
+	PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
 
 	// Output zero step
 	ostringstream PSD_filename, time_string;
@@ -203,7 +213,7 @@ int main(int argc, char* argv[]) {
 		// if (dt > 0.1/24 + 0.001) {
 		if (dt > sqrt(1.0 / V.size_y)) {
 			cout << "Calculating with ADI, time step " << dt << " is too large." << endl;
-			abort();
+			exit(EXIT_FAILURE);
 		} else {
 			cout << "Calculating with " << "Diffusion_2D_ADI3" << endl;
 		}
@@ -337,7 +347,7 @@ int main(int argc, char* argv[]) {
 			if (check < 0) {
 				cout << "Fatal error: (DVV*DKK - DVK*DVK) = " << check << " < 0." << endl;
 				cout << "The computation would be unstable." << endl;
-				abort();
+				exit(EXIT_FAILURE);
 			}
 		}
 
@@ -487,7 +497,7 @@ int main(int argc, char* argv[]) {
 			time_string << time;
 
 			PSD_filename.str("");
-			PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step) << ".dat";
+			PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step) << ".plt";
 			cout << "Writing results: " << PSD_filename.str() << endl;
 			PSD.writeToFile(PSD_filename.str(), time_string.str());
 		}

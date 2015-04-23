@@ -44,7 +44,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 	CourNum = Ux/dx*dt;
 	if (CourNum.maxabs() > 1) {
 		cout << "max(CourNum) = " << CourNum.maxabs() << ", calculation can't be performed." << endl;
-		abort();
+		exit(EXIT_FAILURE);
 	}
 
 	double CourNum_f; // Courant number of a face
@@ -60,7 +60,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 
 	if (x_size < gst*2+1) {
 		cout << "Number of convection grid can't be smaller than " << (gst*2 + 1) << " due to numerical method used." << endl;
-		abort();
+		exit(EXIT_FAILURE);
 	}
 
 	bool use_discreminator = true, use_limiting = true;
@@ -97,7 +97,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 
 		} else {
 			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_LBC_type.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 
 		if (x_UBC_type == "BCT_PERIODIC") { // Periodic
@@ -117,7 +117,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 
 		} else {
 			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_UBC_type.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 
 

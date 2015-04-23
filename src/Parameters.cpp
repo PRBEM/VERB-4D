@@ -15,8 +15,9 @@ Parameters::Parameters(string filename, int argc, char* argv[]) {
 	//if (this->parametersFile == NULL) {
 	if (!this->parametersFile.is_open()) {
 		// if file not found - matrix is zero
-		cout << filename << " not found." << endl;
-		abort();
+		cout << filename << " not found." << endl;		
+		
+		exit(EXIT_FAILURE);
 	}
 
 	for (int i = 1; i<argc; i++) {
@@ -73,7 +74,7 @@ Parameters& Parameters::findParameter(string parameterName, string defaultValue)
 
 	if (defaultValue == "") {
 		cout << "Parameter " << parameterName << " not found." << endl;
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	return *this;
 
@@ -132,7 +133,7 @@ void Parameters::getParameter(string parameterName, T &variable, bool mustBeFoun
 
 	if (mustBeFound) {
 		cout << "Parameter " << parameterName << " not found." << endl;
-		abort();
+		exit(EXIT_FAILURE);
 	}
 
 	// return *this;

@@ -48,7 +48,7 @@ void AddBoundary(DiagMatrix &matr_A, string type, int in, int id1, double dh) {
 		matr_A[id1][in] = -1 / dh;
 	} else {
 		printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", type.c_str());
-		abort();
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -81,7 +81,7 @@ bool AddBoundaries_1D(
 			matr_A[id1][in] = -1 / dh;
 		} else {
 			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_LBC_type.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 
 	} else if (ix == x_size - 1 && x_size >= 3) {
@@ -100,7 +100,7 @@ bool AddBoundaries_1D(
 			matr_A[id1][in] = -1 / dh;
 		} else {
 			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_UBC_type.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 	}
 	return true;
@@ -137,7 +137,7 @@ bool AddBoundaries_2D(
 			matr_A[id1][in] = -1 / dh;
 		} else {
 			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_LBC_type.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 
 	} else if (ix == x_size - 1 && x_size >= 3) {
@@ -156,7 +156,7 @@ bool AddBoundaries_2D(
 			matr_A[id1][in] = -1 / dh;
 		} else {
 			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_UBC_type.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 
 	} else if (iy == 0 && y_size >= 3) {
@@ -175,7 +175,7 @@ bool AddBoundaries_2D(
 			matr_A[id1][in] = -1 / dh;
 		} else {
 			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", y_LBC_type.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 
 	} else if (iy == y_size - 1 && y_size >= 3) {
@@ -194,7 +194,7 @@ bool AddBoundaries_2D(
 			matr_A[id1][in] = -1 / dh;
 		} else {
 			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", y_UBC_type.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 
 	} else {
@@ -1032,7 +1032,7 @@ void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
 
 	if (INFO != 0) {
 		printf("Lapack inversion Error!!! INFO = %ld.\n", INFO);
-		abort();
+		exit(EXIT_FAILURE);
 	}
 
 	// check
@@ -1057,7 +1057,7 @@ void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
 
 	if(max>1) {
 		printf(" Max error: %e.\n", max);
-		abort();
+		exit(EXIT_FAILURE);
 	}
 
 	delete IPIV;

@@ -92,7 +92,7 @@ void ReadBoundaryCondition(
 //bool ReadInitialData(string InputFolder,
 //		int &P_size, int &R_size, int &I_size, int &K_size, int &L_size,
 //		long int &it_total, double &dt, double &output_time, double &total_time, int &output_step) {
-bool ReadInitialData(string InputFolder, int argc, char* argv[],
+bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* argv[],
 		double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
 		string &inversion_method,
 		Matrix4D<double> &PSD,
@@ -105,7 +105,7 @@ bool ReadInitialData(string InputFolder, int argc, char* argv[],
 		UpdatableMatrix < Matrix4D<double> >  &G_local, UpdatableMatrix < Matrix4D<double> >  &G_radial,
 		UpdatableListMatrix < Matrix4D<double> > &Sources, UpdatableListMatrix < Matrix4D<double> > &Losses) {
 
-	Parameters parameters(InputFolder + "parameters.ini", argc, argv);
+	Parameters parameters("parameters.ini", argc, argv);
 
 	parameters.getParameter("time_total", time_total);
 	parameters.getParameter("time_step", time_step);
@@ -117,17 +117,16 @@ bool ReadInitialData(string InputFolder, int argc, char* argv[],
 
 	parameters.getParameter("inversion_method", inversion_method);
 
-	//parameters.findParameter("total_time", "4") >> total_time;
-	//parameters.findParameter("dt", "0.047") >> dt;
-	//parameters.findParameter("output_time", "0.047") >> output_time;
-	//parameters.findParameter("max_threads", "8") >> max_threads;
+	parameters.getParameter("input_folder", InputFolder);
+	parameters.getParameter("output_folder", OutputFolder);
+
 
 	ifstream input;
-	input.open((InputFolder + "grid.dat").c_str());
+	input.open((InputFolder + "grid.plt").c_str());
 	//if (input == NULL) {
 	if (!input.is_open()) {
-		cout << "Grid file " << (InputFolder + "grid.dat") << " not found." << endl;
-		abort();
+		cout << "Grid file " << (InputFolder + "grid.plt") << " not found." << endl;
+		return false;
 	}
 	string inBuf;
 	input >> inBuf;
@@ -143,7 +142,7 @@ bool ReadInitialData(string InputFolder, int argc, char* argv[],
 
 	if (input.eof()) {
 		cout << "Grid file error." << endl;
-		abort();
+		return false;
 	}
 
 	input.close();
@@ -166,50 +165,44 @@ bool ReadInitialData(string InputFolder, int argc, char* argv[],
 
 
 	// Read values
-	P.readFromFile(InputFolder + "grid.dat", 1);
-	R.readFromFile(InputFolder + "grid.dat", 2);
-	V.readFromFile(InputFolder + "grid.dat", 3);
-	K.readFromFile(InputFolder + "grid.dat", 4);
+	P.readFromFile(InputFolder + "grid.plt", 1);
+	R.readFromFile(InputFolder + "grid.plt", 2);
+	V.readFromFile(InputFolder + "grid.plt", 3);
+	K.readFromFile(InputFolder + "grid.plt", 4);
 
-	if (!L.readFromIniFile(InputFolder + "Lstar.ini", P, R, V, K))
-		L.readFromFile(InputFolder + "Lstar.dat", P, R, V, K);
+	if (!L.readFromIniFile(InputFolder + "Lstar.tab", P, R, V, K))
+		L.readFromFile(InputFolder + "Lstar.plt", P, R, V, K);
 	L.update(time_first, P, R, V, K); // Load L-star so it'll available
 
-	string initial_PSD = "PSD0.dat";
-	//parameters.getParameter("initial_PSD", initial_PSD);
-	parameters.findParameter("initial_PSD", "PSD0.dat") >> initial_PSD;
+	string initial_PSD = "PSD0.plt";	
+	parameters.findParameter("initial_PSD", "PSD0.plt") >> initial_PSD;
 
-	//PSD.readFromFile(InputFolder + "PSD0.dat", P, R, I, K);
+	
 	PSD.readFromFile(InputFolder + initial_PSD);
 
-	//DLL.readFromFile(InputFolder + "DLL.dat", P, R, V, K);
-	//DVV.readFromFile(InputFolder + "DVV.dat", P, R, V, K);
-	//DKK.readFromFile(InputFolder + "DKK.dat", P, R, V, K);
-	//DVK.readFromFile(InputFolder + "DVK.dat", P, R, V, K);
-
 	// DLL is defined on PLVK?
-	if (!DLL.readFromIniFile(InputFolder + "DLL.ini", P, L, V, K))
-		DLL.readFromFile(InputFolder + "DLL.dat", P, L, V, K);
+	if (!DLL.readFromIniFile(InputFolder + "DLL.tab", P, L, V, K))
+		DLL.readFromFile(InputFolder + "DLL.plt", P, L, V, K);
 
-	if (!DVV.readFromIniFile(InputFolder + "DVV.ini", P, R, V, K))
-		DVV.readFromFile(InputFolder + "DVV.dat", P, R, V, K);
+	if (!DVV.readFromIniFile(InputFolder + "DVV.tab", P, R, V, K))
+		DVV.readFromFile(InputFolder + "DVV.plt", P, R, V, K);
 
-	if (!DKK.readFromIniFile(InputFolder + "DKK.ini", P, R, V, K))
-		DKK.readFromFile(InputFolder + "DKK.dat", P, R, V, K);
+	if (!DKK.readFromIniFile(InputFolder + "DKK.tab", P, R, V, K))
+		DKK.readFromFile(InputFolder + "DKK.plt", P, R, V, K);
 
-	if (!DVK.readFromIniFile(InputFolder + "DVK.ini", P, R, V, K))
-		DVK.readFromFile(InputFolder + "DVK.dat", P, R, V, K);
+	if (!DVK.readFromIniFile(InputFolder + "DVK.tab", P, R, V, K))
+		DVK.readFromFile(InputFolder + "DVK.plt", P, R, V, K);
 
-	if (!VP.readFromIniFile(InputFolder + "VP.ini", P, R, V, K))
-		VP.readFromFile(InputFolder + "VP.dat", P, R, V, K);
+	if (!VP.readFromIniFile(InputFolder + "VP.tab", P, R, V, K))
+		VP.readFromFile(InputFolder + "VP.plt", P, R, V, K);
 
-	if (!VL.readFromIniFile(InputFolder + "VR.ini", P, R, V, K))
-		VL.readFromFile(InputFolder + "VR.dat", P, R, V, K);
+	if (!VL.readFromIniFile(InputFolder + "VR.tab", P, R, V, K))
+		VL.readFromFile(InputFolder + "VR.plt", P, R, V, K);
 
-	if (!G_local.readFromIniFile(InputFolder + "G_local.ini", P, R, V, K))
-		G_local.readFromFile(InputFolder + "G_local.dat", P, R, V, K);
-	if (!G_radial.readFromIniFile(InputFolder + "G_radial.ini", P, R, V, K))
-		G_radial.readFromFile(InputFolder + "G_radial.dat", P, R, V, K);
+	if (!G_local.readFromIniFile(InputFolder + "G_local.tab", P, R, V, K))
+		G_local.readFromFile(InputFolder + "G_local.plt", P, R, V, K);
+	if (!G_radial.readFromIniFile(InputFolder + "G_radial.tab", P, R, V, K))
+		G_radial.readFromFile(InputFolder + "G_radial.plt", P, R, V, K);
 
 	// XXX: Have to load Jacobians here, cause right now we update them only when L is updated.
 	// XXX: L is updated here so it will not be updated lated and Jacobians will not be loaded
@@ -217,14 +210,14 @@ bool ReadInitialData(string InputFolder, int argc, char* argv[],
 	G_radial.update(time_first, P, R, V, K);
 
 	// Try to read from ini-file
-	if (!Sources.readFromIniFile(InputFolder + "Sources.ini", P, R, V, K))
+	if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K))
 		// if failed - try to read from just data-file
-		Sources.readFromFile(InputFolder + "Sources.dat", P, R, V, K);
+		Sources.readFromFile(InputFolder + "Sources.plt", P, R, V, K);
 
 	// Try to read from ini-file
-	if (!Losses.readFromIniFile(InputFolder + "Losses.ini", P, R, V, K))
+	if (!Losses.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K))
 		// if failed - try to read from just data-file
-		Losses.readFromFile(InputFolder + "Losses.dat", P, R, V, K);
+		Losses.readFromFile(InputFolder + "Losses.plt", P, R, V, K);
 
 	// BC conditions
 	// Always use periodic boundary for Phi
@@ -265,32 +258,32 @@ bool ReadInitialData(string InputFolder, int argc, char* argv[],
 	PSD_u_P = -1e99; //
 
 	// Read BC values from other files
-	if (!PSD_l_R.readFromIniFile(InputFolder + "Rl_BC.ini", P.xSlice(0), V.xSlice(0), K.xSlice(0))) {
-		PSD_l_R.readFromFile(InputFolder + "Rl_BC.dat", P.xSlice(0), V.xSlice(0), K.xSlice(0));
+	if (!PSD_l_R.readFromIniFile(InputFolder + "Rl_BC.tab", P.xSlice(0), V.xSlice(0), K.xSlice(0))) {
+		PSD_l_R.readFromFile(InputFolder + "Rl_BC.plt", P.xSlice(0), V.xSlice(0), K.xSlice(0));
 	}
-	if (!PSD_u_R.readFromIniFile(InputFolder + "Ru_BC.ini", P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1))) {
-		PSD_u_R.readFromFile(InputFolder + "Ru_BC.dat",     P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1));
-	}
-
-	if (!PSD_l_L.readFromIniFile(InputFolder + "Ll_BC.ini", P.xSlice(0), V.xSlice(0), K.xSlice(0))) {
-		PSD_l_L.readFromFile(InputFolder + "Ll_BC.dat",     P.xSlice(0), V.xSlice(0), K.xSlice(0));
-	}
-	if (!PSD_u_L.readFromIniFile(InputFolder + "Lu_BC.ini", P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1))) {
-		PSD_u_L.readFromFile(InputFolder + "Lu_BC.dat",     P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1));
+	if (!PSD_u_R.readFromIniFile(InputFolder + "Ru_BC.tab", P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1))) {
+		PSD_u_R.readFromFile(InputFolder + "Ru_BC.plt",     P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1));
 	}
 
-	if (!PSD_l_V.readFromIniFile(InputFolder + "Vl_BC.ini", P.ySlice(0), R.ySlice(0), K.ySlice(0))) {
-		PSD_l_V.readFromFile(InputFolder + "Vl_BC.dat",     P.ySlice(0), R.ySlice(0), K.ySlice(0));
+	if (!PSD_l_L.readFromIniFile(InputFolder + "Ll_BC.tab", P.xSlice(0), V.xSlice(0), K.xSlice(0))) {
+		PSD_l_L.readFromFile(InputFolder + "Ll_BC.plt",     P.xSlice(0), V.xSlice(0), K.xSlice(0));
 	}
-	if (!PSD_u_V.readFromIniFile(InputFolder + "Vu_BC.ini", P.ySlice(P.size_y-1), R.ySlice(R.size_y-1), K.ySlice(K.size_y-1))) {
-		PSD_u_V.readFromFile(InputFolder + "Vu_BC.dat",     P.ySlice(P.size_y-1), R.ySlice(R.size_y-1), K.ySlice(K.size_y-1));
+	if (!PSD_u_L.readFromIniFile(InputFolder + "Lu_BC.tab", P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1))) {
+		PSD_u_L.readFromFile(InputFolder + "Lu_BC.plt",     P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1));
 	}
 
-	if (!PSD_l_K.readFromIniFile(InputFolder + "Kl_BC.ini", P.zSlice(0), R.zSlice(0), V.zSlice(0))) {
-		PSD_l_K.readFromFile(InputFolder + "Kl_BC.dat",     P.zSlice(0), R.zSlice(0), V.zSlice(0));
+	if (!PSD_l_V.readFromIniFile(InputFolder + "Vl_BC.tab", P.ySlice(0), R.ySlice(0), K.ySlice(0))) {
+		PSD_l_V.readFromFile(InputFolder + "Vl_BC.plt",     P.ySlice(0), R.ySlice(0), K.ySlice(0));
 	}
-	if (!PSD_u_K.readFromIniFile(InputFolder + "Ku_BC.ini", P.zSlice(P.size_z-1), R.zSlice(R.size_z-1), V.zSlice(V.size_z-1))) {
-		PSD_u_K.readFromFile(InputFolder + "Ku_BC.dat",     P.zSlice(P.size_z-1), R.zSlice(R.size_z-1), V.zSlice(V.size_z-1));
+	if (!PSD_u_V.readFromIniFile(InputFolder + "Vu_BC.tab", P.ySlice(P.size_y-1), R.ySlice(R.size_y-1), K.ySlice(K.size_y-1))) {
+		PSD_u_V.readFromFile(InputFolder + "Vu_BC.plt",     P.ySlice(P.size_y-1), R.ySlice(R.size_y-1), K.ySlice(K.size_y-1));
+	}
+
+	if (!PSD_l_K.readFromIniFile(InputFolder + "Kl_BC.tab", P.zSlice(0), R.zSlice(0), V.zSlice(0))) {
+		PSD_l_K.readFromFile(InputFolder + "Kl_BC.plt",     P.zSlice(0), R.zSlice(0), V.zSlice(0));
+	}
+	if (!PSD_u_K.readFromIniFile(InputFolder + "Ku_BC.tab", P.zSlice(P.size_z-1), R.zSlice(R.size_z-1), V.zSlice(V.size_z-1))) {
+		PSD_u_K.readFromFile(InputFolder + "Ku_BC.plt",     P.zSlice(P.size_z-1), R.zSlice(R.size_z-1), V.zSlice(V.size_z-1));
 	}
 
 	cout << "Ll_BC = " << Ll_BC_type << "; Lu_BC = " << Lu_BC_type << ";" << endl;

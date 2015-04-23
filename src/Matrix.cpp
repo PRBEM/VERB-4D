@@ -27,7 +27,7 @@ template<class T>inline T* matrix(long Rows)
 	//	assert(m!=NULL);
 	if (m == NULL) {
 		printf("MEMORY_ERRROR: Memory can't be initialized: %ld size", Rows*sizeof(T));
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	return m;
 }
@@ -41,14 +41,14 @@ template<class T>inline T** matrix(long Rows, long Columns)
 	//	assert(m!=NULL);
 	if (m == NULL) {
 		printf("MEMORY_ERRROR: Memory can't be initialized: %ld size", Rows * sizeof(T));
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	// allocating memory for data array
 	m[0] = new T[Rows * Columns];
 	//	assert(m[0]!=NULL);
 	if (m[0] == NULL) {
 		printf("MEMORY_ERRROR: Memory can't be initialized: %ld size", Rows * Columns * sizeof(T));
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	// assign pointers to data ranges
 	for(long i=1; i<Rows; i++) m[i] = m[i-1] + Columns;
@@ -64,7 +64,7 @@ template<class T>inline T*** matrix(int size_x, int size_y, int size_z)
 	//	assert(m!=NULL);
 	if (m == NULL) {
 		printf("MEMORY_ERRROR: Memory can't be initialized: %d size", size_x * sizeof(T));
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	for (int x = 0; x < size_x; x++) {
 		// for each pointer allocating memory for array of pointers
@@ -72,7 +72,7 @@ template<class T>inline T*** matrix(int size_x, int size_y, int size_z)
 		//		assert(m[x]!=NULL);
 		if (m[x] == NULL) {
 			printf("MEMORY_ERRROR: Memory can't be initialized: %d size", size_y * sizeof(T));
-			abort();
+			exit(EXIT_FAILURE);
 		}
 	}
 	//allocating memory for data array
@@ -80,7 +80,7 @@ template<class T>inline T*** matrix(int size_x, int size_y, int size_z)
 	//	assert(m[0][0]!=NULL);
 	if (m[0][0] == NULL) {
 		printf("MEMORY_ERRROR: Memory can't be initialized: %d size", size_x * size_y * size_z * sizeof(T));
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	for (int x = 0; x < size_x; x++) {
 		for (int y = 0; y < size_y; y++) {
@@ -101,7 +101,7 @@ template<class T>inline T**** matrix(int size_w, int size_x, int size_y, int siz
 
 	if (m == NULL) {
 		printf("MEMORY_ERRROR: Memory can't be initialized: %d size", size_w * sizeof(T));
-		abort();
+		exit(EXIT_FAILURE);
 	}
 
 	for (int w = 0; w < size_w; w++) {
@@ -110,7 +110,7 @@ template<class T>inline T**** matrix(int size_w, int size_x, int size_y, int siz
 		//		assert(m[x]!=NULL);
 		if (m[w] == NULL) {
 			printf("MEMORY_ERRROR: Memory can't be initialized: %d size", size_x * sizeof(T));
-			abort();
+			exit(EXIT_FAILURE);
 		}
 
 		for (int x = 0; x < size_x; x++) {
@@ -119,7 +119,7 @@ template<class T>inline T**** matrix(int size_w, int size_x, int size_y, int siz
 			//		assert(m[x]!=NULL);
 			if (m[w][x] == NULL) {
 				printf("MEMORY_ERRROR: Memory can't be initialized: %d size", size_y * sizeof(T));
-				abort();
+				exit(EXIT_FAILURE);
 			}
 		}
 	}
@@ -129,7 +129,7 @@ template<class T>inline T**** matrix(int size_w, int size_x, int size_y, int siz
 	//	assert(m[0][0]!=NULL);
 	if (m[0][0][0] == NULL) {
 		printf("MEMORY_ERRROR: Memory can't be initialized: %d size", size_w * size_x * size_y * size_z * sizeof(T));
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	for (int w = 0; w < size_w; w++) {
 		for (int x = 0; x < size_x; x++) {
@@ -252,7 +252,7 @@ inline T& Matrix1D<T>::operator[](int i1) {
 #ifdef DEBUG_MODE
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 #endif
 	// return i-value
@@ -270,7 +270,7 @@ inline T& Matrix1D<T>::operator[](int i1) const {
 #ifdef DEBUG_MODE
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 #endif
 	// return i-value
@@ -289,7 +289,7 @@ inline T& Matrix1D<T>::operator()(int i1) {
 #ifdef DEBUG_MODE
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 #endif
 	// return x-value
@@ -468,7 +468,7 @@ template<class T>
 inline T Matrix1D<T>::dot( const Matrix1D<T> &W ) const {
 	if (this->size_q1 != W.size_q1) {
 		printf("DOT_PRODUCT: Size is different");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	T res = 0;
 	int i1;
@@ -489,7 +489,7 @@ void Matrix1D<T>::writeToFile(string filename) {
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
 	if (!output.is_open() && (filename.find("Debug") == string::npos)) {
 		printf("FILE: Unable to output file: %s", filename.c_str());
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	output << "VARIABLES = \"" << ((this->name!="")?this->name:"function") << "\" "<< endl;
 	output << "ZONE T=\"" << filename << "\", I=" << size_q1 << endl;
@@ -510,7 +510,7 @@ void Matrix1D<T>::writeToFile(string filename, Matrix1D<T> &grid_q1) {
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
 	if (!output.is_open() && (filename.find("Debug") == string::npos)) {
 		printf("FILE: Unable to output file: %s", filename.c_str());
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	output << "VARIABLES = \"" << ((grid_q1.name!="")?grid_q1.name:"x") << "\", \""  << ((this->name!="")?this->name:"function") << "\" "<< endl;
 	output << "ZONE T=\"" << filename << "\", I=" << size_q1 << endl;
@@ -531,7 +531,7 @@ void Matrix1D<T>::readFromFile(string filename) {
 	string inBuf;
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	} else {
 		this->name = filename;
 		ifstream input(filename.c_str());
@@ -550,7 +550,7 @@ void Matrix1D<T>::readFromFile(string filename) {
 			}
 		} else {
 			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 		input.close();
 	}
@@ -567,7 +567,7 @@ void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
 	double err = 1e-8;
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	} else {
 		this->name = filename;
 		ifstream input(filename.c_str());
@@ -586,14 +586,14 @@ void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
 				// check if grid is the same
 				if (fabs(loaded_q1 - grid_q1[i1]) > err) {
 					printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch.\nLoaded: %e\nGrid: %e\n", filename.c_str(), loaded_q1, grid_q1[i1]);
-					abort();
+					exit(EXIT_FAILURE);
 				} else {
 					input >> matrix_array[i1];
 				}
 			}
 		} else {
 			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 		input.close();
 	}
@@ -755,7 +755,7 @@ inline Matrix2D<T>& Matrix2D<T>::operator= (const T val) {
 				matrix_array[i1][i2] = val;
 	} else {
 		printf("MATRIX_ERROR: Using un-itialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 
 	return *this;
@@ -961,7 +961,7 @@ void Matrix2D<T>::writeToFile(string filename) {
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
 	if (!output.is_open() && (filename.find("Debug") == string::npos)) {
 		printf("FILE: Unable to output file: %s", filename.c_str());
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	output << "VARIABLES = \""<< ((this->name!="")?this->name:"f") << "\" "<< endl;
 	output << "ZONE T=\"" << filename << "\", I=" << size_q2 << ", J= " << size_q1 << endl;
@@ -1004,7 +1004,7 @@ void Matrix2D<T>::readFromFile(string filename, int read_column) {
 	string inBuf;
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	} else {
 		this->name = filename;
 		ifstream input(filename.c_str());
@@ -1026,7 +1026,7 @@ void Matrix2D<T>::readFromFile(string filename, int read_column) {
 			}
 		} else {
 			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 		input.close();
 	}
@@ -1043,7 +1043,7 @@ void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const 
 	double loaded_x, loaded_y;
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using un-itialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	} else {
 		this->name = filename;
 		ifstream input(filename.c_str());
@@ -1063,7 +1063,7 @@ void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const 
 					// check if grid is the same
 					if (fabs(loaded_x - grid_x[i1][i2]) > err || fabs(loaded_y - grid_y[i1][i2]) > err) {
 						printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch.\nLoaded: %e, %e\nGrid: %e, %e\n", filename.c_str(), loaded_x, loaded_y, grid_x[i1][i2], grid_y[i1][i2]);
-						abort();
+						exit(EXIT_FAILURE);
 					} else {
 						input >> matrix_array[i1][i2];
 						// skip till to the end of the line
@@ -1073,7 +1073,7 @@ void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const 
 			}
 		} else {
 			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 		input.close();
 	}
@@ -1087,7 +1087,7 @@ template<class T>
 Matrix1D<T> Matrix2D<T>::xSlice(int p_x) const {
 	if (p_x > this->size_q1) {
 		printf("MATRIX_ERROR: xSlice outside or array boundary: %d > %d", p_x, this->size_q1);
-		abort();
+		exit(EXIT_FAILURE);
 	}
 
 	int i2;
@@ -1106,7 +1106,7 @@ template<class T>
 Matrix1D<T> Matrix2D<T>::ySlice(int p_y) const {
 	if (p_y > this->size_q2) {
 		printf("MATRIX_ERROR: ySlice outside or array boundary: %d > %d", p_y, this->size_q2);
-		abort();
+		exit(EXIT_FAILURE);
 	}
 
 	int i1;
@@ -1187,7 +1187,7 @@ inline T** Matrix3D<T>::operator[] (int i1) {
 #ifdef DEBUG_MODE
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 #endif
 	// return i-th pointer
@@ -1204,11 +1204,11 @@ inline T& Matrix3D<T>::operator() (int x, int y, int z) {
 #ifdef DEBUG_MODE
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using not initialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	if ((x < 0 || x > size_q1-1) || (y < 0 || y > size_q2-1) || (z < 0 || z > size_q3-1)) {
 		printf("MATRIX_ERROR: Index is out of bound");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 #endif
 	// return (x,y,z) value
@@ -1514,7 +1514,7 @@ void Matrix3D<T>::writeToFile(string filename, Matrix3D<T> &grid_x, Matrix3D<T> 
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
 	  if (!output.is_open() && (filename.find("Debug") == string::npos)) {
 		printf("FILE: Unable to output file: %s", filename.c_str());
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	output << "VARIABLES = \"" << ((grid_x.name!="")?grid_x.name:"x") << "\", \"" << ((grid_y.name!="")?grid_y.name:"y") << "\", \"" << ((grid_z.name!="")?grid_z.name:"z") << "\", \"" << ((this->name!="")?this->name:"f") << "\" "<< endl;
 	output << "ZONE T=\"" << filename << "\", I=" << size_q3 << ", J=" << size_q2 << ", K=" << size_q1 << endl;
@@ -1539,7 +1539,7 @@ void Matrix3D<T>::readFromFile(string filename, int read_column) {
 	int column;
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using un-itialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	} else {
 		this->name = filename;
 		ifstream input(filename.c_str());
@@ -1565,12 +1565,12 @@ void Matrix3D<T>::readFromFile(string filename, int read_column) {
 			}
 		} else {
 			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 		input >> inBuf;
 		if (!input.eof()) {
 			printf("Check grid size - %s.\n", filename.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 		input.close();
 	}
@@ -1588,7 +1588,7 @@ void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const 
 
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	} else {
 		this->name = filename;
 		ifstream input(filename.c_str());
@@ -1614,7 +1614,7 @@ void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const 
 						 // check if grid is the same
 						 if (fabs(loaded_x - grid_x[i1][i2][i3]) > err || fabs(loaded_y - grid_y[i1][i2][i3]) > err || fabs(loaded_z - grid_z[i1][i2][i3]) > err) {
 							printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d, %d, %d].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", filename.c_str(), i1, i2, i3, loaded_x, loaded_y, loaded_z, grid_x[i1][i2][i3], grid_y[i1][i2][i3], grid_z[i1][i2][i3]);
-							abort();
+							exit(EXIT_FAILURE);
 						} else {
 							input >> matrix_array[i1][i2][i3];
 							// skip till to the end of the line
@@ -1625,7 +1625,7 @@ void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const 
 			}
 		} else {
 			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 		input.close();
 	}
@@ -1862,7 +1862,7 @@ inline T*** Matrix4D<T>::operator[] (int i) {
 #ifdef DEBUG_MODE
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 #endif
 	// return i-th pointer
@@ -1879,11 +1879,11 @@ inline T& Matrix4D<T>::operator() (int w, int x, int y, int z) {
 #ifdef DEBUG_MODE
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using not initialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	if ((w < 0 || w > size_w-1) || (x < 0 || x > size_x-1) || (y < 0 || y > size_y-1) || (z < 0 || z > size_z-1)) {
 		printf("MATRIX_ERROR: Index is out of bound");
-		abort();
+		exit(EXIT_FAILURE);
 	}
 #endif
 	// return (x,y,z) value
@@ -2178,7 +2178,7 @@ void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> 
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
 	if (!output.is_open() && (filename.find("Debug") == string::npos)) {
 		printf("FILE: Unable to output file: %s", filename.c_str());
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	output << "VARIABLES = \"" << ((grid_w.name!="")?grid_w.name:"w") << "\", \"" << ((grid_x.name!="")?grid_x.name:"x") << "\", \"" << ((grid_y.name!="")?grid_y.name:"y") << "\", \"" << ((grid_z.name!="")?grid_z.name:"z") << "\", \"" << ((this->name!="")?this->name:"f") << "\" "<< endl;
 	output << "ZONE T=\"" << filename << "\", W=" << size_w << ", I=" << size_z << ", J=" << size_y << ", K=" << size_x << endl;
@@ -2205,7 +2205,7 @@ void Matrix4D<T>::readFromFile(string filename, int read_column) {
 	int column;
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using un-itialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	} else {
 		this->name = filename;
 		ifstream input(filename.c_str());
@@ -2250,12 +2250,12 @@ void Matrix4D<T>::readFromFile(string filename, int read_column) {
 			}
 		} else {
 			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 		input >> inBuf;
 		if (!input.eof()) {
 			printf("Check grid size - %s.\n", filename.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 		input.close();
 	}
@@ -2273,7 +2273,7 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
-		abort();
+		exit(EXIT_FAILURE);
 	} else {
 		this->name = filename;
 		ifstream input(filename.c_str());
@@ -2317,7 +2317,7 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 							 // check if grid is the same
 							 if (fabs(loaded_w - grid_w[w][x][y][z]) > err || fabs(loaded_x - grid_x[w][x][y][z]) > err || fabs(loaded_y - grid_y[w][x][y][z]) > err || fabs(loaded_z - grid_z[w][x][y][z]) > err) {
 								printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d, %d, %d, %d].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", filename.c_str(), w, x, y, z, loaded_w, loaded_x, loaded_y, loaded_z, grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
-								abort();
+								exit(EXIT_FAILURE);
 							} else {
 								input >> matrix_array[w][x][y][z];
 								// skip till to the end of the line
@@ -2329,7 +2329,7 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 			}
 		} else {
 			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
-			abort();
+			exit(EXIT_FAILURE);
 		}
 		input.close();
 	}
@@ -2703,7 +2703,7 @@ void CalculationMatrix::writeToFile(string filename) {
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
 	if (!output.is_open() && (filename.find("Debug") == string::npos)) {
 		printf("FILE: Unable to output file: %s", filename.c_str());
-		abort();
+		exit(EXIT_FAILURE);
 	}
 	output << "VARIABLES = \"";
 	for (DiagMatrix::iterator it = (*this).begin(); it != (*this).end(); it++) {
