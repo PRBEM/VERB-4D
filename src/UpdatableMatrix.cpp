@@ -9,7 +9,7 @@
 
 #include "UpdatableMatrix.h"
 
-#define UPDATE_EXT ".ini"
+#define UPDATE_EXT ".lst"
 
 using namespace std;
 

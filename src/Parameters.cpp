@@ -7,15 +7,15 @@
 
 #include "Parameters.h"
 
-
-using namespace std;
-
 Parameters::Parameters(string filename, int argc, char* argv[]) {
+	
+
 	this->parametersFile.open(filename.c_str());
 	//if (this->parametersFile == NULL) {
 	if (!this->parametersFile.is_open()) {
-		// if file not found - matrix is zero
-		cout << filename << " not found." << endl;		
+		// if file not found - matrix is zero		
+		logcout << filename << " not found." << endl;
+		
 		
 		exit(EXIT_FAILURE);
 	}

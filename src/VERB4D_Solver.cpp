@@ -34,6 +34,9 @@
 
 using namespace std;
 
+#include "Logger.h"
+
+
 #include "Matrix.h"
 
 #include "Diffusion_1D.h"
@@ -72,10 +75,12 @@ using namespace std;
 #define min_V 1e-10
 #define min_Dxx 1e-10
 
+extern Logger logcout; // class that log messages into screen and into file
 
 int main(int argc, char* argv[]) {
 
-	cout << "Compilation time: " << __DATE__ << ", " << __TIME__ << endl;
+	
+	logcout << "Compilation time: " << __DATE__ << ", " << __TIME__ << endl;
 
 	// Variables
 	// Grid, 4D:
@@ -153,7 +158,7 @@ int main(int argc, char* argv[]) {
 
 	// Check that all nesesarry files were loaded
 	if (!initialLoad){
-		cout << "Error: ReadInitialData return false. Check the intial files." << endl;
+		logcout << "Error: ReadInitialData return false. Check the intial files." << endl;
 		exit(EXIT_FAILURE);		
 	}
 
@@ -167,8 +172,8 @@ int main(int argc, char* argv[]) {
 	if (output_step < 1)
 		output_step = 1;
 
-	cout << "Total time " << time_total << ". Time step " << dt << " (" << it_total << " steps)." << endl;
-	cout << "Output each " << output_step << " step. " << endl;
+	logcout << "Total time " << time_total << ". Time step " << dt << " (" << it_total << " steps)." << endl;
+	logcout << "Output each " << output_step << " step. " << endl;
 
 	// Save initial conditions
 	PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
@@ -179,6 +184,7 @@ int main(int argc, char* argv[]) {
 	time_string.setf(ios::fixed);
 	PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << ".dat";
 	cout << "Writing results: " << PSD_filename.str() << endl;
+	logcout << "Writing results: " << PSD_filename.str() << endl;
 	time_string.str("");
 	time_string << time_first;
 	PSD.writeToFile(PSD_filename.str(), time_string.str());
@@ -204,7 +210,7 @@ int main(int argc, char* argv[]) {
 #pragma omp parallel
 	{
 #pragma omp master
-		cout << "Number of threads: " << omp_get_num_threads() << endl;
+		logcout << "Number of threads: " << omp_get_num_threads() << endl;
 	}
 
 	// Check time-step for ADI method - the stable time step is completely empirical (i.e. made-up)
@@ -212,13 +218,13 @@ int main(int argc, char* argv[]) {
 	if (inversion_method == "ADI") {
 		// if (dt > 0.1/24 + 0.001) {
 		if (dt > sqrt(1.0 / V.size_y)) {
-			cout << "Calculating with ADI, time step " << dt << " is too large." << endl;
+			logcout << "Calculating with ADI, time step " << dt << " is too large." << endl;
 			exit(EXIT_FAILURE);
 		} else {
-			cout << "Calculating with " << "Diffusion_2D_ADI3" << endl;
+			logcout << "Calculating with " << "Diffusion_2D_ADI3" << endl;
 		}
 	} else {
-		cout << inversion_method << endl;
+		logcout << inversion_method << endl;
 	}
 
 	int iP, iR, iV, iK, iL;
@@ -231,7 +237,7 @@ int main(int argc, char* argv[]) {
 	// Start time
 	for (long int it = it_first; it < it_total; it++) {
 		time = time_first + it * dt;
-		cout << endl << "Time[" << it << "/" << it_total << "]: " << time << " (days)" << endl;
+		logcout << endl << "Time[" << it << "/" << it_total << "]: " << time << " (days)" << endl;
 
 		// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Update boundary conditions and diffusion coefficients
@@ -246,7 +252,7 @@ int main(int argc, char* argv[]) {
 			// If L was updated - interpolate PSD to new L
 			progress_count = 0;
 			progress_total = P_size * V_size * K_size;
-			cout << "Interpolation to new L (adiabatic transport)  " << "         ";
+			logcout << "Interpolation to new L (adiabatic transport)  " << "         ";
 
 			Matrix1D<double> old_L_1d(L_size), PSD_L(L_size), new_L_1d(L_size);
 // Aparently it's not thread-safe
@@ -287,24 +293,24 @@ int main(int argc, char* argv[]) {
 		// Update convection velocities
 		if (P_size >= 3 || R_size >= 3) {
 			VP.update(time, P, R, V, K);
-			cout << "max(VP) = " << VP.maxabs() << endl;
+			logcout << "max(VP) = " << VP.maxabs() << endl;
 			VR.update(time, P, R, V, K);
-			cout << "max(VR) = " << VR.maxabs() << endl;
+			logcout << "max(VR) = " << VR.maxabs() << endl;
 		}
 
 		// Diffusion coefficients
 		if (L_size >= 3) {
 			DLL.update(time, P, L, V, K);
-			cout << "max(DLL) = " << DLL.maxabs() << endl;
+			logcout << "max(DLL) = " << DLL.maxabs() << endl;
 		}
 
 		if (V_size >= 3 && K_size >= 3) {
 			DVV.update(time, P, R, V, K);
-			cout << "max(DVV) = " << DVV.maxabs() << endl;
+			logcout << "max(DVV) = " << DVV.maxabs() << endl;
 			DVK.update(time, P, R, V, K);
-			cout << "max(DVK) = " << DVK.maxabs() << endl;
+			logcout << "max(DVK) = " << DVK.maxabs() << endl;
 			DKK.update(time, P, R, V, K);
-			cout << "max(DKK) = " << DKK.maxabs() << endl;
+			logcout << "max(DKK) = " << DKK.maxabs() << endl;
 		}
 
 		// Sources and losses
@@ -345,8 +351,8 @@ int main(int argc, char* argv[]) {
 		if (true) {
 			double check = (DVV.times(DKK) - DVK.times(DVK)).min();
 			if (check < 0) {
-				cout << "Fatal error: (DVV*DKK - DVK*DVK) = " << check << " < 0." << endl;
-				cout << "The computation would be unstable." << endl;
+				logcout << "Fatal error: (DVV*DKK - DVK*DVK) = " << check << " < 0." << endl;
+				logcout << "The computation would be unstable." << endl;
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -356,7 +362,7 @@ int main(int argc, char* argv[]) {
 		if (P_size >= 3 && R_size >= 3) {
 			progress_count = 0;
 			progress_total = V_size * K_size;
-			cout << "Convection  " << "         ";
+			logcout << "Convection  " << "         ";
 
 			Matrix2D<double> PSD_PR(P_size, R_size);
 			// omp-paraller loop
@@ -397,7 +403,7 @@ int main(int argc, char* argv[]) {
 		if (L_size >= 3) {
 			progress_count = 0;
 			progress_total = P_size * V_size * K_size;
-			cout << "Radial diffusion  " << "         ";
+			logcout << "Radial diffusion  " << "         ";
 
 			Matrix1D<double> PSD_L(L_size);
 #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
@@ -437,7 +443,7 @@ int main(int argc, char* argv[]) {
 			int number_of_skipped_points = 0;
 			progress_count = 0;
 			progress_total = P_size * R_size;
-			cout << "Local diffusion  " << "         ";
+			logcout << "Local diffusion  " << "         ";
 
 			Matrix2D<double> PSD_IK(V_size, K_size);
 #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1) collapse(2)
@@ -498,14 +504,14 @@ int main(int argc, char* argv[]) {
 
 			PSD_filename.str("");
 			PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step) << ".plt";
-			cout << "Writing results: " << PSD_filename.str() << endl;
+			logcout << "Writing results: " << PSD_filename.str() << endl;
 			PSD.writeToFile(PSD_filename.str(), time_string.str());
 		}
 	}
 
-	cout << "Program was terminated correctly." << endl;
-	cout << "Wall-clock time: " << (omp_get_wtime() - wall_timer) << " sec; ";
-	cout << "CPU time: " << (double) ((clock() - start_time) / CLOCKS_PER_SEC) << " sec." << endl;
+	logcout << "Program was terminated correctly." << endl;
+	logcout << "Wall-clock time: " << (omp_get_wtime() - wall_timer) << " sec; ";
+	logcout << "CPU time: " << (double)((clock() - start_time) / CLOCKS_PER_SEC) << " sec." << endl;
 
 	return 0;
 }
