@@ -125,7 +125,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	input.open((InputFolder + "grid.plt").c_str());
 	//if (input == NULL) {
 	if (!input.is_open()) {
-		cout << "Grid file " << (InputFolder + "grid.plt") << " not found." << endl;
+		Logger::warning << "Grid file " << (InputFolder + "grid.plt") << " not found." << endl;
 		return false;
 	}
 	string inBuf;
@@ -141,7 +141,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	input >> P_size;
 
 	if (input.eof()) {
-		cout << "Grid file error." << endl;
+		Logger::warning << "Grid file error." << endl;
 		return false;
 	}
 
@@ -149,7 +149,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	L_size = R_size;
 
-	cout << "P_size = " << P_size  << ", R_size = " << R_size << ", V_size = " << V_size << ", K_size = " << K_size << endl;
+	Logger::message << "P_size = " << P_size << ", R_size = " << R_size << ", V_size = " << V_size << ", K_size = " << K_size << endl;
 
 
 	///////
@@ -286,9 +286,9 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		PSD_u_K.readFromFile(InputFolder + "Ku_BC.plt",     P.zSlice(P.size_z-1), R.zSlice(R.size_z-1), V.zSlice(V.size_z-1));
 	}
 
-	cout << "Ll_BC = " << Ll_BC_type << "; Lu_BC = " << Lu_BC_type << ";" << endl;
-	cout << "Vl_BC = " << Vl_BC_type << "; Vu_BC = " << Vu_BC_type << ";" << endl;
-	cout << "Kl_BC = " << Kl_BC_type << "; Ku_BC = " << Ku_BC_type << ";" << endl;
+	Logger::message << "Ll_BC = " << Ll_BC_type << "; Lu_BC = " << Lu_BC_type << ";" << endl;
+	Logger::message << "Vl_BC = " << Vl_BC_type << "; Vu_BC = " << Vu_BC_type << ";" << endl;
+	Logger::message << "Kl_BC = " << Kl_BC_type << "; Ku_BC = " << Ku_BC_type << ";" << endl;
 
 	return true;
 }

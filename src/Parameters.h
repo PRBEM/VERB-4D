@@ -16,8 +16,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
 using namespace std;
+
+#include "Logger.h"
 
 class Parameters : public stringstream {
 private:

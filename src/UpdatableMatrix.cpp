@@ -215,10 +215,10 @@ bool UpdatableMatrix<MatrixND>::readFromIniFile(string ini_filename, MatrixND q1
 	//if (input == NULL) {
 	if (!input.is_open() ) {
 		// if file not found - return false
-		cout << ini_filename << " not found." << endl;
+		Logger::warning << ini_filename << " not found." << endl;
 		return false;
 	}
-	cout << "Reading " << ini_filename << ": " << endl;
+	Logger::message << "Reading " << ini_filename << ": " << endl;
 
 	string file_line_string;
 
@@ -236,7 +236,7 @@ bool UpdatableMatrix<MatrixND>::readFromIniFile(string ini_filename, MatrixND q1
 			this->readFromString(file_line_string, q1, q2, q3, q4);
 
 			// output - next line
-			cout << endl;
+			Logger::message << endl;
 
 		}
 	}
@@ -269,7 +269,7 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 	// Read data filename from the stream (first parameter)
 	string data_filename;
 	file_line_stream >> data_filename;
-	cout << "	Data: " << data_filename << endl;
+	Logger::message << "	Data: " << data_filename << endl;
 
 	// Check if what we've read is not empty (or is not an "empty marker")
 	if (!data_filename.empty() && data_filename != empty_marker) {
@@ -279,7 +279,7 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 		if (data_filename.rfind(UPDATE_EXT) == data_filename.length() - strlen(UPDATE_EXT)) { // string::npos) {
 			// This update-file will tell us when and how to update the array
 			this->update_filename = data_filename;
-			cout << "	Update from: " << this->update_filename << endl;
+			Logger::message << "	Update from: " << this->update_filename << endl;
 
 		} else {
 			// If it's not an update-file, no updates
@@ -310,7 +310,7 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 	if (!file_line_stream.eof()) {
 		// If not the end - read the next parameter, which is scaling coefficient
 		file_line_stream >> this->scale_string;
-		cout << "	Scale: " << this->scale_string << endl;
+		Logger::message << "	Scale: " << this->scale_string << endl;
 	} else {
 		// If there is nothing - no scaling
 		this->scale_string  = "";
@@ -322,7 +322,7 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 		// (like above Lpp or belowe Lpp or something like that)
 		file_line_stream >> this->Q1_from_string;
 		file_line_stream >> this->Q1_to_string;
-		cout << "	Limits: " << this->Q1_from_string << " to " << this->Q1_to_string << endl;
+		Logger::message << "	Limits: " << this->Q1_from_string << " to " << this->Q1_to_string << endl;
 	} else {
 		// If there is nothing - no limiting
 		this->Q1_from_string = "";
@@ -335,7 +335,7 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 		// (like above Lpp or belowe Lpp or something like that)
 		file_line_stream >> this->Q2_from_string;
 		file_line_stream >> this->Q2_to_string;
-		cout << "	Limits: " << this->Q2_from_string << " to " << this->Q2_to_string << endl;
+		Logger::message << "	Limits: " << this->Q2_from_string << " to " << this->Q2_to_string << endl;
 	} else {
 		// If there is nothing - no limiting
 		this->Q2_from_string = "";
@@ -348,7 +348,7 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 		// (like above Lpp or belowe Lpp or something like that)
 		file_line_stream >> this->Q3_from_string;
 		file_line_stream >> this->Q3_to_string;
-		cout << "	Limits: " << this->Q3_from_string << " to " << this->Q3_to_string << endl;
+		Logger::message << "	Limits: " << this->Q3_from_string << " to " << this->Q3_to_string << endl;
 	} else {
 		// If there is nothing - no limiting
 		this->Q3_from_string = "";
@@ -361,7 +361,7 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 		// (like above Lpp or belowe Lpp or something like that)
 		file_line_stream >> this->Q4_from_string;
 		file_line_stream >> this->Q4_to_string;
-		cout << "	Limits: " << this->Q4_from_string << " to " << this->Q4_to_string << endl;
+		Logger::message << "	Limits: " << this->Q4_from_string << " to " << this->Q4_to_string << endl;
 	} else {
 		// If there is nothing - no limiting
 		this->Q4_from_string = "";
@@ -404,7 +404,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 	if (!this->original_arr.initialized) {
 		// Check if the current array was even initialized
 		if (!this->initialized) {
-			cout << "Error - using uninitialized matrix" << endl;
+			Logger::error << "Error - using uninitialized matrix" << endl;
 			exit(EXIT_FAILURE);
 		}
 		MatrixAllocateMemory(this->original_arr, q1, q2, q3, q4);
@@ -605,7 +605,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 	}
 
 	if (user_output.str().length() > 0) {
-		cout << this->name << ": " << user_output.str() << endl;
+		Logger::message << this->name << ": " << user_output.str() << endl;
 	}
 
 	return updated;
@@ -634,10 +634,10 @@ bool UpdatableListMatrix<MatrixND>::readFromIniFile(string ini_filename, MatrixN
 	//if (input == NULL) {
 	if (!input.is_open()) {
 		// if file not found - diff coeff is zero
-		cout << ini_filename << " not found." << endl;
+		Logger::warning << ini_filename << " not found." << endl;
 		return false;
 	}
-	cout << "Reading " << ini_filename << ": " << endl;
+	Logger::message << "Reading " << ini_filename << ": " << endl;
 
 	string file_line_string;// = "";
 
@@ -665,7 +665,7 @@ bool UpdatableListMatrix<MatrixND>::readFromIniFile(string ini_filename, MatrixN
 			matricesList.push_back(newUpdatableMatrix);
 
 			// move output cursor to the next line
-			cout << endl;
+			Logger::message << endl;
 
 		}
 	}
@@ -737,7 +737,7 @@ string GetCurrentTimeValue(string filename, double current_time, double &update_
 	input.open(filename.c_str(), ifstream::in);
 	//if (input == NULL || input.eof()) {
 	if (!input.is_open() || input.eof()) {
-		cout << "Error reading file " << filename.c_str() << endl;
+		Logger::error << "Error reading file " << filename.c_str() << endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -776,7 +776,7 @@ string GetCurrentTimeValue(string filename, double current_time, double &update_
 	}
 
 	if (return_value == "") {
-		cout << "ERROR: Scale factor for " << current_time << " wasn't found in " << filename << endl;
+		Logger::error << "ERROR: Scale factor for " << current_time << " wasn't found in " << filename << endl;
 		exit(EXIT_FAILURE);
 	}
 

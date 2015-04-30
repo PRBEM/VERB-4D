@@ -61,6 +61,8 @@ using namespace std;
 
 #include <omp.h>
 
+using namespace std;
+
 //#define DEBUG_MODE
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -75,12 +77,13 @@ using namespace std;
 #define min_V 1e-10
 #define min_Dxx 1e-10
 
-extern Logger logcout; // class that log messages into screen and into file
+//extern Logger logcout; // class that log messages into screen and into file
 
 int main(int argc, char* argv[]) {
-
 	
-	logcout << "Compilation time: " << __DATE__ << ", " << __TIME__ << endl;
+	Logger::createInstance();	
+
+	Logger::message << "Compilation time: " << __DATE__ << ", " << __TIME__ << endl;
 
 	// Variables
 	// Grid, 4D:
@@ -158,7 +161,7 @@ int main(int argc, char* argv[]) {
 
 	// Check that all nesesarry files were loaded
 	if (!initialLoad){
-		logcout << "Error: ReadInitialData return false. Check the intial files." << endl;
+		Logger::error << "Error: ReadInitialData return false. Check the intial files." << endl;
 		exit(EXIT_FAILURE);		
 	}
 
@@ -172,8 +175,8 @@ int main(int argc, char* argv[]) {
 	if (output_step < 1)
 		output_step = 1;
 
-	logcout << "Total time " << time_total << ". Time step " << dt << " (" << it_total << " steps)." << endl;
-	logcout << "Output each " << output_step << " step. " << endl;
+	Logger::message << "Total time " << time_total << ". Time step " << dt << " (" << it_total << " steps)." << endl;
+	Logger::message << "Output each " << output_step << " step. " << endl;
 
 	// Save initial conditions
 	PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
@@ -183,8 +186,8 @@ int main(int argc, char* argv[]) {
 	time_string.precision(5);
 	time_string.setf(ios::fixed);
 	PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << ".dat";
-	cout << "Writing results: " << PSD_filename.str() << endl;
-	logcout << "Writing results: " << PSD_filename.str() << endl;
+	Logger::message << "Writing results: " << PSD_filename.str() << endl;
+	Logger::message << "Writing results: " << PSD_filename.str() << endl;
 	time_string.str("");
 	time_string << time_first;
 	PSD.writeToFile(PSD_filename.str(), time_string.str());
@@ -210,7 +213,7 @@ int main(int argc, char* argv[]) {
 #pragma omp parallel
 	{
 #pragma omp master
-		logcout << "Number of threads: " << omp_get_num_threads() << endl;
+		Logger::message << "Number of threads: " << omp_get_num_threads() << endl;
 	}
 
 	// Check time-step for ADI method - the stable time step is completely empirical (i.e. made-up)
@@ -218,13 +221,13 @@ int main(int argc, char* argv[]) {
 	if (inversion_method == "ADI") {
 		// if (dt > 0.1/24 + 0.001) {
 		if (dt > sqrt(1.0 / V.size_y)) {
-			logcout << "Calculating with ADI, time step " << dt << " is too large." << endl;
+			Logger::error << "Calculating with ADI, time step " << dt << " is too large." << endl;
 			exit(EXIT_FAILURE);
 		} else {
-			logcout << "Calculating with " << "Diffusion_2D_ADI3" << endl;
+			Logger::message << "Calculating with " << "Diffusion_2D_ADI3" << endl;
 		}
 	} else {
-		logcout << inversion_method << endl;
+		Logger::message << inversion_method << endl;
 	}
 
 	int iP, iR, iV, iK, iL;
@@ -237,7 +240,7 @@ int main(int argc, char* argv[]) {
 	// Start time
 	for (long int it = it_first; it < it_total; it++) {
 		time = time_first + it * dt;
-		logcout << endl << "Time[" << it << "/" << it_total << "]: " << time << " (days)" << endl;
+		Logger::message << endl << "Time[" << it << "/" << it_total << "]: " << time << " (days)" << endl;
 
 		// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Update boundary conditions and diffusion coefficients
@@ -252,7 +255,8 @@ int main(int argc, char* argv[]) {
 			// If L was updated - interpolate PSD to new L
 			progress_count = 0;
 			progress_total = P_size * V_size * K_size;
-			logcout << "Interpolation to new L (adiabatic transport)  " << "         ";
+			Logger::message << "Interpolation to new L (adiabatic transport): ";
+			cout << "           ";
 
 			Matrix1D<double> old_L_1d(L_size), PSD_L(L_size), new_L_1d(L_size);
 // Aparently it's not thread-safe
@@ -293,24 +297,24 @@ int main(int argc, char* argv[]) {
 		// Update convection velocities
 		if (P_size >= 3 || R_size >= 3) {
 			VP.update(time, P, R, V, K);
-			logcout << "max(VP) = " << VP.maxabs() << endl;
+			Logger::message << "max(VP) = " << VP.maxabs() << endl;
 			VR.update(time, P, R, V, K);
-			logcout << "max(VR) = " << VR.maxabs() << endl;
+			Logger::message << "max(VR) = " << VR.maxabs() << endl;
 		}
 
 		// Diffusion coefficients
 		if (L_size >= 3) {
 			DLL.update(time, P, L, V, K);
-			logcout << "max(DLL) = " << DLL.maxabs() << endl;
+			Logger::message << "max(DLL) = " << DLL.maxabs() << endl;
 		}
 
 		if (V_size >= 3 && K_size >= 3) {
 			DVV.update(time, P, R, V, K);
-			logcout << "max(DVV) = " << DVV.maxabs() << endl;
+			Logger::message << "max(DVV) = " << DVV.maxabs() << endl;
 			DVK.update(time, P, R, V, K);
-			logcout << "max(DVK) = " << DVK.maxabs() << endl;
+			Logger::message << "max(DVK) = " << DVK.maxabs() << endl;
 			DKK.update(time, P, R, V, K);
-			logcout << "max(DKK) = " << DKK.maxabs() << endl;
+			Logger::message << "max(DKK) = " << DKK.maxabs() << endl;
 		}
 
 		// Sources and losses
@@ -351,8 +355,8 @@ int main(int argc, char* argv[]) {
 		if (true) {
 			double check = (DVV.times(DKK) - DVK.times(DVK)).min();
 			if (check < 0) {
-				logcout << "Fatal error: (DVV*DKK - DVK*DVK) = " << check << " < 0." << endl;
-				logcout << "The computation would be unstable." << endl;
+				Logger::error << "Fatal error: (DVV*DKK - DVK*DVK) = " << check << " < 0." << endl;
+				Logger::error << "The computation would be unstable." << endl;
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -362,7 +366,8 @@ int main(int argc, char* argv[]) {
 		if (P_size >= 3 && R_size >= 3) {
 			progress_count = 0;
 			progress_total = V_size * K_size;
-			logcout << "Convection  " << "         ";
+			Logger::message << "Convection:" << endl;;
+			cout << "           ";
 
 			Matrix2D<double> PSD_PR(P_size, R_size);
 			// omp-paraller loop
@@ -403,7 +408,8 @@ int main(int argc, char* argv[]) {
 		if (L_size >= 3) {
 			progress_count = 0;
 			progress_total = P_size * V_size * K_size;
-			logcout << "Radial diffusion  " << "         ";
+			Logger::message << "Radial diffusion:" << endl;;
+			cout<< "           ";
 
 			Matrix1D<double> PSD_L(L_size);
 #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
@@ -443,7 +449,8 @@ int main(int argc, char* argv[]) {
 			int number_of_skipped_points = 0;
 			progress_count = 0;
 			progress_total = P_size * R_size;
-			logcout << "Local diffusion  " << "         ";
+			Logger::message << "Local diffusion: " << endl;
+			cout << "           ";
 
 			Matrix2D<double> PSD_IK(V_size, K_size);
 #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1) collapse(2)
@@ -504,14 +511,15 @@ int main(int argc, char* argv[]) {
 
 			PSD_filename.str("");
 			PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step) << ".plt";
-			logcout << "Writing results: " << PSD_filename.str() << endl;
+			Logger::message << endl << "Writing results: " << PSD_filename.str() << endl;
 			PSD.writeToFile(PSD_filename.str(), time_string.str());
 		}
 	}
 
-	logcout << "Program was terminated correctly." << endl;
-	logcout << "Wall-clock time: " << (omp_get_wtime() - wall_timer) << " sec; ";
-	logcout << "CPU time: " << (double)((clock() - start_time) / CLOCKS_PER_SEC) << " sec." << endl;
+	Logger::message << "Program was terminated correctly." << endl;
+	Logger::message << "Wall-clock time: " << (omp_get_wtime() - wall_timer) << " sec; ";
+	Logger::message << "CPU time: " << (double)((clock() - start_time) / CLOCKS_PER_SEC) << " sec." << endl;
 
+	Logger::deleteInstance();
 	return 0;
 }

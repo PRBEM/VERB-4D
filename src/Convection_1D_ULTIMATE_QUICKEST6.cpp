@@ -43,7 +43,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 
 	CourNum = Ux/dx*dt;
 	if (CourNum.maxabs() > 1) {
-		cout << "max(CourNum) = " << CourNum.maxabs() << ", calculation can't be performed." << endl;
+		Logger::error << "max(CourNum) = " << CourNum.maxabs() << ", calculation can't be performed." << endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -59,7 +59,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 	double PSD_U[uw_n+1], PSD_D[dw_n+1], PSD_C;
 
 	if (x_size < gst*2+1) {
-		cout << "Number of convection grid can't be smaller than " << (gst*2 + 1) << " due to numerical method used." << endl;
+		Logger::error << "Number of convection grid can't be smaller than " << (gst * 2 + 1) << " due to numerical method used." << endl;
 		exit(EXIT_FAILURE);
 	}
 

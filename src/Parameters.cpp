@@ -4,7 +4,6 @@
  *  Created on: Nov 17, 2012
  *      Author: dimath
  */
-
 #include "Parameters.h"
 
 Parameters::Parameters(string filename, int argc, char* argv[]) {
@@ -14,7 +13,7 @@ Parameters::Parameters(string filename, int argc, char* argv[]) {
 	//if (this->parametersFile == NULL) {
 	if (!this->parametersFile.is_open()) {
 		// if file not found - matrix is zero		
-		logcout << filename << " not found." << endl;
+		Logger::error << filename << " not found." << endl;
 		
 		
 		exit(EXIT_FAILURE);
@@ -73,7 +72,7 @@ Parameters& Parameters::findParameter(string parameterName, string defaultValue)
 	}
 
 	if (defaultValue == "") {
-		cout << "Parameter " << parameterName << " not found." << endl;
+		Logger::error << "Parameter " << parameterName << " not found." << endl;
 		exit(EXIT_FAILURE);
 	}
 	return *this;
@@ -100,13 +99,13 @@ void Parameters::getParameter(string parameterName, T &variable, bool mustBeFoun
 		line = argv[i];
 
 		if (line.size() == 0 || line[0] == '#') {
-			cout << parameterName << " = " << variable << " (default value)" << endl;
+			Logger::message << parameterName << " = " << variable << " (default value)" << endl;
 			continue;
 		}
 
 		if (line.find(parameterName) != -1) {
 			parameterValue = line.substr(line.find("=") + 1);
-			cout << parameterName << " = " << parameterValue << endl;
+			Logger::message << parameterName << " = " << parameterValue << endl;
 			// stringstream(parameterValue) >> variable;
 			stringstream tmp(parameterValue);
 			tmp >> variable;
@@ -123,7 +122,7 @@ void Parameters::getParameter(string parameterName, T &variable, bool mustBeFoun
 
 		if (line.find(parameterName) != -1) {
 			parameterValue = line.substr(line.find("=") + 1);
-			cout << parameterName << " = " << parameterValue << endl;
+			Logger::message << parameterName << " = " << parameterValue << endl;
 			// stringstream(parameterValue) >> variable;
 			stringstream tmp(parameterValue);
 			tmp >> variable;
@@ -132,7 +131,7 @@ void Parameters::getParameter(string parameterName, T &variable, bool mustBeFoun
 	}
 
 	if (mustBeFound) {
-		cout << "Parameter " << parameterName << " not found." << endl;
+		Logger::error << "Parameter " << parameterName << " not found." << endl;
 		exit(EXIT_FAILURE);
 	}
 

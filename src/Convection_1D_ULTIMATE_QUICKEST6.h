@@ -4,6 +4,7 @@
 
 #include "Matrix.h"
 #include "MatrixSolver.h"
+#include "Logger.h"
 
 
 bool Convection_1D_ULTIMATE_QUICKEST6 ( Matrix1D < double > &PSD,

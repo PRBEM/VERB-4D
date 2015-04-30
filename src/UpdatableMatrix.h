@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "Matrix.h"
+#include "Logger.h"
 
 
 /*

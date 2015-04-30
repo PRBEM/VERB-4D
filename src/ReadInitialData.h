@@ -19,13 +19,16 @@
 
 //#include <strings.h>
 #include <string>
+using namespace std;
+
+#include "Logger.h"
 
 #include "UpdatableMatrix.h"
 #include "Matrix.h"
 
 #include "Parameters.h"
 
-using namespace std;
+
 
 
 //bool ReadInitialData(string InputFolder,
