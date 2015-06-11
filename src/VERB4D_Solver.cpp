@@ -185,7 +185,7 @@ int main(int argc, char* argv[]) {
 	ostringstream PSD_filename, time_string;
 	time_string.precision(5);
 	time_string.setf(ios::fixed);
-	PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << ".dat";
+	PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << ".plt";
 	Logger::message << "Writing results: " << PSD_filename.str() << endl;
 	Logger::message << "Writing results: " << PSD_filename.str() << endl;
 	time_string.str("");
