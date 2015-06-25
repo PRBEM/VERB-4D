@@ -22,7 +22,7 @@ add paths for both gcc and omp to work
 Assuming you kept the gcc-5.1.0 file in your downloads like in the above tutorial
 	export PATH=~/Downloads/gcc-5.1.0/libgomp:$PATH
 
-Might need to change <malloc.h> to <stdlib.h> in the file Matrix.h
+Might need to change <malloc.h> to <stdlib.h> in the file MatrixSolver.cpp
 
 Create the executable
 	make

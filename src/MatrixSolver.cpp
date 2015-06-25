@@ -27,7 +27,7 @@
 
 #include "MatrixSolver.h"
 #include <math.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <string>
 #include <ctime>
 #include <iostream>
