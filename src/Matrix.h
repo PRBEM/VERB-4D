@@ -115,8 +115,8 @@ public:
  */
 template <typename T> class Matrix2D {
 private:
-	/// Matrix array (array of links to other arrays). Final likns pointed to the memory addresses of the plane array. Matrix[x][y] can be used.
-	/// Also, all rows saved in the memory one after anouther as a big array. So Matrix[x+x_size*y] can be also used.
+	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y] can be used.
+	/// Also, all rows saved in the memory one after another as a big array. So Matrix[x+x_size*y] can be also used.
 	T **matrix_array;
 public:
 	const static int N_of_dimentions2 = 2;
@@ -206,7 +206,7 @@ class Matrix3D {
 private:
 	/// Plane array of values. All rows saved in the memory one after anouther as a big array.
 	T *plane_array;
-	/// Matrix array (array of links to other arrays). Final likns pointed to the memory addresses of the plane array. Matrix[x][y] can be used.
+	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y] can be used.
 	T ***matrix_array;
 public:
 	bool initialized;														///< Flag, equal true if initialized
@@ -294,7 +294,7 @@ public:
 
 
 /**
- * Matrix 3D class
+ * Matrix 4D class
  *
  * Matrixes and operations.
  */
@@ -302,7 +302,7 @@ template <typename T> class Matrix4D {
 private:
 	/// Plane array of values. All rows saved in the memory one after anouther as a big array.
 	T *plane_array;
-	/// Matrix array (array of links to other arrays). Final likns pointed to the memory addresses of the plane array. Matrix[x][y] can be used.
+	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y][z] can be used.
 	T ****matrix_array;
 public:
 	bool initialized;														///< Flag, equal true if initialized

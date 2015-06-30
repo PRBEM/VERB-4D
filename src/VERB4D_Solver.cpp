@@ -123,6 +123,7 @@ int main(int argc, char* argv[]) {
 	UpdatableMatrix<Matrix3D<double> > Vl_BC, Vu_BC;
 	UpdatableMatrix<Matrix3D<double> > Kl_BC, Ku_BC;
 	UpdatableMatrix<Matrix3D<double> > Ll_BC, Lu_BC;
+	// Type of boundary condition either BCT_CONSTANT_VALUE or BCT_CONSTANT_DERIVATIVE
 	string Pl_BC_type, Pu_BC_type;
 	string Rl_BC_type, Ru_BC_type;
 	string Vl_BC_type, Vu_BC_type;
@@ -136,10 +137,11 @@ int main(int argc, char* argv[]) {
 	int output_step;
 	long int it_total, it_first = 1;
 
-	double dt = 1.0 / 24;
-	double time_output = 1.0 / 24;
-	double time_total = 4;
-	double time_first = 0;
+	
+	double dt = 1.0 / 24; // 1-hour time interval
+	double time_output = 1.0 / 24; // 1-hour time interval
+	double time_total = 4; // in days
+	double time_first = 0; 
 	int max_threads = omp_get_num_threads();
 
 	string inputFolder = "./VERB4D_input/";
@@ -149,7 +151,7 @@ int main(int argc, char* argv[]) {
 	bool initialLoad = false; // Check the load of the initial files
 		 
 
-	// Read all the inputs
+	// Read all the inputs - store them into variables
 	// TODO: create structures for parameters, so there would be no need to pass them one by one
 	initialLoad = ReadInitialData(inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
 			inversion_method, PSD,
@@ -170,18 +172,20 @@ int main(int argc, char* argv[]) {
 	// to account for adiabatic transport if L-star changes
 	L_copy = L;
 
-	it_total = it_first + round(double(time_total) / dt);
-	output_step = round(double(time_output) / dt);
+	// minimum step is 1 hour
+	it_total = it_first + round(double(time_total) / dt); // total number of hours given it_first offset
+	output_step = round(double(time_output) / dt); 
 	if (output_step < 1)
 		output_step = 1;
 
+	// logs the timestep and output step information
 	Logger::message << "Total time " << time_total << ". Time step " << dt << " (" << it_total << " steps)." << endl;
 	Logger::message << "Output each " << output_step << " step. " << endl;
 
 	// Save initial conditions
 	PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
 
-	// Output zero step
+	// Output zero step - writing PSD_0 file
 	ostringstream PSD_filename, time_string;
 	time_string.precision(5);
 	time_string.setf(ios::fixed);
@@ -205,10 +209,12 @@ int main(int argc, char* argv[]) {
 		local_losses = 0;
 	}
 
+	// For recording length of time for all calculations to complete
 	std::clock_t start_time, tic, tok;
 	start_time = clock();
 	double wall_timer = omp_get_wtime();
 
+	// Setting up parellization
 	omp_set_num_threads(max_threads);
 #pragma omp parallel
 	{
@@ -230,6 +236,7 @@ int main(int argc, char* argv[]) {
 		Logger::message << inversion_method << endl;
 	}
 
+	// Indexers to keep track of P,R,V,K,L
 	int iP, iR, iV, iK, iL;
 	double time;
 
@@ -239,6 +246,7 @@ int main(int argc, char* argv[]) {
 	// Main loop
 	// Start time
 	for (long int it = it_first; it < it_total; it++) {
+		// update time by dt every iteration
 		time = time_first + it * dt;
 		Logger::message << endl << "Time[" << it << "/" << it_total << "]: " << time << " (days)" << endl;
 
@@ -254,7 +262,7 @@ int main(int argc, char* argv[]) {
 
 			// If L was updated - interpolate PSD to new L
 			progress_count = 0;
-			progress_total = P_size * V_size * K_size;
+			progress_total = P_size * V_size * K_size; // total size of solution matrix 
 			Logger::message << "Interpolation to new L (adiabatic transport): ";
 			cout << "           ";
 
@@ -264,12 +272,13 @@ int main(int argc, char* argv[]) {
 			for (iP = 0; iP < P_size; iP++) {
 				for (iV = 0; iV < V_size; iV++) {
 					for (iK = 0; iK < K_size; iK++) {
-
+						
+						// show progress % if 0 threads
 						if (omp_get_thread_num() == 0)
 							cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
 									<< (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
 
-						// 1d slice
+						// 1d slice to get L from matrix4d (P,L,V,K)
 						new_L_1d = L.wyzSlice(iP, iV, iK);
 						old_L_1d = L_copy.wyzSlice(iP, iV, iK);
 						PSD_L = PSD.wyzSlice(iP, iV, iK);
@@ -277,11 +286,13 @@ int main(int argc, char* argv[]) {
 						// 1d interpolationCubic1D
 						PSD_L = Cubic1D(old_L_1d, PSD_L, new_L_1d);
 
-						// copy results back
+						// copy results back into PSD adding the 1d list PSD_L for all values of iP,iV,iK
 						for (iL = 0; iL < L_size; iL++)
 							PSD[iP][iL][iV][iK] = PSD_L[iL];
 
-//#pragma omp critical // Progress output
+
+						// Progress output - will update P_size * V_size * K_size times
+//#pragma omp critical 
 						progress_count += 1;
 
 					}
@@ -294,7 +305,7 @@ int main(int argc, char* argv[]) {
 			L_copy = L;
 		}
 
-		// Update convection velocities
+		// Update convection velocities VP and VR and log the maximum absolute values
 		if (P_size >= 3 || R_size >= 3) {
 			VP.update(time, P, R, V, K);
 			Logger::message << "max(VP) = " << VP.maxabs() << endl;
@@ -344,7 +355,7 @@ int main(int argc, char* argv[]) {
 		}
 		if (K_size > 3) {
 			//K_LBC.original_arr =(PSD.zSlice(0));
-			Kl_BC.update(time, P.zSlice(0), R.zSlice(0), V.ySlice(0));
+			Kl_BC.update(time, P.zSlice(0), R.zSlice(0), V.zSlice(0));
 			//K_UBC.original_arr =(PSD.zSlice(PSD.size_z - 1));
 			Ku_BC.update(time, P.zSlice(K.size_z - 1), R.zSlice(K.size_z - 1), V.zSlice(K.size_z - 1));
 		}
@@ -390,7 +401,7 @@ int main(int argc, char* argv[]) {
 							Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, VP.yzSlice(iV, iK), VR.yzSlice(iV, iK),
 							Sources.yzSlice(iV, iK) * 0, Losses.yzSlice(iV, iK) * 0, dt, min_PSD, min_V);
 
-					// copy results back
+					// copy results back into PSD adding the 2d list PSD_PR for all values of iV,iK
 					for (iP = 0; iP < P_size; iP++)
 						for (iR = 0; iR < R_size; iR++)
 							PSD[iP][iR][iV][iK] = PSD_PR[iP][iR];
@@ -407,7 +418,7 @@ int main(int argc, char* argv[]) {
 		// Radial diffusion
 		if (L_size >= 3) {
 			progress_count = 0;
-			progress_total = P_size * V_size * K_size;
+			progress_total = P_size * V_size * K_size; // total size of solution matrix 
 			Logger::message << "Radial diffusion:" << endl;;
 			cout<< "           ";
 
@@ -504,7 +515,7 @@ int main(int argc, char* argv[]) {
 
 		}
 
-		// Output
+		// Output the PSD data for each timestep into the output folder
 		if ((it % output_step) == 0) {
 			time_string.str("");
 			time_string << time;
@@ -516,6 +527,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+	// logger records if everything went correctly
 	Logger::message << "Program was terminated correctly." << endl;
 	Logger::message << "Wall-clock time: " << (omp_get_wtime() - wall_timer) << " sec; ";
 	Logger::message << "CPU time: " << (double)((clock() - start_time) / CLOCKS_PER_SEC) << " sec." << endl;
