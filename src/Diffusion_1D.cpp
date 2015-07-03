@@ -1,5 +1,7 @@
 /**
- * 1D Diffusion
+ * \file Diffusion_1D.cpp
+ *
+ * \brief Getting the diffusion in 1D for the given a 1D matrix of Phase Space Densities, x, boundary conditions, jacobian, sources, losses and change in time
  *
  */
 

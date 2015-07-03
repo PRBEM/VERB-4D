@@ -1,5 +1,7 @@
-/*
- * Diffusion.h
+/**
+ * \file Diffusion_ADI3.h
+ *
+ * \brief Calculating the diffusion in 2D using method from Jihye Shin and Sungsoo Kim (2008)
  *
  *  Created on: May 28, 2011
  *      Author: dimath

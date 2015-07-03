@@ -1,5 +1,7 @@
-/*
- * Diffusion.cpp
+/**
+ * \file Diffusion_2D.cpp
+ *
+ * \brief Getting the diffusion in 2D for the given a 2D matrix of Phase Space Densities, x, y, boundary conditions, jacobian, sources, losses and change in time
  *
  *  Created on: May 28, 2011
  *      Author: dimath

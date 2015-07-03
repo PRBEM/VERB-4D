@@ -18,7 +18,7 @@
 */
 
 /**
-   @file MonotCubicInterpolator.C
+   @file MonotCubicInterpolator.cpp
    @brief Represents one dimensional function f with single valued argument x
 
    Class to represent a one-dimensional function with single-valued

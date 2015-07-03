@@ -1,10 +1,11 @@
 /**
- *  UpdatableMatrix.cpp
- *
+ *  \file UpdatableMatrix.cpp
+ *	
  *  These can act just like matrices, but have the ability to be updated from ini-files at any point in time.
  *
  *  Templetes are used so we don't repeat exactly the same code 4 times - for 1D, 2D, 3D, and 4D matrices
  *
+ * \brief Same functionality as matrices found in Matrix.h but can also be updated from ini-files
  */
 
 #include "UpdatableMatrix.h"
@@ -19,18 +20,32 @@ using namespace std;
 // We need to create functions with the same number of arguments for 1D-4D so they can be called in a similar manner
 
 // Allocating memory
+
+/**  Allocates memory using the allocate memory function for Matrix1D
+*/
 void inline MatrixAllocateMemory(Matrix1D<double> &M, const Matrix1D<double> Q1, const Matrix1D<double> Q2, const Matrix1D<double> Q3, const Matrix1D<double> Q4) {
 	M.Matrix1D<double>::AllocateMemory(Q1.size_q1);
 }
+/**  Allocates memory using the allocate memory function for Matrix2D
+*/
 void inline MatrixAllocateMemory(Matrix2D<double> &M, const Matrix2D<double> Q1, const Matrix2D<double> Q2, const Matrix2D<double> Q3, const Matrix2D<double> Q4) {
 	M.Matrix2D<double>::AllocateMemory(Q1.size_q1, Q2.size_q2);
 }
+/**  Allocates memory using the allocate memory function for Matrix3D
+*/
 void inline MatrixAllocateMemory(Matrix3D<double> &M, const Matrix3D<double> Q1, const Matrix3D<double> Q2, const Matrix3D<double> Q3, const Matrix3D<double> Q4) {
 	M.Matrix3D<double>::AllocateMemory(Q1.size_q1, Q2.size_q2, Q3.size_q3);
 }
+/**  Allocates memory using the allocate memory function for Matrix4D
+*/
 void inline MatrixAllocateMemory(Matrix4D<double> &M, const Matrix4D<double> Q1, const Matrix4D<double> Q2, const Matrix4D<double> Q3, const Matrix4D<double> Q4) {
 	M.Matrix4D<double>::AllocateMemory(Q1.size_w, Q2.size_x, Q3.size_y, Q4.size_z);
-}/*
+}
+
+
+
+
+/*
 void MatrixAllocateMemory(Matrix1D<double> &M, int size_Q1, int size_Q2, int size_Q3, int size_Q4) {
 	M.Matrix1D<double>::AllocateMemory(size_Q1);
 }
@@ -44,16 +59,28 @@ void MatrixAllocateMemory(Matrix4D<double> &M, int size_Q1, int size_Q2, int siz
 	M.Matrix4D<double>::AllocateMemory(size_Q1, size_Q2, size_Q3, size_Q4);
 }*/
 
+
+
+
 // Reading from a file
+
+/**  Reading from a file using the readFromFile function for Matrix1D
+*/
 void MatrixReadFromFile(Matrix1D<double> &M, string data_filename, const Matrix1D<double> Q1, const Matrix1D<double> Q2, const Matrix1D<double> Q3, const Matrix1D<double> Q4) {
 	M.Matrix1D<double>::readFromFile(data_filename, Q1);
 }
+/**  Reading from a file using the readFromFile function for Matrix2D
+*/
 void MatrixReadFromFile(Matrix2D<double> &M, string data_filename, const Matrix2D<double> Q1, const Matrix2D<double> Q2, const Matrix2D<double> Q3, const Matrix2D<double> Q4) {
 	M.Matrix2D<double>::readFromFile(data_filename, Q1, Q2);
 }
+/**  Reading from a file using the readFromFile function for Matrix3D
+*/
 void MatrixReadFromFile(Matrix3D<double> &M, string data_filename, const Matrix3D<double> Q1, const Matrix3D<double> Q2, const Matrix3D<double> Q3, const Matrix3D<double> Q4) {
 	M.Matrix3D<double>::readFromFile(data_filename, Q1, Q2, Q3);
 }
+/**  Reading from a file using the readFromFile function for Matrix4D
+*/
 void MatrixReadFromFile(Matrix4D<double> &M, string data_filename, const Matrix4D<double> Q1, const Matrix4D<double> Q2, const Matrix4D<double> Q3, const Matrix4D<double> Q4) {
 	M.Matrix4D<double>::readFromFile(data_filename, Q1, Q2, Q3, Q4);
 }
@@ -140,6 +167,9 @@ void MatrixLimit(UpdatableMatrix< Matrix1D<double> > &M, Matrix1D<double> &Q1, M
 	}
 }
 
+/**
+ * Function to limit the data on any direction (e.g. only above plasmapause location, or only on day/night side)
+ */
 void MatrixLimit(UpdatableMatrix< Matrix2D<double> > &M, Matrix2D<double> &Q1, Matrix2D<double> &Q2, Matrix2D<double> &Q3, Matrix2D<double> &Q4,
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
@@ -158,6 +188,9 @@ void MatrixLimit(UpdatableMatrix< Matrix2D<double> > &M, Matrix2D<double> &Q1, M
 	}
 }
 
+/**
+ * Function to limit the data on any direction (e.g. only above plasmapause location, or only on day/night side)
+ */
 void MatrixLimit(UpdatableMatrix< Matrix3D<double> > &M, Matrix3D<double> &Q1, Matrix3D<double> &Q2, Matrix3D<double> &Q3, Matrix3D<double> &Q4,
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
@@ -179,6 +212,9 @@ void MatrixLimit(UpdatableMatrix< Matrix3D<double> > &M, Matrix3D<double> &Q1, M
 	}
 }
 
+/**
+ * Function to limit the data on any direction (e.g. only above plasmapause location, or only on day/night side)
+ */
 void MatrixLimit(UpdatableMatrix< Matrix4D<double> > &M, Matrix4D<double> &Q1, Matrix4D<double> &Q2, Matrix4D<double> &Q3, Matrix4D<double> &Q4,
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
@@ -808,19 +844,37 @@ bool is_number(const std::string& s) {
     return !s.empty() && it == s.end();
 }
 
-// to simplify calling of '='
+/**
+* Overloaded = operator for any size Updatable Matrix.
+* Copies every element from M and returns current matrix
+*/
 template <typename MatrixND>
 inline MatrixND& UpdatableMatrix<MatrixND>::operator= (const MatrixND &M) {
 	return MatrixND::operator= (M);
 }
+
+/**
+* Overloaded = operator for any size Updatable Matrix.
+* Sets every elemenet to Val and returns current matrix
+*/
 template <typename MatrixND>
 inline MatrixND& UpdatableMatrix<MatrixND>::operator= (const double Val) {
 	return MatrixND::operator= (Val);
 }
+
+/**
+* Overloaded = operator for any size Updatable List Matrix.
+* Copies every element from M and returns current matrix
+*/
 template <typename MatrixND>
 inline MatrixND& UpdatableListMatrix<MatrixND>::operator= (const MatrixND &M) {
 	return MatrixND::operator= (M);
 }
+
+/**
+* Overloaded = operator for any size Updatable List Matrix.
+* Sets every elemenet to Val and returns current matrix
+*/
 template <typename MatrixND>
 inline MatrixND& UpdatableListMatrix<MatrixND>::operator= (const double Val) {
 	return MatrixND::operator= (Val);

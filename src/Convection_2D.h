@@ -1,4 +1,7 @@
-/*
+/**
+ * \file Convection_2D.h
+ *
+ * \brief Calculates the convection in 2D given a 2D matrix of Phase Space Densities, P, R, boundary conditions, diffusion, sources and losses
  *
  *  Created on: Aug 22, 2011
  *      Author: subbotin
@@ -13,6 +16,10 @@
 
 #include "Convection_1D_ULTIMATE_QUICKEST6.h"
 
+
+/**
+* Function that creates a 2D Convection matrix and returns a bool upon completion
+*/
 bool Convection_2D( Matrix2D < double > &PSD_PR,
 			Matrix2D < double > P, Matrix2D < double > R,
 			int P_size, int R_size,

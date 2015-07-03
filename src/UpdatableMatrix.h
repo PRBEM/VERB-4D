@@ -1,6 +1,6 @@
-/*
- * UpdatableMatrix.h
- *
+/**
+ * \file UpdatableMatrix.h
+ * \brief Same functionality as matrices found in Matrix.h but can also be updated from ini-files
  */
 
 #ifndef UPDATABLEMATRIX_H_
@@ -15,7 +15,7 @@
 #include "Logger.h"
 
 
-/*
+/**
  * Updatable matrix - 1,2,3,4 dimensions.
  *
  * It's a template because it's easier to create, maintain, and debug one class, instead of 4 classes with the same functionality
@@ -24,6 +24,8 @@
  * but it can also be updated according to rules from an ini-file
  *
  * TODO: delete this class, all it's functionality is inside UpdatableListMatrix
+ *
+ * @brief A matrix that can be created in 1, 2, 3, or 4 dimensions with the ability to be updated
  */
 template <typename MatrixND>
 class UpdatableMatrix : public MatrixND { // current array is the parent array - whenever we use UpdatableMatrix as an array, the parent class is used
@@ -72,7 +74,7 @@ public:
 
 };
 
-/*
+/**
  * Updatable list of matrix - 1,2,3,4 dimensions.
  *
  * It's a template because it's easier to create, maintain, and debug one class, instead of 4 classes with the same functionality
@@ -82,12 +84,13 @@ public:
  *
  * The ini-files have specify several matrices that are added to each other,
  * e.g. diffusion coefficients for different waves to get one diffusion coefficient
- *
+ * 
+ * @brief A matrix that can be created in 1, 2, 3, or 4 dimensions with the ability to be updated
  */
 template <typename MatrixND>
 class UpdatableListMatrix : public MatrixND {
 private:
-	// These are the matrices that need to be sum to get the final, updated matrix
+	/// These are the matrices that need to be combined to get the final, updated matrix
 	vector < UpdatableMatrix<MatrixND> > matricesList;
 
 public:

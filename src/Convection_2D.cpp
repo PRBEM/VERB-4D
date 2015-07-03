@@ -1,6 +1,6 @@
 /**
- * Convection 2D
- *
+ * \file Convection_2D.cpp
+ * \brief Calculates the convection in 2D given a 2D matrix of Phase Space Densities, P, R, boundary conditions, diffusion, sources and losses
  */
 
 #include "Convection_2D.h"

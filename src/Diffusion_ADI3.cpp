@@ -1,5 +1,7 @@
-/*
- * Diffusion.cpp
+/**
+ * \file Diffusion_ADI3.cpp
+ *
+ * \brief Calculating the diffusion in 2D using method from Jihye Shin and Sungsoo Kim (2008)
  *
  *  Created on: May 28, 2011
  *      Author: dimath
@@ -12,7 +14,7 @@
 #include <time.h>
 
 
-/** Create model matrices and solve the system
+/** Create model matrices and solve the system,
  * The method is from
  * Jihye Shin and Sungsoo Kim (2008), ALTERNATING DIRECTION IMPLICIT METHOD FOR	TWO-DIMENSIONAL FOKKER-PLANCK EQUATION OF DENSE SPHERICAL STELLAR SYSTEMS
  */

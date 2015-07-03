@@ -1,5 +1,6 @@
-/*
- * ReadInitialData.h
+/**
+ * \file ReadInitialData.h
+ * \brief Reads in all the data files created in Matlab in order to initialize the parameters
  *
  *  Created on: Oct 5, 2012
  *      Author: dimath
@@ -47,5 +48,15 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		UpdatableMatrix < Matrix4D<double> > &G_local, UpdatableMatrix < Matrix4D<double> >  &G_radial,
 		UpdatableListMatrix < Matrix4D<double> > &Sources, UpdatableListMatrix < Matrix4D<double> > &Losses);
 
+
+// Implemented function but not ever used
+/* void ReadBoundaryCondition(
+		ifstream &input,
+		Matrix3D<double> psd_slice,
+		// UpdatableMatrix2D &BC,
+		Matrix3D<double> &BC,
+		string &BC_type,
+		Matrix3D<double> Q_slice1, Matrix3D<double> Q_slice2, Matrix3D<double> Q_slice3)
+*/
 
 #endif /* READINITIALDATA_H_ */

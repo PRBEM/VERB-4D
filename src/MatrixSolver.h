@@ -13,6 +13,8 @@
  *
  * There is a checked version for 1d diffusion (or split method of 2d, 3d diffusions) - 1d_universal_solver.
  *
+ * \brief Solves model matrices for diffusion calculations and has functionality for derivative approximations of matrices
+ *
  * \author Developed under supervision of the PI Yuri Shprits
  */
 

@@ -1,5 +1,8 @@
-/*
- * Diffusion.cpp
+/**
+ * \file Diffusion_ADI2.cpp
+ *
+ * \brief Calculating the diffusion in 2D using multidimensional diffusion process - Xiao, F., Z. Su, H. Zheng, and S. Wang (2009)
+ *
  *
  *  Created on: May 28, 2011
  *      Author: dimath
@@ -12,7 +15,7 @@
 #include <time.h>
 
 
-/** Create model matrices and solve the system
+/** Create model matrices and solve the system,
  * The method is from
  * Xiao, F., Z. Su, H. Zheng, and S. Wang (2009), Modeling of outer radiation belt electrons by multidimensional diffusion process, J. Geophys. Res., 114, A03201, doi:10.1029/2008JA013580.
  */

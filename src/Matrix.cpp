@@ -1,8 +1,14 @@
-/**
-* \file Matrix.cpp
-*
-* \author Developed under supervision of the PI Yuri Shprits
-*/
+/** Matrix 1D, 2D, 3D and 4D and operations with them
+ *
+ * \file Matrix.cpp
+ *
+ * File has 1D-class, 2D-class 3D-class and 4D-class of matrixes and various functions to work with them.
+ *
+ * \author Developed under supervision of the PI Yuri Shprits
+ *
+ * \brief Matrix 1D, 2D, 3D and 4D and operations with them
+ *
+ */
 #ifndef matrix_array_MATRIX_CPP
 #define matrix_array_MATRIX_CPP
 
@@ -20,7 +26,6 @@ using namespace std;
 // Memory related functions
 
 /// Allocating memory for 1D matrix
-/// \todo Move to Matrix.cpp
 template<class T>inline T* matrix(long Rows)
 {
 	T *m=new T[Rows];
@@ -33,7 +38,6 @@ template<class T>inline T* matrix(long Rows)
 }
 
 /// Initilizing memory for 2D matrix
-/// \todo Move to Matrix.cpp
 template<class T>inline T** matrix(long Rows, long Columns)
 {
 	// allocating memory for array of pinters
@@ -56,7 +60,6 @@ template<class T>inline T** matrix(long Rows, long Columns)
 }
 
 /// Initializing memory for 3D matrix
-/// \todo Move to Matrix.cpp
 template<class T>inline T*** matrix(int size_x, int size_y, int size_z)
 {
 	// allocating memory for array of pointers to pointers
@@ -92,7 +95,7 @@ template<class T>inline T*** matrix(int size_x, int size_y, int size_z)
 	return m;
 }
 
-/// Initializing memory for 3D matrix
+/// Initializing memory for 4D matrix
 template<class T>inline T**** matrix(int size_w, int size_x, int size_y, int size_z)
 {
 	// allocating memory for array of pointers to pointers
@@ -145,20 +148,17 @@ template<class T>inline T**** matrix(int size_w, int size_x, int size_y, int siz
 
 
 /// Freeing memory for 1D matrix
-/// \todo Move to Matrix.cpp
 template<class T>inline void free_matrix(T* m) {
 	delete m;
 }
 
 /// Freeing memory for 2D matrix
-/// \todo Move to Matrix.cpp
 template<class T>inline void free_matrix(T** m) {
 	delete[](m[0]);
 	delete[](m);
 }
 
 /// Freeing memory for 3D matrix
-/// \todo Move to Matrix.cpp
 template<class T>inline void free_matrix(T*** m, int size_x, int size_y) {
 	delete[](m[0][0]);
 	for (int x = 0; x < size_x; x++) {
@@ -169,7 +169,6 @@ template<class T>inline void free_matrix(T*** m, int size_x, int size_y) {
 
 
 /// Freeing memory for 4D matrix
-/// \todo Move to Matrix.cpp
 template<class T>inline void free_matrix(T**** m, int size_w, int size_x, int size_y) {
 	delete[](m[0][0][0]);
 	for (int w = 0; w < size_w; w++) {
@@ -261,7 +260,7 @@ inline T& Matrix1D<T>::operator[](int i1) {
 
 /**
 * Operator [i], returns value of element i, version returns 'const' value, can not be later modified.
-* If  DEBUG_MODE defined, check if matrix has been initialized.
+* If  DEBUG_MODE defined, check if matrix has been initialized. 
 *
 * \param i - number of element to return
 */
@@ -557,7 +556,13 @@ void Matrix1D<T>::readFromFile(string filename) {
 }
 
 /**
-* Read matrix data from file and check 'grid'
+* Read matrix data from file with grid, 
+* Checks if the matrix data in the file is the same as the grids that were sent in with error < 1e-8,
+* if not within error range will signal error and exit
+* 
+* Overloaded readFromFile function
+* \param filename - file to read grids from
+* \param grid_q1 - checks grid data against the file data
 */
 template<class T>
 void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
@@ -602,7 +607,8 @@ void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
 
 
 /**
-* Return minimum value of the matrix.
+* Return minimum value of the 1d matrix.
+* Default value set to 1e99
 */
 template<class T>
 T Matrix1D<T>::min() {
@@ -615,7 +621,8 @@ T Matrix1D<T>::min() {
 }
 
 /**
-* Return maximum value of the matrix.
+* Return maximum value of the 1d matrix.
+* Default value seet to 0
 */
 template<class T>
 T Matrix1D<T>::max() {
@@ -628,7 +635,8 @@ T Matrix1D<T>::max() {
 }
 
 /**
-* Return absolute maximum value of the matrix.
+* Return absolute maximum value of the 1d matrix.
+* Default value set to 0
 */
 template<class T>
 T Matrix1D<T>::maxabs() {
@@ -641,7 +649,8 @@ T Matrix1D<T>::maxabs() {
 }
 
 /**
-* Return absolute value of the matrix.
+* Return absolute value of the 1d matrix.
+* Changes every element to a positive value with the same magnitude
 */
 template<class T>
 Matrix1D<T> Matrix1D<T>::abs() {
@@ -862,7 +871,8 @@ inline Matrix2D<T> Matrix2D<T>::times (const Matrix2D<T> &M) const {
 
 
 /**
-* Return maximum value of the matrix.
+* Return maximum value of the 2d matrix.
+* Default value seet to 0
 */
 template<class T>
 T Matrix2D<T>::max() {
@@ -877,7 +887,8 @@ T Matrix2D<T>::max() {
 }
 
 /**
-* Return absolute maximum value of the matrix.
+* Return absolute maximum value of the 2d matrix.
+* Default value set to 0
 */
 template<class T>
 T Matrix2D<T>::maxabs() {
@@ -893,7 +904,8 @@ T Matrix2D<T>::maxabs() {
 
 
 /**
-* Return minimum value of the matrix.
+* Return minimum value of the 2d matrix.
+* Default value set to 1e99
 */
 template<class T>
 T Matrix2D<T>::min() {
@@ -908,7 +920,8 @@ T Matrix2D<T>::min() {
 }
 
 /**
-* Return absolute value of the matrix.
+* Return absolute value of the 2d matrix.
+* Changes every element to a positive value with the same magnitude
 */
 template<class T>
 Matrix2D<T> Matrix2D<T>::abs() {
@@ -939,7 +952,8 @@ Matrix2D<T> Matrix2D<T>::max_of(T val) {
 }
 
 /**
-* Returns corresponding index of 1d array
+* Returns corresponding index of 2d matrix if represented as a 1d array
+* \param x,y - index of element in every dimension for the 2d matrix
 */
 template<class T>
 inline int Matrix2D<T>::index1d(int x, int y) const {
@@ -996,7 +1010,11 @@ void Matrix2D<T>::writeToFile(string filename, Matrix2D<T> &grid_x, Matrix2D<T> 
 
 
 /**
-* Read matrix data from file.
+* Read matrix data from file with grid, by column
+* 
+* Overloaded readFromFile function
+* \param filename - file to read grids from
+* \param read_column - read up to this column from file
 */
 template<class T>
 void Matrix2D<T>::readFromFile(string filename, int read_column) {
@@ -1033,7 +1051,13 @@ void Matrix2D<T>::readFromFile(string filename, int read_column) {
 }
 
 /**
-* Read matrix data from file and check grid
+* Read matrix data from file with grid, 
+* Checks if the matrix data in the file is the same as the grids that were sent in with error < 1e-8,
+* if not within error range will signal error and exit
+* 
+* Overloaded readFromFile function
+* \param filename - file to read grids from
+* \param grids x,y - checks grids data against the file data
 */
 template<class T>
 void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const Matrix2D<T> grid_y) {
@@ -1530,7 +1554,11 @@ void Matrix3D<T>::writeToFile(string filename, Matrix3D<T> &grid_x, Matrix3D<T> 
 }
 
 /**
-* Read matrix data from file.
+* Read matrix data from file with grid, by column
+* 
+* Overloaded readFromFile function
+* \param filename - file to read grids from
+* \param read_column - read up to this column from file
 */
 template<class T>
 void Matrix3D<T>::readFromFile(string filename, int read_column) {
@@ -1577,7 +1605,13 @@ void Matrix3D<T>::readFromFile(string filename, int read_column) {
 }
 
 /**
-* Read matrix data from file with grid
+* Read matrix data from file with grid, 
+* Checks if the matrix data in the file is the same as the grids that were sent in with error < 1e-8,
+* if not within error range will signal error and exit
+* 
+* Overloaded readFromFile function
+* \param filename - file to read grids from
+* \param grids x,y,z - checks grids data against the file data
 */
 template<class T>
 void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const Matrix3D<T> grid_y, const Matrix3D<T> grid_z) {
@@ -1633,7 +1667,8 @@ void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const 
 
 
 /**
-* Returns corresponding index of 1d array
+* Returns corresponding index of 3d matrix if represented as a 1d array
+* \param x,y,z - index of element in every dimension for the 3d matrix
 */
 template<class T>
 inline int Matrix3D<T>::index1d(int x, int y, int z) {
@@ -1641,7 +1676,8 @@ inline int Matrix3D<T>::index1d(int x, int y, int z) {
 }
 
 /**
-* Return minimum value of the matrix.
+* Return minimum value of the 3d matrix.
+* Default value set to 1e99
 */
 template<class T>
 T Matrix3D<T>::min() {
@@ -1658,7 +1694,8 @@ T Matrix3D<T>::min() {
 }
 
 /**
-* Return maximum value of the matrix.
+* Return maximum value of the 3d matrix.
+* Default value seet to 0
 */
 template<class T>
 T Matrix3D<T>::max() {
@@ -1675,7 +1712,8 @@ T Matrix3D<T>::max() {
 }
 
 /**
-* Return absolute maximum value of the matrix.
+* Return absolute maximum value of the 3d matrix.
+* Default value set to 0
 */
 template<class T>
 T Matrix3D<T>::maxabs() {
@@ -1692,7 +1730,8 @@ T Matrix3D<T>::maxabs() {
 }
 
 /**
-* Return absolute value of the matrix.
+* Return absolute value of the 3d matrix.
+* Changes every element to a positive value with the same magnitude
 */
 template<class T>
 Matrix3D<T> Matrix3D<T>::abs() {
@@ -1710,7 +1749,8 @@ Matrix3D<T> Matrix3D<T>::abs() {
 
 
 /**
-* Make x-slice of 3d matrix - 2d matrix.
+* Take x-slice of 3d matrix turning it into a 2d matrix.
+* \param p_x - index at which to slice x dimension
 */
 template<class T>
 Matrix2D<T> Matrix3D<T>::xSlice(int p_x) const {
@@ -1726,7 +1766,8 @@ Matrix2D<T> Matrix3D<T>::xSlice(int p_x) const {
 }
 
 /**
-* Make y-slice of 3d matrix - 2d matrix.
+* Take y-slice of 3d matrix turning it into a 2d matrix.
+* \param p_y - index at which to slice y dimension
 */
 template<class T>
 Matrix2D<T> Matrix3D<T>::ySlice(int p_y) const {
@@ -1742,7 +1783,8 @@ Matrix2D<T> Matrix3D<T>::ySlice(int p_y) const {
 }
 
 /**
-* Make z-slice of 3d matrix - 2d matrix.
+* Take z-slice of 3d matrix turning it into a 2d matrix.
+* \param p_z - index at which to slice z dimension
 */
 template<class T>
 Matrix2D<T> Matrix3D<T>::zSlice(int p_z) const {
@@ -1757,6 +1799,11 @@ Matrix2D<T> Matrix3D<T>::zSlice(int p_z) const {
 	return tmp;
 }
 
+/**
+* Take xy-slice of 3d matrix turning it into a 1d matrix.
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+*/
 template<class T>
 Matrix1D<T> Matrix3D<T>::xySlice(int p_x, int p_y) const {
 	int i3;
@@ -1768,6 +1815,11 @@ Matrix1D<T> Matrix3D<T>::xySlice(int p_x, int p_y) const {
 	return tmp;
 }
 
+/**
+* Take yz-slice of 3d matrix turning it into a 1d matrix.
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix1D<T> Matrix3D<T>::yzSlice(int p_y, int p_z) const {
 	int i1;
@@ -1779,6 +1831,11 @@ Matrix1D<T> Matrix3D<T>::yzSlice(int p_y, int p_z) const {
 	return tmp;
 }
 
+/**
+* Take xz-slice of 3d matrix turning it into a 1d matrix.
+* \param p_x - index at which to slice x dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix1D<T> Matrix3D<T>::xzSlice(int p_x, int p_z) const {
 	int i2;
@@ -1852,7 +1909,7 @@ void Matrix4D<T>::AllocateMemory( int w_size, int x_size, int y_size, int z_size
 }
 
 /**
-* Operator [i], returns pointer to 2D array. Next [j][k] can be applied to return value.
+* Operator [i], returns pointer to 3D array. Next [j][k][l] can be applied to return value.
 * If  DEBUG_MODE defined, check if matrix has been initialized.
 *
 * \param i - number of element to return
@@ -1870,7 +1927,7 @@ inline T*** Matrix4D<T>::operator[] (int i) {
 }
 
 /**
-* Operator (x, y, z), returns value of element [x][y][z].
+* Operator (w, x, y, z), returns value of element [w][x][y][z].
 * If  DEBUG_MODE defined, check if matrix has been initialized.
 *
 */
@@ -1886,12 +1943,12 @@ inline T& Matrix4D<T>::operator() (int w, int x, int y, int z) {
 		exit(EXIT_FAILURE);
 	}
 #endif
-	// return (x,y,z) value
+	// return (w,x,y,z) value
 	return plane_array[((w*size_x + x)*size_y + y)*size_z];
 }
 
 /**
-* Makes matrix equal to Matrix M.
+* Makes current matrix equal to Matrix M and returns the current matrix
 *
 * \param &M - Matrix M.
 */
@@ -1928,7 +1985,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator= (const Matrix4D<T> &M) {
 }
 
 /**
-* Makes Matrix equal to value Val.
+* Makes every element in Matrix equal to Val and returns this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator= (const T Val) {
@@ -1943,7 +2000,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator= (const T Val) {
 
 
 /**
-* Matrix summation, result is stored into applied matrix (left hand side matrix)
+* Add each element of the current matrix by the corresponding element in M and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator+= (const Matrix4D<T> &M) {
@@ -1957,7 +2014,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator+= (const Matrix4D<T> &M) {
 }
 
 /**
-* Matrix subtraction, result is stored into applied matrix (left hand side matrix)
+* Subtract each element of the current matrix by the corresponding element in M and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator-= (const Matrix4D<T> &M) {
@@ -1971,7 +2028,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator-= (const Matrix4D<T> &M) {
 }
 
 /**
-* Multiplication to a value. Result is stored into applied matrix (left hand side matrix)
+* Multiply each element of the current matrix by Val and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator*= (const T Val) {
@@ -1985,7 +2042,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator*= (const T Val) {
 }
 
 /**
-* Division by a value. Result is stored into applied matrix (left hand side matrix)
+* Divide each element of the current matrix by Val and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator/= (const T Val) {
@@ -1999,7 +2056,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator/= (const T Val) {
 }
 
 /**
-* Summation with a value. Result is stored into applied matrix (left hand side matrix)
+* Add each element of the current matrix by Val and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator+= (const T Val) {
@@ -2013,7 +2070,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator+= (const T Val) {
 }
 
 /**
-* Subtraction of a value. Result is stored into applied matrix (left hand side matrix)
+* Subtract each element of the current matrix by Val and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator-= (const T Val) {
@@ -2027,7 +2084,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator-= (const T Val) {
 }
 
 /**
-* Multiplication between each element of the matrices (not a matrix multiplication). Result is stored into applied matrix (left hand side matrix)
+* Multiply each element of the current matrix by the corresponding element of matrix M and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::times_equal (const Matrix4D<T> &M) {
@@ -2041,7 +2098,7 @@ inline Matrix4D<T>& Matrix4D<T>::times_equal (const Matrix4D<T> &M) {
 }
 
 /**
-* Division of each element of one matrices to the element of another. Result is stored into applied matrix (left hand side matrix)
+* Divide each element of the current matrix by the corresponding element of matrix M and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::divide_equal (const Matrix4D<T> &M) {
@@ -2055,7 +2112,7 @@ inline Matrix4D<T>& Matrix4D<T>::divide_equal (const Matrix4D<T> &M) {
 }
 
 /**
-* Add each element of the matrix to corresponds element of matrix M.
+* Add each element of the matrix by the corresponding element of matrix M and return new matrix
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator+ (const Matrix4D<T> &M) const {
@@ -2070,7 +2127,7 @@ inline Matrix4D<T> Matrix4D<T>::operator+ (const Matrix4D<T> &M) const {
 }
 
 /**
-* Substract each element of the matrix to corresponds element of matrix M.
+* Substract each element of the matrix by the corresponding element of matrix M and return new matrix
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator- (const Matrix4D<T> &M) const {
@@ -2086,7 +2143,7 @@ inline Matrix4D<T> Matrix4D<T>::operator- (const Matrix4D<T> &M) const {
 
 
 /**
-* Multiply each element of the matrix to Val, save result to a new matrix.
+* Multiply each element of the matrix by Val, save result to a new matrix.
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator* (const T Val) const {
@@ -2102,7 +2159,7 @@ inline Matrix4D<T> Matrix4D<T>::operator* (const T Val) const {
 
 
 /**
-* Divide each element of the matrix to Val, save result to a new matrix.
+* Divide each element of the matrix by Val, save result to a new matrix.
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator/ (const T Val) const {
@@ -2117,7 +2174,7 @@ inline Matrix4D<T> Matrix4D<T>::operator/ (const T Val) const {
 }
 
 /**
-* Multiply each element of the matrix to corresponds element of matrix M.
+* Multiply each element of the matrix by the corresponding element of matrix M and return new matrix
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::times (const Matrix4D<T> &M) const {
@@ -2132,7 +2189,7 @@ inline Matrix4D<T> Matrix4D<T>::times (const Matrix4D<T> &M) const {
 }
 
 /**
-* Divide each element of the matrix to corresponds element of matrix M.
+* Divide each element of the current matrix by the corresponding element of matrix M and return new matrix
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::divide (const Matrix4D<T> &M) const {
@@ -2196,7 +2253,11 @@ void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> 
 }
 
 /**
-* Read matrix data from file.
+* Read matrix data from file with grid, by column
+* 
+* Overloaded readFromFile function
+* \param filename - file to read grids from
+* \param read_column - read up to this column from file
 */
 template<class T>
 void Matrix4D<T>::readFromFile(string filename, int read_column) {
@@ -2262,7 +2323,13 @@ void Matrix4D<T>::readFromFile(string filename, int read_column) {
 }
 
 /**
-* Read matrix data from file with grid
+* Read matrix data from file with grid, 
+* Checks if the matrix data in the file is the same as the grids that were sent in with error < 1e-8,
+* if not within error range will signal error and exit
+* 
+* Overloaded readFromFile function
+* \param filename - file to read grids from
+* \param grids w,x,y,z - checks grids data against the file data
 */
 template<class T>
 void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z) {
@@ -2272,7 +2339,7 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 	double err = 1e-8;
 
 	if (!initialized) {
-		printf("MATRIX_ERROR: Using unitialized matrix");
+		printf("MATRIX_ERROR: Using uninitialized matrix");
 		exit(EXIT_FAILURE);
 	} else {
 		this->name = filename;
@@ -2337,7 +2404,8 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 
 
 /**
-* Returns corresponding index of 1d array
+* Returns corresponding index of 4d matrix if represented as a 1d array
+* \param w,x,y,z - index of element in every dimension for the 4d matrix
 */
 template<class T>
 inline int Matrix4D<T>::index1d(int w, int x, int y, int z) {
@@ -2347,7 +2415,8 @@ inline int Matrix4D<T>::index1d(int w, int x, int y, int z) {
 
 
 /**
-* Return minimum value of the matrix.
+* Return minimum value of the 4d matrix.
+* Default value set to 1e99
 */
 template<class T>
 T Matrix4D<T>::min() {
@@ -2366,7 +2435,8 @@ T Matrix4D<T>::min() {
 }
 
 /**
-* Return maximum value of the matrix.
+* Return maximum value of the 4d matrix.
+* Default value seet to 0
 */
 template<class T>
 T Matrix4D<T>::max() {
@@ -2385,7 +2455,8 @@ T Matrix4D<T>::max() {
 }
 
 /**
-* Return absolute maximum value of the matrix.
+* Return absolute maximum value of the 4d matrix.
+* Default value set to 0
 */
 template<class T>
 T Matrix4D<T>::maxabs() {
@@ -2404,7 +2475,8 @@ T Matrix4D<T>::maxabs() {
 }
 
 /**
-* Return absolute value of the matrix.
+* Return absolute value of the 4d matrix.
+* Changes every element to a positive value with the same magnitude
 */
 template<class T>
 Matrix4D<T> Matrix4D<T>::abs() {
@@ -2423,7 +2495,9 @@ Matrix4D<T> Matrix4D<T>::abs() {
 }
 
 /**
-* Make w-slice of 4d matrix - 3d matrix.
+* Take w-slice of 4d matrix turning it into 3d matrix.
+* squeeze matrix to 3d getting all the data when the w dimension is at index p_w
+* \param p_w - index at which to slice w dimension
 */
 template<class T>
 Matrix3D<T> Matrix4D<T>::wSlice(int p_w) const {
@@ -2441,7 +2515,9 @@ Matrix3D<T> Matrix4D<T>::wSlice(int p_w) const {
 }
 
 /**
-* Make x-slice of 4d matrix - 3d matrix.
+* Take x-slice of 4d matrix turining it into 3d matrix.
+* squeeze matrix to 3d getting all the data when the x dimension is at index p_x
+* \param p_x - index at which to slice x dimension
 */
 template<class T>
 Matrix3D<T> Matrix4D<T>::xSlice(int p_x) const {
@@ -2459,7 +2535,9 @@ Matrix3D<T> Matrix4D<T>::xSlice(int p_x) const {
 }
 
 /**
-* Make y-slice of 4d matrix - 3d matrix.
+* Take y-slice of 4d matrix turning it into 3d matrix.
+* squeeze matrix to 3d getting all the data when the y dimension is at index p_y
+* \param p_y - index at which to slice y dimension
 */
 template<class T>
 Matrix3D<T> Matrix4D<T>::ySlice(int p_y) const {
@@ -2477,7 +2555,9 @@ Matrix3D<T> Matrix4D<T>::ySlice(int p_y) const {
 }
 
 /**
-* Make z-slice of 4d matrix - 3d matrix.
+* Take z-slice of 4d matrix turning it into 3d matrix.
+* squeeze matrix to 3d getting all the data when the z dimension is at index p_z
+* \param p_z - index at which to slice z dimension
 */
 template<class T>
 Matrix3D<T> Matrix4D<T>::zSlice(int p_z) const {
@@ -2494,6 +2574,11 @@ Matrix3D<T> Matrix4D<T>::zSlice(int p_z) const {
 	return tmp;
 }
 
+/**
+* Take wx-slice of 4d matrix turning it into a 2d matrix.
+* \param p_w - index at which to slice w dimension
+* \param p_x - index at which to slice x dimension
+*/
 template<class T>
 Matrix2D<T> Matrix4D<T>::wxSlice(int p_w, int p_x) const {
 	int y, z;
@@ -2507,6 +2592,11 @@ Matrix2D<T> Matrix4D<T>::wxSlice(int p_w, int p_x) const {
 	return tmp;
 }
 
+/**
+* Take wy-slice of 4d matrix turning it into a 2d matrix.
+* \param p_w - index at which to slice w dimension
+* \param p_y - index at which to slice y dimension
+*/
 template<class T>
 Matrix2D<T> Matrix4D<T>::wySlice(int p_w, int p_y) const {
 	int x, z;
@@ -2520,6 +2610,11 @@ Matrix2D<T> Matrix4D<T>::wySlice(int p_w, int p_y) const {
 	return tmp;
 }
 
+/**
+* Take wz-slice of 4d matrix turning it into a 2d matrix.
+* \param p_w - index at which to slice w dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix2D<T> Matrix4D<T>::wzSlice(int p_w, int p_z) const {
 	int x, y;
@@ -2533,6 +2628,11 @@ Matrix2D<T> Matrix4D<T>::wzSlice(int p_w, int p_z) const {
 	return tmp;
 }
 
+/**
+* Take xy-slice of 4d matrix turning it into a 2d matrix.
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+*/
 template<class T>
 Matrix2D<T> Matrix4D<T>::xySlice(int p_x, int p_y) const {
 	int w, z;
@@ -2546,6 +2646,11 @@ Matrix2D<T> Matrix4D<T>::xySlice(int p_x, int p_y) const {
 	return tmp;
 }
 
+/**
+* Take xz-slice of 4d matrix turning it into a 2d matrix.
+* \param p_x - index at which to slice x dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix2D<T> Matrix4D<T>::xzSlice(int p_x, int p_z) const {
 	int w, y;
@@ -2559,6 +2664,11 @@ Matrix2D<T> Matrix4D<T>::xzSlice(int p_x, int p_z) const {
 	return tmp;
 }
 
+/**
+* Take yz-slice of 4d matrix turning it into a 2d matrix.
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix2D<T> Matrix4D<T>::yzSlice(int p_y, int p_z) const {
 	int w, x;
@@ -2572,7 +2682,12 @@ Matrix2D<T> Matrix4D<T>::yzSlice(int p_y, int p_z) const {
 	return tmp;
 }
 
-
+/**
+* Take wxy-slice of 4d matrix turning it into a 1d matrix.
+* \param p_w - index at which to slice w dimension
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+*/
 template<class T>
 Matrix1D<T> Matrix4D<T>::wxySlice(int p_w, int p_x, int p_y) const {
 	int z;
@@ -2584,6 +2699,12 @@ Matrix1D<T> Matrix4D<T>::wxySlice(int p_w, int p_x, int p_y) const {
 	return tmp;
 }
 
+/**
+* Take wxz-slice of 4d matrix turning it into a 1d matrix.
+* \param p_w - index at which to slice w dimension
+* \param p_x - index at which to slice x dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix1D<T> Matrix4D<T>::wxzSlice(int p_w, int p_x, int p_z) const {
 	int y;
@@ -2595,6 +2716,12 @@ Matrix1D<T> Matrix4D<T>::wxzSlice(int p_w, int p_x, int p_z) const {
 	return tmp;
 }
 
+/**
+* Take wyz-slice of 4d matrix turning it into a 1d matrix.
+* \param p_w - index at which to slice w dimension
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix1D<T> Matrix4D<T>::wyzSlice(int p_w, int p_y, int p_z) const {
 	int x;
@@ -2606,6 +2733,12 @@ Matrix1D<T> Matrix4D<T>::wyzSlice(int p_w, int p_y, int p_z) const {
 	return tmp;
 }
 
+/**
+* Take xyz-slice of 4d matrix turning it into a 1d matrix.
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix1D<T> Matrix4D<T>::xyzSlice(int p_x, int p_y, int p_z) const {
 	int w;
@@ -2631,7 +2764,8 @@ CalculationMatrix::CalculationMatrix(int x_size, int y_size, int z_size, int n_o
 }
 
 /**
-* Allocating memory for CalculationMatrix
+* Allocating memory for CalculationMatrix,
+* Setting the diagonals to be 0
 */
 void CalculationMatrix::Initialize(int x_size, int y_size, int z_size, int n_of_diags) {
 	this->initialized = false;
@@ -2695,6 +2829,7 @@ int CalculationMatrix::index1d(int x, int y, int z) {
 
 /**
 * Save matrix to file.
+* Includes varaible names and sizes
 */
 void CalculationMatrix::writeToFile(string filename) {
 	int in;

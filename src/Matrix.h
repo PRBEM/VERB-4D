@@ -1,10 +1,12 @@
-/** Matrix 1D, 2D and 3D and operations with them
+/** Matrix 1D, 2D, 3D and 4D and operations with them
  *
  * \file Matrix.h
  *
- * File has 1D-class, 2D-class and 3D-class of matrixes and variouse functions to work with them.
+ * File has 1D-class, 2D-class 3D-class and 4D-class of matrixes and various functions to work with them.
  *
  * \author Developed under supervision of the PI Yuri Shprits
+ *
+ * \brief Matrix 1D, 2D, 3D and 4D and operations with them
  *
  */
 #ifndef matrix_array_MATRIX_H
@@ -27,6 +29,8 @@ using namespace std;
  * Matrix 1D class
  *
  * Matrixes and operations.
+ * 
+ * @brief A matrix of 1 dimensions that is immutable
  */
 template <typename T>
 class Matrix1D {
@@ -112,6 +116,8 @@ public:
  * Matrix 2D class
  *
  * Matrixes and operations.
+ * 
+ * @brief A matrix of 2 dimensions that is immutable
  */
 template <typename T> class Matrix2D {
 private:
@@ -200,6 +206,8 @@ public:
  * Matrix 3D class
  *
  * Matrixes and operations.
+ * 
+ * @brief A matrix of 3 dimensions that is immutable
  */
 template <typename T>
 class Matrix3D {
@@ -297,6 +305,8 @@ public:
  * Matrix 4D class
  *
  * Matrixes and operations.
+ * 
+ * @brief A matrix of 4 dimensions that is immutable
  */
 template <typename T> class Matrix4D {
 private:
@@ -319,10 +329,10 @@ public:
 	virtual void AllocateMemory(int size_w, int size_x, int size_y, int size_z);
 
 	// Operators
-	inline T*** operator[] (int i); 											///< Return the i-th pointer to 2d-array. Next [j][k] can be applied, so we have regular [i][j][k].
+	inline T*** operator[] (int i); 											///< Return the i-th pointer to 3d-array. Next [j][k][l] can be applied, so we have regular [i][j][k][l].
 	inline T*** operator[] (int i) const { return matrix_array[i]; }
-	inline T& operator() (int w, int x, int y, int z); 							///< Return the (x,y,z) value of matrix
-	inline T& Value (int w, int x, int y, int z) { return operator()(w, x, y, z); }	///< Return the (x,y,z) value of matrix
+	inline T& operator() (int w, int x, int y, int z); 							///< Return the (w,x,y,z) value of matrix
+	inline T& Value (int w, int x, int y, int z) { return operator()(w, x, y, z); }	///< Return the (w,x,y,z) value of matrix
 	inline Matrix4D<T>& MatrixArray () { return *this; }					///< Return pointer to the instance of the class.
 
 	// The following operators modify the matrix they applied to
@@ -405,6 +415,8 @@ typedef map <int , Matrix1D<double> > DiagMatrix;
 
 /** Model matrix (or related matrices)
  * It is based on Diagonal matrix and have methods for conversion from 3D or 2D PSD (and related) arrays into 1d array of unknown elements
+ * 
+ * @brief A matrix used primarily for diagonalized calculations
  */
 class CalculationMatrix : public DiagMatrix {
 public:

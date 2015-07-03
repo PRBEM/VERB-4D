@@ -1,5 +1,8 @@
-/*
- * Diffusion.h
+/**
+ * \file Diffusion_ADI1.h
+ *
+ * \brief Calculating the diffusion in 2D using implicit implementation of diagonal terms, explicit implementation of mixed terms
+ *
  *
  *  Created on: May 28, 2011
  *      Author: dimath

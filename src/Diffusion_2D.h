@@ -1,5 +1,7 @@
-/*
- * Diffusion.h
+/**
+ * \file Diffusion_2D.h
+ *
+ * \brief Getting the diffusion in 2D for the given a 2D matrix of Phase Space Densities, q1, q2, boundary conditions, jacobian, sources, losses and change in time
  *
  *  Created on: May 28, 2011
  *      Author: dimath
@@ -11,7 +13,9 @@
 #include "Matrix.h"
 #include "MatrixSolver.h"
 
-
+/**
+* Function that creates a 2D Diffusion Matrix and returns a bool upon completion
+*/
 bool Diffusion_2D(
 		  Matrix2D<double> &psd,
 		  Matrix2D<double> Q1, Matrix2D<double> Q2,

@@ -1,5 +1,7 @@
-/*
- * Diffusion.cpp
+/**
+ * \file Diffusion_ADI1.cpp
+ *
+ * \brief Calculating the diffusion in 2D using implicit implementation of diagonal terms, explicit implementation of mixed terms
  *
  *  Created on: May 28, 2011
  *      Author: dimath
@@ -13,7 +15,7 @@
 
 
 /**
- * Create model matrices and solve the system
+ * Create model matrices and solve the system, 
  * Implicit implementation of diagonal terms, explicit implementation of mixed terms
  */
 bool Diffusion_2D_ADI1(

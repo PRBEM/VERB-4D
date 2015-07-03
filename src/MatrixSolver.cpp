@@ -13,6 +13,8 @@
  *
  * There is a checked version for 1d diffusion (or split method of 2d, 3d diffusions) - 1d_universal_solver.
  *
+ * \brief Solves model matrices for diffusion calculations and has functionality for derivative approximations of matrices
+ *
  * \author Developed under supervision of the PI Yuri Shprits
  */
 
@@ -28,7 +30,7 @@
 #include "MatrixSolver.h"
 #include <math.h>
 //#include <malloc.h>
-#include <stdlib.h>
+#include <stdlib.h>frv
 #include <string>
 #include <ctime>
 #include <iostream>
@@ -53,6 +55,11 @@ void AddBoundary(DiagMatrix &matr_A, string type, int in, int id1, double dh) {
 	}
 }
 
+/**
+* Adds in the upper and lower boundaries for the 1D case when x is at first or last index
+* \param matr_A,B,C - calculation matrices
+* \param x_LBC, x_UBC, x_LBC_type, x_UBC_type  - predefined 1D boundaries/types
+*/
 bool AddBoundaries_1D(
 	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
 	Matrix1D<double> &x,
@@ -108,6 +115,11 @@ bool AddBoundaries_1D(
 }
 
 
+/**
+* Adds in the upper and lower boundaries for the 2D case when x or y is at first or last index
+* \param matr_A,B,C - calculation matrices
+* \param LBC, UBC for x and y - predefined 2D boundaries/types
+*/
 bool AddBoundaries_2D(
 		CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
 		Matrix2D<double> &x, Matrix2D<double> &y,
@@ -121,7 +133,7 @@ bool AddBoundaries_2D(
 	int id1;
 	double dh;
 
-	// Bboundary conditions
+	// Boundary conditions
 	if (ix == 0 && x_size >= 3) {
 
 		matr_C[0][in] = x_LBC[iy];

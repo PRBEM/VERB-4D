@@ -1,5 +1,6 @@
-/*
- * ReadInitialData.cpp
+/**
+ * \file ReadInitialData.cpp
+ * \brief Reads in all the data files created in Matlab in order to initialize the parameters
  *
  *  Created on: Oct 5, 2012
  *      Author: dimath
@@ -61,6 +62,7 @@ void AllocateMemory(Matrix4D<double> &PSD,
 
 }
 
+/// NOT USED??
 void ReadBoundaryCondition(
 		ifstream &input,
 		Matrix3D<double> psd_slice,
@@ -92,6 +94,28 @@ void ReadBoundaryCondition(
 //bool ReadInitialData(string InputFolder,
 //		int &P_size, int &R_size, int &I_size, int &K_size, int &L_size,
 //		long int &it_total, double &dt, double &output_time, double &total_time, int &output_step) {
+
+
+
+
+/** Reads in all the data created in Matlab in order to initialize the parameters
+* \param InputFolder - Folder to get input from
+* \param OutputFolder - Folder to write output to
+* \param argc - number of arguments given
+* \param argv - array of string arguments inputted
+* \param time_total,step,output,first - time variables for calculations
+* \param max_threads - number of threads that can be used
+* \param inversion_method - tool for doing calculations, usually Lapack
+* \param PSD - Phase Space Density Matrix
+* \param P,R,V,K,L - matrices for Phi, Actual Distance, Energy, Pitch Angle, Distance due to magnetic field, respectively
+* \param P,R,V,K,L _size - sizes for the corresponding matrices
+* \param PSD_l_ P,R,V,K,L - lower boundaries for PSD with respect to P,R,V,K,L
+* \param PSD_u_ P,R,V,K,L - upper boundaries for PSD with respect to P,R,V,K,L
+* \param BC_type - Type of boundary condition for each matrix - either BCT_CONSTANT_VALUE or BCT_CONSTANT_DERIVATIVE
+* \param DLL,DVV,DKK,DVK - diffusion matrices
+* \param G_local, G_radial - Jacobians for normalizing data
+* \param Sources, Losses - matrices for calculating Sources and Losses(loss cone)
+*/
 bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* argv[],
 		double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
 		string &inversion_method,
@@ -121,13 +145,17 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	parameters.getParameter("output_folder", OutputFolder);
 
 
+	// Opening up grid.plt in order to get P,R,V,K sizes which are stored in the header
 	ifstream input;
 	input.open((InputFolder + "grid.plt").c_str());
-	//if (input == NULL) {
+			//if (input == NULL) {
+	// if the file is missing sends message to the logger
 	if (!input.is_open()) {
 		Logger::warning << "Grid file " << (InputFolder + "grid.plt") << " not found." << endl;
 		return false;
 	}
+	
+	// "I"=K_size, "J"=V_size, "K"=R_size, "L"=P_size from grid.plt from create_grid.m generated in matlab
 	string inBuf;
 	input >> inBuf;
 	while (strcasecmp(inBuf.c_str(), "ZONE") != 0 && !input.eof() ) input >> inBuf;
@@ -139,7 +167,8 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	input >> R_size;
 	while(inBuf.substr(inBuf.size() - 1).compare("L") && !input.eof()) getline(input, inBuf, '=');
 	input >> P_size;
-
+	
+	// If the file doesn't have data send error message
 	if (input.eof()) {
 		Logger::warning << "Grid file error." << endl;
 		return false;
@@ -147,8 +176,9 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	input.close();
 
+	// sets the size of L and R to be the same - both measure distance
 	L_size = R_size;
-
+	// records the sizes of P,R,V,K to the logger
 	Logger::message << "P_size = " << P_size << ", R_size = " << R_size << ", V_size = " << V_size << ", K_size = " << K_size << endl;
 
 
@@ -164,22 +194,25 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			G_local, G_radial, Sources, Losses);
 
 
-	// Read values
+	// Read values from grid.plt - last argument is the column being read in
 	P.readFromFile(InputFolder + "grid.plt", 1);
 	R.readFromFile(InputFolder + "grid.plt", 2);
 	V.readFromFile(InputFolder + "grid.plt", 3);
 	K.readFromFile(InputFolder + "grid.plt", 4);
 
+	// Read in Lstar.plt if Lstar.tab is not present
 	if (!L.readFromIniFile(InputFolder + "Lstar.tab", P, R, V, K))
 		L.readFromFile(InputFolder + "Lstar.plt", P, R, V, K);
-	L.update(time_first, P, R, V, K); // Load L-star so it'll available
+	L.update(time_first, P, R, V, K); // Load L-star so it'll be available
 
+	
 	string initial_PSD = "PSD0.plt";	
 	parameters.findParameter("initial_PSD", "PSD0.plt") >> initial_PSD;
 
 	
 	PSD.readFromFile(InputFolder + initial_PSD);
 
+	// For all of the following load the .tab file if it exists, if not load the corresponding .plt file
 	// DLL is defined on PLVK?
 	if (!DLL.readFromIniFile(InputFolder + "DLL.tab", P, L, V, K))
 		DLL.readFromFile(InputFolder + "DLL.plt", P, L, V, K);
@@ -238,6 +271,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	//K_UBC_type = "BCT_CONSTANT_VALUE";
 	Ku_BC_type = "BCT_CONSTANT_DERIVATIVE";
 
+	// store all of the boundary conditions parameters from BC.ini
 	Parameters BC_parameters(InputFolder + "BC.ini", argc, argv);
 
 	// Read BC type fro BC.ini file
@@ -258,6 +292,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	PSD_u_P = -1e99; //
 
 	// Read BC values from other files
+	// For all of the following load the .tab file if it exists, if not load the corresponding .plt file to set the boundaries
 	if (!PSD_l_R.readFromIniFile(InputFolder + "Rl_BC.tab", P.xSlice(0), V.xSlice(0), K.xSlice(0))) {
 		PSD_l_R.readFromFile(InputFolder + "Rl_BC.plt", P.xSlice(0), V.xSlice(0), K.xSlice(0));
 	}
@@ -285,7 +320,8 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	if (!PSD_u_K.readFromIniFile(InputFolder + "Ku_BC.tab", P.zSlice(P.size_z-1), R.zSlice(R.size_z-1), V.zSlice(V.size_z-1))) {
 		PSD_u_K.readFromFile(InputFolder + "Ku_BC.plt",     P.zSlice(P.size_z-1), R.zSlice(R.size_z-1), V.zSlice(V.size_z-1));
 	}
-
+	
+	// Log the boundary types
 	Logger::message << "Ll_BC = " << Ll_BC_type << "; Lu_BC = " << Lu_BC_type << ";" << endl;
 	Logger::message << "Vl_BC = " << Vl_BC_type << "; Vu_BC = " << Vu_BC_type << ";" << endl;
 	Logger::message << "Kl_BC = " << Kl_BC_type << "; Ku_BC = " << Ku_BC_type << ";" << endl;

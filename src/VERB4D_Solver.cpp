@@ -1,4 +1,7 @@
-/*
+/**
+ * \file VERB4D_Solver.cpp
+ * \brief Holds main function that solves all of the matrices using the help of the other classes/functions
+ *
  * Diffusion + convection code, VERB4D.
  *
  * The code solves the Fokker-Planck equation with convection terms:
@@ -355,7 +358,7 @@ int main(int argc, char* argv[]) {
 		}
 		if (K_size > 3) {
 			//K_LBC.original_arr =(PSD.zSlice(0));
-			Kl_BC.update(time, P.zSlice(0), R.zSlice(0), V.zSlice(0));
+			Kl_BC.update(time, P.zSlice(0), R.zSlice(0), V.ySlice(0));
 			//K_UBC.original_arr =(PSD.zSlice(PSD.size_z - 1));
 			Ku_BC.update(time, P.zSlice(K.size_z - 1), R.zSlice(K.size_z - 1), V.zSlice(K.size_z - 1));
 		}
@@ -363,6 +366,8 @@ int main(int argc, char* argv[]) {
 		// //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		// Check that DQ2Q3^2 < DQ2Q2 * DQ3Q3
 		// The computation will be unstable otherwise
+		
+		// checking if DVV^2 - min(DVK^2) is greator than 0, if not log and exit
 		if (true) {
 			double check = (DVV.times(DKK) - DVK.times(DVK)).min();
 			if (check < 0) {
@@ -379,15 +384,15 @@ int main(int argc, char* argv[]) {
 			progress_total = V_size * K_size;
 			Logger::message << "Convection:" << endl;;
 			cout << "           ";
-
+ 
 			Matrix2D<double> PSD_PR(P_size, R_size);
 			// omp-paraller loop
 #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_PR) shared(progress_total, progress_count) schedule(dynamic,1) collapse(2)
 			for (iV = V_size-1; iV >= 0; iV--) { 	// Looping it backward allows to speed-up the multithread simulation
-												// due to the highest energies being the slowest to calculate
+												// due to the highest energies being the slowest to calculate - calculating highest energy first
 				for (iK = 0; iK < K_size; iK++) {
 
-					// Output current progress
+					// Output current progress percentage when number of threads = 0
 					if (omp_get_thread_num() == 0)
 						cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
 								<< (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
@@ -395,6 +400,7 @@ int main(int argc, char* argv[]) {
 					// 2d slice of PSD to pass to the Convection calculation function
 					PSD_PR = PSD.yzSlice(iV, iK);
 
+					// Inputs to the Convection_2D, Sources and Losses set to 0
 					Convection_2D(PSD_PR, P.yzSlice(iV, iK), R.yzSlice(iV, iK), P_size, R_size, Pl_BC.yzSlice(iV, iK),
 							Pu_BC.yzSlice(iV, iK), // R, I, K
 							Rl_BC.yzSlice(iV, iK), Ru_BC.yzSlice(iV, iK), // P, I, K
@@ -406,7 +412,7 @@ int main(int argc, char* argv[]) {
 						for (iR = 0; iR < R_size; iR++)
 							PSD[iP][iR][iV][iK] = PSD_PR[iP][iR];
 
-#pragma omp critical // Progress count
+#pragma omp critical // update progress count every iteration through
 					progress_count += 1;
 				}
 			}

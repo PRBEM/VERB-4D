@@ -1,14 +1,16 @@
 /**
- * Convection_1D.cpp
+ * \file Convection_1D_ULTIMATE_QUICKEST6.cpp
  *
  * Leonard, 1991; Leonard and Niknafs, 1991;
  * It works somehow, edit with a great care!
  *
+ * \brief Calculates the convection in 1D given a 1D matrix of Phase Space Densities, boundary conditions, diffusion, sources and losses
  */
 
 #include "Convection_1D_ULTIMATE_QUICKEST6.h"
 
-
+/** Using the Standard namespace
+*/
 using namespace std;
 
 #define gst 5
@@ -32,7 +34,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 
 	Matrix1D < double > CourNum(x_size); // Courant number
 
-	double dx = (x[1] - x[0]); // FIXME - will work only for regular grid
+	double dx = (x[1] - x[0]); // FIXME - will work only for regular (uniform) grid
 	//double max_dt = dx / Ux.maxabs();
 	//int num_steps = (max_dt < dt_total) ? ceil((double)dt_total/max_dt) : 1;
 

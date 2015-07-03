@@ -30,6 +30,7 @@ namespace Opm
 {
 
 /**
+   @file MonotCubicInterpolator.hpp
    Class to represent a one-dimensional function f with single-valued
    argument x. The function is represented by a table of function
    values. Interpolation between table values is cubic and monotonicity
@@ -58,7 +59,10 @@ namespace Opm
    @brief Represents one dimensional function f with single valued argument x that can be interpolated using monotone cubic interpolation
 
 */
-
+   
+ /**
+ *  @brief Represents one dimensional function f with single valued argument x that can be interpolated using monotone cubic interpolation
+ */
 class MonotCubicInterpolator {
  public:
 
