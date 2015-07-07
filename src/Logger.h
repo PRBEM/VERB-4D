@@ -78,16 +78,22 @@ public:
 	
 
 	protected:
+	/// defualt constructor
 	Logger() {};
+	/// copy constructor
 	Logger(const Logger& thisobject);
+	/// overloaded equal for copy constructor
 	Logger& operator=(const Logger&);
+	/// default destructor
 	~Logger() {};
 
+	/// stores message into logger, including message type
 	void writeIDEDebugString(const std::string& message, MessageType type);
 
 	
 
 	private:
+		/// private member function here
 		void writeMessage(const std::string& message);
 		void writeWarning(const std::string& message);
 		void writeError(const std::string& message);

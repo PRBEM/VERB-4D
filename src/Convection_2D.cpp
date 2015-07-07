@@ -8,10 +8,9 @@
 
 using namespace std;
 
-/**
- * Calculation of 2D convection
- *
- * @param PSD_PR
+
+
+/* @param PSD_PR
  * @param P
  * @param R
  * @param P_size
@@ -30,6 +29,11 @@ using namespace std;
  * @param Losses
  * @param dt_total
  * @return
+ */
+
+/**
+ * Calculation of 2D convection
+ *
  */
 bool Convection_2D( Matrix2D < double > &PSD_PR,
 			Matrix2D < double > P, Matrix2D < double > R,

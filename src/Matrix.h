@@ -52,15 +52,15 @@ public:
 
 	// Operators
 	inline T& operator[](int i);													///< Return the i-th value of matrix
-	inline T& operator[](int i) const;
+	inline T& operator[](int i) const;												///< const function to return the i-th value of matrix
 	inline T& operator()(int q1);													///< Return the x-th value of matrix
 	inline T& Value (int q1) { return operator()(q1); }								///< Return the (x,y) value of matrix
 	inline Matrix1D<T>& MatrixArray () { return *this; }							///< Return pointer to the instance of the class.
 	inline T* MatrixArrayPointer () { return matrix_array; }							///< Return pointer to the instance of the class.
 
 	// unary
-	inline const Matrix1D& operator+() const { return *this; }
-	inline const Matrix1D operator-() const { return ((*this)*(-1)); }
+	inline const Matrix1D& operator+() const { return *this; }						 ///< Return the matrix
+	inline const Matrix1D operator-() const { return ((*this)*(-1)); } 				///< Return the matrix with all values multiplied by -1
 
 	// The following operators modify the matrix they applied to
 	inline Matrix1D& operator= (const Matrix1D<T> &M);
@@ -128,7 +128,8 @@ public:
 	const static int N_of_dimentions2 = 2;
 
 	bool initialized;														///< Flag, equal true if initialized
-	int size_q1, size_q2;														///< size x, size_y
+	int size_q1;															///< size x
+	int size_q2;															 ///< size_y
 	string name;															///< name of the Matrix
 
 	// Constructors and destructors
@@ -142,14 +143,14 @@ public:
 	// Operators
 
 	inline T* operator[](int i) { return matrix_array[i]; }						///< Return the i-th pointer to 1d-array. Next [j] can be applied, so we have regular [i][j].
-	inline T* operator[](int i) const { return matrix_array[i]; }
+	inline T* operator[](int i) const { return matrix_array[i]; }				///< const function to return the i-th pointer to 1d-array. Next [j] can be applied, so we have regular [i][j].
 	inline T& operator()(int q1, int q2) { return matrix_array[0][q1*size_q2 + q2]; }	///< Return the (x,y)-th value of matrix
 	inline T& Value (int q1, int q2) { return operator()(q1, q2); }				///< Return the (x,y) value of matrix
 	inline Matrix2D<T>& MatrixArray () { return *this; }					///< Return pointer to the instance of the class.
 
 	// unary
-	inline const Matrix2D& operator+() const { return *this; }
-	inline const Matrix2D operator-() const { return ((*this)*(-1)); }
+	inline const Matrix2D& operator+() const { return *this; } ///< unary : return the matrix 
+	inline const Matrix2D operator-() const { return ((*this)*(-1)); } ///< unary : return the matrix with all values multiplied by -1
 
 	// The following operators modify the matrix they applied to
 	inline Matrix2D& operator= (const Matrix2D<T> &M);
@@ -218,7 +219,9 @@ private:
 	T ***matrix_array;
 public:
 	bool initialized;														///< Flag, equal true if initialized
-	int size_q1, size_q2, size_q3;												///< size x, size y, size z
+	int size_q1;															///< size x
+	int size_q2;															///< size y
+	int size_q3;															///< size z
 	string name;															///< name of the Matrix
 
 	// constructors and destructors
@@ -232,7 +235,7 @@ public:
 
 	// Operators
 	inline T** operator[] (int i); 											///< Return the i-th pointer to 2d-array. Next [j][k] can be applied, so we have regular [i][j][k].
-	inline T** operator[] (int i) const { return matrix_array[i]; }
+	inline T** operator[] (int i) const { return matrix_array[i]; }			///< const function to return the i-th pointer to 2d-array. Next [j][k] can be applied, so we have regular [i][j][k].
 	inline T& operator() (int q1, int q2, int q3); 							///< Return the (x,y,z) value of matrix
 	inline T& Value (int q1, int q2, int q3) { return operator()(q1, q2, q3); }	///< Return the (x,y,z) value of matrix
 	inline Matrix3D<T>& MatrixArray () { return *this; }					///< Return pointer to the instance of the class.
@@ -243,8 +246,9 @@ public:
 	inline Matrix3D& operator= (const T Val);
 
 	// unary
-	inline const Matrix3D& operator+() const { return *this; }
-	inline const Matrix3D operator-() const { return ((*this)*(-1)); }
+	inline const Matrix3D& operator+() const { return *this; } ///< unary : return the matrix
+	inline const Matrix3D operator-() const { return ((*this)*(-1)); } ///< unary : return the matrix with all values multiplied by -1
+
 
 	//inline Matrix3D& operator*= (const Matrix3D<T> &M); 					// reserved for something good
 	//inline Matrix3D& operator/= (const Matrix3D<T> &M); 					// reserved for something good
@@ -316,7 +320,10 @@ private:
 	T ****matrix_array;
 public:
 	bool initialized;														///< Flag, equal true if initialized
-	int size_w, size_x, size_y, size_z;												///< size x, size y, size z
+	int size_w;																///< size w
+	int size_x;																///< size x
+	int size_y; 															///< size y
+	int size_z;																///< size z
 	string name;															///< name of the Matrix
 
 	// constructors and destructors
@@ -330,7 +337,7 @@ public:
 
 	// Operators
 	inline T*** operator[] (int i); 											///< Return the i-th pointer to 3d-array. Next [j][k][l] can be applied, so we have regular [i][j][k][l].
-	inline T*** operator[] (int i) const { return matrix_array[i]; }
+	inline T*** operator[] (int i) const { return matrix_array[i]; }            ///< const function to return the i-th pointer to 3d-array. Next [j][k][l] can be applied, so we have regular [i][j][k][l].
 	inline T& operator() (int w, int x, int y, int z); 							///< Return the (w,x,y,z) value of matrix
 	inline T& Value (int w, int x, int y, int z) { return operator()(w, x, y, z); }	///< Return the (w,x,y,z) value of matrix
 	inline Matrix4D<T>& MatrixArray () { return *this; }					///< Return pointer to the instance of the class.
@@ -340,8 +347,8 @@ public:
 	inline Matrix4D& operator= (const T Val);
 
 	// unary
-	inline const Matrix4D& operator+() const { return *this; }
-	inline const Matrix4D operator-() const { return ((*this)*(-1)); }
+	inline const Matrix4D& operator+() const { return *this;}  ///< unary : return the matrix
+	inline const Matrix4D operator-() const { return ((*this)*(-1)); } ///< unary : return the matrix with all values multiplied by -1
 
 	//inline Matrix4D& operator*= (const Matrix4D<T> &M); 					// reserved for something good
 	//inline Matrix4D& operator/= (const Matrix4D<T> &M); 					// reserved for something good
@@ -406,10 +413,11 @@ public:
 };
 
 
-/** Diagonal matrix.
+/** @class DiagMatrix
  * This method of storage for matrices is convenient for diagonal (spread) matrices.
  * Stored as map (diagonal number, 1d diagonal array)
  * The USED diagonals of the matrix are stored in 1d arrays.
+ * @brief Diagonals of matrix stored as map (diagonal number, 1d diagonal array)
  */
 typedef map <int , Matrix1D<double> > DiagMatrix;
 

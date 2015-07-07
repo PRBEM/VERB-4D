@@ -34,9 +34,9 @@ bool Diffusion_2D_ADI3(
 	int ix, iy, in, id;
 	DiagMatrix::iterator it;
 	Matrix2D<double> psd_prev(x_size, y_size);
-	Matrix1D<double> psd_1d_x(x_size * y_size); ///< Rearranged PSD into one vector of unknown variables
-	Matrix1D<double> psd_1d_y(x_size * y_size); ///< Rearranged PSD into one vector of unknown variables
-	Matrix1D<double> psd_1d_prev(x_size * y_size); ///< Rearranged PSD into one vector of unknown variables
+	Matrix1D<double> psd_1d_x(x_size * y_size); // Rearranged PSD into one vector of unknown variables
+	Matrix1D<double> psd_1d_y(x_size * y_size); // Rearranged PSD into one vector of unknown variables
+	Matrix1D<double> psd_1d_prev(x_size * y_size); // Rearranged PSD into one vector of unknown variables
 	double dh;
 
 	CalculationMatrix
@@ -344,7 +344,7 @@ bool Diffusion_2D_ADI3(
 				// multiplication B * f
 				if (in + it_B->first >= 0 && in + it_B->first < matr_B_y.total_size) {
 					//cout << "RHS["<< in <<"] = " << RHS[in] << " + " << it_B->second[in] << " * " << psd_1d[in + it_B->first] << " (" << it_B->first << ")";
-					/// !!!!!!!!! Multiplying to previous PSD
+					// !!!!!!!!! Multiplying to previous PSD
 					RHS[in] += it_B->second[in] * psd_1d_prev[in + it_B->first];
 					//cout << " = " << RHS[in] << endl;
 				}

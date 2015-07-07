@@ -1,3 +1,11 @@
+/** 
+* @mainpage Documentation for the VERB4D_SOLVER
+* Includes classes, namespaces, and files
+* 
+* For use in conjunction with Matlab in order to solve for Phase Space Density, Diffusion etc.
+*/
+
+
 /**
  * \file VERB4D_Solver.cpp
  * \brief Holds main function that solves all of the matrices using the help of the other classes/functions

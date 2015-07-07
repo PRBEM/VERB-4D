@@ -2,6 +2,9 @@
  * \file Convection_1D_ULTIMATE_QUICKEST6.cpp
  *
  * Leonard, 1991; Leonard and Niknafs, 1991;
+ * 
+ * Leonard BP (1988) Universal Limiter for transient interpolation modeling of the advective transport equations: the ULTIMATE conservative difference scheme, NASA technical Memorandum 100916 ICOMP-88-11
+ *
  * It works somehow, edit with a great care!
  *
  * \brief Calculates the convection in 1D given a 1D matrix of Phase Space Densities, boundary conditions, diffusion, sources and losses
@@ -169,7 +172,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 			}
 
 			// From now on, only PSD_D, PSD_U, and PSD_C are in use
-
+			// Using 3.5 Simplified Ultimate Quickest strategy from B.P Leonard the Ultimate conservative difference scheme
 			// (2) Calculate some useful parameters
 			DEL = PSD_D[1] - PSD_U[1];
 			CURV = PSD_D[1] - 2*PSD_C + PSD_U[1];

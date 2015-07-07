@@ -62,7 +62,7 @@ void AllocateMemory(Matrix4D<double> &PSD,
 
 }
 
-/// NOT USED??
+/// THIS FUNCTION IS NOT USED ANYWHERE
 void ReadBoundaryCondition(
 		ifstream &input,
 		Matrix3D<double> psd_slice,

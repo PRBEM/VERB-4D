@@ -26,6 +26,11 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+
+/** 
+* @namespace Opm   
+* @brief Namespace included for using the monotone cubic interpolator
+*/
 namespace Opm
 {
 

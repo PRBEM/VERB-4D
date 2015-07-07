@@ -672,8 +672,8 @@ Matrix1D<T> Matrix1D<T>::abs() {
 * Constructor.
 * Allocate memory.
 *
-* \param size_q1 - q1 size
-* \param size_q1 - q1 size
+* \param size_q1 - x size
+* \param size_q2 - y size
 */
 template<class T>
 Matrix2D<T>::Matrix2D( int size_q1, int size_q2 ) {

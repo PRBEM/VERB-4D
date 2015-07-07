@@ -14,6 +14,11 @@
 #include "Matrix.h"
 #include "Logger.h"
 
+/** @class MatrixND
+ * 
+ * @brief A normal matrix that can be defined to have 1, 2, 3, or 4 dimensions which is templated for UpdatableMatrix and UpdatableListMatrix
+ */
+
 
 /**
  * Updatable matrix - 1,2,3,4 dimensions.
