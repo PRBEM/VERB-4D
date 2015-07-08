@@ -16,7 +16,7 @@
 #include "Logger.h"
 
 /**
-* Function that creates a 1D Convection Quickset and returns a bool upon completion
+* Function that creates a 1D Convection Quickest and returns a bool upon completion
 * \param PSD - 1D matrix of phase space densities
 * \param x - matrix for determining step size dx = x[1] - x[0]
 * \param x_size - size of matrix x

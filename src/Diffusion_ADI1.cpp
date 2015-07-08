@@ -17,6 +17,28 @@
 /**
  * Create model matrices and solve the system, 
  * Implicit implementation of diagonal terms, explicit implementation of mixed terms
+ *
+ * @param psd - phase space density
+ * @param x - one dimensional slice
+ * @param y - one dimensional slice 
+ * @param x_size - size of x slice
+ * @param y_size - size of y slice
+ * @param x_LBC - lower boundary condition for param x
+ * @param x_UBC - upper boundary condition for param x
+ * @param y_LBC - lower boundary condition for param y
+ * @param y_UBC - upper boundary condition for param y
+ * @param x_LBC_type - type of lower boundary condition for param x
+ * @param x_UBC_type - type of upper boundary condition for param x
+ * @param y_LBC_type - type of lower boundary condition for param y
+ * @param y_UBC_type - type of upper boundary condition for param y
+ * @param Dxx - 2D Diffusion matrix
+ * @param Dyy - 2D Diffusion matrix
+ * @param Dxy - 2D Diffusion matrix
+ * @param Dyx - 2D Diffusion matrix
+ * @param G - 2D used for Jacobian to normalize matrix
+ * @param Sources - matrix used for Sources
+ * @param Losses - Matrix used for Losses (loss cone)
+ * @param dt - change in time of single time step
  */
 bool Diffusion_2D_ADI1(
 				  Matrix2D<double> &psd,

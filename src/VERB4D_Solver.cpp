@@ -279,15 +279,20 @@ int main(int argc, char* argv[]) {
 
 			Matrix1D<double> old_L_1d(L_size), PSD_L(L_size), new_L_1d(L_size);
 // Aparently it's not thread-safe
-// #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
+//#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
 			for (iP = 0; iP < P_size; iP++) {
 				for (iV = 0; iV < V_size; iV++) {
 					for (iK = 0; iK < K_size; iK++) {
 						
 						// show progress % if 0 threads
-						if (omp_get_thread_num() == 0)
+						if (omp_get_thread_num() == 0){
 							cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
 									<< (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+						}
+						else
+						{
+							cout << "thread" << omp_get_thread_num();
+						}
 
 						// 1d slice to get L from matrix4d (P,L,V,K)
 						new_L_1d = L.wyzSlice(iP, iV, iK);
@@ -437,14 +442,29 @@ int main(int argc, char* argv[]) {
 			cout<< "           ";
 
 			Matrix1D<double> PSD_L(L_size);
-#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
+//#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
+//#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1)  
 			for (iP = 0; iP < P_size; iP++) {
+				if (omp_get_thread_num() != 0){
+							cout << "#000"  << endl;
+					}
+#pragma omp parallel for private(iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) 
+//#pragma omp parallel for
 				for (iV = 0; iV < V_size; iV++) {
+					if (omp_get_thread_num() != 0){
+							cout << "#11"  << endl;
+					}
+//#pragma omp parallel for private(iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) 
+//#pragma omp parallel for
 					for (iK = 0; iK < K_size; iK++) {
 
-						if (omp_get_thread_num() == 0)
-							cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
-									<< (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+						if (omp_get_thread_num() == 0){
+							//cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+						}
+						else
+						{
+						cout << "#2" << endl;
+						}
 
 						// 1d slice
 						PSD_L = PSD.wyzSlice(iP, iV, iK);

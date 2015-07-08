@@ -9,31 +9,29 @@
 using namespace std;
 
 
-
-/* @param PSD_PR
- * @param P
- * @param R
- * @param P_size
- * @param R_size
- * @param P_LBC
- * @param P_UBC
- * @param R_LBC
- * @param R_UBC
- * @param P_LBC_type
- * @param P_UBC_type
- * @param R_LBC_type
- * @param R_UBC_type
- * @param DP
- * @param DR
- * @param Sources
- * @param Losses
- * @param dt_total
- * @return
- */
-
 /**
  * Calculation of 2D convection
  *
+ * @param PSD_PR - Phase Space Density - P and R held constant
+ * @param P - Time (magnetic local time) based on phi
+ * @param R - radial distance
+ * @param P_size - dimension of P
+ * @param R_size - dimension of R
+ * @param P_LBC - P lower boundary
+ * @param P_UBC - P upper boundary
+ * @param R_LBC - R lower boundary
+ * @param R_UBC - R upper boundary
+ * @param P_LBC_type - Type of boundary for p lower
+ * @param P_UBC_type - Type of boundary for p upper
+ * @param R_LBC_type - Type of boundary for r lower
+ * @param R_UBC_type - Type of boundary for r upper
+ * @param VP - Matrix of energy and time(phi)
+ * @param VR - Matrix of energy and radial distance
+ * @param Sources - Sources matrix
+ * @param Losses - Losses matrix (loss cone)
+ * @param dt_total - total time change
+ * @param min_PSD - minimum value from the PSD matrix
+ * @param min_V - minimum value for V from the 
  */
 bool Convection_2D( Matrix2D < double > &PSD_PR,
 			Matrix2D < double > P, Matrix2D < double > R,
