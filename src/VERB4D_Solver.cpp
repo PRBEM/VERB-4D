@@ -1,8 +1,55 @@
 /** 
-* @mainpage Documentation for the VERB4D_SOLVER
+* 
+*@mainpage Documentation for the VERB4D_SOLVER
 * Includes classes, namespaces, and files
 * 
-* For use in conjunction with Matlab in order to solve for Phase Space Density, Diffusion etc.
+* For use in conjunction with Matlab in order to solve for Phase Space Density, Diffusion, Convection etc.
+*
+* Diffusion + convection code, VERB4D.
+*
+* The code solves the Fokker-Planck equation with convection terms:
+* \f[
+* \frac{\partial f}{\partial t} =
+* v_{\Phi} \frac{\partial f}{\partial \Pi} + v_{R} \frac{\partial f}{\partial R} +
+* \frac{1}{G} \frac{\partial}{\partial L} G D_{LL} \frac{\partial f}{\partial L} +
+* \frac{1}{G} \frac{\partial}{\partial V} G (D_{VV} \frac{\partial f}{\partial V} + D_{VK} \frac{\partial f}{\partial K}) +
+* \frac{1}{G} \frac{\partial}{\partial K} G (D_{KV} \frac{\partial f}{\partial V} + D_{KK} \frac{\partial f}{\partial K}) +
+* Losses * f + Sources
+* \f]
+* where f is a Phase Space Density (PSD); Φ is MLT angle, R is radial distance from Earth center, \f$ V≡μ∙(K+0.5)^2 \f$ is a combination of adiabatic
+* invariants μ and \f$ K≡ {J}{\sqrt{8μ}} \f$; L is the third adiabatic invariant; D are bounce-averaged diffusion coefficients; \f$ v_Φ \f$, \f$ v_R \f$ are drift velocities; G is the
+* Jacobian of the transformation from (μ,J,L) to (V,K,L)
+*
+*
+* Books, required to understand the code:
+* 
+* Stroustrup C++
+*
+* Schulz and Lanzerotti, 1974
+*
+* Convection is solved using Convection_1D_ULTIMATE_QUICKEST6.h 
+* which implements 
+* Leonard BP (1988) Universal Limiter for transient interpolation modeling of the advective transport equations:
+* the ULTIMATE conservative difference scheme, NASA technical Memorandum 100916 ICOMP-88-11
+* http://www.hadian.ir/teaching/CompHydr/3.pdf
+*
+* Diffusion is solved using Diffusion_1D() and Diffusion_2D() for the standard cases.
+*
+* Three other methods are also used for finding diffusion in 2D:
+* these can be found in Diffusion_ADI1.h, Diffusion_ADI2.h, and Diffusion_ADI3.h
+* 
+* The main solver function can be found in VERB4D_Solver.cpp
+*
+* This will be used in order to take the input data from matlab store them into Matrix1D, Matrix2D, Matrix3D, and Matrix4D using ReadInitialData.h
+* 
+* The matrix classes listed above are used to store the data in 1,2,3 or 4 dimension. One example is a 4D matrix containing P,R,V,K 
+* 
+* There is also the standardized MatrixND for any size matrices which is used in conjunction with UpdatableMatrix which can be updated with new data.
+*
+* Most of the computation such as umerically approximating derivatives are done with MatrixSolver.h using CalculationMatrix.
+* These calculation matrices are made up of DiagMatrix which is a mapping of an int (which diagonal number) to a 1d matrix of values (for that diagonal).
+*
+* There is also a Parameters class which holds paramters and their value as defined in the file they came from
 */
 
 
@@ -15,15 +62,15 @@
  * The code solves the Fokker-Planck equation with convection terms:
  * \f[
  * \frac{\partial f}{\partial t} =
- * v_{\Phi} \frac{\partial f}{\partial \pPi} + v_{R} \frac{\partial f}{\partial R} +
+ * v_{\Phi} \frac{\partial f}{\partial \Pi} + v_{R} \frac{\partial f}{\partial R} +
  * \frac{1}{G} \frac{\partial}{\partial L} G D_{LL} \frac{\partial f}{\partial L} +
  * \frac{1}{G} \frac{\partial}{\partial V} G (D_{VV} \frac{\partial f}{\partial V} + D_{VK} \frac{\partial f}{\partial K}) +
  * \frac{1}{G} \frac{\partial}{\partial K} G (D_{KV} \frac{\partial f}{\partial V} + D_{KK} \frac{\partial f}{\partial K}) +
  * Losses * f + Sources
- * \f],
- * where f is a Phase Space Density (PSD); Φ is MLT angle, R is radial distance from Earth center, V≡μ∙(K+0.5)2 is a combination of adiabatic
- * invariants μ and K≡J/√8mμ; L is the third adiabatic invariant; D are bounce-averaged diffusion coefficients; v_Φ, v_R are drift velocities; G is the
- * Jacobin of the transformation from (μ,J,L) to (V,K,L)
+ * \f]
+ * where f is a Phase Space Density (PSD); Φ is MLT angle, R is radial distance from Earth center, \f$ V≡μ∙(K+0.5)^2 \f$ is a combination of adiabatic
+ * invariants μ and \f$ K≡ {J}{\sqrt{8μ}} \f$; L is the third adiabatic invariant; D are bounce-averaged diffusion coefficients; \f$ v_Φ \f$, \f$ v_R \f$ are drift velocities; G is the
+ * Jacobian of the transformation from (μ,J,L) to (V,K,L)
  */
 
 /*
@@ -31,7 +78,7 @@
  * Schulz and Lanzerotti, 1974
  * Stroustrup C++
  *
- * Continue reading ONLY if you are familiar yourself with these books.
+ * Continue reading ONLY after familiarizing yourself with these books.
  */
 
 #include <iostream>
@@ -442,29 +489,40 @@ int main(int argc, char* argv[]) {
 			cout<< "           ";
 
 			Matrix1D<double> PSD_L(L_size);
-//#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
+#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) // collapse(3)
+// #pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total) reduction(+ : progress_count) schedule(static) 
+//#pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic)  
+			 for (iP = 0; iP < P_size; iP++) {
+				// if (omp_get_thread_num() != 0){
+				// 			cout << "[" << omp_get_thread_num() << "]"  << endl;
+				// 	}
 //#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1)  
-			for (iP = 0; iP < P_size; iP++) {
-				if (omp_get_thread_num() != 0){
-							cout << "#000"  << endl;
-					}
-#pragma omp parallel for private(iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) 
+//#pragma omp parallel for private(iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) 
 //#pragma omp parallel for
-				for (iV = 0; iV < V_size; iV++) {
-					if (omp_get_thread_num() != 0){
-							cout << "#11"  << endl;
-					}
+				 for (iV = 0; iV < V_size; iV++) {
+					// if (omp_get_thread_num() != 0){
+					// 		cout << "#" << omp_get_thread_num() << "#"  << endl;
+					// }
 //#pragma omp parallel for private(iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) 
 //#pragma omp parallel for
-					for (iK = 0; iK < K_size; iK++) {
 
-						if (omp_get_thread_num() == 0){
-							//cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
-						}
-						else
-						{
-						cout << "#2" << endl;
-						}
+					 for (iK = 0; iK < K_size; iK++) {
+// #pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total, progress_count)
+// for (int index = 0 ; index < P_size*V_size*K_size; index++)
+// 	{
+// 		iP = index / (V_size*K_size);
+// 		iV = (index/K_size) % V_size;
+// 		iK = index % K_size;
+
+
+
+						// if (omp_get_thread_num() == 0){
+						// 	//cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+						// }
+						// else
+						// {
+						// cout << "(" << omp_get_thread_num() << ")" << endl;
+						// }
 
 						// 1d slice
 						PSD_L = PSD.wyzSlice(iP, iV, iK);
@@ -483,8 +541,8 @@ int main(int argc, char* argv[]) {
 						progress_count += 1;
 
 					}
-				}
-			}
+				  }
+			 }
 			cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%"
 					<< endl;
 		}
@@ -549,6 +607,9 @@ int main(int argc, char* argv[]) {
 
 		}
 
+		
+
+		
 		// Output the PSD data for each timestep into the output folder
 		if ((it % output_step) == 0) {
 			time_string.str("");

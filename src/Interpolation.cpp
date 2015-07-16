@@ -15,6 +15,7 @@ using namespace std;
  *  Interpolates values into new grid,
  *  Grid size should be the same
  *
+ * Using interpolator from Opm::MonotCubicInterpolator
  */
 //template <typename T>
 Matrix1D<double> Cubic1D(Matrix1D<double> &old_grid, Matrix1D<double> &values, Matrix1D<double> &new_grid) {

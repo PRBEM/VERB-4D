@@ -15,7 +15,9 @@ using namespace std;
 	#define strcasecmp _stricmp
 #endif
 
-
+/** 
+* Allocates the memory for all the matrices using Matrix4D::AllocateMemory() for everything except boundary conditions which use Matrix3D::AllocateMemory()
+*/
 void AllocateMemory(Matrix4D<double> &PSD,
 		Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V,  Matrix4D<double> &K, Matrix4D<double> &L,
 		int &P_size, int &R_size, int &V_size, int &K_size,
@@ -99,6 +101,15 @@ void ReadBoundaryCondition(
 
 
 /** Reads in all the data created in Matlab in order to initialize the parameters
+*
+* Using Parameters::getParameter() for timesteps, number of threads, input and output folders, boundary condition types
+*
+* Using AllocateMemory() for all the matrices
+*
+* Using UpdatableMatrix<MatrixND>::update() for G_local and G_radial
+*
+* Using UpdatableMatrix<MatrixND>::readFromIniFile() for all boundary conditions and data tables/matrices
+*
 * \param InputFolder - Folder to get input from
 * \param OutputFolder - Folder to write output to
 * \param argc - number of arguments given

@@ -2436,7 +2436,7 @@ T Matrix4D<T>::min() {
 
 /**
 * Return maximum value of the 4d matrix.
-* Default value seet to 0
+* Default value set to 0
 */
 template<class T>
 T Matrix4D<T>::max() {

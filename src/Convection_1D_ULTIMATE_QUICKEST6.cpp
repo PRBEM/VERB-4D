@@ -81,19 +81,26 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 
 		// copy PSD to PSD_new, potentially can use memcpy to speed-up:
 		// memcpy( &PSD_t[gst], &PSD[0], PSD.size_q1 * sizeof( PSD[0] ) );
+		
+		// copying PSD into PSD_t offset by gst, with gst extra spots at the end
+		// the offset (gst) is used in order to wrap values around from the end to the beginning and vice versa for the periodic case
 		for (ix = 0; ix <= x_size-1; ix++)
 			PSD_t[gst + ix] = PSD[ix];
 
+
+		// if periodic then wrap around the values (last gst values in the PSD go into the first gst spots of PSD_t)
 		// add ghost points from boundary conditions
 		if (x_LBC_type == "BCT_PERIODIC") { // Periodic
 			//FYI: PSD_t[gst] = PSD[0] = PSD[x_size-1] = PSD_t[gst + x_size-1]; - this is by grid construction
 			for (ig = 1; ig <= gst; ig++)
 				PSD_t[gst - ig] = PSD[(x_size-1) - ig];
 
+		// if constant value set the first gst spots to x_LBC
 		} else if (x_LBC_type == "BCT_CONSTANT_VALUE") { // for condition on value
 			for (ig = 1; ig <= gst; ig++)
 				PSD_t[gst - ig] = x_LBC;
 
+		// take the derivative of each point with the previous one
 		} else if (x_LBC_type == "BCT_CONSTANT_DERIVATIVE") { // for condition on derivative
 			dx = (x[1] - x[0]);
 			PSD_t[gst - 1] = PSD[0] - x_LBC * dx;
@@ -104,6 +111,8 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_LBC_type.c_str());
 			exit(EXIT_FAILURE);
 		}
+
+		// same thing for the upper boundary conditions
 
 		if (x_UBC_type == "BCT_PERIODIC") { // Periodic
 			//FYI: PSD_t[gst] = PSD[0] = PSD[x_size-1] = PSD_t[gst + x_size-1]; - this is by grid construction
@@ -125,7 +134,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 			exit(EXIT_FAILURE);
 		}
 
-
+		// All equations and formulas for these calculations can be found at http://www.hadian.ir/teaching/CompHydr/3.pdf
 		// Start calculation
 		for (ix = 0; ix <= x_size-1; ix++) {
 
@@ -189,24 +198,27 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 //			} else
 			if (true) {
 				// desired order scheme
-
-				PSD_f[ix] = 0.5 * (PSD_D[1] + PSD_C) - fabs(CourNum_f)/2 * (PSD_D[1] - PSD_C) - (1 - pow(CourNum_f,2))/6 * CURV;
+				
+				PSD_f[ix] = 0.5 * (PSD_D[1] + PSD_C) - fabs(CourNum_f)/2 * (PSD_D[1] - PSD_C) - (1 - pow(CourNum_f,2))/6 * CURV; // Leonard and Niknafs, 1991, (85)
 				// note: CURV = PSD_D - 2*PSD_C + PSD_U;
 				//continue;
 
-				PSD_f[ix] = 0.5 * (PSD_C + PSD_D[1]);
+				PSD_f[ix] = 0.5 * (PSD_C + PSD_D[1]); // A.1
 
-				d1 = PSD_C - PSD_D[1];
+				d1 = PSD_C - PSD_D[1]; //A.2
 				// 2 order
 				PSD_f[ix] = PSD_f[ix] + 0.5 * fabs(CourNum_f) * d1;
 
-				D2 = (PSD_U[1] - PSD_C - PSD_D[1] + PSD_D[2])/2;
-				d3 = PSD_U[1] - 3*PSD_C + 3*PSD_D[1] - PSD_D[2];
+
+				// Using table A1 to get the coefficients for the odd differences and table A2 for the even differences
+				// Even is divided by 2
+				D2 = (PSD_U[1] - PSD_C - PSD_D[1] + PSD_D[2])/2; // A.3
+				d3 = PSD_U[1] - 3*PSD_C + 3*PSD_D[1] - PSD_D[2]; //
 
 				if (always_3rd_order) { // !never_3rd_order && (always_3rd_order || (CURVAV < THC1 && GRAD < THG))) {
 					// 3 order - QUICKEST method
 					PSD_f[ix] = PSD_f[ix] + (pow(CourNum_f,2) - pow(1.,2.))/(3*2*1)
-														* (D2 + d3 / 2);
+														* (D2 + d3 / 2); // A.16
 
 				} else {
 					// 4 order

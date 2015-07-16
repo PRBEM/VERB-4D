@@ -64,22 +64,31 @@ void MatrixAllocateMemory(Matrix4D<double> &M, int size_Q1, int size_Q2, int siz
 
 // Reading from a file
 
-/**  Reading from a file using the readFromFile function for Matrix1D
+/**  
+* Reading from a file using Matrix1D::readFromFile(string filename, const Matrix1D< T > grid_x)
+*
+* Only using Q1
 */
 void MatrixReadFromFile(Matrix1D<double> &M, string data_filename, const Matrix1D<double> Q1, const Matrix1D<double> Q2, const Matrix1D<double> Q3, const Matrix1D<double> Q4) {
 	M.Matrix1D<double>::readFromFile(data_filename, Q1);
 }
-/**  Reading from a file using the readFromFile function for Matrix2D
+/**  Reading from a file using Matrix2D::readFromFile(string filename, const Matrix2D< T > grid_x,const Matrix2D< T > grid_y)
+*
+* Only using Q1, Q2
 */
 void MatrixReadFromFile(Matrix2D<double> &M, string data_filename, const Matrix2D<double> Q1, const Matrix2D<double> Q2, const Matrix2D<double> Q3, const Matrix2D<double> Q4) {
 	M.Matrix2D<double>::readFromFile(data_filename, Q1, Q2);
 }
-/**  Reading from a file using the readFromFile function for Matrix3D
+/**  Reading from a file using Matrix3D::readFromFile(string filename, const Matrix3D< T > grid_x,const Matrix3D< T > grid_y, const Matrix3D< T > grid_z)
+*
+* Only using Q1, Q2, Q3
 */
 void MatrixReadFromFile(Matrix3D<double> &M, string data_filename, const Matrix3D<double> Q1, const Matrix3D<double> Q2, const Matrix3D<double> Q3, const Matrix3D<double> Q4) {
 	M.Matrix3D<double>::readFromFile(data_filename, Q1, Q2, Q3);
 }
-/**  Reading from a file using the readFromFile function for Matrix4D
+/**  Reading from a file using Matrix4D::readFromFile(string filename, const Matrix4D< T > grid_w, const Matrix4D< T > grid_x,const Matrix4D< T > grid_y, const Matrix4D< T > grid_z) 
+*
+* Using Q1, Q2, Q3, Q4
 */
 void MatrixReadFromFile(Matrix4D<double> &M, string data_filename, const Matrix4D<double> Q1, const Matrix4D<double> Q2, const Matrix4D<double> Q3, const Matrix4D<double> Q4) {
 	M.Matrix4D<double>::readFromFile(data_filename, Q1, Q2, Q3, Q4);
@@ -150,6 +159,10 @@ void UpdatableMatrix<MatrixND>::saveCurrent() {
 
 /**
  * Function to limit the data on any direction (e.g. only above plasmapause location, or only on day/night side)
+ *
+ * Sets all values to 0 which are not in the range of "from" to "to"
+ *
+ * \param M - The matrix that will be updated(limited)
  */
 void MatrixLimit(UpdatableMatrix< Matrix1D<double> > &M, Matrix1D<double> &Q1, Matrix1D<double> &Q2, Matrix1D<double> &Q3, Matrix1D<double> &Q4,
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
@@ -169,6 +182,10 @@ void MatrixLimit(UpdatableMatrix< Matrix1D<double> > &M, Matrix1D<double> &Q1, M
 
 /**
  * Function to limit the data on any direction (e.g. only above plasmapause location, or only on day/night side)
+ *
+ * Sets all values to 0 which are not in the range of "from" to "to"
+ *
+ * \param M - The matrix that will be updated(limited)
  */
 void MatrixLimit(UpdatableMatrix< Matrix2D<double> > &M, Matrix2D<double> &Q1, Matrix2D<double> &Q2, Matrix2D<double> &Q3, Matrix2D<double> &Q4,
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
@@ -190,6 +207,10 @@ void MatrixLimit(UpdatableMatrix< Matrix2D<double> > &M, Matrix2D<double> &Q1, M
 
 /**
  * Function to limit the data on any direction (e.g. only above plasmapause location, or only on day/night side)
+ *
+ * Sets all values to 0 which are not in the range of "from" to "to"
+ *
+ * \param M - The matrix that will be updated(limited)
  */
 void MatrixLimit(UpdatableMatrix< Matrix3D<double> > &M, Matrix3D<double> &Q1, Matrix3D<double> &Q2, Matrix3D<double> &Q3, Matrix3D<double> &Q4,
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
@@ -214,6 +235,10 @@ void MatrixLimit(UpdatableMatrix< Matrix3D<double> > &M, Matrix3D<double> &Q1, M
 
 /**
  * Function to limit the data on any direction (e.g. only above plasmapause location, or only on day/night side)
+ *
+ * Sets all values to 0 which are not in the range of "from" to "to"
+ *
+ * \param M - The matrix that will be updated(limited)
  */
 void MatrixLimit(UpdatableMatrix< Matrix4D<double> > &M, Matrix4D<double> &Q1, Matrix4D<double> &Q2, Matrix4D<double> &Q3, Matrix4D<double> &Q4,
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
@@ -241,6 +266,10 @@ void MatrixLimit(UpdatableMatrix< Matrix4D<double> > &M, Matrix4D<double> &Q1, M
 
 /**
  * Read UpdatableMatrix rules from ini-file
+ *
+ * Gets parameters from the first line using readFromString()
+ *
+ * @return True if success, False if failure
  */
 template <typename MatrixND>
 bool UpdatableMatrix<MatrixND>::readFromIniFile(string ini_filename, MatrixND q1, MatrixND q2, MatrixND q3, MatrixND q4) {
@@ -285,12 +314,12 @@ bool UpdatableMatrix<MatrixND>::readFromIniFile(string ini_filename, MatrixND q1
 /**
  * Read UpdateMatrix parameters from a string
  *
- * @param file_line_string
- * @param q1
- * @param q2
- * @param q3
- * @param q4
- * @return
+ * Will traverse the string and get the entire lines values - 
+ * starting with parameter q1 and getting values until reaching q4 or running out of values for the line
+ *
+ * @param file_line_string - string which contains one line of values spanning from q1 to q4
+ *
+ * @return True if success, False if failure
  */
 template <typename MatrixND>
 bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND &q1, MatrixND &q2, MatrixND &q3, MatrixND &q4) {
@@ -355,7 +384,7 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 	// Check for the end of line
 	if (!file_line_stream.eof()) {
 		// If not the end - read the next parameters, which are 'from' and 'to' boundaries for the array
-		// (like above Lpp or belowe Lpp or something like that)
+		// (like above Lpp or below Lpp or something like that)
 		file_line_stream >> this->Q1_from_string;
 		file_line_stream >> this->Q1_to_string;
 		Logger::message << "	Limits: " << this->Q1_from_string << " to " << this->Q1_to_string << endl;
@@ -409,14 +438,17 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 
 
 /**
- * Update the Matrix according to rules
+ * Update the Matrix if last update time is less than current update time
  *
- * @param iteration
- * @param dt
- * @param q1
- * @param q2
- * @param q3
- * @param q4
+ * Scaling coefficients are added
+ *
+ * Limits are set for the coefficients for q1 through q4
+ *
+ * The limits are applied using MatrixLimit()
+ *
+ * Record which limits were applied
+ *
+ * @return True if updated, False if not
  */
 template <typename MatrixND>
 bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixND q2, MatrixND q3, MatrixND q4) {
@@ -827,8 +859,11 @@ string GetCurrentTimeValue(string filename, double current_time, double &update_
 /**
  * Check if a string is number
  *
+ * Note: Will accept any string (even badly formatted ones) consisting entirely of the following: Numbers, . , e , - , +
+ *
+ * For example 1.2.3-e.4 will be accepted
  * @param s - the string we need to check
- * @return True if it's a number, fase if it's not
+ * @return True if it's a number, false if it's not
  */
 bool is_number(const std::string& s) {
 	// Loop through each character and see if it's one of the allowed characters

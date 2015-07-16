@@ -18,6 +18,18 @@
  * Create model matrices and solve the system, 
  * Implicit implementation of diagonal terms, explicit implementation of mixed terms
  *
+ * Method:
+ *
+ * For the x direction and then for the y direction
+ *
+ * 1. Add boundary conditions AddBoundary()
+ *
+ * 2. Add sources and losses
+ *
+ * 3. get the seond derivative approximation with diffusion coeficient SecondDerivativeApproximation_2D()
+ *
+ * 4. solve matrix with tridag()
+ *
  * @param psd - phase space density
  * @param x - one dimensional slice
  * @param y - one dimensional slice 

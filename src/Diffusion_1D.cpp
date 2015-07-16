@@ -12,6 +12,16 @@
 /**
  * 1D Diffusion - returns true on successful completion
  *
+ * Method:
+ *
+ * 1. Add boundary conditions
+ *
+ * 2. Add sources and losses
+ *
+ * 3. get the seond derivative approximation with diffusion coeficient SecondDerivativeApproximation_1D()
+ *
+ * 4. solve matrix with tridag()
+ *
  * @param psd - phase space density
  * @param x - one dimensional slice 
  * @param x_size - size of slice
@@ -35,7 +45,7 @@ bool Diffusion_1D(	Matrix1D<double> &psd,
 
 	CalculationMatrix matr_A(x_size, 1, 1, 1), matr_B(x_size, 1, 1, 0), matr_C(x_size, 1, 1, 0);
 
-	// Make diagonals to be equal to zero
+	// Set all diagonals (1-D matrices) to 0
 	DiagMatrix::iterator it;
 	for (it = matr_A.begin(); it != matr_A.end(); it++)	it->second = 0;
 	for (it = matr_B.begin(); it != matr_B.end(); it++)	it->second = 0;
@@ -48,6 +58,8 @@ bool Diffusion_1D(	Matrix1D<double> &psd,
 		// calculating current line number (in)
 		in = ix;
 
+
+		
 		// Boundary conditions
 		if (ix == 0 && x_size >= 3) {
 
@@ -101,7 +113,7 @@ bool Diffusion_1D(	Matrix1D<double> &psd,
 
 			// Dxx
 			if (x_size >= 3) {
-				// Writing the finate difference approximation of the diffusion operator into matrix A
+				// Writing the finite difference approximation of the diffusion operator into matrix A
 				SecondDerivativeApproximation_1D(matr_A, ix, "x_left", "x_right", x, Dxx, G, -0.5);
 				SecondDerivativeApproximation_1D(matr_A, ix, "x_right", "x_left", x, Dxx, G, -0.5);
 			}
@@ -142,4 +154,4 @@ bool Diffusion_1D(	Matrix1D<double> &psd,
 
 	return true;
 }
-
+// ADDS DIFFUSION COEFFICIENTS FROM SECOND DERIVATIVE APPROXIMATION AND THEN SOLVES THE MATRIX USING TRIDAG

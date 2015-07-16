@@ -356,8 +356,8 @@ public:
 	inline Matrix4D& operator-= (const Matrix4D<T> &M);
 	inline Matrix4D& operator*= (const T Val);
 	inline Matrix4D& operator/= (const T Val);
-	inline Matrix4D& operator+= (const T Val); 								///< Add the Val to each matrix element, stores result in the matrix it's applied to
-	inline Matrix4D& operator-= (const T Val); 								///< Substract the Val from each matrix element, stores result in the matrix it's applied to
+	inline Matrix4D& operator+= (const T Val); 								///< Add Val to each matrix element, stores result in the matrix it's applied to
+	inline Matrix4D& operator-= (const T Val); 								///< Substract Val from each element in this matrix, stores result in the matrix it's applied to
 
 	inline Matrix4D& times_equal (const Matrix4D<T> &M); 					///< Arraywise multiplication (A.*B), stores result in the matrix it's applied to
 	inline Matrix4D& divide_equal (const Matrix4D<T> &M); 					///< Arraywise division (A./B), stores result in the matrix it's applied to
@@ -417,6 +417,14 @@ public:
  * This method of storage for matrices is convenient for diagonal (spread) matrices.
  * Stored as map (diagonal number, 1d diagonal array)
  * The USED diagonals of the matrix are stored in 1d arrays.
+ * CalculationMatrix inherits from this
+ * @brief Diagonals of matrix stored as map (diagonal number, 1d diagonal array)
+ *
+ * @typedef DiagMatrix
+ * This method of storage for matrices is convenient for diagonal (spread) matrices.
+ * Stored as map (diagonal number, 1d diagonal array)
+ * The USED diagonals of the matrix are stored in 1d arrays.
+ * This typedef is used in CalculationMatrix 
  * @brief Diagonals of matrix stored as map (diagonal number, 1d diagonal array)
  */
 typedef map <int , Matrix1D<double> > DiagMatrix;
@@ -429,7 +437,7 @@ typedef map <int , Matrix1D<double> > DiagMatrix;
 class CalculationMatrix : public DiagMatrix {
 public:
 
-	bool initialized;
+	bool initialized; ///< Variables used for denoting whether it is initialized or not
 	int x_size, y_size, total_size;
 	// flag, if needs to be recalculated
 	string change_ind;						///< Variables useful for changes tracking (store here time when changed)
@@ -450,10 +458,12 @@ public:
 	void writeToFile(string filename);
 
 	// Operators
+	/// FUNCTION NOT IMPLEMENTED
 	Matrix1D<double> operator* (Matrix1D<double> &V) const;
 
 };
 
+/// FUNCTION NOT IMPLEMENTED
 int index1d2(int x, int y = 0, int z = 0);
 
 #endif

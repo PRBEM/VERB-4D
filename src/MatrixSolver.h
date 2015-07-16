@@ -43,6 +43,7 @@ bool AddBoundaries_2D(
 		string &y_LBC_type, string &y_UBC_type,
 		int ix, int iy, int in);
 
+/// FUNCITON NOT IMPLEMENTED
 bool MakeModelMatrix_2D(
 				  CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
 				  Matrix2D<double> &x, Matrix2D<double> &y,
@@ -55,6 +56,9 @@ bool MakeModelMatrix_2D(
 				  Matrix2D<double> &G, Matrix2D<double> Sources, Matrix2D<double> Losses, double dt);
 
 void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X);
+
+
+
 
 void SecondDerivativeApproximation_1D(CalculationMatrix &matr_A, int ix,
 		string FirstDerivative, string SecondDerivative,
@@ -108,7 +112,7 @@ void AnySecondDerivativeApproximation_2D_y(CalculationMatrix &matr_A,
 /// Solve the AU=R system of equations, where A - tridiagonal matrix nxn with diagonals a[], b[], c[].
 bool tridag(double a[], double b[], double c[], double r[], double u[], long n);
 
-// Lapack function for matrix inversion declaration
+/// Lapack function for matrix inversion declaration
 extern "C" {
 	//extern void dgesv_(int *,int *,double *,int *,int*,double *,int*,int*);
 	//extern void sgesv_(int *,int *,float *,int *,int*, float *,int*,int*);

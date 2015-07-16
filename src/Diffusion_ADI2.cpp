@@ -19,6 +19,22 @@
  * The method is from
  * Xiao, F., Z. Su, H. Zheng, and S. Wang (2009), Modeling of outer radiation belt electrons by multidimensional diffusion process, J. Geophys. Res., 114, A03201, doi:10.1029/2008JA013580.
  *
+ * http://onlinelibrary.wiley.com/store/10.1029/2008JA013580/asset/jgra19599.pdf?v=1&t=ic3m61g2&s=334d50627dee2d592de0ae583e755afce42948a9
+ *
+ * Method:
+ *
+ * For the x direction and then for the y direction
+ *
+ * 1. Add boundary conditions AddBoundary()
+ *
+ * 2. Add sources and losses
+ *
+ * 3. get the seond derivative approximation with diffusion coeficient SecondDerivativeApproximation_2D()
+ *
+ * 4. Implicit part (first derivatives)	\f$ \frac{-1}{G} \frac {\partial{(G D_{xy})}}{\partial x} \frac {\partial f}{\partial y} \f$
+ *
+ * 5. solve matrix with tridag()
+ *
  * @param psd - phase space density
  * @param x - one dimensional slice
  * @param y - one dimensional slice 
@@ -54,7 +70,7 @@ bool Diffusion_2D_ADI2(
 
 	DiagMatrix::iterator it_B, it_A;
 	static Matrix1D<double> RHS(x_size * y_size);
-	static Matrix1D<double> psd_1d(x_size * y_size); ///< Rearranged PSD into one vector of unknown variables
+	static Matrix1D<double> psd_1d(x_size * y_size); // Rearranged PSD into one vector of unknown variables
 	int ix, iy, in, id;
 	double coef;
 	DiagMatrix::iterator it;

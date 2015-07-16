@@ -1,6 +1,6 @@
 /**
  * \file Parameters.cpp
- * \brief Holds the parameters along with their corresponding file and arguments 
+ * \brief Holds the Parameters along with their corresponding file and arguments 
  *
  *  Created on: Nov 17, 2012
  *      Author: dimath

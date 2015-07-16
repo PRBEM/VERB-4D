@@ -19,6 +19,16 @@
  *
  * Make 2D arrays from 3D, create model matrices and solve them
  *
+ * Method:
+ *
+ * 1. Add boundary conditions AddBoundaries_2D()
+ *
+ * 2. Add sources and losses
+ *
+ * 3. get the seond derivative approximation with diffusion coeficient SecondDerivativeApproximation_2D()
+ *
+ * 4. solve matrix with Lapack()
+ *
  * @param psd - phase space density
  * @param x - one dimensional slice
  * @param y - one dimensional slice 

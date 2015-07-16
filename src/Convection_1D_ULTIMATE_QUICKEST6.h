@@ -16,7 +16,14 @@
 #include "Logger.h"
 
 /**
-* Function that creates a 1D Convection Quickest and returns a bool upon completion
+* Function that implements 1D Convection Quickest and returns a bool upon completion as referenced in the following publication
+*
+* All equations and formulas for this function can be found at http://www.hadian.ir/teaching/CompHydr/3.pdf
+*
+* \f$ c = u*dt/dx \f$ where c = Courant number
+*
+* \f$ \phi_{i}^{n+1} - \phi_{i}^{n} = -c(\phi_{r}*\phi_{l}) \f$ where \f$ \phi_{r} \f$ and \f$ \phi_{l} \f$ refer to the right and left faces (between (i and i-1), and (i and i+1)) for PSD
+*
 * \param PSD - 1D matrix of phase space densities
 * \param x - matrix for determining step size dx = x[1] - x[0]
 * \param x_size - size of matrix x

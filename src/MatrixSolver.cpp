@@ -219,6 +219,9 @@ bool AddBoundaries_2D(
 
 
 // Implicit diagonals, explicit mixed
+/**
+* \brief THIS FUNCTION IS CURRENTLY NOT BEING USED
+*/
 bool MakeModelMatrix_2D_ADI1_x(CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
 		Matrix2D<double> &x, Matrix2D<double> &y,
 		int x_size, int y_size,
@@ -326,7 +329,9 @@ bool MakeModelMatrix_2D_ADI1_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 
 	return true;
 }
-
+/**
+* \brief THIS FUNCTION IS CURRENTLY NOT BEING USED
+*/
 bool MakeModelMatrix_2D_ADI1_y(CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
 		Matrix2D<double> &x, Matrix2D<double> &y,
 		int x_size, int y_size,
@@ -435,6 +440,11 @@ bool MakeModelMatrix_2D_ADI1_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 	return true;
 }
 
+
+
+/**
+* \brief THIS FUNCTION IS CURRENTLY NOT BEING USED
+*/
 bool MakeModelMatrix_2D_ADI2_x(CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
 		Matrix2D<double> &x, Matrix2D<double> &y,
 		int x_size, int y_size,
@@ -466,7 +476,7 @@ bool MakeModelMatrix_2D_ADI2_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 			// calculating current line number (in)
 			in = matr_A.index1d(ix, iy);
 
-			// Bboundary conditions
+			// Boundary conditions
 			if (ix == 0 && x_size >= 3) {
 
 				matr_C[0][in] = x_LBC[iy];
@@ -588,7 +598,9 @@ bool MakeModelMatrix_2D_ADI2_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 
 	return true;
 }
-
+/**
+* \brief THIS FUNCTION IS CURRENTLY NOT BEING USED
+*/
 bool MakeModelMatrix_2D_ADI2_y(CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
 		Matrix2D<double> &x, Matrix2D<double> &y,
 		int x_size, int y_size,
@@ -742,7 +754,9 @@ bool MakeModelMatrix_2D_ADI2_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 	return true;
 }
 
-
+/**
+* \brief THIS FUNCTION IS CURRENTLY NOT BEING USED
+*/
 bool MakeModelMatrix_2D_ADI3_x(CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
 		Matrix2D<double> &x, Matrix2D<double> &y,
 		int x_size, int y_size,
@@ -871,7 +885,9 @@ bool MakeModelMatrix_2D_ADI3_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 
 	return true;
 }
-
+/**
+* \brief THIS FUNCTION IS CURRENTLY NOT BEING USED
+*/
 bool MakeModelMatrix_2D_ADI3_y(CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
 		Matrix2D<double> &x, Matrix2D<double> &y,
 		int x_size, int y_size,
@@ -996,6 +1012,8 @@ bool MakeModelMatrix_2D_ADI3_y(CalculationMatrix &matr_A, CalculationMatrix &mat
  * Lapack inversion.
  *
  * A * X = B - equation
+ *
+ * LAPACK - Linear Algebra PACKage. For linear algebra methods. Using the lapack library from http://www.netlib.org/lapack/
  */
 void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
 
@@ -1078,12 +1096,22 @@ void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
 	delete newmat;
 }
 
-void SecondDerivativeApproximation_1D(CalculationMatrix &matr_A, int ix,
-		string FirstDerivative, string SecondDerivative,
-		Matrix1D<double> &x, ///< Coordinate x
+/**
+* numerical derivative approximation of a matrix in 1D
+*
+* \f$ \frac{m G(x) D(x)}{[f(x) - f(FirstDerivative)]G(x)[(f(x) - f(SecondDerivative))]} \f$
+*
+* Done for a couple locations near x[ix] each location has a slightly modified equation
+*/
+void SecondDerivativeApproximation_1D(CalculationMatrix &matr_A, 
+		int ix, ///< index for current location
+		string FirstDerivative, ///< determines whether first derivative approx. is with the point to the right or left of ix
+		string SecondDerivative, ///< determines whether second derivative approx. is with the point to the right or left of ix
+		Matrix1D<double> &x, ///< x matrix
 		Matrix1D<double> &D, ///< Diffusion coefficient
 		Matrix1D<double> &G, ///< Jacobian
-		double multiplicator) {
+		double multiplicator) ///< multiplier based on number of iterations done (m)
+	{
 
 	int dx1 = 0, dx2 = 0;
 	if (FirstDerivative == "x_left") dx1 = -1;
@@ -1151,10 +1179,15 @@ void GetDerivativeVector_2D(string derivativeType, int &dx, int &dy) {
 }
 
 /**
- * Second derivative approximation, returns coefficients to be putted into the model matrix.
- *  \f$L_{\alpha \beta}(y) = (D_{\alpha \beta} \cdot y_{\bar{x}_\alpha})_{x_{\beta}}\f$
+ * Second derivative approximation, returns coefficients to be put into the model matrix.
+ *  
+ * Coef1 * d/dx * Coef2 * df/dy
  *
  * Samarskiy, page 261
+ *
+ * The approximation is done in a similar fashion to SecondDerivativeApproximation_1D
+ *
+ * \f$ \frac{m G(x,y) D(x,y)}{[f(x,y) - f(x_{FirstDerivative} , y_{FirstDerivative} )]G(x,y)[(f(x,y) - f(x_{SecondDerivative} , y_{SecondDerivative})]} \f$
  *
  * Returns coefficients to be put into model matrix for an approximation of a second derivative.
  */
@@ -1196,7 +1229,7 @@ void SecondDerivativeApproximation_2D(CalculationMatrix &matr_A,
 
 	int id;
 
-	// The same for all four coefficients, what's stending befire derivatives pretty much
+	// The same for all four coefficients, what's standing before derivatives pretty much
 	double common_part = multiplicator / G[ix][iy] / dh1;
 
 	// getting model matrix diagonal number according to derivative
@@ -1215,6 +1248,20 @@ void SecondDerivativeApproximation_2D(CalculationMatrix &matr_A,
 
 }
 
+
+/**
+ * Second derivative approximation in the y direction first, returns coefficients to be put into the model matrix.
+ *  
+ * Coef1 * d/dx * Coef2 * df/dy
+ *
+ * Samarskiy, page 261
+ *
+ * The approximation is done in a similar fashion to SecondDerivativeApproximation_1D
+ *
+ * \f$ \frac{m G(x,y) D(x,y)}{[f(x,y) - f(x_{FirstDerivative} , y_{FirstDerivative} )]G(x,y)[(f(x,y) - f(x_{SecondDerivative} , y_{SecondDerivative})]} \f$
+ *
+ * Returns coefficients to be put into model matrix for an approximation of a second derivative.
+ */
 void SecondDerivativeApproximation_2D_y(CalculationMatrix &matr_A,
 		int ix, int iy,
 		string FirstDerivative, string SecondDerivative,
@@ -1240,7 +1287,7 @@ void SecondDerivativeApproximation_2D_y(CalculationMatrix &matr_A,
 
 	double dh1, dh21, dh22;
 	// The following trick work only for orthogonal grid
-	// first and second dh in derivatove calculation
+	// first and second dh in derivative calculation
 
 	// Grid steps.
 	dh1  = (x[ix][iy]             + y[ix][iy])             - (x[ix + dx1][iy + dy1]             + y[ix + dx1][iy + dy1]);
@@ -1249,7 +1296,7 @@ void SecondDerivativeApproximation_2D_y(CalculationMatrix &matr_A,
 
 	int id;
 
-	// The same for all four coefficients, what's stending befire derivatives pretty much
+	// The same for all four coefficients, what's standing before derivatives pretty much
 	double common_part = multiplicator / G[ix][iy] / dh1;
 
 	// getting model matrix diagonal number according to derivative
@@ -1270,8 +1317,8 @@ void SecondDerivativeApproximation_2D_y(CalculationMatrix &matr_A,
 
 
 /**
- * Second derivative approximation, returns coefficients to be putted into the model matrix.
- *  Coef1 * d/dx * Coef2 * df/dy
+ * Second derivative approximation, returns coefficients to be put into the model matrix.
+ *  \f$ \frac {m Coef1 Coef2}{\frac{d}{dx} \frac{d}{dy}} \f$
  *
  * Samarskiy, page 261
  *
@@ -1311,7 +1358,7 @@ void AnySecondDerivativeApproximation_2D(CalculationMatrix &matr_A,
 
 	int id;
 
-	// The same for all four coefficients, what's stending befire derivatives pretty much
+	// The same for all four coefficients, what's standing before derivatives pretty much
 	double common_part = multiplicator * Coef1[ix][iy] / dh1;
 
 	// getting model matrix diagonal number according to derivative
@@ -1330,6 +1377,14 @@ void AnySecondDerivativeApproximation_2D(CalculationMatrix &matr_A,
 
 }
 
+/**
+ * Second derivative approximation in the y direction first, returns coefficients to be put into the model matrix.
+ *  \f$ \frac {m Coef1 Coef2}{\frac{d}{dx} \frac{d}{dy}} \f$
+ *
+ * Samarskiy, page 261
+ *
+ * Returns coefficients to be put into model matrix for an approximation of a second derivative.
+ */
 void AnySecondDerivativeApproximation_2D_y(CalculationMatrix &matr_A,
 		int ix, int iy,
 		string FirstDerivative, string SecondDerivative,
@@ -1384,7 +1439,18 @@ void AnySecondDerivativeApproximation_2D_y(CalculationMatrix &matr_A,
 }
 
 
-/// Solve the AU=R system of equations, where A - tridiagonal matrix nxn with diagonals a[], b[], c[].
+/**
+* Solver for a system of equations with 3-diagonal matrix.
+*
+* Au = r Where A = diag(a, b, c),
+* 
+* \param a[]	- array, diagonal '-1' of the matrix
+* \param b[]	- array, diagonal '0' of the matrix
+* \param c[]	- array, diagonal '+1' of the matrix
+* \param r[]	- array, r-vector - the Right Hand Side (RHS)
+* \param u[]	- array, result
+* \param n	- size of the matrix
+*/
 bool tridag(double a[], double b[], double c[], double r[], double u[], long n) {
 	long j;
 	double bet, *gam;

@@ -41,20 +41,18 @@ namespace Opm
    values. Interpolation between table values is cubic and monotonicity
    preserving if input values are monotonous.
 
-   Outside x_min and x_max, the class will extrapolate using the
-   constant f(x_min) or f(x_max).
+   Outside \f$ x_{min} \f$ and \f$ x_{max} \f$, the class will extrapolate using the
+   constant \f$f(x_{min})\f$ or \f$f(x_{max})\f$.
 
    Extra functionality:
-    - Can return (x_1+x_2)/2 where x_1 and x_2 are such that
-      abs(f(x_1) - f(x_2)) is maximized. This is used to determine where
+    - Can return \f$ (x_1+x_2)/2 \f$ where \f$ x_1 \f$ and \f$ x_2 \f$ are such that
+      \f$ abs(f(x_1) - f(x_2)) \f$ is maximized. This is used to determine where
       one should calculate a new value for increased accuracy in the
       current function
 
    Monotonicity preserving cubic interpolation algorithm is taken
    from Fritsch and Carlson, "Monotone piecewise cubic interpolation",
    SIAM J. Numer. Anal. 17, 238--246, no. 2,
-
-   $Id$
 
    Algorithm also described here:
    http://en.wikipedia.org/wiki/Monotone_cubic_interpolation

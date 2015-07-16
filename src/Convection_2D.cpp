@@ -12,6 +12,10 @@ using namespace std;
 /**
  * Calculation of 2D convection
  *
+ * Uses Convection_1D_Ultimate_QUICKEST6.h for calculating P and R if either are of size > 3
+ *
+ * Refer to the equations/function in Convection_1D_Ultimate_QUICKEST6.h
+ *
  * @param PSD_PR - Phase Space Density - P and R held constant
  * @param P - Time (magnetic local time) based on phi
  * @param R - radial distance

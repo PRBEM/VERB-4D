@@ -112,6 +112,7 @@ public:
 // couple of helpful functions
 string GetCurrentTimeValue(string filename, double current_time, double &update_time);
 bool is_number(const std::string& s);
+/// FUNCTION NOT IMPLEMENTED
 double stringToValue(string string_value, double current_time);
 
 #endif /* UPDATABLEMATRIX_H_ */
