@@ -71,6 +71,10 @@
  * where f is a Phase Space Density (PSD); Φ is MLT angle, R is radial distance from Earth center, \f$ V≡μ∙(K+0.5)^2 \f$ is a combination of adiabatic
  * invariants μ and \f$ K≡ {J}{\sqrt{8μ}} \f$; L is the third adiabatic invariant; D are bounce-averaged diffusion coefficients; \f$ v_Φ \f$, \f$ v_R \f$ are drift velocities; G is the
  * Jacobian of the transformation from (μ,J,L) to (V,K,L)
+ *
+ * The solver first reads in data using ReadInitialData() then procedes to calculate convection and diffusion based on the data it received.
+ * Convection_2D() is calculated followed by Diffusion_1D() and Diffusion_2D(). Lastly, the solver calculates Diffusion in 2 dimensions using one of the 3 defined diffusion_ADI functions.
+ * The current solver is set-up to use Diffusion_2D_ADI3() currently.
  */
 
 /*
@@ -134,6 +138,8 @@ using namespace std;
 #define min_PSD 1e-10
 #define min_V 1e-10
 #define min_Dxx 1e-10
+
+#define OpenMP_3 true
 
 //extern Logger logcout; // class that log messages into screen and into file
 
@@ -447,8 +453,10 @@ int main(int argc, char* argv[]) {
  
 			Matrix2D<double> PSD_PR(P_size, R_size);
 			// omp-paraller loop
-#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_PR) shared(progress_total, progress_count) schedule(dynamic,1) collapse(2)
-			for (iV = V_size-1; iV >= 0; iV--) { 	// Looping it backward allows to speed-up the multithread simulation
+            
+            if (OpenMP_3){
+            #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_PR) shared(progress_total, progress_count) schedule(dynamic,1) collapse(2)
+                for (iV = V_size-1; iV >= 0; iV--) { 	// Looping it backward allows to speed-up the multithread simulation
 												// due to the highest energies being the slowest to calculate - calculating highest energy first
 				for (iK = 0; iK < K_size; iK++) {
 
@@ -476,7 +484,40 @@ int main(int argc, char* argv[]) {
 					progress_count += 1;
 				}
 			}
-
+            }
+            else
+            {
+                #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_PR) shared(progress_total, progress_count) schedule(dynamic,1)
+                for (int index = (V_size * K_size) - 1; index >= 0; index--) { 	// Looping it backward allows to speed-up the multithread simulation
+                    // due to the highest energies being the slowest to calculate - calculating highest energy first
+                    
+                    iV = index % V_size;
+                    iK = (K_size - 1) - (index / V_size);
+                    // Output current progress percentage when number of threads = 0
+                    if (omp_get_thread_num() == 0)
+                    cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
+                    << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+                    
+                    // 2d slice of PSD to pass to the Convection calculation function
+                    PSD_PR = PSD.yzSlice(iV,  iK);
+                    
+                    // Inputs to the Convection_2D, Sources and Losses set to 0
+                    Convection_2D(PSD_PR, P.yzSlice(iV, iK), R.yzSlice(iV,  iK), P_size, R_size, Pl_BC.yzSlice(iV,  iK),
+                                      Pu_BC.yzSlice(iV,  iK), // R, I, K
+                                      Rl_BC.yzSlice(iV,  iK), Ru_BC.yzSlice(iV,  iK), // P, I, K
+                                      Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, VP.yzSlice(iV,  iK), VR.yzSlice(iV, iK),
+                                      Sources.yzSlice(iV, iK) * 0, Losses.yzSlice(iV,  iK) * 0, dt, min_PSD, min_V);
+                        
+                        // copy results back into PSD adding the 2d list PSD_PR for all values of iV,iK
+                    for (iP = 0; iP < P_size; iP++)
+                    for (iR = 0; iR < R_size; iR++)
+                    PSD[iP][iR][iV][iK] = PSD_PR[iP][iR];
+                        
+#pragma omp critical // update progress count every iteration through
+                    progress_count += 1;
+                    
+                }
+            }
 			// Output final progress (it should be 100%)
 			cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
 		}
@@ -489,7 +530,10 @@ int main(int argc, char* argv[]) {
 			cout<< "           ";
 
 			Matrix1D<double> PSD_L(L_size);
-#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) // collapse(3)
+            
+            if (OpenMP_3){
+            
+#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
 // #pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total) reduction(+ : progress_count) schedule(static) 
 //#pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic)  
 			 for (iP = 0; iP < P_size; iP++) {
@@ -516,9 +560,9 @@ int main(int argc, char* argv[]) {
 
 
 
-						// if (omp_get_thread_num() == 0){
-						// 	//cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
-						// }
+						 //if (omp_get_thread_num() == 0){
+						 //	cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+						 //}
 						// else
 						// {
 						// cout << "(" << omp_get_thread_num() << ")" << endl;
@@ -543,6 +587,37 @@ int main(int argc, char* argv[]) {
 					}
 				  }
 			 }
+                
+            }
+            else
+            {
+                #pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total, progress_count)
+                for (int index = 0 ; index < P_size*V_size*K_size; index++)
+                {
+                    iP = index / (V_size*K_size);
+                    iV = (index/K_size) % V_size;
+                    iK = index % K_size;
+                
+                    //if (omp_get_thread_num() == 0){
+                    //    cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+                    //}
+                    // 1d slice
+                    PSD_L = PSD.wyzSlice(iP, iV, iK);
+                
+                    // 1d diffusion
+                    Diffusion_1D(PSD_L, L.wyzSlice(iP, iV, iK), L_size, Ll_BC[iP][iV][iK], Lu_BC[iP][iV][iK],
+                             Ll_BC_type, Lu_BC_type, DLL.wyzSlice(iP, iV, iK), G_radial.wyzSlice(iP, iV, iK),
+                             Sources.wyzSlice(iP, iV, iK) * radial_losses,
+                             Losses.wyzSlice(iP, iV, iK) * radial_losses, dt);
+                
+                    // copy results back
+                    for (iL = 0; iL < L_size; iL++)
+                    PSD[iP][iL][iV][iK] = PSD_L[iL];
+                
+                #pragma omp critical // Progress output
+                progress_count += 1;
+            }
+            }
 			cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%"
 					<< endl;
 		}
@@ -556,8 +631,9 @@ int main(int argc, char* argv[]) {
 			cout << "           ";
 
 			Matrix2D<double> PSD_IK(V_size, K_size);
-#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1) collapse(2)
-			for (iP = 0; iP < P_size; iP++) {
+            if (OpenMP_3){
+                #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1) collapse(2)
+                for (iP = 0; iP < P_size; iP++) {
 				for (iR = 0; iR < R_size; iR++) {
 
 					if (omp_get_thread_num() == 0)
@@ -602,6 +678,56 @@ int main(int argc, char* argv[]) {
 
 				}
 			}
+            }
+            else
+            {
+                #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1)
+                for ( int index = 0; index < P_size * R_size; index++) {
+                    iP = index % P_size;
+                    iR = index / P_size;
+                        
+                    if (omp_get_thread_num() == 0)
+                    cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
+                    << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+                        
+#pragma omp critical // Progress count
+                    progress_count += 1;
+                        
+                    // 2d slice
+                    PSD_IK = PSD.wxSlice(iP, iR);
+                        
+                    // Don't calculate anything, if diffusion coefficient are zero or PSD is zero
+                    //					if (PSD_IK.max() < min_PSD || (DKK.wxSlice(iP, iR).max() < min_Dxx && DVV.wxSlice(iP, iR).max() < min_Dxx)) {
+                    //#pragma omp critical // Progress count
+                    //						number_of_skipped_points++;
+                    //						continue;
+                    //					}
+                        
+                        
+                    // 2d diffusion
+                    if (inversion_method == "Lapack") {
+                        Diffusion_2D(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
+                                         Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+                                         Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+                                         Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+                                         DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+                                         Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+                    } else {
+                        Diffusion_2D_ADI3(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
+                                              Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+                                              Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+                                              Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+                                              DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+                                              Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+                    }
+                        
+                        // copy results back
+                    for (iV = 0; iV < V_size; iV++)
+                    for (iK = 0; iK < K_size; iK++)
+                    PSD[iP][iR][iV][iK] = PSD_IK[iV][iK];
+                    
+                }
+            }
 			cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
 			cout << "Number of skipped points: " << (int) ((double) number_of_skipped_points/progress_total * 100) << "\%" << endl;
 

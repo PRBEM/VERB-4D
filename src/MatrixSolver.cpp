@@ -1319,10 +1319,6 @@ void SecondDerivativeApproximation_2D_y(CalculationMatrix &matr_A,
 /**
  * Second derivative approximation, returns coefficients to be put into the model matrix.
  *  \f$ \frac {m Coef1 Coef2}{\frac{d}{dx} \frac{d}{dy}} \f$
- *
- * Samarskiy, page 261
- *
- * Returns coefficients to be put into model matrix for an approximation of a second derivative.
  */
 void AnySecondDerivativeApproximation_2D(CalculationMatrix &matr_A,
 		int ix, int iy,
@@ -1380,10 +1376,6 @@ void AnySecondDerivativeApproximation_2D(CalculationMatrix &matr_A,
 /**
  * Second derivative approximation in the y direction first, returns coefficients to be put into the model matrix.
  *  \f$ \frac {m Coef1 Coef2}{\frac{d}{dx} \frac{d}{dy}} \f$
- *
- * Samarskiy, page 261
- *
- * Returns coefficients to be put into model matrix for an approximation of a second derivative.
  */
 void AnySecondDerivativeApproximation_2D_y(CalculationMatrix &matr_A,
 		int ix, int iy,
