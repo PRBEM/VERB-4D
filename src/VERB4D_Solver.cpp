@@ -139,7 +139,6 @@ using namespace std;
 #define min_V 1e-10
 #define min_Dxx 1e-10
 
-#define OpenMP_3 true
 
 //extern Logger logcout; // class that log messages into screen and into file
 
@@ -453,8 +452,7 @@ int main(int argc, char* argv[]) {
  
 			Matrix2D<double> PSD_PR(P_size, R_size);
 			// omp-paraller loop
-            
-            if (OpenMP_3){
+#if defined _OPENMP && _OPENMP >= 20071
             #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_PR) shared(progress_total, progress_count) schedule(dynamic,1) collapse(2)
                 for (iV = V_size-1; iV >= 0; iV--) { 	// Looping it backward allows to speed-up the multithread simulation
 												// due to the highest energies being the slowest to calculate - calculating highest energy first
@@ -484,9 +482,8 @@ int main(int argc, char* argv[]) {
 					progress_count += 1;
 				}
 			}
-            }
-            else
-            {
+            
+#else
                 #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_PR) shared(progress_total, progress_count) schedule(dynamic,1)
                 for (int index = (V_size * K_size) - 1; index >= 0; index--) { 	// Looping it backward allows to speed-up the multithread simulation
                     // due to the highest energies being the slowest to calculate - calculating highest energy first
@@ -517,7 +514,7 @@ int main(int argc, char* argv[]) {
                     progress_count += 1;
                     
                 }
-            }
+#endif
 			// Output final progress (it should be 100%)
 			cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
 		}
@@ -531,7 +528,7 @@ int main(int argc, char* argv[]) {
 
 			Matrix1D<double> PSD_L(L_size);
             
-            if (OpenMP_3){
+#if defined _OPENMP && _OPENMP >= 20071
             
 #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
 // #pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total) reduction(+ : progress_count) schedule(static) 
@@ -588,9 +585,8 @@ int main(int argc, char* argv[]) {
 				  }
 			 }
                 
-            }
-            else
-            {
+        
+#else
                 #pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total, progress_count)
                 for (int index = 0 ; index < P_size*V_size*K_size; index++)
                 {
@@ -617,7 +613,7 @@ int main(int argc, char* argv[]) {
                 #pragma omp critical // Progress output
                 progress_count += 1;
             }
-            }
+#endif
 			cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%"
 					<< endl;
 		}
@@ -631,7 +627,7 @@ int main(int argc, char* argv[]) {
 			cout << "           ";
 
 			Matrix2D<double> PSD_IK(V_size, K_size);
-            if (OpenMP_3){
+#if defined _OPENMP && _OPENMP >= 20071
                 #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1) collapse(2)
                 for (iP = 0; iP < P_size; iP++) {
 				for (iR = 0; iR < R_size; iR++) {
@@ -678,9 +674,9 @@ int main(int argc, char* argv[]) {
 
 				}
 			}
-            }
-            else
-            {
+            
+#else
+            
                 #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1)
                 for ( int index = 0; index < P_size * R_size; index++) {
                     iP = index % P_size;
@@ -727,7 +723,7 @@ int main(int argc, char* argv[]) {
                     PSD[iP][iR][iV][iK] = PSD_IK[iV][iK];
                     
                 }
-            }
+#endif
 			cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
 			cout << "Number of skipped points: " << (int) ((double) number_of_skipped_points/progress_total * 100) << "\%" << endl;
 
