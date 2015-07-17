@@ -452,7 +452,7 @@ int main(int argc, char* argv[]) {
  
 			Matrix2D<double> PSD_PR(P_size, R_size);
 			// omp-paraller loop
-#if defined _OPENMP && _OPENMP >= 20071
+#if defined _OPENMP && _OPENMP >= 200711
             #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_PR) shared(progress_total, progress_count) schedule(dynamic,1) collapse(2)
                 for (iV = V_size-1; iV >= 0; iV--) { 	// Looping it backward allows to speed-up the multithread simulation
 												// due to the highest energies being the slowest to calculate - calculating highest energy first
@@ -528,7 +528,7 @@ int main(int argc, char* argv[]) {
 
 			Matrix1D<double> PSD_L(L_size);
             
-#if defined _OPENMP && _OPENMP >= 20071
+#if defined _OPENMP && _OPENMP >= 200711
             
 #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
 // #pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total) reduction(+ : progress_count) schedule(static) 
@@ -627,7 +627,7 @@ int main(int argc, char* argv[]) {
 			cout << "           ";
 
 			Matrix2D<double> PSD_IK(V_size, K_size);
-#if defined _OPENMP && _OPENMP >= 20071
+#if defined _OPENMP && _OPENMP >= 200711
                 #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1) collapse(2)
                 for (iP = 0; iP < P_size; iP++) {
 				for (iR = 0; iR < R_size; iR++) {
