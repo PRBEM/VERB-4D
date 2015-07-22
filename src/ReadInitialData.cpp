@@ -27,7 +27,6 @@ using namespace std;
 * \param G_local, G_radial - Jacobians for normalizing data
 * \param Sources, Losses - matrices for calculating Sources and Losses(loss cone)
 */
-*/
 void AllocateMemory(Matrix4D<double> &PSD,
 		Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V,  Matrix4D<double> &K, Matrix4D<double> &L,
 		int &P_size, int &R_size, int &V_size, int &K_size,

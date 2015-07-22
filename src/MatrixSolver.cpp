@@ -1102,7 +1102,7 @@ void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
 *  \f$ Coef1 \frac{d}{dx} \f$
 * which is approximatied using the method: 
 *
-* \f$ \frac{m G(x) D(x)}{[f(x) - f(FirstDerivative)]G(x)[(f(x) - f(SecondDerivative))]} \f$
+* \f$ \frac{m G(x) D(x)}{[f(x) - f'(x)]G(x)[(f(x) - f''(x))]} \f$
 *
 * Done for a couple locations near x[ix] each location has a slightly modified equation
 */
@@ -1188,7 +1188,7 @@ void GetDerivativeVector_2D(string derivativeType, int &dx, int &dy) {
  *
  * The approximation is done in a similar fashion to SecondDerivativeApproximation_1D
  *
- * \f$ \frac{m G(x,y) D(x,y)}{[f(x,y) - f(x_{FirstDerivative} , y_{FirstDerivative} )]G(x,y)[(f(x,y) - f(x_{SecondDerivative} , y_{SecondDerivative})]} \f$
+ * \f$ \frac{m G(x,y) D(x,y)}{[f(x,y) - f'(x , y)]G(x,y)[(f(x,y) - f''(x , y)]} \f$
  *
  * Returns coefficients to be put into model matrix for an approximation of a second derivative.
  */
@@ -1257,7 +1257,7 @@ void SecondDerivativeApproximation_2D(CalculationMatrix &matr_A,
  *
  * The approximation is done in a similar fashion to SecondDerivativeApproximation_1D
  *
- * \f$ \frac{m G(x,y) D(x,y)}{[f(x,y) - f(x_{FirstDerivative} , y_{FirstDerivative} )]G(x,y)[(f(x,y) - f(x_{SecondDerivative} , y_{SecondDerivative})]} \f$
+ * \f$ \frac{m G(x,y) D(x,y)}{[f(x,y) - f'(x , y )]G(x,y)[(f(x,y) - f''(x , y)]} \f$
  *
  * Returns coefficients to be put into model matrix for an approximation of a second derivative.
  */
