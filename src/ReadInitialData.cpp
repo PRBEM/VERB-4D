@@ -17,6 +17,16 @@ using namespace std;
 
 /** 
 * Allocates the memory for all the matrices using Matrix4D::AllocateMemory() for everything except boundary conditions which use Matrix3D::AllocateMemory()
+*
+* \param P,R,V,K,L - matrices for Phi, Radial Distance, Energy, Pitch Angle, Distance due to magnetic field, respectively
+* \param P,R,V,K,L _size - sizes for the corresponding matrices
+* \param UBC/LBC - Boundary condition for each matrix P,R,V,K,L upper and lower 
+* \param DLL,DVV,DKK,DVK - diffusion matrices
+* \param VP - Phi and Energy Matrix
+* \param VL - Phi and distance due to magnetic field Matrix
+* \param G_local, G_radial - Jacobians for normalizing data
+* \param Sources, Losses - matrices for calculating Sources and Losses(loss cone)
+*/
 */
 void AllocateMemory(Matrix4D<double> &PSD,
 		Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V,  Matrix4D<double> &K, Matrix4D<double> &L,

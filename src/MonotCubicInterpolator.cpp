@@ -511,7 +511,7 @@ computeInternalFunctionData() const {
 //         will become
 //            (2,3), (3,4), (4,5)
 //
-//       Assumes at least 3 datapoints. If less than three, this function is a noop.
+//       Assumes at least 3 datapoints. If less than three, this function is a loop.
 void
 MonotCubicInterpolator::
 chopFlatEndpoints(const double epsilon) {

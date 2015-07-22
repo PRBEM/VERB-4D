@@ -42,10 +42,10 @@
  * @param x_UBC_type - type of upper boundary condition for param x
  * @param y_LBC_type - type of lower boundary condition for param y
  * @param y_UBC_type - type of upper boundary condition for param y
- * @param Dxx - 2D Diffusion matrix
- * @param Dyy - 2D Diffusion matrix
- * @param Dxy - 2D Diffusion matrix
- * @param Dyx - 2D Diffusion matrix
+ * @param Dxx - 2D Diffusion matrix - derivative with respect to x twice
+ * @param Dyy - 2D Diffusion matrix - derivative with respect to y twice
+ * @param Dxy - 2D Diffusion matrix - derivative with respect to x then y
+ * @param Dyx - 2D Diffusion matrix - derivative with respect to y then x
  * @param G - 2D used for Jacobian to normalize matrix
  * @param Sources - matrix used for Sources
  * @param Losses - Matrix used for Losses (loss cone)

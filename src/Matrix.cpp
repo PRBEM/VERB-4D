@@ -460,7 +460,7 @@ inline T Matrix1D<T>::norm() const {
 	return sqrt(res);
 }
 
-/**
+/*
 * Dot product
 */
 template<class T>

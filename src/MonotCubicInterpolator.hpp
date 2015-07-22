@@ -98,7 +98,6 @@ class MonotCubicInterpolator {
       All commas in the file will be treated as spaces when parsing.
 
    */
-
  MonotCubicInterpolator(const char* datafilename) throw (const char*)
   {
     if (!read(std::string(datafilename))) {
@@ -461,7 +460,7 @@ class MonotCubicInterpolator {
          will become
             (2,3), (3,4), (4,5)
 
-       Assumes at least 3 datapoints. If less than three, this function is a noop.
+       Assumes at least 3 datapoints. If less than three, this function is a loop.
     */
     void chopFlatEndpoints(const double);
 
@@ -501,29 +500,30 @@ class MonotCubicInterpolator {
 
 private:
 
-   // Data structure to store x- and f-values
+   
+  
+   /// Data structure to store x- and f-values
    std::map<double, double> data;
 
-   // Data structure to store x- and d-values
+   /// Data structure to store x- and d-values
    mutable std::map<double, double> ddata;
 
 
    // Storage containers for precomputed interpolation data
    //   std::vector<double> dvalues; // derivatives in Hermite interpolation.
+   
+   mutable bool strictlyMonotoneCached; ///< Flag to determine whether the boolean strictlyMonotone can be trusted.
+   mutable bool monotoneCached; ///< Flag to determine whether the boolean Monotone can be trusted. 
 
-   // Flag to determine whether the boolean strictlyMonotone can be
-   // trusted.
-   mutable bool strictlyMonotoneCached;
-   mutable bool monotoneCached; /* only monotone, not stricly montone */
-
-   mutable bool strictlyMonotone;
-   mutable bool monotone;
+   mutable bool strictlyMonotone; ///< strictly monotone function
+   mutable bool monotone; ///< monotone function, not strictly monotone
 
    // if strictlyMonotone is true (and can be trusted), the two next are meaningful
-   mutable bool strictlyDecreasing;
-   mutable bool strictlyIncreasing;
-   mutable bool decreasing;
-   mutable bool increasing;
+   
+   mutable bool strictlyDecreasing; ///< if strictlyMonotone is true, tells whether function is strictly decreasing
+   mutable bool strictlyIncreasing; ///< if strictlyMonotone is true, tells whether function is strictly increasing
+   mutable bool decreasing; ///< tells whether function is decreasing
+   mutable bool increasing; ///< tells whether function is increasing
 
 
    /* Hermite basis functions, t \in [0,1] ,
@@ -531,20 +531,35 @@ private:
       http://en.wikipedia.org/w/index.php?title=Cubic_Hermite_spline&oldid=84495502
    */
 
+   
+   /// Hermite Basis function - H00
    double H00(double t) const {
        return 2*t*t*t - 3*t*t + 1;
    }
+   /// Hermite Basis function - H10
    double H10(double t) const {
        return t*t*t - 2*t*t + t;
    }
+   /// Hermite Basis function - H01
    double H01(double t) const {
        return -2*t*t*t + 3*t*t;
    }
+   /// Hermite Basis function - H11
    double H11(double t) const {
        return t*t*t - t*t;
    }
 
 
+   /**
+   *  Sets the following information (booleans) about the function to true or false, default is true for all
+   *
+   *  strictlyMonotone,
+   *  monotone,
+   *  strictlyDecreasing,
+   *  decreasing,
+   *  strictlyIncreasing,
+   *  increasing
+   */
    void computeInternalFunctionData() const ;
 
    /**

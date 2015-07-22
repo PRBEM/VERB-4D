@@ -102,7 +102,7 @@ Parameters& Parameters::findParameter(string parameterName, string defaultValue)
 /**
 * Gets the value for a  parameters with parameterName and saves it into variable
 * \param parameterName - name of parameter
-* \param varaible - variable for storing parameter
+* \param variable - variable for storing parameter
 * \param mustBeFound - if true and parameter not found, error is logged and function exited, default is false
 */
 template <typename T>

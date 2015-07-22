@@ -52,7 +52,6 @@ public:
 */
 	class Streamer : public std::ostream {
 	public:
-
 		Streamer(Logger::MessageType messageType);
 		~Streamer();
 

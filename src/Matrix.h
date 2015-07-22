@@ -125,7 +125,7 @@ private:
 	/// Also, all rows saved in the memory one after another as a big array. So Matrix[x+x_size*y] can be also used.
 	T **matrix_array;
 public:
-	const static int N_of_dimentions2 = 2;
+	// const static int N_of_dimentions2 = 2;									///< Not used anywhere
 
 	bool initialized;														///< Flag, equal true if initialized
 	int size_q1;															///< size x
@@ -430,7 +430,7 @@ public:
 typedef map <int , Matrix1D<double> > DiagMatrix;
 
 /** Model matrix (or related matrices)
- * It is based on Diagonal matrix and have methods for conversion from 3D or 2D PSD (and related) arrays into 1d array of unknown elements
+ * It is based on DiagMatrix and have methods for conversion from 3D or 2D PSD (and related) arrays into 1d array of unknown elements
  * 
  * @brief A matrix used primarily for diagonalized calculations
  */
@@ -438,7 +438,9 @@ class CalculationMatrix : public DiagMatrix {
 public:
 
 	bool initialized; ///< Variables used for denoting whether it is initialized or not
-	int x_size, y_size, total_size;
+	int x_size; ///< size in x direction of matrix
+	int y_size; ///< size in y direction of matrix
+	int total_size; ///< total size of matrix
 	// flag, if needs to be recalculated
 	string change_ind;						///< Variables useful for changes tracking (store here time when changed)
 

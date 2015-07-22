@@ -21,11 +21,18 @@
 * Jacobian of the transformation from (μ,J,L) to (V,K,L)
 *
 *
-* Books, required to understand the code:
-* 
-* Stroustrup C++
+* Books, required to understand the code: 
+* - 	Stroustrup C++
+* - 	Schulz and Lanzerotti, 1974
 *
-* Schulz and Lanzerotti, 1974
+* VARIABLES for understanding code
+* - 	PSD - Phase Space Density
+* - 	P - Phi: magnetic local time
+* - 	R - Radial distance actual
+* - 	V - Energy
+* - 	K - Pitch andle
+* - 	L - Radial distance distorted
+* - 	Dxx - Diffusion - subscripts denote with respect to what derivative
 *
 * Convection is solved using Convection_1D_ULTIMATE_QUICKEST6.h 
 * which implements 
@@ -46,7 +53,7 @@
 * 
 * There is also the standardized MatrixND for any size matrices which is used in conjunction with UpdatableMatrix which can be updated with new data.
 *
-* Most of the computation such as umerically approximating derivatives are done with MatrixSolver.h using CalculationMatrix.
+* Most of the computation such as numerically approximating derivatives are done with MatrixSolver.h using CalculationMatrix.
 * These calculation matrices are made up of DiagMatrix which is a mapping of an int (which diagonal number) to a 1d matrix of values (for that diagonal).
 *
 * There is also a Parameters class which holds paramters and their value as defined in the file they came from

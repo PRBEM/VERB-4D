@@ -1099,6 +1099,9 @@ void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
 /**
 * numerical derivative approximation of a matrix in 1D
 *
+*  \f$ Coef1 \frac{d}{dx} \f$
+* which is approximatied using the method: 
+*
 * \f$ \frac{m G(x) D(x)}{[f(x) - f(FirstDerivative)]G(x)[(f(x) - f(SecondDerivative))]} \f$
 *
 * Done for a couple locations near x[ix] each location has a slightly modified equation
@@ -1181,9 +1184,7 @@ void GetDerivativeVector_2D(string derivativeType, int &dx, int &dy) {
 /**
  * Second derivative approximation, returns coefficients to be put into the model matrix.
  *  
- * Coef1 * d/dx * Coef2 * df/dy
- *
- * Samarskiy, page 261
+ *  \f$ Coef1 \frac{d}{dx} * Coef2 \frac{df}{dy}  \f$
  *
  * The approximation is done in a similar fashion to SecondDerivativeApproximation_1D
  *
@@ -1252,9 +1253,7 @@ void SecondDerivativeApproximation_2D(CalculationMatrix &matr_A,
 /**
  * Second derivative approximation in the y direction first, returns coefficients to be put into the model matrix.
  *  
- * Coef1 * d/dx * Coef2 * df/dy
- *
- * Samarskiy, page 261
+*  \f$ Coef1 \frac{d}{dx} * Coef2 \frac{df}{dy}  \f$
  *
  * The approximation is done in a similar fashion to SecondDerivativeApproximation_1D
  *

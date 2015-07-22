@@ -28,7 +28,7 @@
  *
  * 3. get the seond derivative approximation with diffusion coeficient SecondDerivativeApproximation_2D()
  *
- * 4. solve matrix with tridag()
+ * 4. make RHS = B*f + C and then solve with tridag()
  *
  * @param psd - phase space density
  * @param x - one dimensional slice

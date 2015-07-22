@@ -1,6 +1,8 @@
 /**
  * \file Logger.cpp
  * \brief Logs the messages sent, including information, warnings, and errors
+ *
+ * Contains the definition for Logger and Logger::Streamer
  */
 
 
@@ -94,6 +96,7 @@ void Logger::writeIDEDebugString(const std::string& message, MessageType type)
 	//cerr << message.c_str() << endl;
 }
 
+/// Constructor - must send in message type
 Logger::Streamer::Streamer(Logger::MessageType messageType)
 : std::ostream(new StringBuffer(messageType))
 {
@@ -105,6 +108,7 @@ Logger::Streamer::~Streamer()
 	delete rdbuf();
 }
 
+/// Constructor for StinrgBuffer- must send in message type
 Logger::Streamer::StringBuffer::StringBuffer(Logger::MessageType messageType)
 : mMessageType(messageType)
 {
