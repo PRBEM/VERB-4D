@@ -44,6 +44,12 @@
 *
 * Three other methods are also used for finding diffusion in 2D:
 * these can be found in Diffusion_ADI1.h, Diffusion_ADI2.h, and Diffusion_ADI3.h
+*
+* The parameters.ini file created in matlab will specify the inversion method. 
+* If "Lapack" is specified then Diffusion_2D() will be used. 
+* Otherwise 1 of the 3 ADI methods will be used to inversion.
+* All 3 ADI methods can use multiple threads while Lapack can only use 1.
+* The current chosen method of inversion is Diffusion_ADI3() if "ADI" is specified. It can be changed in VERB4D_SOLVER.cpp 
 * 
 * The main solver function can be found in VERB4D_Solver.cpp
 *
@@ -91,6 +97,11 @@
  *
  * Continue reading ONLY after familiarizing yourself with these books.
  */
+
+
+// ADDED
+#include "/Applications/MATLAB_R2015a.app/extern/include/mat.h"
+
 
 #include <iostream>
 #include <iomanip>
@@ -145,6 +156,10 @@ using namespace std;
 #define min_PSD 1e-10
 #define min_V 1e-10
 #define min_Dxx 1e-10
+
+
+
+
 
 
 //extern Logger logcout; // class that log messages into screen and into file
@@ -214,6 +229,9 @@ int main(int argc, char* argv[]) {
 	double time_first = 0; 
 	int max_threads = omp_get_num_threads();
 
+	// The inversion method can be Lapack or ADI
+	// Lapack cannot be used with multiple threads (must be updated to scalapack)
+	// Instead ADI should be used for parallelization - It should be changed in the matlab Conv_Dif.m file if using more than 1 thread
 	string inputFolder = "./VERB4D_input/";
 	string outputFolder = "./VERB4D_output/";
 	string inversion_method = "Lapack";
@@ -222,7 +240,7 @@ int main(int argc, char* argv[]) {
 		 
 
 	// Read all the inputs - store them into variables
-	// TODO: create structures for parameters, so there would be no need to pass them one by one
+	// These inputs come from the matlab files that are generated when running Conv_Dif.m examples
 	initialLoad = ReadInitialData(inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
 			inversion_method, PSD,
 			P, R, V, K, L,
@@ -294,6 +312,7 @@ int main(int argc, char* argv[]) {
 
 	// Check time-step for ADI method - the stable time step is completely empirical (i.e. made-up)
 	// This isn't really working I think.
+	// Only throws error if time step is too large - else has no effect on remaining calculations
 	if (inversion_method == "ADI") {
 		// if (dt > 0.1/24 + 0.001) {
 		if (dt > sqrt(1.0 / V.size_y)) {
@@ -658,6 +677,7 @@ int main(int argc, char* argv[]) {
 
 
 					// 2d diffusion
+					// If parameters.ini specify "Lapack" then Lapack will be used
 					if (inversion_method == "Lapack") {
 						Diffusion_2D(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
 								Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
@@ -665,7 +685,10 @@ int main(int argc, char* argv[]) {
 								Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
 								DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
 								Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
-					} else {
+					} 
+					// Currently setup to calculate 2d Diffusion using Diffusion_2D_ADI3
+					// Can change to Diffusion_2D_ADI1 or Diffusion_2D_ADI2 for different methods of inversion
+					else {
 						Diffusion_2D_ADI3(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
 								Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
 								Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
@@ -708,6 +731,7 @@ int main(int argc, char* argv[]) {
                         
                         
                     // 2d diffusion
+					// If parameters.ini specify "Lapack" then Lapack will be used
                     if (inversion_method == "Lapack") {
                         Diffusion_2D(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
                                          Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
@@ -715,7 +739,10 @@ int main(int argc, char* argv[]) {
                                          Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
                                          DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
                                          Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
-                    } else {
+                    } 
+					// Currently setup to calculate 2d Diffusion using Diffusion_2D_ADI3
+					// Can change to Diffusion_2D_ADI1 or Diffusion_2D_ADI2 for different methods of inversion
+					else {
                         Diffusion_2D_ADI3(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
                                               Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
                                               Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
@@ -750,6 +777,11 @@ int main(int argc, char* argv[]) {
 			PSD.writeToFile(PSD_filename.str(), time_string.str());
 		}
 	}
+
+
+
+
+
 
 	// logger records if everything went correctly
 	Logger::message << "Program was terminated correctly." << endl;

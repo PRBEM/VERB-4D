@@ -15,6 +15,9 @@ using namespace std;
 	#define strcasecmp _stricmp
 #endif
 
+const bool matlab = false;
+
+
 /** 
 * Allocates the memory for all the matrices using Matrix4D::AllocateMemory() for everything except boundary conditions which use Matrix3D::AllocateMemory()
 *
@@ -165,37 +168,145 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	parameters.getParameter("output_folder", OutputFolder);
 
 
-	// Opening up grid.plt in order to get P,R,V,K sizes which are stored in the header
-	ifstream input;
-	input.open((InputFolder + "grid.plt").c_str());
-			//if (input == NULL) {
-	// if the file is missing sends message to the logger
-	if (!input.is_open()) {
-		Logger::warning << "Grid file " << (InputFolder + "grid.plt") << " not found." << endl;
-		return false;
+	if (!matlab)
+	{
+		// Opening up grid.plt in order to get P,R,V,K sizes which are stored in the header
+		ifstream input;
+		input.open((InputFolder + "grid.plt").c_str());
+				//if (input == NULL) {
+		// if the file is missing sends message to the logger
+		if (!input.is_open()) {
+			Logger::warning << "Grid file " << (InputFolder + "grid.plt") << " not found." << endl;
+			return false;
+		}
+		
+		// "I"=K_size, "J"=V_size, "K"=R_size, "L"=P_size from grid.plt from create_grid.m generated in matlab
+		string inBuf;
+		input >> inBuf;
+		while (strcasecmp(inBuf.c_str(), "ZONE") != 0 && !input.eof() ) input >> inBuf;
+		while(inBuf.substr(inBuf.size() - 1).compare("I") && !input.eof()) getline(input, inBuf, '=');
+		input >> K_size;
+		while(inBuf.substr(inBuf.size() - 1).compare("J") && !input.eof()) getline(input, inBuf, '=');
+		input >> V_size;
+		while(inBuf.substr(inBuf.size() - 1).compare("K") && !input.eof()) getline(input, inBuf, '=');
+		input >> R_size;
+		while(inBuf.substr(inBuf.size() - 1).compare("L") && !input.eof()) getline(input, inBuf, '=');
+		input >> P_size;
+		
+		//ADDED
+		printf("size of K: %d", K_size);
+		printf("size of V: %d", V_size);
+		printf("size of R: %d", R_size);
+		printf("size of P: %d \n", P_size);
+		
+		
+		
+		// If the file doesn't have data send error message
+		if (input.eof()) {
+			Logger::warning << "Grid file error." << endl;
+			return false;
+		}
+	
+		input.close();
+
+	}
+	// ADDED
+	else // IF MATLAB SELECTED
+	{
+		
+		MATFile *mfPtr; /* MAT-file pointer */
+   		mxArray *aPtr;  /* mxArray pointer */
+		mwSize nElements;       /* number of elements in array */
+    	mwIndex eIdx;           /* element index */
+    	const mxArray *fPtr;    /* field pointer */
+		string arr; 			/* variable name*/
+		
+		mfPtr = matOpen((InputFolder + "grid.mat").c_str(), "r");
+    	if (mfPtr == NULL) {
+        	printf("Error opening file grid.mat\n");
+    	}
+		
+    	string field = "size";
+		
+	 	arr = "P";
+    	aPtr = matGetVariable(mfPtr, arr.c_str());
+    	if (aPtr == NULL) {
+        	printf("mxArray not found: %s\n", arr);
+   		}   
+		   
+		if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+        	if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+            	printf("Field not found: %s\n", field);
+        	}
+        	else {
+       		 		nElements = (mwSize)mxGetNumberOfElements(aPtr);
+   					 for (eIdx = 0; eIdx < nElements; eIdx++) {
+						fPtr = mxGetField(aPtr, eIdx, field.c_str());
+						P_size = int(mxGetScalar(fPtr));
+					}
+   				 }
+	        }
+    	
+		arr = "V";
+    	aPtr = matGetVariable(mfPtr, arr.c_str());
+    	if (aPtr == NULL) {
+        	printf("mxArray not found: %s\n", arr);
+   		}   
+		   
+		if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+        	if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+            	printf("Field not found: %s\n", field);
+        	}
+        	else 
+			{
+				nElements = (mwSize)mxGetNumberOfElements(aPtr);
+   			 	for (eIdx = 0; eIdx < nElements; eIdx++) {
+					fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 		V_size = int(mxGetScalar(fPtr));
+				}
+			}
+    	}
+		arr = "R";
+    	aPtr = matGetVariable(mfPtr, arr.c_str());
+    	if (aPtr == NULL) {
+        	printf("mxArray not found: %s\n", arr);
+   		}   
+		   
+		if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+        	if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+            	printf("Field not found: %s\n", field);
+        	}
+        	else {
+    				nElements = (mwSize)mxGetNumberOfElements(aPtr);
+   					 for (eIdx = 0; eIdx < nElements; eIdx++) {
+       		 			fPtr = mxGetField(aPtr, eIdx, field.c_str()); 
+						R_size = int(mxGetScalar(fPtr));
+					}
+       		 		
+   				 }
+	        }
+    	
+		arr = "K";
+    	aPtr = matGetVariable(mfPtr, arr.c_str());
+    	if (aPtr == NULL) {
+        	printf("mxArray not found: %s\n", arr);
+   		}   
+		   
+		if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+        	if ( mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+            	printf("Field not found: %s\n", field);
+        	}
+        	else {
+       		 		nElements = (mwSize)mxGetNumberOfElements(aPtr);
+   				 	for (eIdx = 0; eIdx < nElements; eIdx++) {
+						fPtr = mxGetField(aPtr, eIdx, field.c_str());
+						K_size = int(mxGetScalar(fPtr));
+					}
+   				 }
+	        }		  	   
 	}
 	
-	// "I"=K_size, "J"=V_size, "K"=R_size, "L"=P_size from grid.plt from create_grid.m generated in matlab
-	string inBuf;
-	input >> inBuf;
-	while (strcasecmp(inBuf.c_str(), "ZONE") != 0 && !input.eof() ) input >> inBuf;
-	while(inBuf.substr(inBuf.size() - 1).compare("I") && !input.eof()) getline(input, inBuf, '=');
-	input >> K_size;
-	while(inBuf.substr(inBuf.size() - 1).compare("J") && !input.eof()) getline(input, inBuf, '=');
-	input >> V_size;
-	while(inBuf.substr(inBuf.size() - 1).compare("K") && !input.eof()) getline(input, inBuf, '=');
-	input >> R_size;
-	while(inBuf.substr(inBuf.size() - 1).compare("L") && !input.eof()) getline(input, inBuf, '=');
-	input >> P_size;
 	
-	// If the file doesn't have data send error message
-	if (input.eof()) {
-		Logger::warning << "Grid file error." << endl;
-		return false;
-	}
-
-	input.close();
-
 	// sets the size of L and R to be the same - both measure distance
 	L_size = R_size;
 	// records the sizes of P,R,V,K to the logger
@@ -214,17 +325,51 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			G_local, G_radial, Sources, Losses);
 
 
-	// Read values from grid.plt - last argument is the column being read in
-	P.readFromFile(InputFolder + "grid.plt", 1);
-	R.readFromFile(InputFolder + "grid.plt", 2);
-	V.readFromFile(InputFolder + "grid.plt", 3);
-	K.readFromFile(InputFolder + "grid.plt", 4);
+	// // Read values from grid.plt - last argument is the column being read in
+	// P.readFromFile(InputFolder + "grid.plt", 1);
+	// R.readFromFile(InputFolder + "grid.plt", 2);
+	// V.readFromFile(InputFolder + "grid.plt", 3);
+	// K.readFromFile(InputFolder + "grid.plt", 4);
+	
+	// // ADDED
+	// P.writeToFile( "PTEST.plt", "");
+	// R.writeToFile( "RTEST.plt", "");
+	// V.writeToFile( "VTEST.plt", "");
+	// K.writeToFile( "KTEST.plt", "");
+	
+	// ADDED
+	P.readFromMatlabFile(InputFolder + "grid.mat", 1);
+	R.readFromMatlabFile(InputFolder + "grid.mat", 2);
+	V.readFromMatlabFile(InputFolder + "grid.mat", 3);
+	K.readFromMatlabFile(InputFolder + "grid.mat", 4);
 
-	// Read in Lstar.plt if Lstar.tab is not present
+	// // ADDED
+	// P.writeToFile( "PTEST2.plt", "");
+	// R.writeToFile( "RTEST2.plt", "");
+	// V.writeToFile( "VTEST2.plt", "");
+	// K.writeToFile( "KTEST2.plt", "");
+
+	// // Read in Lstar.plt if Lstar.tab is not present
+	// if (!L.readFromIniFile(InputFolder + "Lstar.tab", P, R, V, K))
+	// 	L.readFromFile(InputFolder + "Lstar.plt", P, R, V, K);
+		
+	// // ADDED
+	//L.writeToFile( "LTEST.plt", "");	
+		
+		
+	// ADDED
 	if (!L.readFromIniFile(InputFolder + "Lstar.tab", P, R, V, K))
-		L.readFromFile(InputFolder + "Lstar.plt", P, R, V, K);
+		L.readFromMatlabFile(InputFolder + "Lstar.mat", P, R, V, K);	
+	
+	printf("reached here7");
+		
+	// ADDED
+	L.writeToFile( "LTEST2.plt", "");		
+	printf("reached here8");	
+		
 	L.update(time_first, P, R, V, K); // Load L-star so it'll be available
 
+	printf("reached here9");
 	
 	string initial_PSD = "PSD0.plt";	
 	parameters.findParameter("initial_PSD", "PSD0.plt") >> initial_PSD;

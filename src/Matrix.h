@@ -12,6 +12,11 @@
 #ifndef matrix_array_MATRIX_H
 #define matrix_array_MATRIX_H
 
+// ADDED
+#include "/Applications/MATLAB_R2015a.app/extern/include/mat.h"
+
+
+
 #include <assert.h>
 #include <string>
 #include <string.h>
@@ -104,6 +109,10 @@ public:
 	virtual void writeToFile(string filename, Matrix1D<T> &grid_q1);
 	virtual void readFromFile(string filename);
 	virtual void readFromFile(string filename, const Matrix1D<T> grid_q1);
+	
+	//ADDED
+	//virtual void readFromMatlabFile(string filename);
+	//virtual void readFromMatlabFile(string filename, const Matrix1D<T> grid_q1);
 
 	T min();
 	T max();
@@ -197,6 +206,10 @@ public:
 	virtual void readFromFile(string filename, int column = 1);
 	virtual void readFromFile(string filename, const Matrix2D<T> grid_q1, const Matrix2D<T> grid_q2);
 
+	//ADDED
+	//virtual void readFromMatlabFile(string filename, int column = 1);
+	//virtual void readFromMatlabFile(string filename, const Matrix1D<T> grid_q1, const Matrix2D<T> grid_q2);
+
 	// slices - get 1D slice from 2D array
 	Matrix1D<T> xSlice(int p_q1) const;
 	Matrix1D<T> ySlice(int p_q2) const;
@@ -215,7 +228,7 @@ class Matrix3D {
 private:
 	/// Plane array of values. All rows saved in the memory one after anouther as a big array.
 	T *plane_array;
-	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y] can be used.
+	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y][z] can be used.
 	T ***matrix_array;
 public:
 	bool initialized;														///< Flag, equal true if initialized
@@ -280,6 +293,10 @@ public:
 	virtual void writeToFile(string filename, Matrix3D<T> &grid_q1, Matrix3D<T> &grid_q2, Matrix3D<T> &grid_q3); ///< Save matrix to a file, including grid
 	virtual void readFromFile(string filename, int column = 1);  									///< Load matrix from a file
 	virtual void readFromFile(string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3); ///< Load matrix to a file
+	
+	// ADDED
+	//virtual void readFromMatlabFile(string filename, int column = 1);  									
+	//virtual void readFromMatlabFile(string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3);
 
 	// Some other stuff
 	string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
@@ -316,7 +333,7 @@ template <typename T> class Matrix4D {
 private:
 	/// Plane array of values. All rows saved in the memory one after anouther as a big array.
 	T *plane_array;
-	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y][z] can be used.
+	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[w][x][y][z] can be used.
 	T ****matrix_array;
 public:
 	bool initialized;														///< Flag, equal true if initialized
@@ -380,6 +397,10 @@ public:
 	virtual void writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z); ///< Save matrix to a file, including grid
 	virtual void readFromFile(string filename, int column = 1);  									///< Load matrix from a file
 	virtual void readFromFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z); ///< Load matrix to a file
+
+	// ADDED
+	virtual void readFromMatlabFile(string file, int column = 1);  									
+	virtual void readFromMatlabFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z); 
 
 	// Some other stuff
 	string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)

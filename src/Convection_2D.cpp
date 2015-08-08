@@ -1,5 +1,12 @@
 /**
  * \file Convection_2D.cpp
+ *
+ *
+ * Using the Convection_1D_Ultimate_QUICKEST6() for calculating P and R.
+ * All equations and formulas for these calculations can be found at http://www.hadian.ir/teaching/CompHydr/3.pdf .
+ * Mostly coming from 3.5 Simplified Ultimate Quickest strategy from B.P Leonard the Ultimate conservative difference scheme.
+ * In the source code mathematical equations are numbered corresponding to the numbering of equations found in the paper
+ * 
  * \brief Calculates the convection in 2D given a 2D matrix of Phase Space Densities, P, R, boundary conditions, diffusion, sources and losses
  */
 
@@ -12,8 +19,11 @@ using namespace std;
 /**
  * Calculation of 2D convection
  *
- * Uses Convection_1D_Ultimate_QUICKEST6.h for calculating P and R if either are of size > 3
- *
+ * Uses Convection_1D_Ultimate_QUICKEST6.h for calculating P and R if either are of size > 3.
+ * 
+ * All equations and formulas for these calculations can be found at http://www.hadian.ir/teaching/CompHydr/3.pdf .
+ * Mostly coming from 3.5 Simplified Ultimate Quickest strategy from B.P Leonard the Ultimate conservative difference scheme.
+ * In the source code mathematical equations are numbered corresponding to the numbering of equations found in the paper.
  * Refer to the equations/function in Convection_1D_Ultimate_QUICKEST6.h
  *
  * @param PSD_PR - Phase Space Density - P and R held constant

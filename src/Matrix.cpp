@@ -11,7 +11,7 @@
  */
 #ifndef matrix_array_MATRIX_CPP
 #define matrix_array_MATRIX_CPP
-
+	
 #include "Matrix.h"
 
 using namespace std;
@@ -20,6 +20,8 @@ using namespace std;
 	#define strncasecmp _strnicmp
 	#define strcasecmp _stricmp
 #endif
+
+const double err = 1e-6;
 
 // #define DEBUG_MODE
 
@@ -555,6 +557,29 @@ void Matrix1D<T>::readFromFile(string filename) {
 	}
 }
 
+
+
+
+
+// /**
+// * Read matrix data from MATLAB file.
+// */
+// template<class T>
+// void Matrix1D<T>::readFromMatlabFile(string filename) {
+	
+// 	MATfile *pmat;
+// 	MxArray *pa;
+// 	pmat = matOpen(filename.c_str(), "r");
+// 	const char* name;
+// 	pa = matGetNextVariable(pmat, &name);
+// 	matrix_array = mxGetData(pa);
+	
+// }
+
+
+
+
+
 /**
 * Read matrix data from file with grid, 
 * Checks if the matrix data in the file is the same as the grids that were sent in with error < 1e-8,
@@ -569,7 +594,6 @@ void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
 	int i1;
 	string inBuf;
 	double loaded_q1;
-	double err = 1e-8;
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
 		exit(EXIT_FAILURE);
@@ -589,7 +613,7 @@ void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
 			for (i1 = 0; i1 < size_q1; i1++) {
 				input >> loaded_q1;
 				// check if grid is the same
-				if (fabs(loaded_q1 - grid_q1[i1]) > err) {
+				if (fabs(log10(loaded_q1) - log10(grid_q1[i1])) > err) {
 					printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch.\nLoaded: %e\nGrid: %e\n", filename.c_str(), loaded_q1, grid_q1[i1]);
 					exit(EXIT_FAILURE);
 				} else {
@@ -603,6 +627,67 @@ void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
 		input.close();
 	}
 }
+
+
+
+
+
+
+// ADDED
+/* Analyze field FNAME in struct array SPTR. */
+static void
+analyzestructarray(const mxArray *sPtr, const char *fName)
+{
+    mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    mwIndex fPTRIdx;           /* fptr index */
+    const mxArray *fPtr;    /* field pointer */
+    double *realPtr;        /* pointer to data */
+    mwSize nElementsInRealData; /* number of elements in array */
+    
+	
+	// Goes through all of the structs
+	// I think all of them only have one struct consisting of a couple fields (one or more of which is the double array which we want)
+    nElements = (mwSize)mxGetNumberOfElements(sPtr);
+    for (eIdx = 0; eIdx < nElements; eIdx++) {
+        fPtr = mxGetField(sPtr, eIdx, fName);
+        nElementsInRealData = (mwSize)mxGetNumberOfElements(fPtr);
+        printf("number of elements in %s: %.2d\n", fName, nElementsInRealData);
+        if ((fPtr != NULL)
+            && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) 
+            && (!mxIsComplex(fPtr))) 
+        {
+            realPtr = mxGetPr(fPtr);
+            for (fPTRIdx = 0; fPTRIdx < nElementsInRealData; fPTRIdx++)
+            {
+                printf("%.2f \n", realPtr[fPTRIdx]);
+            }
+        }
+    }
+}
+
+/* Find struct array ARR in MAT-file FILE.
+ * Pass field name FIELD to analyzestructarray function. */
+int findstructure(
+        const char *file,
+        const char *arr,
+        const char *field) {
+    
+   
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1063,7 +1148,6 @@ template<class T>
 void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const Matrix2D<T> grid_y) {
 	int i1, i2;
 	string inBuf;
-	double err = 1e-6;
 	double loaded_x, loaded_y;
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using un-itialized matrix");
@@ -1085,7 +1169,7 @@ void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const 
 				for (i2 = 0; i2 < size_q2; i2++) {
 					input >> loaded_x >> loaded_y;
 					// check if grid is the same
-					if (fabs(loaded_x - grid_x[i1][i2]) > err || fabs(loaded_y - grid_y[i1][i2]) > err) {
+					if (fabs(log10(loaded_x) - log10(grid_x[i1][i2])) > err || fabs(log10(loaded_y) - log10(grid_y[i1][i2])) > err) {
 						printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch.\nLoaded: %e, %e\nGrid: %e, %e\n", filename.c_str(), loaded_x, loaded_y, grid_x[i1][i2], grid_y[i1][i2]);
 						exit(EXIT_FAILURE);
 					} else {
@@ -1618,7 +1702,6 @@ void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const 
 	int i1, i2, i3;
 	string inBuf;
 	double loaded_x, loaded_y, loaded_z;
-	double err = 1e-8;
 
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
@@ -1646,7 +1729,7 @@ void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const 
 
 						 input >> loaded_x >> loaded_y >> loaded_z;
 						 // check if grid is the same
-						 if (fabs(loaded_x - grid_x[i1][i2][i3]) > err || fabs(loaded_y - grid_y[i1][i2][i3]) > err || fabs(loaded_z - grid_z[i1][i2][i3]) > err) {
+						 if (fabs(log10(loaded_x) - log10(grid_x[i1][i2][i3])) > err || fabs(log10(loaded_y) - log10(grid_y[i1][i2][i3])) > err || fabs(log10(loaded_z) - log10(grid_z[i1][i2][i3])) > err) {
 							printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d, %d, %d].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", filename.c_str(), i1, i2, i3, loaded_x, loaded_y, loaded_z, grid_x[i1][i2][i3], grid_y[i1][i2][i3], grid_z[i1][i2][i3]);
 							exit(EXIT_FAILURE);
 						} else {
@@ -2322,6 +2405,93 @@ void Matrix4D<T>::readFromFile(string filename, int read_column) {
 	}
 }
 
+
+// Function for reading from matlab file in 1-dimension
+// Will always be stored in PRVK format so 1 = P, 2 = R ... 
+template<class T>
+void Matrix4D<T>::readFromMatlabFile(string file ,int columnNumber)
+{
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	
+	
+	if (columnNumber == 1)
+		arr =  "P";
+	if (columnNumber == 2)
+		arr =  "R";
+	if (columnNumber == 3)
+		arr =  "V";
+	if (columnNumber == 4)
+		arr =  "K";
+	
+	this->name = arr;
+		
+	mfPtr = matOpen(file.c_str(), "r");
+    if (mfPtr == NULL) {
+        printf("Error opening file %s\n", file);
+    }
+    
+    aPtr = matGetVariable(mfPtr, arr.c_str());
+    if (aPtr == NULL) {
+        printf("mxArray not found: %s\n", arr);
+    }
+    
+    if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+        if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+            printf("Field not found: %s\n", field);
+        }
+        else {
+            // Goes through all of the structs
+			// I think all of them only have one struct consisting of a couple fields (one or more of which is the double array which we want)
+    		nElements = (mwSize)mxGetNumberOfElements(aPtr);
+   			 for (eIdx = 0; eIdx < nElements; eIdx++) {
+       		 	fPtr = mxGetField(aPtr, eIdx, field.c_str()); // field was previously fname
+       		 	if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 	{
+          			realPtr = mxGetPr(fPtr);
+       		 	}
+   			 }
+        }
+    } 
+   // ADDED
+   // change to call function if it is just an array of doubles
+   // realPtr should hold a pointer to the double array
+    else if (mxGetClassID(aPtr) == mxDOUBLE_CLASS) 
+	{
+        realPtr = mxGetPr(aPtr);
+	}
+	else 
+	{
+		printf("%s is of unknown type\n", arr);
+    }
+
+	// sets the matrix array to be equal to an array of doubles
+	for (w = 0; w < size_w; w++) {
+		for (x = 0; x < size_x; x++) {
+			for (y = 0; y < size_y; y++) {
+				for (z = 0; z < size_z; z++) {
+					matrix_array[w][x][y][z] = realPtr[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w];
+				}
+			}
+		}
+	}
+	
+    mxDestroyArray(aPtr);
+    
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file);
+    }
+}
+
+
+
 /**
 * Read matrix data from file with grid, 
 * Checks if the matrix data in the file is the same as the grids that were sent in with error < 1e-8,
@@ -2336,7 +2506,6 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 	int w, x, y, z;
 	string inBuf;
 	double loaded_w, loaded_x, loaded_y, loaded_z;
-	double err = 1e-8;
 
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using uninitialized matrix");
@@ -2382,11 +2551,14 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 
 							 input >> loaded_w >> loaded_x >> loaded_y >> loaded_z;
 							 // check if grid is the same
-							 if (fabs(loaded_w - grid_w[w][x][y][z]) > err || fabs(loaded_x - grid_x[w][x][y][z]) > err || fabs(loaded_y - grid_y[w][x][y][z]) > err || fabs(loaded_z - grid_z[w][x][y][z]) > err) {
+							 if (fabs(log10(loaded_w) - log10(grid_w[w][x][y][z])) > err || fabs(log10(loaded_x) - log10(grid_x[w][x][y][z])) > err || fabs(log10(loaded_y) - log10(grid_y[w][x][y][z])) > err || fabs(log10(loaded_z) - log10(grid_z[w][x][y][z])) > err) {
 								printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d, %d, %d, %d].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", filename.c_str(), w, x, y, z, loaded_w, loaded_x, loaded_y, loaded_z, grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
 								exit(EXIT_FAILURE);
 							} else {
 								input >> matrix_array[w][x][y][z];
+								//ADDED
+								//printf( "%e \n",  matrix_array[w][x][y][z]);
+								//std::cout <<  input.rdbuf();
 								// skip till to the end of the line
 								input.ignore(9999, '\n');
 							}
@@ -2401,6 +2573,225 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 		input.close();
 	}
 }
+
+
+
+
+
+// Function for reading from matlab file in 1-dimension
+// Will always be stored in PRVK format so 1 = P, 2 = R ... 
+template<class T>
+void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z)
+{
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr1;  /* mxArray pointer */
+	mxArray *aPtr2;  /* mxArray pointer */
+	mxArray *aPtr3;  /* mxArray pointer */
+	mxArray *aPtr4;  /* mxArray pointer */
+	mxArray *aPtr5;  /* mxArray pointer */
+	mxArray *aPtrfinished;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	double *realPtrLoadedW; /* loaded W grid */
+	double *realPtrLoadedX; /* loaded X grid */
+	double *realPtrLoadedY; /* loaded Y grid */
+	double *realPtrLoadedZ; /* loaded Z grid */
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrw;    /* field pointer */
+	const mxArray *fPtrx;    /* field pointer */
+	const mxArray *fPtry;    /* field pointer */
+	const mxArray *fPtrz;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	const char* name;		/* for getting variable names */		
+	printf("reached here3");
+			
+	mfPtr = matOpen(file.c_str(), "r");
+    if (mfPtr == NULL) {
+        printf("Error opening file %s\n", file);
+    }
+    
+	printf("reached here2");
+	aPtr1 = matGetNextVariableInfo(mfPtr, &name);
+	aPtr2 = matGetNextVariableInfo(mfPtr, &name);
+	aPtr3 = matGetNextVariableInfo(mfPtr, &name);
+	aPtr4 = matGetNextVariableInfo(mfPtr, &name);
+	aPtr5 = matGetNextVariableInfo(mfPtr, &name);
+	this->name = name;
+    
+	aPtrfinished = matGetVariable(mfPtr, name);
+    if (aPtrfinished == NULL) {
+        printf("mxArray not found: %s\n", arr);
+    }
+	
+	
+     printf("reached here1");	
+    if (mxGetClassID(aPtrfinished) == mxSTRUCT_CLASS) {
+        if (mxGetFieldNumber(aPtrfinished, field.c_str()) == -1) {
+            printf("Field not found: %s\n", field);
+        }
+        else {
+            // Goes through all of the structs
+			// I think all of them only have one struct consisting of a couple fields (one or more of which is the double array which we want)
+    		nElements = (mwSize)mxGetNumberOfElements(aPtrfinished);
+   			 for (eIdx = 0; eIdx < nElements; eIdx++) {
+       		 	fPtr = mxGetField(aPtrfinished, eIdx, field.c_str()); // field was previously fname
+       		 	if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 	{
+          			printf("size of realptr = %d \n" , (int)mxGetNumberOfElements(fPtr) );  
+					realPtr = mxGetPr(fPtr);  
+       		 	}
+   			 }
+        }
+    } 
+   // ADDED
+   // change to call function if it is just an array of doubles
+   // realPtr should hold a pointer to the double array
+    else if (mxGetClassID(aPtrfinished) == mxDOUBLE_CLASS) 
+	{
+        realPtr = mxGetPr(aPtrfinished);
+	}
+	else 
+	{
+		printf("%s is of unknown type\n", arr);
+    }
+
+
+	// // // NOW GET ALL THE LOADED GRIDS TO CHECK ERROR
+		
+	// 	arr = grid_w.name;
+    // 	aPtr = matGetVariable(mfPtr, arr.c_str());
+    // 	if (aPtr == NULL) {
+    //     	printf("mxArray not found: %s\n", arr);
+   	// 	}   
+		   
+	// 	if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+    //     	if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+    //         	printf("Field not found: %s\n", field);
+    //     	}
+    //     	else 
+	// 		{
+	// 			nElements = (mwSize)mxGetNumberOfElements(aPtr);
+   	// 			for (eIdx = 0; eIdx < nElements; eIdx++) {
+	// 				fPtrw = mxGetField(aPtr, eIdx, field.c_str());
+	//        		 	if ((fPtrw != NULL) && (mxGetClassID(fPtrw) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrw))) 
+    //    		 		{
+    //       				realPtrLoadedW = mxGetPr(fPtrw);
+    //    		 		}
+	// 			   }
+	// 		}
+    // 	}
+		
+	// 	arr = grid_x.name;
+    // 	aPtr = matGetVariable(mfPtr, arr.c_str());
+    // 	if (aPtr == NULL) {
+    //     	printf("mxArray not found: %s\n", arr);
+   	// 	}   
+		   
+	// 	if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+    //     	if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+    //         	printf("Field not found: %s\n", field);
+    //     	}
+    //     	else 
+	// 		{
+	// 			nElements = (mwSize)mxGetNumberOfElements(aPtr);
+   	// 			 for (eIdx = 0; eIdx < nElements; eIdx++) {
+	// 				fPtrx = mxGetField(aPtr, eIdx, field.c_str());
+    //    		 		if ((fPtrx != NULL) && (mxGetClassID(fPtrx) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrx))) 
+    //    		 		{
+    //       				realPtrLoadedX = mxGetPr(fPtrx);
+    //    		 		}
+	// 			}
+	// 		}
+    // 	}
+		
+	// 	arr = grid_y.name;
+    // 	aPtr = matGetVariable(mfPtr, arr.c_str());
+    // 	if (aPtr == NULL) {
+    //     	printf("mxArray not found: %s\n", arr);
+   	// 	}   
+		   
+	// 	if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+    //     	if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+    //         	printf("Field not found: %s\n", field);
+    //     	}
+    //     	else 
+	// 		{
+	// 			nElements = (mwSize)mxGetNumberOfElements(aPtr);
+   	// 		 	for (eIdx = 0; eIdx < nElements; eIdx++) {
+	// 				fPtry = mxGetField(aPtr, eIdx, field.c_str());
+    //    		 		if ((fPtry != NULL) && (mxGetClassID(fPtry) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtry))) 
+    //    		 		{
+    //       				realPtrLoadedY = mxGetPr(fPtry);
+    //    		 		}
+	// 			}
+	// 		}
+    // 	}
+		
+	// 	arr = grid_z.name;
+    // 	aPtr = matGetVariable(mfPtr, arr.c_str());
+    // 	if (aPtr == NULL) {
+    //     	printf("mxArray not found: %s\n", arr);
+   	// 	}   
+		   
+	// 	if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+    //     	if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+    //         	printf("Field not found: %s\n", field);
+    //     	}
+    //     	else 
+	// 		{
+	// 			nElements = (mwSize)mxGetNumberOfElements(aPtr);
+   	// 		 	for (eIdx = 0; eIdx < nElements; eIdx++) {
+	// 				fPtrz = mxGetField(aPtr, eIdx, field.c_str());
+    //    		 		if ((fPtrz != NULL) && (mxGetClassID(fPtrz) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrz))) 
+    //    		 		{
+    //       				realPtrLoadedZ = mxGetPr(fPtrz);
+    //    		 		}
+	// 			}
+	// 		}
+    // 	}
+		
+		
+	
+printf("w: %d x: %d y: %d z: %d \n", size_w, size_x, size_y, size_z);
+
+	// sets the matrix array to be equal to an array of doubles
+	for (w = 0; w < size_w; w++) {
+		for (x = 0; x < size_x; x++) {
+			for (y = 0; y < size_y; y++) {
+				for (z = 0; z < size_z; z++) {
+					
+					
+					// if (fabs(log10(realPtrLoadedW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_w[w][x][y][z])) > err || fabs(log10(realPtrLoadedX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_x[w][x][y][z])) > err || fabs(log10(realPtrLoadedY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_y[w][x][y][z])) > err || fabs(log10(realPtrLoadedZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_z[w][x][y][z])) > err) {
+	// 				// 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d, %d, %d, %d].\nLoaded: %e\nGrid: %e, %e, %e, %e\n", file.c_str(), w, x, y, z, realPtr[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
+					matrix_array[w][x][y][z] = realPtr[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w];
+					// }
+				}
+			}
+		}
+	}
+	
+    mxDestroyArray(aPtr1);
+	mxDestroyArray(aPtr2);
+	mxDestroyArray(aPtr3);	
+	mxDestroyArray(aPtr4);
+	mxDestroyArray(aPtr5);
+	mxDestroyArray(aPtrfinished);
+
+    
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file);
+    }
+}
+
+
+
+
+
+
+
 
 
 /**
@@ -2867,3 +3258,4 @@ template class Matrix3D<double>;
 template class Matrix4D<double>;
 
 #endif
+
