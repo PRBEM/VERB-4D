@@ -111,8 +111,8 @@ public:
 	virtual void readFromFile(string filename, const Matrix1D<T> grid_q1);
 	
 	//ADDED
-	//virtual void readFromMatlabFile(string filename);
-	//virtual void readFromMatlabFile(string filename, const Matrix1D<T> grid_q1);
+	virtual void readFromMatlabFile(string filename, int columnNumber = 1);
+	virtual void readFromMatlabFile(string filename, const Matrix1D<T> grid_q1);
 
 	T min();
 	T max();
@@ -207,8 +207,8 @@ public:
 	virtual void readFromFile(string filename, const Matrix2D<T> grid_q1, const Matrix2D<T> grid_q2);
 
 	//ADDED
-	//virtual void readFromMatlabFile(string filename, int column = 1);
-	//virtual void readFromMatlabFile(string filename, const Matrix1D<T> grid_q1, const Matrix2D<T> grid_q2);
+	virtual void readFromMatlabFile(string filename, int column = 1);
+	virtual void readFromMatlabFile(string filename, const Matrix2D<T> grid_q1, const Matrix2D<T> grid_q2);
 
 	// slices - get 1D slice from 2D array
 	Matrix1D<T> xSlice(int p_q1) const;
@@ -295,8 +295,8 @@ public:
 	virtual void readFromFile(string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3); ///< Load matrix to a file
 	
 	// ADDED
-	//virtual void readFromMatlabFile(string filename, int column = 1);  									
-	//virtual void readFromMatlabFile(string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3);
+	virtual void readFromMatlabFile(string filename, int column = 1);  									
+	virtual void readFromMatlabFile(string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3);
 
 	// Some other stuff
 	string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
@@ -399,6 +399,8 @@ public:
 	virtual void readFromFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z); ///< Load matrix to a file
 
 	// ADDED
+	virtual void writeToMatlabFile(string filename, string info = ""); 										///< Save matrix to a file
+	virtual void writeToMatlabFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z); 
 	virtual void readFromMatlabFile(string file, int column = 1);  									
 	virtual void readFromMatlabFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z); 
 

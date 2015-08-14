@@ -13,6 +13,7 @@
 #define matrix_array_MATRIX_CPP
 	
 #include "Matrix.h"
+#include "Logger.h"
 
 using namespace std;
 
@@ -559,22 +560,300 @@ void Matrix1D<T>::readFromFile(string filename) {
 
 
 
-
-
-// /**
-// * Read matrix data from MATLAB file.
-// */
-// template<class T>
-// void Matrix1D<T>::readFromMatlabFile(string filename) {
+// Function for reading from matlab file in 1-dimension
+// Will always be stored in PRVK format so 1 = P, 2 = R ... 
+template<class T>
+void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
+{
+	Logger::message << "Reading " << file << ": " << endl;	
 	
-// 	MATfile *pmat;
-// 	MxArray *pa;
-// 	pmat = matOpen(filename.c_str(), "r");
-// 	const char* name;
-// 	pa = matGetNextVariable(pmat, &name);
-// 	matrix_array = mxGetData(pa);
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrReturn; /* pointer to data */
+	double *PtrL; /* pointer to data */		
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;		/* for getting variable names */
+	bool wReached = false;			
+	bool xReached = false;			
+	bool yReached = false;	
+	bool zReached = false;									
+	bool defaultReached = false;													
+			
+	mfPtr = matOpen(file.c_str(), "r");
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file);
+	}
 	
-// }
+	for (int i= 0; i < 3; i++)
+	{
+		
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		if (temp.length() == 1)
+		    {
+		        nameTemp = (temp.substr(0,1)).c_str();
+		    }
+		    else
+		    {
+		        if (temp.substr(1,1) == "_")
+				{
+					nameTemp = (temp.substr(0,1)).c_str();
+				}
+				else
+				{
+					nameTemp = "!";	
+				}
+		    }
+		switch (*nameTemp)
+		{
+			case 'P':
+				wReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								PtrW = mxGetPr(fPtrW);
+								//printf("%e \n", PtrW[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								PtrL = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				yReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+								//printf("%e \n", PtrY[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				zReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+								//printf("%e \n", PtrZ[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+								//printf("%e \n", PtrFinal[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+		
+	
+	// To get the column number of the return
+	if (wReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrW;
+		}	
+	}
+	if (xReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrX;
+		}	
+	}
+	if (yReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrY;
+		}	
+	}
+	if (zReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrZ;
+		}	
+	}
+	if (defaultReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrFinal;
+		}	
+	}
+	if (columnNumber > 0)
+	{
+		printf("column number too high \n");
+		EXIT_FAILURE;
+	}
+	
+	
+	//sets the matrix array to be equal to an array of doubles
+	for (x = 0; x < size_q1; x++) {
+		matrix_array[x] = PtrReturn[x];
+	}
+	
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file);
+    }
+	
+	mxDestroyArray(aPtr);
+}
 
 
 
@@ -626,6 +905,280 @@ void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
 		}
 		input.close();
 	}
+}
+
+
+
+
+
+
+
+
+// Function for reading from matlab file in 1-dimension
+// Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard 
+template<class T>
+void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
+{
+	Logger::message << "Reading " << file << ": " << endl;	
+	
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrL; /* pointer to data */		
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;		/* for getting variable names */
+	bool wReached = false;			
+	bool xReached = false;			
+	bool yReached = false;	
+	bool zReached = false;									
+	bool defaultReached = false;													
+			
+	mfPtr = matOpen(file.c_str(), "r");
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file);
+	}
+	
+	for (int i= 0; i < 3; i++)
+	{
+		
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		if (temp.length() == 1)
+		    {
+		        nameTemp = (temp.substr(0,1)).c_str();
+		    }
+		    else
+		    {
+		        if (temp.substr(1,1) == "_")
+				{
+					nameTemp = (temp.substr(0,1)).c_str();
+				}
+				else
+				{
+					nameTemp = "!";	
+				}
+		    }
+		switch (*nameTemp)
+		{
+			case 'P':
+				wReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								PtrW = mxGetPr(fPtrW);
+								//printf("%e \n", PtrW[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								PtrL = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				yReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+								//printf("%e \n", PtrY[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				zReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+								//printf("%e \n", PtrZ[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+								//printf("%e \n", PtrFinal[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+	
+	if (wReached)
+	{
+		PtrX = PtrW;
+	}
+	if (yReached)
+	{
+		PtrX = PtrY;
+	}
+	if (zReached)
+	{
+		PtrX = PtrZ;
+	}
+	
+	
+	
+	
+	
+	//sets the matrix array to be equal to an array of doubles
+	for (x = 0; x < size_q1; x++) {
+		if (fabs(log10(PtrX[x]) - log10(grid_x[x])) > err ) {
+		 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d].\nLoaded: %e\nGrid: %e\n", file.c_str(), x, PtrX[x], grid_x[x]);
+					//printf("grid error \n");
+					exit(EXIT_FAILURE);
+		}
+		matrix_array[x] = PtrFinal[x];
+	}
+	
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file);
+    }
+	
+	mxDestroyArray(aPtr);
 }
 
 
@@ -1135,6 +1688,309 @@ void Matrix2D<T>::readFromFile(string filename, int read_column) {
 	}
 }
 
+
+
+// Function for reading from matlab file in 1-dimension
+// Will always be stored in PRVK format so 1 = P, 2 = R ... 
+template<class T>
+void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
+{
+	Logger::message << "Reading " << file << ": " << endl;	
+	
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrReturn; /* pointer to data */
+	double *PtrL; /* pointer to data */		
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;		/* for getting variable names */
+	bool wReached = false;			
+	bool xReached = false;			
+	bool yReached = false;	
+	bool zReached = false;									
+	bool defaultReached = false;													
+			
+	mfPtr = matOpen(file.c_str(), "r");
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file);
+	}
+	
+	for (int i= 0; i < 3; i++)
+	{
+		
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		if (temp.length() == 1)
+		    {
+		        nameTemp = (temp.substr(0,1)).c_str();
+		    }
+		    else
+		    {
+		        if (temp.substr(1,1) == "_")
+				{
+					nameTemp = (temp.substr(0,1)).c_str();
+				}
+				else
+				{
+					nameTemp = "!";	
+				}
+		    }
+		switch (*nameTemp)
+		{
+			case 'P':
+				wReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								PtrW = mxGetPr(fPtrW);
+								//printf("%e \n", PtrW[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								PtrL = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				yReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+								//printf("%e \n", PtrY[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				zReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+								//printf("%e \n", PtrZ[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+								//printf("%e \n", PtrFinal[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+	
+	// To get the column number of the return
+	if (wReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrW;
+		}	
+	}
+	if (xReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrX;
+		}	
+	}
+	if (yReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrY;
+		}	
+	}
+	if (zReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrZ;
+		}	
+	}
+	if (defaultReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrFinal;
+		}	
+	}
+	if (columnNumber > 0)
+	{
+		printf("column number too high \n");
+		EXIT_FAILURE;
+	}
+	
+	//sets the matrix array to be equal to an array of doubles
+	for (x = 0; x < size_q1; x++) {
+		for (y = 0; y < size_q2; y++) {
+			matrix_array[x][y] = PtrReturn[ y*(size_q1) +  x];
+		}
+	}
+	
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file);
+    }
+	
+	mxDestroyArray(aPtr);
+}
+
+
+
+
+
+
+
 /**
 * Read matrix data from file with grid, 
 * Checks if the matrix data in the file is the same as the grids that were sent in with error < 1e-8,
@@ -1186,6 +2042,298 @@ void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const 
 		input.close();
 	}
 }
+
+
+
+
+
+// Function for reading from matlab file in 1-dimension
+// Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard 
+template<class T>
+void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, const Matrix2D<T> grid_y)
+{
+	Logger::message << "Reading " << file << ": " << endl;	
+	
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrL; /* pointer to data */		
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;		/* for getting variable names */
+	bool wReached = false;			
+	bool xReached = false;			
+	bool yReached = false;	
+	bool zReached = false;									
+	bool defaultReached = false;													
+			
+	mfPtr = matOpen(file.c_str(), "r");
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file);
+	}
+	
+	for (int i= 0; i < 3; i++)
+	{
+		
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		if (temp.length() == 1)
+		    {
+		        nameTemp = (temp.substr(0,1)).c_str();
+		    }
+		    else
+		    {
+		        if (temp.substr(1,1) == "_")
+				{
+					nameTemp = (temp.substr(0,1)).c_str();
+				}
+				else
+				{
+					nameTemp = "!";	
+				}
+		    }
+		switch (*nameTemp)
+		{
+			case 'P':
+				wReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								PtrW = mxGetPr(fPtrW);
+								//printf("%e \n", PtrW[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								PtrL = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				yReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+								//printf("%e \n", PtrY[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				zReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+								//printf("%e \n", PtrZ[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+								//printf("%e \n", PtrFinal[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+	
+	if (!wReached)
+	{
+		if (!xReached)
+		{
+			PtrX = PtrY;
+			PtrY = PtrZ;
+		}	
+		if (!yReached)
+		{
+			PtrY = PtrZ;
+		}
+	}
+	else if (!xReached)
+	{
+		if (!yReached)
+		{
+			PtrX = PtrW;
+			PtrY = PtrZ;
+		}	
+		if (!zReached)
+		{
+			PtrX = PtrW;
+		}
+	}
+	else
+	{
+		PtrY = PtrX;
+		PtrX = PtrW;
+	}
+	
+	
+	
+	
+	//sets the matrix array to be equal to an array of doubles
+	for (x = 0; x < size_q1; x++) {
+		for (y = 0; y < size_q2; y++) {
+			if (fabs(log10(PtrX[y*(size_q1) +  x]) - log10(grid_x[x][y])) > err || fabs(log10(PtrY[ y*(size_q1) +  x]) - log10(grid_y[x][y])) > err) {
+			 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d, %d].\nLoaded: %e, %e\nGrid: %e, %e\n", file.c_str(), x, y, PtrX[y*(size_q1) +  x],PtrY[ y*(size_q1) +  x], grid_x[x][y], grid_y[x][y]);
+						//printf("grid error \n");
+						exit(EXIT_FAILURE);
+			}
+			matrix_array[x][y] = PtrFinal[ y*(size_q1) +  x];
+		}
+	}
+	
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file);
+    }
+	
+	mxDestroyArray(aPtr);
+}
+
+
+
 
 
 /**
@@ -1688,6 +2836,311 @@ void Matrix3D<T>::readFromFile(string filename, int read_column) {
 	}
 }
 
+
+
+
+template<class T>
+void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
+{
+	Logger::message << "Reading " << file << ": " << endl;	
+	
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrReturn; /* pointer to data */
+	double *PtrL; /* pointer to data */		
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;		/* for getting variable names */
+	bool wReached = false;			
+	bool xReached = false;			
+	bool yReached = false;	
+	bool zReached = false;									
+	bool defaultReached = false;													
+			
+	mfPtr = matOpen(file.c_str(), "r");
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file);
+	}
+	
+	for (int i= 0; i < 4; i++)
+	{
+		
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		if (temp.length() == 1)
+		    {
+		        nameTemp = (temp.substr(0,1)).c_str();
+		    }
+		    else
+		    {
+		        if (temp.substr(1,1) == "_")
+				{
+					nameTemp = (temp.substr(0,1)).c_str();
+				}
+				else
+				{
+					nameTemp = "!";	
+				}
+		    }
+		switch (*nameTemp)
+		{
+			case 'P':
+				wReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								PtrW = mxGetPr(fPtrW);
+								//printf("%e \n", PtrW[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								PtrL = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				yReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+								//printf("%e \n", PtrY[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				zReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+								//printf("%e \n", PtrZ[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+								//printf("%e \n", PtrFinal[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+	
+	
+	// To get the column number of the return
+	if (wReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrW;
+		}	
+	}
+	if (xReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrX;
+		}	
+	}
+	if (yReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrY;
+		}	
+	}
+	if (zReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrZ;
+		}	
+	}
+	if (defaultReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrFinal;
+		}	
+	}
+	if (columnNumber > 0)
+	{
+		printf("column number too high \n");
+		EXIT_FAILURE;
+	}
+	
+	
+	
+	
+	//sets the matrix array to be equal to an array of doubles
+	for (x = 0; x < size_q1; x++) {
+		for (y = 0; y < size_q2; y++) {
+			for (z = 0; z < size_q3; z++) {
+				matrix_array[x][y][z] = PtrReturn[z*(size_q1 * size_q2) + y*(size_q1) +  x];
+			}
+		}
+	}
+	
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file);
+    }
+	
+	mxDestroyArray(aPtr);
+}
+
+
+
+
 /**
 * Read matrix data from file with grid, 
 * Checks if the matrix data in the file is the same as the grids that were sent in with error < 1e-8,
@@ -1747,6 +3200,286 @@ void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const 
 		input.close();
 	}
 }
+
+
+
+
+
+
+
+// Function for reading from matlab file in 1-dimension
+// Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard 
+template<class T>
+void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, const Matrix3D<T> grid_y, const Matrix3D<T> grid_z)
+{
+	Logger::message << "Reading " << file << ": " << endl;	
+	
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrL; /* pointer to data */		
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;		/* for getting variable names */
+	bool wReached = false;			
+	bool xReached = false;			
+	bool yReached = false;	
+	bool zReached = false;									
+	bool defaultReached = false;													
+			
+	mfPtr = matOpen(file.c_str(), "r");
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file);
+	}
+	
+	for (int i= 0; i < 4; i++)
+	{
+		
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		if (temp.length() == 1)
+		    {
+		        nameTemp = (temp.substr(0,1)).c_str();
+		    }
+		    else
+		    {
+		        if (temp.substr(1,1) == "_")
+				{
+					nameTemp = (temp.substr(0,1)).c_str();
+				}
+				else
+				{
+					nameTemp = "!";	
+				}
+		    }
+		switch (*nameTemp)
+		{
+			case 'P':
+				wReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								PtrW = mxGetPr(fPtrW);
+								//printf("%e \n", PtrW[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								PtrL = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				yReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+								//printf("%e \n", PtrY[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				zReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+								//printf("%e \n", PtrZ[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+								//printf("%e \n", PtrFinal[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+	
+	if (!xReached)
+	{
+		PtrX = PtrW;
+	}
+	if (!yReached)
+	{
+		PtrY = PtrX;
+		PtrX = PtrW;
+	}
+	if (!zReached)
+	{
+		PtrZ = PtrY;
+		PtrY = PtrX;
+		PtrX = PtrW;
+	}
+	
+	
+	//sets the matrix array to be equal to an array of doubles
+	for (x = 0; x < size_q1; x++) {
+		for (y = 0; y < size_q2; y++) {
+			for (z = 0; z < size_q3; z++) {
+				if (fabs(log10(PtrX[z*(size_q1 * size_q2) + y*(size_q1) +  x]) - log10(grid_x[x][y][z])) > err || fabs(log10(PtrY[z*(size_q1 * size_q2) + y*(size_q1) +  x]) - log10(grid_y[x][y][z])) > err || fabs(log10(PtrZ[z*(size_q1 * size_q2) + y*(size_q1) +  x]) - log10(grid_z[x][y][z])) > err) {
+				 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d, %d, %d].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", file.c_str(), x, y, z, PtrX[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrY[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrZ[z*(size_q1 * size_q2) + y*(size_q1) +  x], grid_x[x][y][z], grid_y[x][y][z], grid_z[x][y][z]);
+							//printf("grid error \n");
+							exit(EXIT_FAILURE);
+				}
+				matrix_array[x][y][z] = PtrFinal[z*(size_q1 * size_q2) + y*(size_q1) +  x];
+			}
+		}
+	}
+	
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file);
+    }
+	
+	mxDestroyArray(aPtr);
+}
+
+
+
 
 
 /**
@@ -2307,8 +4040,82 @@ void Matrix4D<T>::writeToFile(string filename, string info) {
 }
 
 
+
+
+
 /**
-* Write matrix to file, using 3 other matrixes as a grid (simply - write all 4 matrixes to the file).
+* Write matrix to file, using 4 other matrixes as a grid (simply - write all 5 matrixes to the file).
+* Function for matlab files
+*/ 
+template<class T>
+void Matrix4D<T>::writeToMatlabFile(string file, string info) {
+	Logger::message << "writing " << file << ": " << endl;	
+	
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+	mxArray *infoPtr;  /* mxArray pointer */
+	double *data;
+	int status;
+	int w,x,y,z;
+	size_t bytes_to_copy = this->size_w * this->size_x * this->size_y * this->size_z * sizeof(data);
+	
+	mfPtr = matOpen(file.c_str(), "w");
+	if (mfPtr == NULL) {
+   		printf("Error creating file %s\n", file);
+    	exit(EXIT_FAILURE);
+  	}
+
+	aPtr = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);
+	if (aPtr == NULL) 
+	{
+      printf("Unable to create mxArray.\n");
+      exit(EXIT_FAILURE);
+ 	}
+	 
+	data = mxGetPr(aPtr);
+	for (w = 0; w < size_w; w++) {
+		for (x = 0; x < size_x; x++) {
+			for (y = 0; y < size_y; y++) {
+				for (z = 0; z < size_z; z++) {
+					data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = matrix_array[w][x][y][z];
+				}
+			}
+		}
+	} 
+
+	infoPtr = mxCreateString(info.c_str());
+  	if (infoPtr == NULL) {
+    printf("Unable to create string mxArray.\n");
+    exit(EXIT_FAILURE);
+  	}
+	
+	status = matPutVariable(mfPtr, (this->name).c_str() , aPtr);
+  	if (status != 0) {
+    	printf("error matputvariabial");
+      	exit(EXIT_FAILURE);
+ 	}
+	 
+	status = matPutVariable(mfPtr, "info" , infoPtr);
+  	if (status != 0) {
+    	printf("error matputvariabial");
+      	exit(EXIT_FAILURE);
+ 	}
+	
+	mxDestroyArray(aPtr);
+	mxDestroyArray(infoPtr);
+  	
+  	if (matClose(mfPtr) != 0) {
+    printf("Error closing file %s\n",file);
+    exit(EXIT_FAILURE);
+  	}
+
+}
+
+
+
+
+/**
+* Write matrix to file, using 4 other matrixes as a grid (simply - write all 5 matrixes to the file).
 * File has two header lines.
 */
 template<class T>
@@ -2327,13 +4134,120 @@ void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> 
 		for (x = 0; x < size_x; x++) {
 			for (y = 0; y < size_y; y++) {
 				for (z = 0; z < size_z; z++) {
-					output << "\t" << grid_x[w][x][y][z] << "\t" << grid_y[w][x][y][z] << "\t" << grid_z[w][x][y][z] << "\t" << matrix_array[w][x][y][z] << endl;
+					output << "\t" << grid_w[w][x][y][z] << "\t" << grid_x[w][x][y][z] << "\t" << grid_y[w][x][y][z] << "\t" << grid_z[w][x][y][z] << "\t" << matrix_array[w][x][y][z] << endl;
 				}
 			}
 		}
 	}
 	output.close();
 }
+
+
+// ADDED
+/**
+* Write matrix to file, using 4 other matrixes as a grid (simply - write all 5 matrixes to the file).
+* Function for matlab files
+*/ 
+template<class T>
+void Matrix4D<T>::writeToMatlabFile(string file, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) {
+	Logger::message << "writing " << file << ": " << endl;	
+	
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+	mxArray *aPtrW;  /* mxArray pointer */
+	mxArray *aPtrX;  /* mxArray pointer */
+	mxArray *aPtrY;  /* mxArray pointer */
+	mxArray *aPtrZ;  /* mxArray pointer */
+	double *data;
+	double *dataW;
+	double *dataX;
+	double *dataY;
+	double *dataZ;
+	
+	int status;
+	int w,x,y,z;
+	
+	mfPtr = matOpen(file.c_str(), "w");
+	if (mfPtr == NULL) {
+   		printf("Error creating file %s\n", file);
+    	exit(EXIT_FAILURE);
+  	}
+
+	aPtr = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);	 
+	aPtrW = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);	 
+	aPtrX = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);
+	aPtrY = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL); 
+	aPtrZ = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);
+	if (aPtr == NULL || aPtrW == NULL || aPtrX == NULL || aPtrY == NULL || aPtrZ == NULL ) 
+	{
+      printf("Unable to create mxArray.\n");
+      exit(EXIT_FAILURE);
+ 	}
+
+	 
+	data = mxGetPr(aPtr);
+	dataW = mxGetPr(aPtrW);
+	dataX = mxGetPr(aPtrX);
+	dataY = mxGetPr(aPtrY);
+	dataZ = mxGetPr(aPtrZ);
+	for (w = 0; w < size_w; w++) {
+		for (x = 0; x < size_x; x++) {
+			for (y = 0; y < size_y; y++) {
+				for (z = 0; z < size_z; z++) {
+					data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = matrix_array[w][x][y][z];
+					dataW[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_w[w][x][y][z];
+					dataX[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_x[w][x][y][z];
+					dataY[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_y[w][x][y][z];
+					dataZ[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_z[w][x][y][z];
+				}
+			}
+		}
+	} 
+
+	
+	status = matPutVariable(mfPtr, (this->name).c_str() , aPtr);
+  	if (status != 0) {
+    	printf("error matputvariabial");
+      	exit(EXIT_FAILURE);
+ 	}
+	 
+	status = matPutVariable(mfPtr, (grid_w.name).c_str() , aPtrW);
+  	if (status != 0) {
+    	printf("error matputvariabial");
+      	exit(EXIT_FAILURE);
+ 	}
+	status = matPutVariable(mfPtr, (grid_x.name).c_str() , aPtrX);
+  	if (status != 0) {
+    	printf("error matputvariabial");
+      	exit(EXIT_FAILURE);
+ 	}
+	status = matPutVariable(mfPtr, (grid_y.name).c_str() , aPtrY);
+  	if (status != 0) {
+    	printf("error matputvariabial");
+      	exit(EXIT_FAILURE);
+ 	}
+	status = matPutVariable(mfPtr, (grid_z.name).c_str() , aPtrZ);
+  	if (status != 0) {
+    	printf("error matputvariabial");
+      	exit(EXIT_FAILURE);
+ 	}  
+	 
+	mxDestroyArray(aPtr);
+  	mxDestroyArray(aPtrW);
+  	mxDestroyArray(aPtrX);
+	mxDestroyArray(aPtrY);
+	mxDestroyArray(aPtrZ);
+
+  	if (matClose(mfPtr) != 0) {
+    printf("Error closing file %s\n",file);
+    exit(EXIT_FAILURE);
+  	}
+
+}
+
+
+
+
 
 /**
 * Read matrix data from file with grid, by column
@@ -2406,89 +4320,439 @@ void Matrix4D<T>::readFromFile(string filename, int read_column) {
 }
 
 
+// // Function for reading from matlab file in 1-dimension
+// // Will always be stored in PRVK format so 1 = P, 2 = R ... 
+// template<class T>
+// void Matrix4D<T>::readFromMatlabFile(string file ,int columnNumber)
+// {
+// 	Logger::message << "Reading " << file << ": " << endl;	
+	
+// 	MATFile *mfPtr; /* MAT-file pointer */
+//     mxArray *aPtr;  /* mxArray pointer */
+//     double *realPtr; /* pointer to data */
+// 	const char *arr; /*name of variable*/
+// 	string field = "arr"; // name of field
+// 	mwSize nElements;       /* number of elements in array */
+//     mwIndex eIdx;           /* element index */
+//     const mxArray *fPtr;    /* field pointer */
+//     int w,x,y,z; 			/* for index*/
+	
+	
+// 	mfPtr = matOpen(file.c_str(), "r");
+//     if (mfPtr == NULL) {
+//         printf("Error opening file %s\n", file);
+//     }
+	
+// 	if (columnNumber == 1)
+// 		arr =  "P";
+// 	if (columnNumber == 2)
+// 		arr =  "R";
+// 	if (columnNumber == 3)
+// 		arr =  "V";
+// 	if (columnNumber == 4)
+// 		arr =  "K";
+	
+// 	aPtr = matGetVariable(mfPtr, arr);
+//     if (aPtr == NULL) {
+// 		if ( columnNumber == 2)
+// 		{
+// 			arr = "L";
+// 			aPtr = matGetVariable(mfPtr, arr);
+// 			if (aPtr == NULL) {
+//        			printf("mxArray not found: %s\n", arr);
+// 			}
+// 		}
+// 		else
+// 		{
+// 			printf("mxArray not found: %s\n", arr);
+// 		}
+//     }
+	
+// 	this->name = arr;
+	
+//     if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+//         if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+//             printf("Field not found: %s\n", field);
+//         }
+//         else {
+//             // Goes through all of the structs
+// 			// I think all of them only have one struct consisting of a couple fields (one or more of which is the double array which we want)
+//     		nElements = (mwSize)mxGetNumberOfElements(aPtr);
+//    			 for (eIdx = 0; eIdx < nElements; eIdx++) {
+//        		 	fPtr = mxGetField(aPtr, eIdx, field.c_str()); // field was previously fname
+//        		 	if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+//        		 	{
+//           			realPtr = mxGetPr(fPtr);
+//        		 	}
+//    			 }
+//         }
+//     } 
+//    // ADDED
+//    // change to call function if it is just an array of doubles
+//    // realPtr should hold a pointer to the double array
+//     else if (mxGetClassID(aPtr) == mxDOUBLE_CLASS) 
+// 	{
+//         realPtr = mxGetPr(aPtr);
+// 	}
+// 	else 
+// 	{
+// 		printf("%s is of unknown type\n", arr);
+//     }
+
+// 	// sets the matrix array to be equal to an array of doubles
+// 	for (w = 0; w < size_w; w++) {
+// 		for (x = 0; x < size_x; x++) {
+// 			for (y = 0; y < size_y; y++) {
+// 				for (z = 0; z < size_z; z++) {
+// 					matrix_array[w][x][y][z] = realPtr[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w];
+// 				}
+// 			}
+// 		}
+// 	}
+	
+//     mxDestroyArray(aPtr);
+    
+//     if (matClose(mfPtr) != 0) {
+//         printf("Error closing file %s\n", file);
+//     }
+// }
+
+
+
+
+
 // Function for reading from matlab file in 1-dimension
-// Will always be stored in PRVK format so 1 = P, 2 = R ... 
+// Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard 
 template<class T>
-void Matrix4D<T>::readFromMatlabFile(string file ,int columnNumber)
+void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 {
+	Logger::message << "Reading " << file << ": " << endl;	
+	
 	MATFile *mfPtr; /* MAT-file pointer */
     mxArray *aPtr;  /* mxArray pointer */
     double *realPtr; /* pointer to data */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrReturn; /* pointer to data */
+	double *PtrL; /* pointer to data */		
 	string arr; /*name of variable*/
 	string field = "arr"; // name of field
 	mwSize nElements;       /* number of elements in array */
     mwIndex eIdx;           /* element index */
     const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrL;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
     int w,x,y,z; 			/* for index*/
-	
-	
-	if (columnNumber == 1)
-		arr =  "P";
-	if (columnNumber == 2)
-		arr =  "R";
-	if (columnNumber == 3)
-		arr =  "V";
-	if (columnNumber == 4)
-		arr =  "K";
-	
-	this->name = arr;
-		
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;	/* for getting variable names */
+	bool wReached = false;			
+	bool xReached = false;			
+	bool yReached = false;	
+	bool zReached = false;									
+	bool defaultReached = false;	
+	bool rReached = false;						
+						
+			
 	mfPtr = matOpen(file.c_str(), "r");
-    if (mfPtr == NULL) {
-        printf("Error opening file %s\n", file);
-    }
-    
-    aPtr = matGetVariable(mfPtr, arr.c_str());
-    if (aPtr == NULL) {
-        printf("mxArray not found: %s\n", arr);
-    }
-    
-    if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
-        if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-            printf("Field not found: %s\n", field);
-        }
-        else {
-            // Goes through all of the structs
-			// I think all of them only have one struct consisting of a couple fields (one or more of which is the double array which we want)
-    		nElements = (mwSize)mxGetNumberOfElements(aPtr);
-   			 for (eIdx = 0; eIdx < nElements; eIdx++) {
-       		 	fPtr = mxGetField(aPtr, eIdx, field.c_str()); // field was previously fname
-       		 	if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
-       		 	{
-          			realPtr = mxGetPr(fPtr);
-       		 	}
-   			 }
-        }
-    } 
-   // ADDED
-   // change to call function if it is just an array of doubles
-   // realPtr should hold a pointer to the double array
-    else if (mxGetClassID(aPtr) == mxDOUBLE_CLASS) 
-	{
-        realPtr = mxGetPr(aPtr);
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file);
 	}
-	else 
+	
+	for (int i= 0; i < 5; i++)
 	{
-		printf("%s is of unknown type\n", arr);
-    }
-
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		if (temp.length() == 1)
+	    {
+	        nameTemp = (temp.substr(0,1)).c_str();
+	    }
+	    else
+	    {
+	        if (temp.substr(1,1) == "_")
+			{
+				nameTemp = (temp.substr(0,1)).c_str();
+			}
+			else
+			{
+				nameTemp = "!";	
+			}
+	    }
+		switch (*nameTemp)
+		{
+			case 'P':
+				wReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								PtrW = mxGetPr(fPtrW);
+								//printf("%e \n", PtrW[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				rReached = true;
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrL = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrL != NULL) && (mxGetClassID(fPtrL) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrL))) 
+       		 				{
+								PtrL = mxGetPr(fPtrL);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				yReached = true;	
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+								//printf("%e \n", PtrY[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				zReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+								//printf("%e \n", PtrZ[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+								//printf("%e \n", PtrFinal[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+	
+	
+	
+	// if no R but there is L
+	if (!rReached)
+	{
+		PtrX = PtrL;
+	}
+	// if no default - must have been L star where 5th parameter = L
+	else if (!defaultReached)
+	{
+		PtrFinal = PtrL;
+	}
+	
+	
+	
+	// To get the column number of the return
+	if (wReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrW;
+		}	
+	}
+	if (rReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrX;
+		}	
+	}
+	if (yReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrY;
+		}	
+	}
+	if (zReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrZ;
+		}	
+	}
+	if (defaultReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrFinal;
+		}	
+	}
+	if (columnNumber > 0)
+	{
+		printf("column number too high \n");
+		EXIT_FAILURE;
+	}
+	
+		
 	// sets the matrix array to be equal to an array of doubles
 	for (w = 0; w < size_w; w++) {
 		for (x = 0; x < size_x; x++) {
 			for (y = 0; y < size_y; y++) {
 				for (z = 0; z < size_z; z++) {
-					matrix_array[w][x][y][z] = realPtr[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w];
+					matrix_array[w][x][y][z] = PtrReturn[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w];
 				}
 			}
 		}
 	}
 	
-    mxDestroyArray(aPtr);
-    
     if (matClose(mfPtr) != 0) {
         printf("Error closing file %s\n", file);
     }
+	
+	mxDestroyArray(aPtr);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2579,184 +4843,240 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 
 
 // Function for reading from matlab file in 1-dimension
-// Will always be stored in PRVK format so 1 = P, 2 = R ... 
+// Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard 
 template<class T>
 void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z)
 {
+	Logger::message << "Reading " << file << ": " << endl;	
+	
 	MATFile *mfPtr; /* MAT-file pointer */
-    mxArray *aPtr1;  /* mxArray pointer */
-	mxArray *aPtr2;  /* mxArray pointer */
-	mxArray *aPtr3;  /* mxArray pointer */
-	mxArray *aPtr4;  /* mxArray pointer */
-	mxArray *aPtr5;  /* mxArray pointer */
-	mxArray *aPtrfinished;  /* mxArray pointer */
+    mxArray *aPtr;  /* mxArray pointer */
     double *realPtr; /* pointer to data */
-	double *realPtrLoadedW; /* loaded W grid */
-	double *realPtrLoadedX; /* loaded X grid */
-	double *realPtrLoadedY; /* loaded Y grid */
-	double *realPtrLoadedZ; /* loaded Z grid */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrL; /* pointer to data */		
 	string arr; /*name of variable*/
 	string field = "arr"; // name of field
 	mwSize nElements;       /* number of elements in array */
     mwIndex eIdx;           /* element index */
     const mxArray *fPtr;    /* field pointer */
-	const mxArray *fPtrw;    /* field pointer */
-	const mxArray *fPtrx;    /* field pointer */
-	const mxArray *fPtry;    /* field pointer */
-	const mxArray *fPtrz;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrL;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
     int w,x,y,z; 			/* for index*/
-	const char* name;		/* for getting variable names */		
-	printf("reached here3");
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;	/* for getting variable names */
+	bool defaultReached = false;
+	bool rReached = false;						
+						
 			
 	mfPtr = matOpen(file.c_str(), "r");
-    if (mfPtr == NULL) {
-        printf("Error opening file %s\n", file);
-    }
-    
-	printf("reached here2");
-	aPtr1 = matGetNextVariableInfo(mfPtr, &name);
-	aPtr2 = matGetNextVariableInfo(mfPtr, &name);
-	aPtr3 = matGetNextVariableInfo(mfPtr, &name);
-	aPtr4 = matGetNextVariableInfo(mfPtr, &name);
-	aPtr5 = matGetNextVariableInfo(mfPtr, &name);
-	this->name = name;
-    
-	aPtrfinished = matGetVariable(mfPtr, name);
-    if (aPtrfinished == NULL) {
-        printf("mxArray not found: %s\n", arr);
-    }
-	
-	
-     printf("reached here1");	
-    if (mxGetClassID(aPtrfinished) == mxSTRUCT_CLASS) {
-        if (mxGetFieldNumber(aPtrfinished, field.c_str()) == -1) {
-            printf("Field not found: %s\n", field);
-        }
-        else {
-            // Goes through all of the structs
-			// I think all of them only have one struct consisting of a couple fields (one or more of which is the double array which we want)
-    		nElements = (mwSize)mxGetNumberOfElements(aPtrfinished);
-   			 for (eIdx = 0; eIdx < nElements; eIdx++) {
-       		 	fPtr = mxGetField(aPtrfinished, eIdx, field.c_str()); // field was previously fname
-       		 	if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
-       		 	{
-          			printf("size of realptr = %d \n" , (int)mxGetNumberOfElements(fPtr) );  
-					realPtr = mxGetPr(fPtr);  
-       		 	}
-   			 }
-        }
-    } 
-   // ADDED
-   // change to call function if it is just an array of doubles
-   // realPtr should hold a pointer to the double array
-    else if (mxGetClassID(aPtrfinished) == mxDOUBLE_CLASS) 
-	{
-        realPtr = mxGetPr(aPtrfinished);
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file);
 	}
-	else 
-	{
-		printf("%s is of unknown type\n", arr);
-    }
-
-
-	// // // NOW GET ALL THE LOADED GRIDS TO CHECK ERROR
-		
-	// 	arr = grid_w.name;
-    // 	aPtr = matGetVariable(mfPtr, arr.c_str());
-    // 	if (aPtr == NULL) {
-    //     	printf("mxArray not found: %s\n", arr);
-   	// 	}   
-		   
-	// 	if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
-    //     	if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-    //         	printf("Field not found: %s\n", field);
-    //     	}
-    //     	else 
-	// 		{
-	// 			nElements = (mwSize)mxGetNumberOfElements(aPtr);
-   	// 			for (eIdx = 0; eIdx < nElements; eIdx++) {
-	// 				fPtrw = mxGetField(aPtr, eIdx, field.c_str());
-	//        		 	if ((fPtrw != NULL) && (mxGetClassID(fPtrw) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrw))) 
-    //    		 		{
-    //       				realPtrLoadedW = mxGetPr(fPtrw);
-    //    		 		}
-	// 			   }
-	// 		}
-    // 	}
-		
-	// 	arr = grid_x.name;
-    // 	aPtr = matGetVariable(mfPtr, arr.c_str());
-    // 	if (aPtr == NULL) {
-    //     	printf("mxArray not found: %s\n", arr);
-   	// 	}   
-		   
-	// 	if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
-    //     	if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-    //         	printf("Field not found: %s\n", field);
-    //     	}
-    //     	else 
-	// 		{
-	// 			nElements = (mwSize)mxGetNumberOfElements(aPtr);
-   	// 			 for (eIdx = 0; eIdx < nElements; eIdx++) {
-	// 				fPtrx = mxGetField(aPtr, eIdx, field.c_str());
-    //    		 		if ((fPtrx != NULL) && (mxGetClassID(fPtrx) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrx))) 
-    //    		 		{
-    //       				realPtrLoadedX = mxGetPr(fPtrx);
-    //    		 		}
-	// 			}
-	// 		}
-    // 	}
-		
-	// 	arr = grid_y.name;
-    // 	aPtr = matGetVariable(mfPtr, arr.c_str());
-    // 	if (aPtr == NULL) {
-    //     	printf("mxArray not found: %s\n", arr);
-   	// 	}   
-		   
-	// 	if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
-    //     	if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-    //         	printf("Field not found: %s\n", field);
-    //     	}
-    //     	else 
-	// 		{
-	// 			nElements = (mwSize)mxGetNumberOfElements(aPtr);
-   	// 		 	for (eIdx = 0; eIdx < nElements; eIdx++) {
-	// 				fPtry = mxGetField(aPtr, eIdx, field.c_str());
-    //    		 		if ((fPtry != NULL) && (mxGetClassID(fPtry) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtry))) 
-    //    		 		{
-    //       				realPtrLoadedY = mxGetPr(fPtry);
-    //    		 		}
-	// 			}
-	// 		}
-    // 	}
-		
-	// 	arr = grid_z.name;
-    // 	aPtr = matGetVariable(mfPtr, arr.c_str());
-    // 	if (aPtr == NULL) {
-    //     	printf("mxArray not found: %s\n", arr);
-   	// 	}   
-		   
-	// 	if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
-    //     	if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-    //         	printf("Field not found: %s\n", field);
-    //     	}
-    //     	else 
-	// 		{
-	// 			nElements = (mwSize)mxGetNumberOfElements(aPtr);
-   	// 		 	for (eIdx = 0; eIdx < nElements; eIdx++) {
-	// 				fPtrz = mxGetField(aPtr, eIdx, field.c_str());
-    //    		 		if ((fPtrz != NULL) && (mxGetClassID(fPtrz) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrz))) 
-    //    		 		{
-    //       				realPtrLoadedZ = mxGetPr(fPtrz);
-    //    		 		}
-	// 			}
-	// 		}
-    // 	}
-		
-		
 	
-printf("w: %d x: %d y: %d z: %d \n", size_w, size_x, size_y, size_z);
-
+	for (int i= 0; i < 5; i++)
+	{
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		if (temp.length() == 1)
+	    {
+	        nameTemp = (temp.substr(0,1)).c_str();
+	    }
+	    else
+	    {
+	        if (temp.substr(1,1) == "_")
+			{
+				nameTemp = (temp.substr(0,1)).c_str();
+			}
+			else
+			{
+				nameTemp = "!";	
+			}
+	    }
+		switch (*nameTemp)
+		{
+			case 'P':
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								PtrW = mxGetPr(fPtrW);
+								//printf("%e \n", PtrW[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				rReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrL = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrL != NULL) && (mxGetClassID(fPtrL) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrL))) 
+       		 				{
+								PtrL = mxGetPr(fPtrL);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+								//printf("%e \n", PtrY[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+								//printf("%e \n", PtrZ[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				this->name = name;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field);
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+								//printf("%e \n", PtrFinal[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+	
+	if (!rReached)
+	{
+		PtrX = PtrL;
+	}
+	else if (!defaultReached)
+	{
+		PtrFinal = PtrL;
+	}
+	
 	// sets the matrix array to be equal to an array of doubles
 	for (w = 0; w < size_w; w++) {
 		for (x = 0; x < size_x; x++) {
@@ -2764,26 +5084,22 @@ printf("w: %d x: %d y: %d z: %d \n", size_w, size_x, size_y, size_z);
 				for (z = 0; z < size_z; z++) {
 					
 					
-					// if (fabs(log10(realPtrLoadedW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_w[w][x][y][z])) > err || fabs(log10(realPtrLoadedX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_x[w][x][y][z])) > err || fabs(log10(realPtrLoadedY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_y[w][x][y][z])) > err || fabs(log10(realPtrLoadedZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_z[w][x][y][z])) > err) {
-	// 				// 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d, %d, %d, %d].\nLoaded: %e\nGrid: %e, %e, %e, %e\n", file.c_str(), w, x, y, z, realPtr[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
-					matrix_array[w][x][y][z] = realPtr[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w];
-					// }
+					if (fabs(log10(PtrW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_w[w][x][y][z])) > err || fabs(log10(PtrX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_x[w][x][y][z])) > err || fabs(log10(PtrY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_y[w][x][y][z])) > err || fabs(log10(PtrZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_z[w][x][y][z])) > err) {
+					 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d, %d, %d, %d].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", file.c_str(), w, x, y, z, PtrW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], PtrX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
+								//printf("grid error \n");
+								exit(EXIT_FAILURE);
+					}
+					matrix_array[w][x][y][z] = PtrFinal[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w];
 				}
 			}
 		}
 	}
 	
-    mxDestroyArray(aPtr1);
-	mxDestroyArray(aPtr2);
-	mxDestroyArray(aPtr3);	
-	mxDestroyArray(aPtr4);
-	mxDestroyArray(aPtr5);
-	mxDestroyArray(aPtrfinished);
-
-    
     if (matClose(mfPtr) != 0) {
         printf("Error closing file %s\n", file);
     }
+	
+	mxDestroyArray(aPtr);
 }
 
 
@@ -3251,6 +5567,10 @@ void CalculationMatrix::writeToFile(string filename) {
 //////////////////////////////////////////
 // Implementations
 //////////////////////////////////////////
+
+
+
+
 
 template class Matrix1D<double>;
 template class Matrix2D<double>;

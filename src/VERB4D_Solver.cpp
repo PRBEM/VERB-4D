@@ -159,7 +159,8 @@ using namespace std;
 
 
 
-
+// ADDED 
+const bool matlab = false;
 
 
 //extern Logger logcout; // class that log messages into screen and into file
@@ -272,17 +273,38 @@ int main(int argc, char* argv[]) {
 
 	// Save initial conditions
 	PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
+	
+	// ADDED 
+	// PSD.writeToMatlabFile(outputFolder + "PSD0.mat", P, R, V, K);
 
 	// Output zero step - writing PSD_0 file
 	ostringstream PSD_filename, time_string;
 	time_string.precision(5);
 	time_string.setf(ios::fixed);
-	PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << ".plt";
-	Logger::message << "Writing results: " << PSD_filename.str() << endl;
-	Logger::message << "Writing results: " << PSD_filename.str() << endl;
-	time_string.str("");
-	time_string << time_first;
-	PSD.writeToFile(PSD_filename.str(), time_string.str());
+	
+	
+	
+	// ADDED
+	if (matlab)
+	{
+		PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << ".mat";
+		Logger::message << "Writing results: " << PSD_filename.str() << endl;
+		Logger::message << "Writing results: " << PSD_filename.str() << endl;
+		time_string.str("");
+		time_string << time_first;
+		PSD.writeToMatlabFile(PSD_filename.str(), time_string.str());
+	}
+	else
+	{
+		PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << ".plt";
+		Logger::message << "Writing results: " << PSD_filename.str() << endl;
+		Logger::message << "Writing results: " << PSD_filename.str() << endl;
+		time_string.str("");
+		time_string << time_first;
+		PSD.writeToFile(PSD_filename.str(), time_string.str());
+	}
+	
+	
 
 	int radial_losses, local_losses;
 
@@ -771,10 +793,22 @@ int main(int argc, char* argv[]) {
 			time_string.str("");
 			time_string << time;
 
-			PSD_filename.str("");
-			PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step) << ".plt";
-			Logger::message << endl << "Writing results: " << PSD_filename.str() << endl;
-			PSD.writeToFile(PSD_filename.str(), time_string.str());
+			// ADDED
+			if (matlab)
+			{
+				PSD_filename.str("");
+				PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step) << ".mat";
+				Logger::message << endl << "Writing results: " << PSD_filename.str() << endl;
+				PSD.writeToMatlabFile(PSD_filename.str(), time_string.str());
+			}
+			else
+			{
+				PSD_filename.str("");
+				PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step) << ".plt";
+				Logger::message << endl << "Writing results: " << PSD_filename.str() << endl;
+				PSD.writeToFile(PSD_filename.str(), time_string.str());
+			}
+			
 		}
 	}
 

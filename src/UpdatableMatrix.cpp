@@ -70,28 +70,40 @@ void MatrixAllocateMemory(Matrix4D<double> &M, int size_Q1, int size_Q2, int siz
 * Only using Q1
 */
 void MatrixReadFromFile(Matrix1D<double> &M, string data_filename, const Matrix1D<double> Q1, const Matrix1D<double> Q2, const Matrix1D<double> Q3, const Matrix1D<double> Q4) {
-	M.Matrix1D<double>::readFromFile(data_filename, Q1);
+	if (data_filename.substr(data_filename.length() - 4 ,4) == ".mat")
+		M.Matrix1D<double>::readFromMatlabFile(data_filename, Q1);
+	else
+		M.Matrix1D<double>::readFromFile(data_filename, Q1);
 }
 /**  Reading from a file using Matrix2D::readFromFile(string filename, const Matrix2D< T > grid_x,const Matrix2D< T > grid_y)
 *
 * Only using Q1, Q2
 */
 void MatrixReadFromFile(Matrix2D<double> &M, string data_filename, const Matrix2D<double> Q1, const Matrix2D<double> Q2, const Matrix2D<double> Q3, const Matrix2D<double> Q4) {
-	M.Matrix2D<double>::readFromFile(data_filename, Q1, Q2);
+	if (data_filename.substr(data_filename.length() - 4 ,4) == ".mat")
+		M.Matrix2D<double>::readFromMatlabFile(data_filename, Q1,Q2);
+	else
+		M.Matrix2D<double>::readFromFile(data_filename, Q1, Q2);
 }
 /**  Reading from a file using Matrix3D::readFromFile(string filename, const Matrix3D< T > grid_x,const Matrix3D< T > grid_y, const Matrix3D< T > grid_z)
 *
 * Only using Q1, Q2, Q3
 */
 void MatrixReadFromFile(Matrix3D<double> &M, string data_filename, const Matrix3D<double> Q1, const Matrix3D<double> Q2, const Matrix3D<double> Q3, const Matrix3D<double> Q4) {
-	M.Matrix3D<double>::readFromFile(data_filename, Q1, Q2, Q3);
+	if (data_filename.substr(data_filename.length() - 4 ,4) == ".mat")
+		M.Matrix3D<double>::readFromMatlabFile(data_filename, Q1,Q2,Q3);
+	else
+		M.Matrix3D<double>::readFromFile(data_filename, Q1, Q2, Q3);
 }
 /**  Reading from a file using Matrix4D::readFromFile(string filename, const Matrix4D< T > grid_w, const Matrix4D< T > grid_x,const Matrix4D< T > grid_y, const Matrix4D< T > grid_z) 
 *
 * Using Q1, Q2, Q3, Q4
 */
 void MatrixReadFromFile(Matrix4D<double> &M, string data_filename, const Matrix4D<double> Q1, const Matrix4D<double> Q2, const Matrix4D<double> Q3, const Matrix4D<double> Q4) {
-	M.Matrix4D<double>::readFromFile(data_filename, Q1, Q2, Q3, Q4);
+	if (data_filename.substr(data_filename.length() - 4 ,4) == ".mat")
+		M.Matrix4D<double>::readFromMatlabFile(data_filename, Q1, Q2, Q3, Q4);
+	else
+		M.Matrix4D<double>::readFromFile(data_filename, Q1, Q2, Q3, Q4);
 }
 
 /**
