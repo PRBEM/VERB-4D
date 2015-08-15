@@ -15,8 +15,6 @@ using namespace std;
 	#define strcasecmp _stricmp
 #endif
 
-const bool matlab = false;
-
 
 /** 
 * Allocates the memory for all the matrices using Matrix4D::AllocateMemory() for everything except boundary conditions which use Matrix3D::AllocateMemory()
@@ -141,7 +139,7 @@ void ReadBoundaryCondition(
 */
 bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* argv[],
 		double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
-		string &inversion_method,
+		string &inversion_method, string &use_matlab,
 		Matrix4D<double> &PSD,
 		Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V, Matrix4D<double> &K, UpdatableMatrix < Matrix4D<double> > &L,
 		int &P_size, int &R_size, int &V_size, int &K_size, int &L_size,
@@ -163,12 +161,16 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	parameters.getParameter("it_first", it_first);
 
 	parameters.getParameter("inversion_method", inversion_method);
+	
+	// ADDED	
+	parameters.getParameter("use_matlab", use_matlab);
+	// END ADDED
 
 	parameters.getParameter("input_folder", InputFolder);
 	parameters.getParameter("output_folder", OutputFolder);
 
 	fstream inputcheck;
-	if (!matlab)
+	if (use_matlab == "false")
 	{
 		// Opening up grid.plt in order to get P,R,V,K sizes which are stored in the header
 		ifstream input;
@@ -192,12 +194,6 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		input >> R_size;
 		while(inBuf.substr(inBuf.size() - 1).compare("L") && !input.eof()) getline(input, inBuf, '=');
 		input >> P_size;
-		
-		//ADDED
-		printf("size of K: %d", K_size);
-		printf("size of V: %d", V_size);
-		printf("size of R: %d", R_size);
-		printf("size of P: %d \n", P_size);
 		
 		
 		
@@ -324,7 +320,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			G_local, G_radial, Sources, Losses);
 
 	// ADDED
-	if (!matlab)
+	if (use_matlab == "false")
 	{
 	// Original Section	
 	// Read values from grid.plt - last argument is the column being read in
@@ -352,18 +348,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 	}
 	inputcheck.close();
-	// // ADDED
-	// P.writeToFile( "PTEST2.plt", "");
-	// R.writeToFile( "RTEST2.plt", "");
-	// V.writeToFile( "VTEST2.plt", "");
-	// K.writeToFile( "KTEST2.plt", "");
-
-
-
+	
 
 	// ADDED
 	// If matlab not selected
-	if (!matlab)
+	if (use_matlab == "false")
 	{
 		// Read in Lstar.plt if Lstar.tab is not present
 		if (!L.readFromIniFile(InputFolder + "Lstar.tab", P, R, V, K))
@@ -399,7 +388,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	
 	// ADDED
 	// If matlab not selected
-	if (!matlab)
+	if (use_matlab == "false")
 	{
 		if (!DLL.readFromIniFile(InputFolder + "DLL.tab", P, L, V, K))
 		DLL.readFromFile(InputFolder + "DLL.plt", P, L, V, K);
@@ -422,7 +411,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	// ADDED
 	// If matlab not selected
-	if (!matlab)
+	if (use_matlab == "false")
 	{
 		if (!DVV.readFromIniFile(InputFolder + "DVV.tab", P, R, V, K))
 		DVV.readFromFile(InputFolder + "DVV.plt", P, R, V, K);
@@ -445,7 +434,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	// ADDED
 	// If matlab not selected
-	if (!matlab)
+	if (use_matlab == "false")
 	{
 		if (!DKK.readFromIniFile(InputFolder + "DKK.tab", P, R, V, K))
 		DKK.readFromFile(InputFolder + "DKK.plt", P, R, V, K);
@@ -467,7 +456,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	// ADDED
 	// If matlab not selected
-	if (!matlab)
+	if (use_matlab == "false")
 	{
 		if (!DVK.readFromIniFile(InputFolder + "DVK.tab", P, R, V, K))
 		DVK.readFromFile(InputFolder + "DVK.plt", P, R, V, K);
@@ -489,7 +478,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	
 	// ADDED
 	// If matlab not selected
-	if (!matlab)
+	if (use_matlab == "false")
 	{
 		if (!VP.readFromIniFile(InputFolder + "VP.tab", P, R, V, K))
 		VP.readFromFile(InputFolder + "VP.plt", P, R, V, K);
@@ -511,7 +500,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		
 	// ADDED
 	// If matlab not selected
-	if (!matlab)
+	if (use_matlab == "false")
 	{
 		if (!VL.readFromIniFile(InputFolder + "VR.tab", P, R, V, K))
 		VL.readFromFile(InputFolder + "VR.plt", P, R, V, K);
@@ -533,7 +522,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	
 	// ADDED
 	// If matlab not selected
-	if (!matlab)
+	if (use_matlab == "false")
 	{
 		if (!G_local.readFromIniFile(InputFolder + "G_local.tab", P, R, V, K))
 		G_local.readFromFile(InputFolder + "G_local.plt", P, R, V, K);
@@ -555,7 +544,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	
 	// ADDED
 	// If matlab not selected
-	if (!matlab)
+	if (use_matlab == "false")
 	{
 		if (!G_radial.readFromIniFile(InputFolder + "G_radial.tab", P, R, V, K))
 		G_radial.readFromFile(InputFolder + "G_radial.plt", P, R, V, K);
@@ -591,7 +580,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	// ADDED
 	// If matlab not selected
-	if (!matlab)
+	if (use_matlab == "false")
 	{
 		if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K))
 		Sources.readFromFile(InputFolder + "Sources.plt", P, R, V, K);
@@ -613,7 +602,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	
 	// ADDED
 	// If matlab not selected
-	if (!matlab)
+	if (use_matlab == "false")
 	{
 		if (!Losses.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K))
 		Losses.readFromFile(InputFolder + "Losses.plt", P, R, V, K);
@@ -692,7 +681,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	
 	// ADDED	
 	// If matlab not selected
-	if (!matlab)
+	if (use_matlab == "false")
 	{
 		if (!PSD_l_R.readFromIniFile(InputFolder + "Rl_BC.tab",P.xSlice(0), V.xSlice(0), K.xSlice(0))) {
 		PSD_l_R.readFromFile(InputFolder + "Rl_BC.plt", P.xSlice(0), V.xSlice(0), K.xSlice(0));

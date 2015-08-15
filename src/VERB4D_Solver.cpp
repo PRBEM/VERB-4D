@@ -159,10 +159,6 @@ using namespace std;
 
 
 
-// ADDED 
-const bool matlab = false;
-
-
 //extern Logger logcout; // class that log messages into screen and into file
 
 int main(int argc, char* argv[]) {
@@ -236,6 +232,7 @@ int main(int argc, char* argv[]) {
 	string inputFolder = "./VERB4D_input/";
 	string outputFolder = "./VERB4D_output/";
 	string inversion_method = "Lapack";
+	string use_matlab = "false";
 
 	bool initialLoad = false; // Check the load of the initial files
 		 
@@ -243,16 +240,18 @@ int main(int argc, char* argv[]) {
 	// Read all the inputs - store them into variables
 	// These inputs come from the matlab files that are generated when running Conv_Dif.m examples
 	initialLoad = ReadInitialData(inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
-			inversion_method, PSD,
+			inversion_method, use_matlab,  PSD,
 			P, R, V, K, L,
 			P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
 			Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
 			Vu_BC_type, Kl_BC_type, Ku_BC_type, Ll_BC_type, Lu_BC_type, DLL, DVV, DKK, DVK, VP, VR, G_local, G_radial,
 			Sources, Losses);
 
+
+
 	// Check that all nesesarry files were loaded
 	if (!initialLoad){
-		Logger::error << "Error: ReadInitialData return false. Check the intial files." << endl;
+		Logger::error << "Error: ReadInitialData return false. Check the initial files." << endl;
 		exit(EXIT_FAILURE);		
 	}
 
@@ -272,10 +271,11 @@ int main(int argc, char* argv[]) {
 	Logger::message << "Output each " << output_step << " step. " << endl;
 
 	// Save initial conditions
-	PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
 	
-	// ADDED 
-	// PSD.writeToMatlabFile(outputFolder + "PSD0.mat", P, R, V, K);
+	if (use_matlab == "false")
+		PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
+	else
+		PSD.writeToMatlabFile(outputFolder + "PSD0.mat", P, R, V, K);
 
 	// Output zero step - writing PSD_0 file
 	ostringstream PSD_filename, time_string;
@@ -285,7 +285,7 @@ int main(int argc, char* argv[]) {
 	
 	
 	// ADDED
-	if (matlab)
+	if (use_matlab == "true")
 	{
 		PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << ".mat";
 		Logger::message << "Writing results: " << PSD_filename.str() << endl;
@@ -794,7 +794,7 @@ int main(int argc, char* argv[]) {
 			time_string << time;
 
 			// ADDED
-			if (matlab)
+			if (use_matlab == "true")
 			{
 				PSD_filename.str("");
 				PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step) << ".mat";

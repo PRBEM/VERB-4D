@@ -4048,66 +4048,131 @@ void Matrix4D<T>::writeToFile(string filename, string info) {
 * Function for matlab files
 */ 
 template<class T>
-void Matrix4D<T>::writeToMatlabFile(string file, string info) {
-	Logger::message << "writing " << file << ": " << endl;	
+void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
+	Logger::message << "writing " << filename << ": " << endl;	
 	
-	MATFile *mfPtr; /* MAT-file pointer */
-    mxArray *aPtr;  /* mxArray pointer */
-	mxArray *infoPtr;  /* mxArray pointer */
-	double *data;
-	int status;
-	int w,x,y,z;
-	size_t bytes_to_copy = this->size_w * this->size_x * this->size_y * this->size_z * sizeof(data);
 	
-	mfPtr = matOpen(file.c_str(), "w");
-	if (mfPtr == NULL) {
-   		printf("Error creating file %s\n", file);
-    	exit(EXIT_FAILURE);
-  	}
+	
+	
+	// MATFile *mfPtr; /* MAT-file pointer */
+    // mxArray *matStruct;
+	// mxArray *aPtr;  /* mxArray pointer */
+	// mxArray *infoPtr;  /* mxArray pointer */
+	// double *data;
+	// int status;
+	// int w,x,y,z;
+	// // mwSize dims[2] = {1,1};
+	// // const char* fields[] = {"arr"};
+	
+	// mfPtr = matOpen(file.c_str(), "w");
+	// if (mfPtr == NULL) {
+   	// 	printf("Error creating file %s\n", file);
+    // 	exit(EXIT_FAILURE);
+  	// }
 
-	aPtr = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);
-	if (aPtr == NULL) 
-	{
-      printf("Unable to create mxArray.\n");
-      exit(EXIT_FAILURE);
- 	}
+	// // matStruct = mxCreateStructMatrix(1,1,2,fields);
+	// // if (matStruct == NULL) 
+	// // {
+    // //   printf("Unable to create mxArray.\n");
+    // //   exit(EXIT_FAILURE);
+ 	// // }
+	
+
+	// aPtr = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);
+	// if (aPtr == NULL) 
+	// {
+    //   printf("Unable to create mxArray.\n");
+    //   exit(EXIT_FAILURE);
+ 	// }
 	 
-	data = mxGetPr(aPtr);
-	for (w = 0; w < size_w; w++) {
-		for (x = 0; x < size_x; x++) {
-			for (y = 0; y < size_y; y++) {
-				for (z = 0; z < size_z; z++) {
-					data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = matrix_array[w][x][y][z];
+	// data = mxGetPr(aPtr);
+	// for (w = 0; w < size_w; w++) {
+	// 	for (x = 0; x < size_x; x++) {
+	// 		for (y = 0; y < size_y; y++) {
+	// 			for (z = 0; z < size_z; z++) {
+	// 				data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = matrix_array[w][x][y][z];
+	// 			}
+	// 		}
+	// 	}
+	// } 
+
+	
+
+	// infoPtr = mxCreateString(info.c_str());
+  	// if (infoPtr == NULL) {
+    // printf("Unable to create string mxArray.\n");
+    // exit(EXIT_FAILURE);
+  	// }
+	
+	// // mxSetField(matStruct, 0 , "arr", aPtr);
+	
+	// // status = matPutVariable(mfPtr, file.c_str() , matStruct);
+  	// // if (status != 0) {
+    // // 	printf("error matputvariabial");
+    // //   	exit(EXIT_FAILURE);
+ 	// // }
+	
+	
+	
+	
+	// status = matPutVariable(mfPtr, (this->name).c_str() , aPtr);
+  	// if (status != 0) {
+    // 	printf("error matputvariabial");
+    //   	exit(EXIT_FAILURE);
+ 	// }
+	 
+	// status = matPutVariable(mfPtr, "info" , infoPtr);
+  	// if (status != 0) {
+    // 	printf("error matputvariabial");
+    //   	exit(EXIT_FAILURE);
+ 	// }
+	
+	
+	// mxDestroyArray(aPtr);
+	// mxDestroyArray(infoPtr);
+	// // mxDestroyArray(matStruct);
+  	
+  	// if (matClose(mfPtr) != 0) {
+    // printf("Error closing file %s\n",file);
+    // exit(EXIT_FAILURE);
+  	// }
+
+
+
+	MATFile *pmat = matOpen( filename.c_str(), "w");
+	int w,x,y,z;
+    // create a scalar struct array with two fields
+    const char *fieldnames[2] = {"arr", "info"};
+    mxArray *s = mxCreateStructMatrix(1, 1, 2, fieldnames);
+
+    // fill struct fields
+    for (mwIndex i=0; i<2; i++) {
+        if (i== 0)
+		{
+			mxArray *aPtr = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			for (w = 0; w < size_w; w++) {
+				for (x = 0; x < size_x; x++) {
+					for (y = 0; y < size_y; y++) {
+						for (z = 0; z < size_z; z++) {
+							data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = matrix_array[w][x][y][z];
+						}
+					}
 				}
 			}
+			mxSetField(s, 0, fieldnames[i], aPtr); 
 		}
-	} 
+		if ( i == 1 )
+		{
+			mxArray *aPtr = mxCreateString(info.c_str());
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}		
+    }
+    matPutVariable(pmat, "PSD", s);
 
-	infoPtr = mxCreateString(info.c_str());
-  	if (infoPtr == NULL) {
-    printf("Unable to create string mxArray.\n");
-    exit(EXIT_FAILURE);
-  	}
-	
-	status = matPutVariable(mfPtr, (this->name).c_str() , aPtr);
-  	if (status != 0) {
-    	printf("error matputvariabial");
-      	exit(EXIT_FAILURE);
- 	}
-	 
-	status = matPutVariable(mfPtr, "info" , infoPtr);
-  	if (status != 0) {
-    	printf("error matputvariabial");
-      	exit(EXIT_FAILURE);
- 	}
-	
-	mxDestroyArray(aPtr);
-	mxDestroyArray(infoPtr);
-  	
-  	if (matClose(mfPtr) != 0) {
-    printf("Error closing file %s\n",file);
-    exit(EXIT_FAILURE);
-  	}
+
+    mxDestroyArray(s);
+    matClose(pmat);
 
 }
 
@@ -4128,7 +4193,7 @@ void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> 
 		exit(EXIT_FAILURE);
 	}
 	output << "VARIABLES = \"" << ((grid_w.name!="")?grid_w.name:"w") << "\", \"" << ((grid_x.name!="")?grid_x.name:"x") << "\", \"" << ((grid_y.name!="")?grid_y.name:"y") << "\", \"" << ((grid_z.name!="")?grid_z.name:"z") << "\", \"" << ((this->name!="")?this->name:"f") << "\" "<< endl;
-	output << "ZONE T=\"" << filename << "\", W=" << size_w << ", I=" << size_z << ", J=" << size_y << ", K=" << size_x << endl;
+	output << "ZONE T=\"" << filename << "\", I=" << size_z << ", J=" << size_y << ", K=" << size_x << ", L=" << size_w << endl;
 	output.setf(ios_base::scientific, ios_base::floatfield);
 	for (w = 0; w < size_w; w++) {
 		for (x = 0; x < size_x; x++) {
@@ -4150,99 +4215,44 @@ void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> 
 */ 
 template<class T>
 void Matrix4D<T>::writeToMatlabFile(string file, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) {
+	
+	
 	Logger::message << "writing " << file << ": " << endl;	
-	
-	MATFile *mfPtr; /* MAT-file pointer */
-    mxArray *aPtr;  /* mxArray pointer */
-	mxArray *aPtrW;  /* mxArray pointer */
-	mxArray *aPtrX;  /* mxArray pointer */
-	mxArray *aPtrY;  /* mxArray pointer */
-	mxArray *aPtrZ;  /* mxArray pointer */
-	double *data;
-	double *dataW;
-	double *dataX;
-	double *dataY;
-	double *dataZ;
-	
-	int status;
+	MATFile *pmat = matOpen( file.c_str(), "w");
 	int w,x,y,z;
-	
-	mfPtr = matOpen(file.c_str(), "w");
-	if (mfPtr == NULL) {
-   		printf("Error creating file %s\n", file);
-    	exit(EXIT_FAILURE);
-  	}
+    // create a scalar struct array with two fields
+    const char *fieldnames[5] = {"arr", "arrW" , "arrX", "arrY", "arrZ"};
+    mxArray *s = mxCreateStructMatrix(1, 1, 5, fieldnames);
 
-	aPtr = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);	 
-	aPtrW = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);	 
-	aPtrX = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);
-	aPtrY = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL); 
-	aPtrZ = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);
-	if (aPtr == NULL || aPtrW == NULL || aPtrX == NULL || aPtrY == NULL || aPtrZ == NULL ) 
-	{
-      printf("Unable to create mxArray.\n");
-      exit(EXIT_FAILURE);
- 	}
-
-	 
-	data = mxGetPr(aPtr);
-	dataW = mxGetPr(aPtrW);
-	dataX = mxGetPr(aPtrX);
-	dataY = mxGetPr(aPtrY);
-	dataZ = mxGetPr(aPtrZ);
-	for (w = 0; w < size_w; w++) {
-		for (x = 0; x < size_x; x++) {
-			for (y = 0; y < size_y; y++) {
-				for (z = 0; z < size_z; z++) {
-					data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = matrix_array[w][x][y][z];
-					dataW[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_w[w][x][y][z];
-					dataX[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_x[w][x][y][z];
-					dataY[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_y[w][x][y][z];
-					dataZ[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_z[w][x][y][z];
+    // fill struct fields
+    for (mwIndex i=0; i<5; i++) {
+		mxArray *aPtr = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);
+		double *data = mxGetPr(aPtr);
+		for (w = 0; w < size_w; w++) {
+			for (x = 0; x < size_x; x++) {
+				for (y = 0; y < size_y; y++) {
+					for (z = 0; z < size_z; z++) {
+						if (i == 0)
+							data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = matrix_array[w][x][y][z];
+						else if (i == 1)
+							data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_w[w][x][y][z];
+						else if (i == 2)
+							data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_x[w][x][y][z];
+						else if (i == 3)
+							data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_y[w][x][y][z];
+						else
+							data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_z[w][x][y][z];
+					}
 				}
 			}
-		}
-	} 
-
+		} 		
+		mxSetField(s, 0, fieldnames[i], aPtr);	
+    }
 	
-	status = matPutVariable(mfPtr, (this->name).c_str() , aPtr);
-  	if (status != 0) {
-    	printf("error matputvariabial");
-      	exit(EXIT_FAILURE);
- 	}
-	 
-	status = matPutVariable(mfPtr, (grid_w.name).c_str() , aPtrW);
-  	if (status != 0) {
-    	printf("error matputvariabial");
-      	exit(EXIT_FAILURE);
- 	}
-	status = matPutVariable(mfPtr, (grid_x.name).c_str() , aPtrX);
-  	if (status != 0) {
-    	printf("error matputvariabial");
-      	exit(EXIT_FAILURE);
- 	}
-	status = matPutVariable(mfPtr, (grid_y.name).c_str() , aPtrY);
-  	if (status != 0) {
-    	printf("error matputvariabial");
-      	exit(EXIT_FAILURE);
- 	}
-	status = matPutVariable(mfPtr, (grid_z.name).c_str() , aPtrZ);
-  	if (status != 0) {
-    	printf("error matputvariabial");
-      	exit(EXIT_FAILURE);
- 	}  
-	 
-	mxDestroyArray(aPtr);
-  	mxDestroyArray(aPtrW);
-  	mxDestroyArray(aPtrX);
-	mxDestroyArray(aPtrY);
-	mxDestroyArray(aPtrZ);
-
-  	if (matClose(mfPtr) != 0) {
-    printf("Error closing file %s\n",file);
-    exit(EXIT_FAILURE);
-  	}
-
+	
+    matPutVariable(pmat, "PSD", s);
+    mxDestroyArray(s);
+    matClose(pmat);
 }
 
 
@@ -4320,109 +4330,8 @@ void Matrix4D<T>::readFromFile(string filename, int read_column) {
 }
 
 
-// // Function for reading from matlab file in 1-dimension
-// // Will always be stored in PRVK format so 1 = P, 2 = R ... 
-// template<class T>
-// void Matrix4D<T>::readFromMatlabFile(string file ,int columnNumber)
-// {
-// 	Logger::message << "Reading " << file << ": " << endl;	
-	
-// 	MATFile *mfPtr; /* MAT-file pointer */
-//     mxArray *aPtr;  /* mxArray pointer */
-//     double *realPtr; /* pointer to data */
-// 	const char *arr; /*name of variable*/
-// 	string field = "arr"; // name of field
-// 	mwSize nElements;       /* number of elements in array */
-//     mwIndex eIdx;           /* element index */
-//     const mxArray *fPtr;    /* field pointer */
-//     int w,x,y,z; 			/* for index*/
-	
-	
-// 	mfPtr = matOpen(file.c_str(), "r");
-//     if (mfPtr == NULL) {
-//         printf("Error opening file %s\n", file);
-//     }
-	
-// 	if (columnNumber == 1)
-// 		arr =  "P";
-// 	if (columnNumber == 2)
-// 		arr =  "R";
-// 	if (columnNumber == 3)
-// 		arr =  "V";
-// 	if (columnNumber == 4)
-// 		arr =  "K";
-	
-// 	aPtr = matGetVariable(mfPtr, arr);
-//     if (aPtr == NULL) {
-// 		if ( columnNumber == 2)
-// 		{
-// 			arr = "L";
-// 			aPtr = matGetVariable(mfPtr, arr);
-// 			if (aPtr == NULL) {
-//        			printf("mxArray not found: %s\n", arr);
-// 			}
-// 		}
-// 		else
-// 		{
-// 			printf("mxArray not found: %s\n", arr);
-// 		}
-//     }
-	
-// 	this->name = arr;
-	
-//     if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
-//         if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-//             printf("Field not found: %s\n", field);
-//         }
-//         else {
-//             // Goes through all of the structs
-// 			// I think all of them only have one struct consisting of a couple fields (one or more of which is the double array which we want)
-//     		nElements = (mwSize)mxGetNumberOfElements(aPtr);
-//    			 for (eIdx = 0; eIdx < nElements; eIdx++) {
-//        		 	fPtr = mxGetField(aPtr, eIdx, field.c_str()); // field was previously fname
-//        		 	if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
-//        		 	{
-//           			realPtr = mxGetPr(fPtr);
-//        		 	}
-//    			 }
-//         }
-//     } 
-//    // ADDED
-//    // change to call function if it is just an array of doubles
-//    // realPtr should hold a pointer to the double array
-//     else if (mxGetClassID(aPtr) == mxDOUBLE_CLASS) 
-// 	{
-//         realPtr = mxGetPr(aPtr);
-// 	}
-// 	else 
-// 	{
-// 		printf("%s is of unknown type\n", arr);
-//     }
-
-// 	// sets the matrix array to be equal to an array of doubles
-// 	for (w = 0; w < size_w; w++) {
-// 		for (x = 0; x < size_x; x++) {
-// 			for (y = 0; y < size_y; y++) {
-// 				for (z = 0; z < size_z; z++) {
-// 					matrix_array[w][x][y][z] = realPtr[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w];
-// 				}
-// 			}
-// 		}
-// 	}
-	
-//     mxDestroyArray(aPtr);
-    
-//     if (matClose(mfPtr) != 0) {
-//         printf("Error closing file %s\n", file);
-//     }
-// }
-
-
-
-
-
-// Function for reading from matlab file in 1-dimension
-// Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard 
+// Function for reading from matlab file in 4-dimensions
+// Will check the variables, order them in P R/L V K Val format and then set matrix_array to be the variable with the corresponding column number 
 template<class T>
 void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 {
@@ -4451,59 +4360,75 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
     int w,x,y,z; 			/* for index*/
 	const char* name;		/* for getting variable names */
 	const char* nameTemp;	/* for getting variable names */
-	bool wReached = false;			
-	bool xReached = false;			
-	bool yReached = false;	
-	bool zReached = false;									
-	bool defaultReached = false;	
-	bool rReached = false;						
+	bool wReached = false;	/* for checking which variables go to which coordinates */
+	bool xReached = false;	/* for checking which variables go to which coordinates */		
+	bool yReached = false;	/* for checking which variables go to which coordinates */
+	bool zReached = false;	/* for checking which variables go to which coordinates */								
+	bool defaultReached = false;	/* for checking which variables go to which coordinates */
+	bool rReached = false;	/* for checking which variables go to which coordinates */					
 						
-			
+	// open matlab file
 	mfPtr = matOpen(file.c_str(), "r");
    	if (mfPtr == NULL) {
        	printf("Error opening file %s\n", file);
 	}
 	
+	// for each of the 5 columns
 	for (int i= 0; i < 5; i++)
 	{
+		// get variable name
 		aPtr = matGetNextVariableInfo(mfPtr, &name);
 		string temp = name;
+		// If the name is one char long - match on that char
 		if (temp.length() == 1)
 	    {
 	        nameTemp = (temp.substr(0,1)).c_str();
 	    }
 	    else
 	    {
-	        if (temp.substr(1,1) == "_")
+	        // if the second char is underscore '_' then match on first char example V_BC
+			if (temp.substr(1,1) == "_")
 			{
 				nameTemp = (temp.substr(0,1)).c_str();
 			}
+			// If length is more than 1 and second char is not underscore will go to default
 			else
 			{
 				nameTemp = "!";	
 			}
 	    }
+		
+		// switch on name to get P R(or L) V K Value in that order
+		// The code is nearly the same for all switch statements - comments are found only for case 'P'
 		switch (*nameTemp)
 		{
+			// If variable is the array for 'P'
 			case 'P':
+				// coordinate w has been recorded
 				wReached = true;
+				// get variable
 				aPtr = matGetVariable(mfPtr, name);
-				//printf("%s \n" , name );
 				if (aPtr == NULL) {
   					printf("mxArray not found: %s\n", name);
 				} 
+				// if variable is matlab struct
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					// make sure it has a "arr" field
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
    						printf("Field not found: %s\n", field);
 	 				}
 					else {
+						// get the number of elements in struct
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						// for each element in struct
 						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							// try to get the field "arr"
 							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+							// if successfully got the field "arr" and it is an array of doubles
        		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
        		 				{
+								// get the data from "arr" (array of doubles)
 								PtrW = mxGetPr(fPtrW);
-								//printf("%e \n", PtrW[0]);
 							}
 						}
 					}
@@ -4517,7 +4442,6 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 				rReached = true;
 				xReached = true;
 				aPtr = matGetVariable(mfPtr, name);
-				//printf("%s \n" , name );
 				if (aPtr == NULL) {
   					printf("mxArray not found: %s\n", name);
 				} 
@@ -4532,7 +4456,6 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
        		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
        		 				{
 								PtrX = mxGetPr(fPtrX);
-								//printf("%e \n", PtrX[0]);
 							}
 						}
 					}
@@ -4545,7 +4468,6 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 			case 'L':
 				xReached = true;
 				aPtr = matGetVariable(mfPtr, name);
-				//printf("%s \n" , name );
 				if (aPtr == NULL) {
   					printf("mxArray not found: %s\n", name);
 				} 
@@ -4572,7 +4494,6 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 			case 'V':
 				yReached = true;	
 				aPtr = matGetVariable(mfPtr, name);
-				//printf("%s \n" , name );
 				if (aPtr == NULL) {
   					printf("mxArray not found: %s\n", name);
 				} 
@@ -4587,7 +4508,6 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
        		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
        		 				{
 								PtrY = mxGetPr(fPtrY);
-								//printf("%e \n", PtrY[0]);
 							}
 						}
 					}
@@ -4600,7 +4520,6 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 			case 'K':
 				zReached = true;
 				aPtr = matGetVariable(mfPtr, name);
-				//printf("%s \n" , name );
 				if (aPtr == NULL) {
   					printf("mxArray not found: %s\n", name);
 				} 
@@ -4615,7 +4534,6 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
        		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
        		 				{
 								PtrZ = mxGetPr(fPtrZ);
-								//printf("%e \n", PtrZ[0]);
 							}
 						}
 					}
@@ -4628,7 +4546,6 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 			default:
 				defaultReached = true;
 				aPtr = matGetVariable(mfPtr, name);
-				//printf("%s \n" , name );
 				if (aPtr == NULL) {
   					printf("mxArray not found: %s\n", name);
 				} 
@@ -4643,7 +4560,6 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
        		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
        		 				{
 								PtrFinal = mxGetPr(fPtr);
-								//printf("%e \n", PtrFinal[0]);
 							}
 						}
 					}
@@ -4661,9 +4577,12 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 	// if no R but there is L
 	if (!rReached)
 	{
-		PtrX = PtrL;
+		if (xReached)
+		{
+			PtrX = PtrL;
+		}
 	}
-	// if no default - must have been L star where 5th parameter = L
+	// if no default - must have been L star (5th parameter = L which should be Val in "P R V K Val")
 	else if (!defaultReached)
 	{
 		PtrFinal = PtrL;
@@ -4672,6 +4591,8 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 	
 	
 	// To get the column number of the return
+	// since it is assumed the variables are in P - R/L - V - K - Val form iterate through until we reach the correct column
+	// Not necesarily required for the 4D case where all 5 variables will be present - however in 3D and below might be missing arbitrary V or P etc.
 	if (wReached)
 	{
 		columnNumber--;
@@ -4680,7 +4601,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 			PtrReturn = PtrW;
 		}	
 	}
-	if (rReached)
+	if (xReached)
 	{
 		columnNumber--;
 		if (columnNumber == 0)
@@ -4724,16 +4645,19 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 		for (x = 0; x < size_x; x++) {
 			for (y = 0; y < size_y; y++) {
 				for (z = 0; z < size_z; z++) {
+					// Saving variable from matlab requires reversing indeces because matlab is stored in column major order while c++ is row major order
 					matrix_array[w][x][y][z] = PtrReturn[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w];
 				}
 			}
 		}
 	}
 	
+	// close file
     if (matClose(mfPtr) != 0) {
         printf("Error closing file %s\n", file);
     }
 	
+	// free allocated memory
 	mxDestroyArray(aPtr);
 }
 
@@ -5086,7 +5010,6 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 					
 					if (fabs(log10(PtrW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_w[w][x][y][z])) > err || fabs(log10(PtrX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_x[w][x][y][z])) > err || fabs(log10(PtrY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_y[w][x][y][z])) > err || fabs(log10(PtrZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_z[w][x][y][z])) > err) {
 					 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d, %d, %d, %d].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", file.c_str(), w, x, y, z, PtrW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], PtrX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
-								//printf("grid error \n");
 								exit(EXIT_FAILURE);
 					}
 					matrix_array[w][x][y][z] = PtrFinal[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w];
