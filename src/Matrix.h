@@ -399,6 +399,7 @@ public:
 	virtual void readFromFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z); ///< Load matrix to a file
 
 	// ADDED
+	virtual mxArray* createStructMatrix(string filename, string info = "");
 	virtual void writeToMatlabFile(string filename, string info = ""); 										///< Save matrix to a file
 	virtual void writeToMatlabFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z); 
 	virtual void readFromMatlabFile(string file, int column = 1);  									

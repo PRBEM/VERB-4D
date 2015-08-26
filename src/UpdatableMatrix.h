@@ -28,7 +28,9 @@
  * It's just like a normal matrix (and can be used just like one),
  * but it can also be updated according to rules from an ini-file
  *
- * TODO: delete this class, all it's functionality is inside UpdatableListMatrix
+ * The readFromIniFile function is used to load data into an UpdatableMatrix by storing the contents of a .tab file.
+ * The .tab file will either list a .plt file to load or a .lst file which in turn has both time steps and .plt files.
+ * The update function is called at every time step in the main function and will execute any updates that can be found from these files that match the designated timestep.
  *
  * @brief A matrix that can be created in 1, 2, 3, or 4 dimensions with the ability to be updated
  */
@@ -80,15 +82,20 @@ public:
 };
 
 /**
- * Updatable list of matrix - 1,2,3,4 dimensions.
+ * Updatable list of matrix - 1,2,3,4 dimensions. Currently set up to be used for diffusion coefficients, Sources, and Losses only.
+ * All other matrices use UpdatableMatrix
  *
  * It's a template because it's easier to create, maintain, and debug one class, instead of 4 classes with the same functionality
  *
  * It's just like a normal matrix (and can be used just like one),
  * but it can also be updated according to rules from an ini-file
  *
- * The ini-files have specify several matrices that are added to each other,
+ * The ini-files specify several matrices that are added to each other,
  * e.g. diffusion coefficients for different waves to get one diffusion coefficient
+ * The readFromIniFile function is used to load data into an UpdatableListMatrix by storing line by line the contents of the ini file into a vector of UpdatableMatrix
+ * At every time step the update function is called from the main file. The vector is then traversed and any valid updates are completed.
+ * The standard method is to save diffusion coefficients, Sources, or Losses in a .tab file which is comprised of either .plt or .lst files or both.
+ * 
  * 
  * @brief A matrix that can be created in 1, 2, 3, or 4 dimensions with the ability to be updated
  */

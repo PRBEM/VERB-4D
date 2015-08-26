@@ -281,6 +281,8 @@ void MatrixLimit(UpdatableMatrix< Matrix4D<double> > &M, Matrix4D<double> &Q1, M
  *
  * Gets parameters from the first line using readFromString()
  *
+ * File will either be data file (such as .plt which will store data immediately) or update file (such as .lst which will update matrix values at corresponding timestep from main function)
+ *
  * @return True if success, False if failure
  */
 template <typename MatrixND>
@@ -328,6 +330,10 @@ bool UpdatableMatrix<MatrixND>::readFromIniFile(string ini_filename, MatrixND q1
  *
  * Will traverse the string and get the entire lines values - 
  * starting with parameter q1 and getting values until reaching q4 or running out of values for the line
+ * 
+ * If a data file (such as .plt) is selected then the contents will be stored into the matrix.
+ * If a update-file (such as .lst) is selected then no matrix values will be saved, however the update_filename field will be saved.
+ * Upon every timestep the main file will call update() on this matrix, and inside update will look for the update_filename field. If present it will update the matrix to the corresponding timestep
  *
  * @param file_line_string - string which contains one line of values spanning from q1 to q4
  *
@@ -460,6 +466,9 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
  *
  * Record which limits were applied
  *
+ * This function is called at every time step from the main function. It will look to see if this matrix has the update_filename field set.
+ * If so at any time where the update_time is less than current_time it will use the update_filename to load the new matrix. This pertains to .lst files mainly
+ *
  * @return True if updated, False if not
  */
 template <typename MatrixND>
@@ -504,7 +513,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 		// The second column will be data-filename
 		data_filename = GetCurrentTimeValue(this->update_filename, current_time, update_time);
 
-		// Check if data-filename is not and empty-file-marker
+		// Check if data-filename is not an empty-file-marker
 		if (!data_filename.empty()
 				&& data_filename != empty_marker
 				// && data_filename != this->last_data_filename
@@ -516,6 +525,11 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 				this->last_update_time = current_time;
 				// this->last_data_filename = data_filename;
 				updated = true;
+				
+				
+				// // ADDED FOR TESTING
+				// original_arr.writeToFile(to_string(current_time) + "LUBC_Update.plt" );
+				
 			}
 		}
 	}
@@ -526,6 +540,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 	// MatrixND::operator = (original_arr);
 	*this = original_arr;
 
+	
 	// ////////////////////////////////////////////
 	// Scaling
 
@@ -698,7 +713,12 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
  * UpdatableListMatrix is a list (vector) or UpdatableMatrices
  * They are combined together to form one matrix (e.g. diffusion coefficients for different waves)
  *
- * @param ini_filename - ini filename with appropriate structure (see documentation)
+ * The inputted file can be of any format. If it is a data file (such as .plt) the data will be stored into the matrix.
+ * If the file is an update file then the matrix will only be updated on the corresponding timestep from the main file.
+ * The inputted file may be a .tab file that has a combination of data and update files.
+ * This function goes through the inputted file and stores the contents individually into a vector of UpdatableMatrix, which in turn will be evaluated from the calls to the UpdatableMatrix functions
+ *
+ * @param ini_filename - ini filename with appropriate structure
  * @param Q1 - corresponding grid coordinate
  * @param Q2 - corresponding grid coordinate
  * @param Q3 - corresponding grid coordinate
@@ -794,7 +814,7 @@ void UpdatableListMatrix<MatrixND>::update(double current_time, MatrixND Q1, Mat
 
 
 /**
- * Search for current time-step in an update-file and get return the corresponding value
+ * Search for current time-step in an update-file and return the corresponding value
  *
  * @param filename - filename to check. Also can be just a value - then we just return this value!
  * @param current_time - the time we're searching for
@@ -927,9 +947,10 @@ inline MatrixND& UpdatableListMatrix<MatrixND>::operator= (const double Val) {
 	return MatrixND::operator= (Val);
 }
 
-// ////////////////////////////////////////
-// Implementations
-// ////////////////////////////////////////
+// ///////////////////////////////////////////////////////////
+// Implementations - Enumerates all possibilities for MatrixND 
+// ///////////////////////////////////////////////////////////
+
 
 template class UpdatableMatrix< Matrix1D<double> >;
 template class UpdatableMatrix< Matrix2D<double> >;

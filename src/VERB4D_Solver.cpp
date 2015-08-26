@@ -100,8 +100,8 @@
 
 
 // ADDED
-#include "/Applications/MATLAB_R2015a.app/extern/include/mat.h"
-
+// #include "/Applications/MATLAB_R2015a.app/extern/include/mat.h"
+#include "include/mat.h"
 
 #include <iostream>
 #include <iomanip>
@@ -233,6 +233,7 @@ int main(int argc, char* argv[]) {
 	string outputFolder = "./VERB4D_output/";
 	string inversion_method = "Lapack";
 	string use_matlab = "false";
+	string include_boundary = "true";
 
 	bool initialLoad = false; // Check the load of the initial files
 		 
@@ -240,7 +241,7 @@ int main(int argc, char* argv[]) {
 	// Read all the inputs - store them into variables
 	// These inputs come from the matlab files that are generated when running Conv_Dif.m examples
 	initialLoad = ReadInitialData(inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
-			inversion_method, use_matlab,  PSD,
+			inversion_method, use_matlab, include_boundary,  PSD,
 			P, R, V, K, L,
 			P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
 			Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
@@ -461,7 +462,21 @@ int main(int argc, char* argv[]) {
 			//L_LBC.original_arr =(PSD.xSlice(0));
 			Ll_BC.update(time, P.xSlice(0), V.xSlice(0), K.xSlice(0));
 			//L_UBC.original_arr =(PSD.xSlice(PSD.size_x - 1));
+			// UNCOMMENT NEXT LINE
 			Lu_BC.update(time, P.xSlice(R.size_x - 1), V.xSlice(R.size_x - 1), K.xSlice(R.size_x - 1));
+			
+			
+			
+			// // ADDED FOR TESTING PURPOSES
+			// if (!Lu_BC.update(time, P.xSlice(R.size_x - 1), V.xSlice(R.size_x - 1), K.xSlice(R.size_x - 1)))
+			// {
+			// 	Lu_BC.writeToFile( to_string(time) + "LUBC_NO.plt");
+			// }
+			
+			
+			
+			
+			
 		}
 		if (V_size > 3) {
 			//V_LBC.original_arr =(PSD.ySlice(0));
@@ -567,6 +582,10 @@ int main(int argc, char* argv[]) {
 			cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
 		}
 
+				// ADDED FOR TESTING
+                //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_before_radial.plt");			
+
+
 		// Radial diffusion
 		if (L_size >= 3) {
 			progress_count = 0;
@@ -625,6 +644,9 @@ int main(int argc, char* argv[]) {
 						// copy results back
 						for (iL = 0; iL < L_size; iL++)
 							PSD[iP][iL][iV][iK] = PSD_L[iL];
+                
+			
+
 
 #pragma omp critical // Progress output
 						progress_count += 1;
@@ -633,6 +655,9 @@ int main(int argc, char* argv[]) {
 				  }
 			 }
                 
+				// ADDED FOR TESTING
+                //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_after_radial.plt");			
+				
         
 #else
                 #pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total, progress_count)
@@ -657,7 +682,8 @@ int main(int argc, char* argv[]) {
                     // copy results back
                     for (iL = 0; iL < L_size; iL++)
                     PSD[iP][iL][iV][iK] = PSD_L[iL];
-                
+					
+				
                 #pragma omp critical // Progress output
                 progress_count += 1;
             }
@@ -665,6 +691,10 @@ int main(int argc, char* argv[]) {
 			cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%"
 					<< endl;
 		}
+
+				// ADDED FOR TESTING
+                //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_after_radial.plt");			
+
 
 		// Local diffusion
 		if (V_size >= 3 && K_size >= 3) {
@@ -680,6 +710,13 @@ int main(int argc, char* argv[]) {
                 for (iP = 0; iP < P_size; iP++) {
 				for (iR = 0; iR < R_size; iR++) {
 
+					// If we dont want to include the boundary in the L/R axis we can exclude those points by setting include_boundary to false in matlab main file or parameter.ini file
+					if ((include_boundary == "false") && (iR == 0 || iR == R_size-1))
+					{
+						continue;
+					}
+
+
 					if (omp_get_thread_num() == 0)
 						cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
 								<< (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
@@ -691,11 +728,11 @@ int main(int argc, char* argv[]) {
 					PSD_IK = PSD.wxSlice(iP, iR);
 
 					// Don't calculate anything, if diffusion coefficient are zero or PSD is zero
-//					if (PSD_IK.max() < min_PSD || (DKK.wxSlice(iP, iR).max() < min_Dxx && DVV.wxSlice(iP, iR).max() < min_Dxx)) {
-//#pragma omp critical // Progress count
-//						number_of_skipped_points++;
-//						continue;
-//					}
+// 					if (PSD_IK.max() < min_PSD || (DKK.wxSlice(iP, iR).max() < min_Dxx && DVV.wxSlice(iP, iR).max() < min_Dxx)) {
+// #pragma omp critical // Progress count
+// 						number_of_skipped_points++;
+// 						continue;
+// 					}
 
 
 					// 2d diffusion
@@ -731,9 +768,18 @@ int main(int argc, char* argv[]) {
             
                 #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1)
                 for ( int index = 0; index < P_size * R_size; index++) {
-                    iP = index % P_size;
-                    iR = index / P_size;
+                    iP = index / R_size;
+                    iR = index % R_size;
                         
+						
+					// If we dont want to include the boundary in the L/R axis we can exclude those points by setting include_boundary to false in matlab main file or parameter.ini file
+					if ((include_boundary == "false") && (iR == 0 || iR == R_size-1))
+					{
+						continue;
+					}
+					
+						
+						
                     if (omp_get_thread_num() == 0)
                     cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
                     << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;

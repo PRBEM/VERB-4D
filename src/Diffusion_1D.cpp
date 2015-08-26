@@ -120,9 +120,9 @@ bool Diffusion_1D(	Matrix1D<double> &psd,
 		}
 	}
 
-	//matr_A.writeToFile("./Debug_output/matr_A.dat");
-	//matr_B.writeToFile("./Debug_output/matr_B.dat");
-	//matr_C.writeToFile("./Debug_output/matr_C.dat");
+	// matr_A.writeToFile("matr_A.dat");
+	// matr_B.writeToFile("matr_B.dat");
+	// matr_C.writeToFile("matr_C.dat");
 
 	// Add reanalysis here?
 
@@ -154,4 +154,4 @@ bool Diffusion_1D(	Matrix1D<double> &psd,
 
 	return true;
 }
-// ADDS DIFFUSION COEFFICIENTS FROM SECOND DERIVATIVE APPROXIMATION AND THEN SOLVES THE MATRIX USING TRIDAG
+// ADDS BOUNDARIES FROM SECOND DERIVATIVE APPROXIMATION AND THEN SOLVES THE MATRIX USING TRIDAG

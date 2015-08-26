@@ -41,3 +41,10 @@ Scroll down to the run portion and change system('VERB4D_Solver.exe’) to syste
 press command enter to run
 
 go to plot - press command enter to run
+
+For saving to matlab add in the following line into Conv_Dif.m where the parameters are listed:*** fprintf(fid, ['use_matlab = true \n']); ***
+
+Also to compile the solver you must link to the matlab/c++ shared libraries:
+for mac they can be found at /Applications/MATLAB_R2015a.app/bin/maci64 assuming you downloaded matlab into applications folder. Look at the Makefile for an idea of how to link the proper Matlab libraries for compiling.
+
+

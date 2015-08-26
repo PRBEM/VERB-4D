@@ -139,7 +139,7 @@ void ReadBoundaryCondition(
 */
 bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* argv[],
 		double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
-		string &inversion_method, string &use_matlab,
+		string &inversion_method, string &use_matlab, string &include_boundary, 
 		Matrix4D<double> &PSD,
 		Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V, Matrix4D<double> &K, UpdatableMatrix < Matrix4D<double> > &L,
 		int &P_size, int &R_size, int &V_size, int &K_size, int &L_size,
@@ -164,13 +164,18 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	
 	// ADDED	
 	parameters.getParameter("use_matlab", use_matlab);
+	parameters.getParameter("include_boundary", include_boundary);
 	// END ADDED
-
+	
+	
 	parameters.getParameter("input_folder", InputFolder);
 	parameters.getParameter("output_folder", OutputFolder);
 
-	fstream inputcheck;
-	if (use_matlab == "false")
+	FILE *file;
+	//if (file = fopen(name.c_str(), "r"))
+	
+	
+	if ( (!(file = fopen((InputFolder + "grid.mat").c_str() , "r"))) || use_matlab == "false")
 	{
 		// Opening up grid.plt in order to get P,R,V,K sizes which are stored in the header
 		ifstream input;
@@ -202,7 +207,6 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			Logger::warning << "Grid file error." << endl;
 			return false;
 		}
-	
 		input.close();
 
 	}
@@ -216,6 +220,8 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
     	const mxArray *fPtr;    /* field pointer */
 		string arr; 			/* variable name*/
 		
+		
+		
 		mfPtr = matOpen((InputFolder + "grid.mat").c_str(), "r");
     	if (mfPtr == NULL) {
         	printf("Error opening file grid.mat\n");
@@ -226,12 +232,12 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	 	arr = "P";
     	aPtr = matGetVariable(mfPtr, arr.c_str());
     	if (aPtr == NULL) {
-        	printf("mxArray not found: %s\n", arr);
+        	printf("mxArray not found: %s\n", arr.c_str());
    		}   
 		   
 		if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
         	if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-            	printf("Field not found: %s\n", field);
+            	printf("Field not found: %s\n", field.c_str());
         	}
         	else {
        		 		nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -245,12 +251,16 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		arr = "V";
     	aPtr = matGetVariable(mfPtr, arr.c_str());
     	if (aPtr == NULL) {
-        	printf("mxArray not found: %s\n", arr);
+        	arr = "pc";
+			aPtr = matGetVariable(mfPtr, arr.c_str());
+    		if (aPtr == NULL) {
+				printf("mxArray not found: %s\n", arr.c_str());
+			}
    		}   
 		   
 		if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
         	if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-            	printf("Field not found: %s\n", field);
+            	printf("Field not found: %s\n", field.c_str());
         	}
         	else 
 			{
@@ -264,12 +274,16 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		arr = "R";
     	aPtr = matGetVariable(mfPtr, arr.c_str());
     	if (aPtr == NULL) {
-        	printf("mxArray not found: %s\n", arr);
+        	arr = "L";
+			aPtr = matGetVariable(mfPtr, arr.c_str());
+    		if (aPtr == NULL) {
+				printf("mxArray not found: %s\n", arr.c_str());
+			}
    		}   
 		   
 		if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
         	if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-            	printf("Field not found: %s\n", field);
+            	printf("Field not found: %s\n", field.c_str());
         	}
         	else {
     				nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -284,12 +298,16 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		arr = "K";
     	aPtr = matGetVariable(mfPtr, arr.c_str());
     	if (aPtr == NULL) {
-        	printf("mxArray not found: %s\n", arr);
+        	arr = "al";
+			aPtr = matGetVariable(mfPtr, arr.c_str());
+    		if (aPtr == NULL) {
+				printf("mxArray not found: %s\n", arr.c_str());
+			}
    		}   
 		   
 		if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
         	if ( mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-            	printf("Field not found: %s\n", field);
+            	printf("Field not found: %s\n", field.c_str());
         	}
         	else {
        		 		nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -298,9 +316,12 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 						K_size = int(mxGetScalar(fPtr));
 					}
    				 }
-	        }		  	   
+	        }	
+			
+			mxDestroyArray(aPtr);
+    		matClose(mfPtr);  	   
 	}
-	
+	fclose(file);
 	
 	// sets the size of L and R to be the same - both measure distance
 	L_size = R_size;
@@ -328,12 +349,13 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	R.readFromFile(InputFolder + "grid.plt", 2);
 	V.readFromFile(InputFolder + "grid.plt", 3);
 	K.readFromFile(InputFolder + "grid.plt", 4);
+	
 	// End original section
 	}
 	else // if Matlab
 	{
-		inputcheck.open((InputFolder + "grid.mat").c_str()); // Check to see if .mat file is there
-		if (!inputcheck.is_open()) { // if .mat file can't be opened use the .plt
+		if (!(file = fopen((InputFolder + "grid.mat").c_str() , "r"))) // Check to see if .mat file is there
+		{
 			P.readFromFile(InputFolder + "grid.plt", 1);
 			R.readFromFile(InputFolder + "grid.plt", 2);
 			V.readFromFile(InputFolder + "grid.plt", 3);
@@ -346,10 +368,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			V.readFromMatlabFile(InputFolder + "grid.mat", 3);
 			K.readFromMatlabFile(InputFolder + "grid.mat", 4);
 		}
+		fclose(file);
 	}
-	inputcheck.close();
 	
 
+	
 	// ADDED
 	// If matlab not selected
 	if (use_matlab == "false")
@@ -360,8 +383,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	}
 	else // if matlab
 	{
-		inputcheck.open((InputFolder + "Lstar.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		if (!(file = fopen((InputFolder + "Lstar.mat").c_str(), "r" ))) // Check to see if .mat file is there 
 		{
 			if (!L.readFromIniFile(InputFolder + "Lstar.tab", P, R, V, K))
 			L.readFromFile(InputFolder + "Lstar.plt", P, R, V, K);
@@ -370,17 +392,26 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		{
 			L.readFromMatlabFile(InputFolder + "Lstar.mat", P, R, V, K);
 		}
+		fclose(file);
 	}
-	inputcheck.close();
+
 		
 	
 	L.update(time_first, P, R, V, K); // Load L-star so it'll be available
 	
 	string initial_PSD = "PSD0.plt";	
-	parameters.findParameter("initial_PSD", "PSD0.plt") >> initial_PSD;
-
 	
-	PSD.readFromFile(InputFolder + initial_PSD);
+	// if (use_matlab == "false")
+	// {
+		parameters.findParameter("initial_PSD", "PSD0.plt") >> initial_PSD;
+		PSD.readFromFile(InputFolder + initial_PSD);
+	// }
+	// else
+	// {
+	// 	parameters.findParameter("initial_PSD", "PSD0.mat") >> initial_PSD;
+	// 	PSD.readFromMatlabFile(InputFolder + initial_PSD);
+	// }
+	
 
 	// For all of the following load the .tab file if it exists, if not load the corresponding .plt file
 	// DLL is defined on PLVK?
@@ -395,8 +426,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	}
 	else // if matlab
 	{
-		inputcheck.open((InputFolder + "DLL.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		if (!(file = fopen((InputFolder + "DLL.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!DLL.readFromIniFile(InputFolder + "DLL.tab", P, L, V, K))
 				DLL.readFromFile(InputFolder + "DLL.plt", P, L, V, K);
@@ -406,7 +436,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			DLL.readFromMatlabFile(InputFolder + "DLL.mat", P, L, V, K);
 		}
 	}
-	inputcheck.close();
+	fclose(file);
 
 
 	// ADDED
@@ -418,8 +448,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	}
 	else // if matlab
 	{
-		inputcheck.open((InputFolder + "DVV.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		if (!(file = fopen((InputFolder + "DVV.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!DVV.readFromIniFile(InputFolder + "DVV.tab", P, R, V, K))
 				DVV.readFromFile(InputFolder + "DVV.plt", P, R, V, K);
@@ -429,7 +458,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			DVV.readFromMatlabFile(InputFolder + "DVV.mat", P, R, V, K);
 		}
 	}
-	inputcheck.close();
+	fclose(file);
 
 
 	// ADDED
@@ -441,8 +470,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	}
 	else // if matlab
 	{
-		inputcheck.open((InputFolder + "DKK.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		if (!(file = fopen((InputFolder + "DKK.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!DKK.readFromIniFile(InputFolder + "DKK.tab", P, R, V, K))
 				DKK.readFromFile(InputFolder + "DKK.plt", P, R, V, K);
@@ -452,7 +480,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			DKK.readFromMatlabFile(InputFolder + "DKK.mat", P, R, V, K);
 		}
 	}
-	inputcheck.close();
+	fclose(file);
 
 	// ADDED
 	// If matlab not selected
@@ -463,8 +491,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	}
 	else // if matlab
 	{
-		inputcheck.open((InputFolder + "DVK.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		if (!(file = fopen((InputFolder + "DVK.mat").c_str() , "r"))) // Check to see if .mat file is there  
 		{
 				if (!DVK.readFromIniFile(InputFolder + "DVK.tab", P, R, V, K))
 				DVK.readFromFile(InputFolder + "DVK.plt", P, R, V, K);
@@ -474,7 +501,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			DVK.readFromMatlabFile(InputFolder + "DVK.mat", P, R, V, K);
 		}
 	}
-	inputcheck.close();
+	fclose(file);
 	
 	// ADDED
 	// If matlab not selected
@@ -485,8 +512,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	}
 	else // if matlab
 	{
-		inputcheck.open((InputFolder + "VP.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		if (!(file = fopen((InputFolder + "VP.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!VP.readFromIniFile(InputFolder + "VP.tab", P, R, V, K))
 				VP.readFromFile(InputFolder + "VP.plt", P, R, V, K);
@@ -496,7 +522,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			VP.readFromMatlabFile(InputFolder + "VP.mat", P, R, V, K);
 		}
 	}
-	inputcheck.close();
+	fclose(file);
 		
 	// ADDED
 	// If matlab not selected
@@ -507,8 +533,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	}
 	else // if matlab
 	{
-		inputcheck.open((InputFolder + "VR.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		if (!(file = fopen((InputFolder + "VR.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!VL.readFromIniFile(InputFolder + "VR.tab", P, R, V, K))
 				VL.readFromFile(InputFolder + "VR.plt", P, R, V, K);
@@ -518,7 +543,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			VL.readFromMatlabFile(InputFolder + "VR.mat", P, R, V, K);
 		}
 	}
-	inputcheck.close();	
+	fclose(file);	
 	
 	// ADDED
 	// If matlab not selected
@@ -529,8 +554,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	}
 	else // if matlab
 	{
-		inputcheck.open((InputFolder + "G_local.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		if (!(file = fopen((InputFolder + "G_local.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!G_local.readFromIniFile(InputFolder + "G_local.tab", P, R, V, K))
 				G_local.readFromFile(InputFolder + "G_local.plt", P, R, V, K);
@@ -540,7 +564,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			G_local.readFromMatlabFile(InputFolder + "G_local.mat", P, R, V, K);
 		}
 	}
-	inputcheck.close();
+	fclose(file);
 	
 	// ADDED
 	// If matlab not selected
@@ -551,8 +575,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	}
 	else // if matlab
 	{
-		inputcheck.open((InputFolder + "G_radial.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		if (!(file = fopen((InputFolder + "G_radial.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!G_radial.readFromIniFile(InputFolder + "G_radial.tab", P, R, V, K))
 				G_radial.readFromFile(InputFolder + "G_radial.plt", P, R, V, K);
@@ -562,7 +585,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			G_radial.readFromMatlabFile(InputFolder + "G_radial.mat", P, R, V, K);
 		}
 	}
-	inputcheck.close();	
+	fclose(file);	
 
 	// if (!VL.readFromIniFile(InputFolder + "VR.tab", P, R, V, K))
 	// 	VL.readFromFile(InputFolder + "VR.plt", P, R, V, K);
@@ -587,8 +610,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	}
 	else // if matlab
 	{
-		inputcheck.open((InputFolder + "Sources.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		if (!(file = fopen((InputFolder + "Sources.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K))
 				Sources.readFromFile(InputFolder + "Sources.plt", P, R, V, K);
@@ -598,40 +620,49 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			Sources.readFromMatlabFile(InputFolder + "Sources.mat", P, R, V, K);
 		}
 	}
-	inputcheck.close();	
+	fclose(file);	
 	
 	// ADDED
 	// If matlab not selected
-	if (use_matlab == "false")
+	// if (use_matlab == "false")
+	// {
+	// 	if (!Losses.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K))
+	// 	Losses.readFromFile(InputFolder + "Losses_losscone.plt", P, R, V, K);
+	// }
+	// else // if matlab
+	// {
+	// 	inputcheck.open((InputFolder + "Losses_losscone.mat").c_str()); // Check to see if .mat file is there 
+	// 	if (!inputcheck.is_open()) 
+	// 	{
+	// 			if (!Losses.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K))
+	// 			Losses.readFromFile(InputFolder + "Losses_losscone.plt", P, R, V, K);
+	// 	}
+	// 	else
+	// 	{
+	// 		Losses.readFromMatlabFile(InputFolder + "Losses_losscone.mat", P, R, V, K);
+	// 	}
+	// }
+	// inputcheck.close();	
+	
+	
+	
+	
+	// ADDED
+	// If matlab selected
+	if (!Losses.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K))
 	{
-		if (!Losses.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K))
-		Losses.readFromFile(InputFolder + "Losses.plt", P, R, V, K);
-	}
-	else // if matlab
-	{
-		inputcheck.open((InputFolder + "Losses_losscone.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
-		{
-				if (!Losses.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K))
-				Losses.readFromFile(InputFolder + "Losses.plt", P, R, V, K);
-		}
-		else
+		if (fopen((InputFolder + "Losses_losscone.mat").c_str() , "r") && use_matlab == "true" )
 		{
 			Losses.readFromMatlabFile(InputFolder + "Losses_losscone.mat", P, R, V, K);
 		}
+		else
+		{
+			Losses.readFromFile(InputFolder + "Losses_losscone.plt", P, R, V, K);
+		}
+		fclose(file);	
 	}
-	inputcheck.close();	
 	
 	
-	// // Try to read from ini-file
-	// if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K))
-	// 	// if failed - try to read from just data-file
-	// 	Sources.readFromFile(InputFolder + "Sources.plt", P, R, V, K);
-
-	// // Try to read from ini-file
-	// if (!Losses.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K))
-	// 	// if failed - try to read from just data-file
-	// 	Losses.readFromFile(InputFolder + "Losses.plt", P, R, V, K);
 
 	// BC conditions
 	// Always use periodic boundary for Phi
@@ -714,8 +745,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		// R boundary conditions
 		
 		
-		inputcheck.open((InputFolder + "Rl_BC.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		if (!(file = fopen((InputFolder + "Rl_BC.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!PSD_l_R.readFromIniFile(InputFolder + "Rl_BC.tab", P.xSlice(0), V.xSlice(0), K.xSlice(0)))
 				PSD_l_R.readFromFile(InputFolder + "Rl_BC.plt", P.xSlice(0), V.xSlice(0), K.xSlice(0));
@@ -724,9 +754,9 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		{
 			PSD_l_R.readFromMatlabFile(InputFolder + "Rl_BC.mat", P.xSlice(0), V.xSlice(0), K.xSlice(0));
 		}
-		inputcheck.close();	
-		inputcheck.open((InputFolder + "Ru_BC.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		fclose(file);	
+		if (!(file = fopen((InputFolder + "Ru_BC.mat").c_str() , "r"))) // Check to see if .mat file is there 
+		 
 		{
 				if (!PSD_u_R.readFromIniFile(InputFolder + "Ru_BC.tab", P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1)))
 				PSD_u_R.readFromFile(InputFolder + "Ru_BC.plt", P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1));
@@ -735,12 +765,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		{
 			PSD_u_R.readFromMatlabFile(InputFolder + "Ru_BC.mat",P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1));
 		}
-		inputcheck.close();
+		fclose(file);
 		
 		// L boundary conditions
 		
-		inputcheck.open((InputFolder + "Ll_BC.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		if (!(file = fopen((InputFolder + "Ll_BC.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!PSD_l_L.readFromIniFile(InputFolder + "Ll_BC.tab", P.xSlice(0), V.xSlice(0), K.xSlice(0)))
 				PSD_l_L.readFromFile(InputFolder + "Ll_BC.plt", P.xSlice(0), V.xSlice(0), K.xSlice(0));
@@ -749,9 +778,8 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		{
 			PSD_l_L.readFromMatlabFile(InputFolder + "Ll_BC.mat", P.xSlice(0), V.xSlice(0), K.xSlice(0));
 		}
-		inputcheck.close();
-		inputcheck.open((InputFolder + "Lu_BC.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		fclose(file);
+		if (!(file = fopen((InputFolder + "Lu_BC.mat").c_str() , "r"))) // Check to see if .mat file is there  
 		{
 				if (!PSD_u_L.readFromIniFile(InputFolder + "Lu_BC.tab", P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1)))
 				PSD_u_L.readFromFile(InputFolder + "Lu_BC.plt", P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1));
@@ -760,14 +788,13 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		{
 			PSD_u_L.readFromMatlabFile(InputFolder + "Lu_BC.mat",P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1));
 		}
-		inputcheck.close();
+		fclose(file);
 		
 		
 		
 		// V boundary conditions
 		
-		inputcheck.open((InputFolder + "Vl_BC.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		if (!(file = fopen((InputFolder + "Vl_BC.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!PSD_l_V.readFromIniFile(InputFolder + "Vl_BC.tab", P.ySlice(0), R.ySlice(0), K.ySlice(0)))
 				PSD_l_V.readFromFile(InputFolder + "Vl_BC.plt", P.ySlice(0), R.ySlice(0), K.ySlice(0));
@@ -776,9 +803,8 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		{
 			PSD_l_V.readFromMatlabFile(InputFolder + "Vl_BC.mat", P.ySlice(0), R.ySlice(0), K.ySlice(0));
 		}
-		inputcheck.close();
-		inputcheck.open((InputFolder + "Vu_BC.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		fclose(file);
+		if (!(file = fopen((InputFolder + "Vu_BC.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!PSD_u_V.readFromIniFile(InputFolder + "Vu_BC.tab", P.ySlice(P.size_y-1), R.ySlice(R.size_y-1), K.ySlice(K.size_y-1)))
 				PSD_u_V.readFromFile(InputFolder + "Vu_BC.plt", P.ySlice(P.size_y-1), R.ySlice(R.size_y-1), K.ySlice(K.size_y-1));
@@ -787,14 +813,13 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		{
 			PSD_u_V.readFromMatlabFile(InputFolder + "Vu_BC.mat",P.ySlice(P.size_y-1), R.ySlice(R.size_y-1), K.ySlice(K.size_y-1));
 		}
-		inputcheck.close();
+		fclose(file);
 		
 		
 		
 		// K boundary conditions
 		
-		inputcheck.open((InputFolder + "Kl_BC.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		if (!(file = fopen((InputFolder + "Kl_BC.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!PSD_l_K.readFromIniFile(InputFolder + "Kl_BC.tab", P.zSlice(0), R.zSlice(0), V.zSlice(0)))
 				PSD_l_K.readFromFile(InputFolder + "Kl_BC.plt", P.zSlice(0), R.zSlice(0), V.zSlice(0));
@@ -803,9 +828,8 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		{
 			PSD_l_K.readFromMatlabFile(InputFolder + "Kl_BC.mat", P.zSlice(0), R.zSlice(0), V.zSlice(0));
 		}
-		inputcheck.close();
-		inputcheck.open((InputFolder + "Ku_BC.mat").c_str()); // Check to see if .mat file is there 
-		if (!inputcheck.is_open()) // if .mat file can't be opened use the .plt
+		fclose(file);
+		if (!(file = fopen((InputFolder + "Ku_BC.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!PSD_u_K.readFromIniFile(InputFolder + "Ku_BC.tab", P.zSlice(P.size_z-1), R.zSlice(R.size_z-1), V.zSlice(V.size_z-1)))
 				PSD_u_K.readFromFile(InputFolder + "Ku_BC.plt", P.zSlice(P.size_z-1), R.zSlice(R.size_z-1), V.zSlice(V.size_z-1));
@@ -814,8 +838,34 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		{
 			PSD_u_K.readFromMatlabFile(InputFolder + "Ku_BC.mat",P.zSlice(P.size_z-1), R.zSlice(R.size_z-1), V.zSlice(V.size_z-1));
 		}		
-		inputcheck.close();
+		fclose(file);
 	}
+	
+	// For Testing
+			// P.writeToFile("P.plt" , "test"); 
+			// R.writeToFile("R.plt" , "test"); 
+			// V.writeToFile("V.plt" , "test"); 
+			// K.writeToFile("K.plt" , "test"); 	
+			// L.writeToFile("L.plt" , "test"); 
+			// DLL.writeToFile("DLL.plt" , "test"); 
+			// DVV.writeToFile("DVV.plt" , "test"); 
+			// DKK.writeToFile("DKK.plt" , "test"); 
+			// DVK.writeToFile("DVK.plt" , "test"); 
+			// VP.writeToFile("VP.plt" , "test"); 
+			// VL.writeToFile("VL.plt" , "test"); 
+			// PSD.writeToFile("PSD.plt" , "test"); 
+			// G_local.writeToFile("G_local.plt" , "test"); 
+			// G_radial.writeToFile("G_radial.plt" , "test"); 
+			// Sources.writeToFile("Sources.plt" , "test"); 
+			// Losses.writeToFile("Losses.plt" , "test"); 
+			// PSD_l_R.writeToFile("PSD_l_R.plt" , "test"); 
+			// PSD_u_R.writeToFile("PSD_u_R.plt" , "test"); 
+			// PSD_l_L.writeToFile("PSD_l_L.plt" , "test"); 
+			// PSD_u_L.writeToFile("PSD_u_L.plt" , "test"); 
+			// PSD_l_V.writeToFile("PSD_l_V.plt" , "test"); 
+			// PSD_u_V.writeToFile("PSD_u_V.plt" , "test"); 
+			// PSD_l_K.writeToFile("PSD_l_K.plt" , "test"); 
+			// PSD_u_K.writeToFile("PSD_u_K.plt" , "test");
 	
 	
 	

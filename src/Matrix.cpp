@@ -615,6 +615,14 @@ void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
 				{
 					nameTemp = (temp.substr(0,1)).c_str();
 				}
+				else if ((temp.substr(0,2) == "pc"))
+				{
+					nameTemp = "V";
+				}
+				else if ((temp.substr(0,2) == "al"))
+				{
+					nameTemp = "K";
+				}
 				else
 				{
 					nameTemp = "!";	
@@ -631,7 +639,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -659,7 +667,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -716,7 +724,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -744,7 +752,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -772,7 +780,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -849,7 +857,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
 	}
 	
     if (matClose(mfPtr) != 0) {
-        printf("Error closing file %s\n", file);
+        printf("Error closing file %s\n", file.c_str());
     }
 	
 	mxDestroyArray(aPtr);
@@ -950,7 +958,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 			
 	mfPtr = matOpen(file.c_str(), "r");
    	if (mfPtr == NULL) {
-       	printf("Error opening file %s\n", file);
+       	printf("Error opening file %s\n", file.c_str());
 	}
 	
 	for (int i= 0; i < 3; i++)
@@ -968,6 +976,14 @@ void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 				{
 					nameTemp = (temp.substr(0,1)).c_str();
 				}
+				else if ((temp.substr(0,2) == "pc"))
+				{
+					nameTemp = "V";
+				}
+				else if ((temp.substr(0,2) == "al"))
+				{
+					nameTemp = "K";
+				}
 				else
 				{
 					nameTemp = "!";	
@@ -984,7 +1000,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -1012,7 +1028,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -1040,7 +1056,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -1069,7 +1085,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -1097,7 +1113,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -1125,7 +1141,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -1175,7 +1191,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 	}
 	
     if (matClose(mfPtr) != 0) {
-        printf("Error closing file %s\n", file);
+        printf("Error closing file %s\n", file.c_str());
     }
 	
 	mxDestroyArray(aPtr);
@@ -1727,7 +1743,7 @@ void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
 			
 	mfPtr = matOpen(file.c_str(), "r");
    	if (mfPtr == NULL) {
-       	printf("Error opening file %s\n", file);
+       	printf("Error opening file %s\n", file.c_str());
 	}
 	
 	for (int i= 0; i < 3; i++)
@@ -1745,6 +1761,14 @@ void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
 				{
 					nameTemp = (temp.substr(0,1)).c_str();
 				}
+				else if ((temp.substr(0,2) == "pc"))
+				{
+					nameTemp = "V";
+				}
+				else if ((temp.substr(0,2) == "al"))
+				{
+					nameTemp = "K";
+				}
 				else
 				{
 					nameTemp = "!";	
@@ -1761,7 +1785,7 @@ void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -1789,7 +1813,7 @@ void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -1817,7 +1841,7 @@ void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -1846,7 +1870,7 @@ void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -1874,7 +1898,7 @@ void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -1902,7 +1926,7 @@ void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -1979,7 +2003,7 @@ void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
 	}
 	
     if (matClose(mfPtr) != 0) {
-        printf("Error closing file %s\n", file);
+        printf("Error closing file %s\n", file.c_str());
     }
 	
 	mxDestroyArray(aPtr);
@@ -2083,7 +2107,7 @@ void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, con
 			
 	mfPtr = matOpen(file.c_str(), "r");
    	if (mfPtr == NULL) {
-       	printf("Error opening file %s\n", file);
+       	printf("Error opening file %s\n", file.c_str());
 	}
 	
 	for (int i= 0; i < 3; i++)
@@ -2101,6 +2125,14 @@ void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, con
 				{
 					nameTemp = (temp.substr(0,1)).c_str();
 				}
+				else if ((temp.substr(0,2) == "pc"))
+				{
+					nameTemp = "V";
+				}
+				else if ((temp.substr(0,2) == "al"))
+				{
+					nameTemp = "K";
+				}
 				else
 				{
 					nameTemp = "!";	
@@ -2117,7 +2149,7 @@ void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -2145,7 +2177,7 @@ void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -2173,7 +2205,7 @@ void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -2202,7 +2234,7 @@ void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -2258,7 +2290,7 @@ void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -2326,7 +2358,7 @@ void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, con
 	}
 	
     if (matClose(mfPtr) != 0) {
-        printf("Error closing file %s\n", file);
+        printf("Error closing file %s\n", file.c_str());
     }
 	
 	mxDestroyArray(aPtr);
@@ -2874,7 +2906,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
 			
 	mfPtr = matOpen(file.c_str(), "r");
    	if (mfPtr == NULL) {
-       	printf("Error opening file %s\n", file);
+       	printf("Error opening file %s\n", file.c_str());
 	}
 	
 	for (int i= 0; i < 4; i++)
@@ -2892,6 +2924,14 @@ void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
 				{
 					nameTemp = (temp.substr(0,1)).c_str();
 				}
+				else if ((temp.substr(0,2) == "pc"))
+				{
+					nameTemp = "V";
+				}
+				else if ((temp.substr(0,2) == "al"))
+				{
+					nameTemp = "K";
+				}
 				else
 				{
 					nameTemp = "!";	
@@ -2908,7 +2948,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -2936,7 +2976,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -2964,7 +3004,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -2993,7 +3033,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -3021,7 +3061,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -3049,7 +3089,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -3132,7 +3172,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
 	}
 	
     if (matClose(mfPtr) != 0) {
-        printf("Error closing file %s\n", file);
+        printf("Error closing file %s\n", file.c_str());
     }
 	
 	mxDestroyArray(aPtr);
@@ -3243,7 +3283,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, con
 			
 	mfPtr = matOpen(file.c_str(), "r");
    	if (mfPtr == NULL) {
-       	printf("Error opening file %s\n", file);
+       	printf("Error opening file %s\n", file.c_str());
 	}
 	
 	for (int i= 0; i < 4; i++)
@@ -3261,6 +3301,14 @@ void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, con
 				{
 					nameTemp = (temp.substr(0,1)).c_str();
 				}
+				else if ((temp.substr(0,2) == "pc"))
+				{
+					nameTemp = "V";
+				}
+				else if ((temp.substr(0,2) == "al"))
+				{
+					nameTemp = "K";
+				}				
 				else
 				{
 					nameTemp = "!";	
@@ -3277,7 +3325,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -3305,7 +3353,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -3333,7 +3381,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -3362,7 +3410,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -3390,7 +3438,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -3418,7 +3466,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -3472,7 +3520,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, con
 	}
 	
     if (matClose(mfPtr) != 0) {
-        printf("Error closing file %s\n", file);
+        printf("Error closing file %s\n", file.c_str());
     }
 	
 	mxDestroyArray(aPtr);
@@ -4043,134 +4091,225 @@ void Matrix4D<T>::writeToFile(string filename, string info) {
 
 
 
-/**
-* Write matrix to file, using 4 other matrixes as a grid (simply - write all 5 matrixes to the file).
-* Function for matlab files
-*/ 
+
 template<class T>
-void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
-	Logger::message << "writing " << filename << ": " << endl;	
-	
-	
-	
-	
-	// MATFile *mfPtr; /* MAT-file pointer */
-    // mxArray *matStruct;
-	// mxArray *aPtr;  /* mxArray pointer */
-	// mxArray *infoPtr;  /* mxArray pointer */
-	// double *data;
-	// int status;
-	// int w,x,y,z;
-	// // mwSize dims[2] = {1,1};
-	// // const char* fields[] = {"arr"};
-	
-	// mfPtr = matOpen(file.c_str(), "w");
-	// if (mfPtr == NULL) {
-   	// 	printf("Error creating file %s\n", file);
-    // 	exit(EXIT_FAILURE);
-  	// }
-
-	// // matStruct = mxCreateStructMatrix(1,1,2,fields);
-	// // if (matStruct == NULL) 
-	// // {
-    // //   printf("Unable to create mxArray.\n");
-    // //   exit(EXIT_FAILURE);
- 	// // }
-	
-
-	// aPtr = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);
-	// if (aPtr == NULL) 
-	// {
-    //   printf("Unable to create mxArray.\n");
-    //   exit(EXIT_FAILURE);
- 	// }
-	 
-	// data = mxGetPr(aPtr);
-	// for (w = 0; w < size_w; w++) {
-	// 	for (x = 0; x < size_x; x++) {
-	// 		for (y = 0; y < size_y; y++) {
-	// 			for (z = 0; z < size_z; z++) {
-	// 				data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = matrix_array[w][x][y][z];
-	// 			}
-	// 		}
-	// 	}
-	// } 
-
-	
-
-	// infoPtr = mxCreateString(info.c_str());
-  	// if (infoPtr == NULL) {
-    // printf("Unable to create string mxArray.\n");
-    // exit(EXIT_FAILURE);
-  	// }
-	
-	// // mxSetField(matStruct, 0 , "arr", aPtr);
-	
-	// // status = matPutVariable(mfPtr, file.c_str() , matStruct);
-  	// // if (status != 0) {
-    // // 	printf("error matputvariabial");
-    // //   	exit(EXIT_FAILURE);
- 	// // }
-	
-	
-	
-	
-	// status = matPutVariable(mfPtr, (this->name).c_str() , aPtr);
-  	// if (status != 0) {
-    // 	printf("error matputvariabial");
-    //   	exit(EXIT_FAILURE);
- 	// }
-	 
-	// status = matPutVariable(mfPtr, "info" , infoPtr);
-  	// if (status != 0) {
-    // 	printf("error matputvariabial");
-    //   	exit(EXIT_FAILURE);
- 	// }
-	
-	
-	// mxDestroyArray(aPtr);
-	// mxDestroyArray(infoPtr);
-	// // mxDestroyArray(matStruct);
-  	
-  	// if (matClose(mfPtr) != 0) {
-    // printf("Error closing file %s\n",file);
-    // exit(EXIT_FAILURE);
-  	// }
-
-
-
-	MATFile *pmat = matOpen( filename.c_str(), "w");
+mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
+{
 	int w,x,y,z;
-    // create a scalar struct array with two fields
-    const char *fieldnames[2] = {"arr", "info"};
-    mxArray *s = mxCreateStructMatrix(1, 1, 2, fieldnames);
+	int status;
+    // create a struct array with two fields
+    const char *fieldnames[7] = {"arr", "time", "size", "size1", "size2" , "size3" , "size4"};
+	// create a 1x1 struct that will hold the array of values and the time info
+	mxArray *s = mxCreateStructMatrix(1, 1, 7, fieldnames);
 
     // fill struct fields
-    for (mwIndex i=0; i<2; i++) {
-        if (i== 0)
+    for (mwIndex i=0; i<7; i++) {
+        // For the arr variable in the 1x1 struct
+		if (i== 0)
 		{
-			mxArray *aPtr = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);
+			// create array of doubles and give it the data in matrix_array
+			int ndim = 4;
+			mwSize dims[ndim] = {size_w , size_x, size_y, size_z};
+			mxArray *aPtr = mxCreateNumericArray(ndim,dims,mxDOUBLE_CLASS,mxREAL);
+			if (aPtr == NULL) {
+    			printf("Unable to create double mxArray.\n");
+    			exit(EXIT_FAILURE);
+  			}
 			double *data = mxGetPr(aPtr);
+			//int bytes_to_copy = size_w * size_x * size_y * size_z * mxGetElementSize(aPtr);
 			for (w = 0; w < size_w; w++) {
 				for (x = 0; x < size_x; x++) {
 					for (y = 0; y < size_y; y++) {
 						for (z = 0; z < size_z; z++) {
-							data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = matrix_array[w][x][y][z];
+							data[z*(size_w * size_x * size_y) + y*(size_w * size_x) +  x*(size_w) + w] = matrix_array[w][x][y][z];
 						}
 					}
 				}
 			}
-			mxSetField(s, 0, fieldnames[i], aPtr); 
+			mxSetField(s, 0, fieldnames[i], aPtr);
 		}
+		// For the time variable in the 1x1 struct
 		if ( i == 1 )
 		{
-			mxArray *aPtr = mxCreateString(info.c_str());
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			double temp = 0.0;
+			stringstream ss;
+			ss << info;
+			ss >> temp;
+			data[0] = temp;
 			mxSetField(s, 0, fieldnames[i], aPtr);
-		}		
+		}	
+		// For the size variable in the 1x1 struct
+		if ( i == 2 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = 1;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		if ( i == 3 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_w;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		if ( i == 4 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_x;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		if ( i == 5 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_y;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		if ( i == 6 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_z;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
     }
-    matPutVariable(pmat, "PSD", s);
+	return s;
+}
 
 
+
+
+/**
+* Write matrix to file - with information
+* Function for matlab files
+* Creates a .mat struct for the matrix 
+* Struct has 7 fields in including - arr time size, size1, size2, size3, size4
+*/ 
+template<class T>
+void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
+	
+	
+	// for testing
+	//writeToFile((filename.substr(0, filename.size()-5) + ".plt"), info);
+	
+	
+	Logger::message << "writing " << filename << ": " << endl;	
+	
+	// Open file for writing
+	MATFile *pmat = matOpen( filename.c_str(), "w");
+	if (pmat == NULL) {
+   		printf("Error creating file %s\n", filename.c_str());
+    	exit(EXIT_FAILURE);
+  	}
+	
+	int w,x,y,z;
+	int status;
+    // create a struct array with two fields
+    const char *fieldnames[7] = {"arr", "time", "size", "size1", "size2" , "size3" , "size4"};
+	// create a 1x1 struct that will hold the array of values and the time info
+	mxArray *s = mxCreateStructMatrix(1, 1, 7, fieldnames);
+
+    // fill struct fields
+    for (mwIndex i=0; i<7; i++) {
+        // For the arr variable in the 1x1 struct
+		if (i== 0)
+		{
+			// create array of doubles and give it the data in matrix_array
+			int ndim = 4;
+			mwSize dims[ndim] = {size_w , size_x, size_y, size_z};
+			mxArray *aPtr = mxCreateNumericArray(ndim,dims,mxDOUBLE_CLASS,mxREAL);
+			if (aPtr == NULL) {
+    			printf("Unable to create double mxArray.\n");
+    			exit(EXIT_FAILURE);
+  			}
+			double *data = mxGetPr(aPtr);
+			//int bytes_to_copy = size_w * size_x * size_y * size_z * mxGetElementSize(aPtr);
+			for (w = 0; w < size_w; w++) {
+				for (x = 0; x < size_x; x++) {
+					for (y = 0; y < size_y; y++) {
+						for (z = 0; z < size_z; z++) {
+							data[z*(size_w * size_x * size_y) + y*(size_w * size_x) +  x*(size_w) + w] = matrix_array[w][x][y][z];
+						}
+					}
+				}
+			}
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}
+		// For the time variable in the 1x1 struct
+		if ( i == 1 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			double temp = 0.0;
+			stringstream ss;
+			ss << info;
+			ss >> temp;
+			data[0] = temp;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		// For the size variable in the 1x1 struct
+		if ( i == 2 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = 1;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		if ( i == 3 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_w;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		if ( i == 4 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_x;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		if ( i == 5 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_y;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		if ( i == 6 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_z;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+    }
+	// Save the struct into the .mat file
+	// hardcoded to get rid of the "./output_folder/" and only get PSD_XXXXX
+    status = matPutVariable(pmat, filename.substr(16,9).c_str(), s);
+    if (status != 0) {
+    	printf("error matputvariable");
+    	exit(EXIT_FAILURE);
+ 	}
+	
+	
+	// cleanup
     mxDestroyArray(s);
     matClose(pmat);
 
@@ -4219,39 +4358,26 @@ void Matrix4D<T>::writeToMatlabFile(string file, Matrix4D<T> &grid_w, Matrix4D<T
 	
 	Logger::message << "writing " << file << ": " << endl;	
 	MATFile *pmat = matOpen( file.c_str(), "w");
-	int w,x,y,z;
-    // create a scalar struct array with two fields
-    const char *fieldnames[5] = {"arr", "arrW" , "arrX", "arrY", "arrZ"};
-    mxArray *s = mxCreateStructMatrix(1, 1, 5, fieldnames);
 
-    // fill struct fields
-    for (mwIndex i=0; i<5; i++) {
-		mxArray *aPtr = mxCreateDoubleMatrix(size_w *size_x*size_y*size_z,1,mxREAL);
-		double *data = mxGetPr(aPtr);
-		for (w = 0; w < size_w; w++) {
-			for (x = 0; x < size_x; x++) {
-				for (y = 0; y < size_y; y++) {
-					for (z = 0; z < size_z; z++) {
-						if (i == 0)
-							data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = matrix_array[w][x][y][z];
-						else if (i == 1)
-							data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_w[w][x][y][z];
-						else if (i == 2)
-							data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_x[w][x][y][z];
-						else if (i == 3)
-							data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_y[w][x][y][z];
-						else
-							data[w*(size_x * size_y * size_z) + x*(size_y * size_z) +  y*(size_z) + z] = grid_z[w][x][y][z];
-					}
-				}
-			}
-		} 		
-		mxSetField(s, 0, fieldnames[i], aPtr);	
-    }
+   
+	mxArray* current = createStructMatrix(file);
+	mxArray* w = grid_w.createStructMatrix(file);
+	mxArray* x = grid_x.createStructMatrix(file);
+	mxArray* y = grid_y.createStructMatrix(file);
+	mxArray* z = grid_z.createStructMatrix(file);
 	
-	
-    matPutVariable(pmat, "PSD", s);
-    mxDestroyArray(s);
+	// Save the struct into the .mat file
+	// hardcoded to get rid of the "./output_folder/" and only get PSD_XXXXX
+    matPutVariable(pmat, this->name.c_str(), current);
+	matPutVariable(pmat, "grid_w", w);
+	matPutVariable(pmat, "grid_x", x);
+	matPutVariable(pmat, "grid_y", y);
+	matPutVariable(pmat, "grid_z", z);
+    mxDestroyArray(current);
+	mxDestroyArray(w);
+	mxDestroyArray(x);
+	mxDestroyArray(y);
+	mxDestroyArray(z);
     matClose(pmat);
 }
 
@@ -4370,7 +4496,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 	// open matlab file
 	mfPtr = matOpen(file.c_str(), "r");
    	if (mfPtr == NULL) {
-       	printf("Error opening file %s\n", file);
+       	printf("Error opening file %s\n", file.c_str());
 	}
 	
 	// for each of the 5 columns
@@ -4390,6 +4516,14 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 			if (temp.substr(1,1) == "_")
 			{
 				nameTemp = (temp.substr(0,1)).c_str();
+			}
+			else if ((temp.substr(0,2) == "pc"))
+			{
+				nameTemp = "V";
+			}
+			else if ((temp.substr(0,2) == "al"))
+			{
+				nameTemp = "K";
 			}
 			// If length is more than 1 and second char is not underscore will go to default
 			else
@@ -4415,7 +4549,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					// make sure it has a "arr" field
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						// get the number of elements in struct
@@ -4447,7 +4581,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -4473,7 +4607,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -4499,7 +4633,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -4525,7 +4659,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -4551,7 +4685,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -4654,7 +4788,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 	
 	// close file
     if (matClose(mfPtr) != 0) {
-        printf("Error closing file %s\n", file);
+        printf("Error closing file %s\n", file.c_str());
     }
 	
 	// free allocated memory
@@ -4796,12 +4930,13 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 	const char* name;		/* for getting variable names */
 	const char* nameTemp;	/* for getting variable names */
 	bool defaultReached = false;
-	bool rReached = false;						
+	bool rReached = false;
+	bool lReached = false;												
 						
 			
 	mfPtr = matOpen(file.c_str(), "r");
    	if (mfPtr == NULL) {
-       	printf("Error opening file %s\n", file);
+       	printf("Error opening file %s\n", file.c_str());
 	}
 	
 	for (int i= 0; i < 5; i++)
@@ -4818,6 +4953,14 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 			{
 				nameTemp = (temp.substr(0,1)).c_str();
 			}
+			else if ((temp.substr(0,2) == "pc"))
+			{
+				nameTemp = "V";
+			}
+			else if ((temp.substr(0,2) == "al"))
+			{
+				nameTemp = "K";
+			}
 			else
 			{
 				nameTemp = "!";	
@@ -4833,7 +4976,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -4861,7 +5004,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -4881,6 +5024,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 			    }
 				break;
 			case 'L':
+				lReached = true;
 				aPtr = matGetVariable(mfPtr, name);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
@@ -4888,7 +5032,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -4914,7 +5058,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -4941,7 +5085,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -4970,7 +5114,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -4992,11 +5136,11 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 		}
 	}	
 	
-	if (!rReached)
+	if (!rReached && lReached)
 	{
 		PtrX = PtrL;
 	}
-	else if (!defaultReached)
+	else if (!defaultReached && lReached)
 	{
 		PtrFinal = PtrL;
 	}
@@ -5019,7 +5163,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 	}
 	
     if (matClose(mfPtr) != 0) {
-        printf("Error closing file %s\n", file);
+        printf("Error closing file %s\n", file.c_str());
     }
 	
 	mxDestroyArray(aPtr);
