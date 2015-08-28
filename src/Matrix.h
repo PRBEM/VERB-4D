@@ -13,7 +13,7 @@
 #define matrix_array_MATRIX_H
 
 // ADDED
-#include "/Applications/MATLAB_R2015a.app/extern/include/mat.h"
+#include "include/mat.h"
 
 
 

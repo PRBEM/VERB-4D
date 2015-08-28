@@ -597,7 +597,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
 			
 	mfPtr = matOpen(file.c_str(), "r");
    	if (mfPtr == NULL) {
-       	printf("Error opening file %s\n", file);
+       	printf("Error opening file %s\n", file.c_str());
 	}
 	
 	for (int i= 0; i < 3; i++)
@@ -695,7 +695,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -2262,7 +2262,7 @@ void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, con
 				} 
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
-   						printf("Field not found: %s\n", field);
+   						printf("Field not found: %s\n", field.c_str());
 	 				}
 					else {
 						nElements = (mwSize)mxGetNumberOfElements(aPtr);
@@ -4101,6 +4101,12 @@ mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
     const char *fieldnames[7] = {"arr", "time", "size", "size1", "size2" , "size3" , "size4"};
 	// create a 1x1 struct that will hold the array of values and the time info
 	mxArray *s = mxCreateStructMatrix(1, 1, 7, fieldnames);
+	mwSize size_W = size_w;
+	mwSize size_X = size_x;
+	mwSize size_Y = size_y;
+	mwSize size_Z = size_z;
+	
+
 
     // fill struct fields
     for (mwIndex i=0; i<7; i++) {
@@ -4108,8 +4114,8 @@ mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
 		if (i== 0)
 		{
 			// create array of doubles and give it the data in matrix_array
-			int ndim = 4;
-			mwSize dims[ndim] = {size_w , size_x, size_y, size_z};
+			const int ndim = 4;
+			mwSize dims[ndim] = {size_W , size_X, size_Y, size_Z};
 			mxArray *aPtr = mxCreateNumericArray(ndim,dims,mxDOUBLE_CLASS,mxREAL);
 			if (aPtr == NULL) {
     			printf("Unable to create double mxArray.\n");
@@ -4212,6 +4218,12 @@ void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
     	exit(EXIT_FAILURE);
   	}
 	
+	
+	
+	mwSize size_W = size_w;
+	mwSize size_X = size_x;
+	mwSize size_Y = size_y;
+	mwSize size_Z = size_z;
 	int w,x,y,z;
 	int status;
     // create a struct array with two fields
@@ -4225,8 +4237,8 @@ void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
 		if (i== 0)
 		{
 			// create array of doubles and give it the data in matrix_array
-			int ndim = 4;
-			mwSize dims[ndim] = {size_w , size_x, size_y, size_z};
+			const int ndim = 4;
+			mwSize dims[ndim] = {size_W , size_X, size_Y, size_Z};
 			mxArray *aPtr = mxCreateNumericArray(ndim,dims,mxDOUBLE_CLASS,mxREAL);
 			if (aPtr == NULL) {
     			printf("Unable to create double mxArray.\n");
