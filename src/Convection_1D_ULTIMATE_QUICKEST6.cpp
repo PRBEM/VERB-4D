@@ -69,7 +69,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 
 	if (x_size < gst*2+1) {
 		Logger::error << "Number of convection grid can't be smaller than " << (gst * 2 + 1) << " due to numerical method used." << endl;
-		exit(EXIT_FAILURE);
+		//exit(EXIT_FAILURE);
 	}
 
 	bool use_discreminator = true, use_limiting = true;
@@ -112,8 +112,8 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 				PSD_t[gst - ig] = PSD_t[gst - ig + 1] - x_LBC * dx;
 
 		} else {
-			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_LBC_type.c_str());
-			exit(EXIT_FAILURE);
+			Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_LBC_type.c_str() << endl;
+			//exit(EXIT_FAILURE);
 		}
 
 		// same thing for the upper boundary conditions
@@ -134,8 +134,8 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 				PSD_t[gst + (x_size-1) + ig] = PSD_t[gst + (x_size-1) + ig - 1] + x_UBC * dx;
 
 		} else {
-			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_UBC_type.c_str());
-			exit(EXIT_FAILURE);
+			Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_UBC_type.c_str() << endl;
+			//exit(EXIT_FAILURE);
 		}
 
 		// All equations and formulas for these calculations can be found at http://www.hadian.ir/teaching/CompHydr/3.pdf

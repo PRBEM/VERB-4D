@@ -15,6 +15,7 @@
 #include "Matrix.h"
 #include "Logger.h"
 
+
 using namespace std;
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -1237,14 +1238,14 @@ analyzestructarray(const mxArray *sPtr, const char *fName)
 
 /* Find struct array ARR in MAT-file FILE.
  * Pass field name FIELD to analyzestructarray function. */
-int findstructure(
+/*int findstructure(
         const char *file,
         const char *arr,
         const char *field) {
     
    
     
-}
+}*/
 
 
 

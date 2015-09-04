@@ -3,4 +3,13 @@
   <PropertyGroup>
     <ShowAllFiles>true</ShowAllFiles>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LocalDebuggerEnvironment>PATH=c:\Program Files (x86)\MATLAB\R2015b\bin\win32</LocalDebuggerEnvironment>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ADI1|Win32'">
+    <LocalDebuggerWorkingDirectory>$(ProjectDir)ADI1</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerEnvironment>PATH=c:\Program Files (x86)\MATLAB\R2015b\bin\win32</LocalDebuggerEnvironment>
+  </PropertyGroup>
 </Project>

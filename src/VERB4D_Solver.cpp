@@ -101,7 +101,7 @@
 
 // ADDED
 // #include "/Applications/MATLAB_R2015a.app/extern/include/mat.h"
-#include "include/mat.h"
+#include <mat.h>
 
 #include <iostream>
 #include <iomanip>
@@ -125,9 +125,9 @@ using namespace std;
 #include "Diffusion_2D.h"
 
 // Straightforward ADI
-//#include "Diffusion_ADI1.h"
+#include "Diffusion_ADI1.h"
 // Fuliang Xiao's ADI
-//#include "Diffusion_ADI2.h"
+#include "Diffusion_ADI2.h"
 // Jihye Shin and Sungsoo S. Kim (2008)'s ADI - most stable
 #include "Diffusion_ADI3.h"
 
@@ -288,8 +288,7 @@ int main(int argc, char* argv[]) {
 	// ADDED
 	if (use_matlab == "true")
 	{
-		PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << ".mat";
-		Logger::message << "Writing results: " << PSD_filename.str() << endl;
+		PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << ".mat";		
 		Logger::message << "Writing results: " << PSD_filename.str() << endl;
 		time_string.str("");
 		time_string << time_first;
@@ -297,8 +296,7 @@ int main(int argc, char* argv[]) {
 	}
 	else
 	{
-		PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << ".plt";
-		Logger::message << "Writing results: " << PSD_filename.str() << endl;
+		PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << ".plt";		
 		Logger::message << "Writing results: " << PSD_filename.str() << endl;
 		time_string.str("");
 		time_string << time_first;
@@ -338,7 +336,7 @@ int main(int argc, char* argv[]) {
 	// Only throws error if time step is too large - else has no effect on remaining calculations
 	if (inversion_method == "ADI") {
 		// if (dt > 0.1/24 + 0.001) {
-		if (dt > sqrt(1.0 / V.size_y)) {
+		if (dt > sqrt(1.0 / V.size_y)) { // This check should be included for other inversion_methods
 			Logger::error << "Calculating with ADI, time step " << dt << " is too large." << endl;
 			exit(EXIT_FAILURE);
 		} else {
@@ -739,21 +737,41 @@ int main(int argc, char* argv[]) {
 					// If parameters.ini specify "Lapack" then Lapack will be used
 					if (inversion_method == "Lapack") {
 						Diffusion_2D(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
-								Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
-								Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
-								Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
-								DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
-								Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
-					} 
+							Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+							Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+							Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+							DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+							Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+					}
 					// Currently setup to calculate 2d Diffusion using Diffusion_2D_ADI3
 					// Can change to Diffusion_2D_ADI1 or Diffusion_2D_ADI2 for different methods of inversion
-					else {
+					else if (inversion_method == "ADI") {
 						Diffusion_2D_ADI3(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
-								Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
-								Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
-								Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
-								DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
-								Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+							Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+							Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+							Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+							DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+							Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+					}
+					else if (inversion_method == "ADI2") {
+						Diffusion_2D_ADI2(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
+							Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+							Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+							Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+							DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+							Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+					}
+					else if (inversion_method == "ADI1") {
+						Diffusion_2D_ADI1(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
+							Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+							Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+							Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+							DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+							Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+		}
+					else
+					{
+						Logger::error << "Error: Unknown inversion method " << inversion_method << endl;
 					}
 
 					// copy results back
@@ -810,7 +828,7 @@ int main(int argc, char* argv[]) {
                     } 
 					// Currently setup to calculate 2d Diffusion using Diffusion_2D_ADI3
 					// Can change to Diffusion_2D_ADI1 or Diffusion_2D_ADI2 for different methods of inversion
-					else {
+					else if(inversion_method == "ADI"){
                         Diffusion_2D_ADI3(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
                                               Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
                                               Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
@@ -818,6 +836,26 @@ int main(int argc, char* argv[]) {
                                               DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
                                               Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
                     }
+					else if (inversion_method == "ADI2") {
+						Diffusion_2D_ADI2(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
+							Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+							Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+							Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+							DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+							Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+					}
+					else if (inversion_method == "ADI1") {
+						Diffusion_2D_ADI1(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
+							Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+							Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+							Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+							DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+							Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+					}
+					else
+					{
+						Logger::error << "Error: Unknown inversion method " << inversion_method << endl;
+					}
                         
                         // copy results back
                     for (iV = 0; iV < V_size; iV++)

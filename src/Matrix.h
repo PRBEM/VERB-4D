@@ -13,9 +13,8 @@
 #define matrix_array_MATRIX_H
 
 // ADDED
-#include "include/mat.h"
-
-
+//#include "include/mat.h"
+//#include "include/mex.h"
 
 #include <assert.h>
 #include <string>
@@ -27,6 +26,15 @@
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
+
+#include <mat.h>
+
+
+// Stupid hook to make it works in Visual Studio with Maltab 2013-2015 libs
+//#define printf printf
+
+// Another way is to not include mex.h into the matrix.h
+//#include <mex.h>
 
 using namespace std;
 

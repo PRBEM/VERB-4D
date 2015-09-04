@@ -213,6 +213,10 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	// ADDED
 	else // IF MATLAB SELECTED
 	{
+		if (file != NULL)
+			fclose(file);
+		
+
 		MATFile *mfPtr; /* MAT-file pointer */
    		mxArray *aPtr;  /* mxArray pointer */
 		mwSize nElements;       /* number of elements in array */
@@ -321,7 +325,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			mxDestroyArray(aPtr);
     		matClose(mfPtr);  	   
 	}
-	fclose(file);
+	
 	
 	// sets the size of L and R to be the same - both measure distance
 	L_size = R_size;
@@ -363,12 +367,15 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
+
 			P.readFromMatlabFile(InputFolder + "grid.mat", 1);
 			R.readFromMatlabFile(InputFolder + "grid.mat", 2);
 			V.readFromMatlabFile(InputFolder + "grid.mat", 3);
 			K.readFromMatlabFile(InputFolder + "grid.mat", 4);
 		}
-		fclose(file);
+	
 	}
 	
 
@@ -390,9 +397,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if(file!=NULL)
+				fclose(file);
 			L.readFromMatlabFile(InputFolder + "Lstar.mat", P, R, V, K);
 		}
-		fclose(file);
+		
 	}
 
 		
@@ -433,10 +442,12 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			DLL.readFromMatlabFile(InputFolder + "DLL.mat", P, L, V, K);
 		}
 	}
-	fclose(file);
+
 
 
 	// ADDED
@@ -455,10 +466,12 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			DVV.readFromMatlabFile(InputFolder + "DVV.mat", P, R, V, K);
 		}
 	}
-	fclose(file);
+	
 
 
 	// ADDED
@@ -477,10 +490,12 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			DKK.readFromMatlabFile(InputFolder + "DKK.mat", P, R, V, K);
 		}
 	}
-	fclose(file);
+	
 
 	// ADDED
 	// If matlab not selected
@@ -498,10 +513,12 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			DVK.readFromMatlabFile(InputFolder + "DVK.mat", P, R, V, K);
 		}
 	}
-	fclose(file);
+
 	
 	// ADDED
 	// If matlab not selected
@@ -519,10 +536,12 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			VP.readFromMatlabFile(InputFolder + "VP.mat", P, R, V, K);
 		}
 	}
-	fclose(file);
+	
 		
 	// ADDED
 	// If matlab not selected
@@ -540,10 +559,12 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			VL.readFromMatlabFile(InputFolder + "VR.mat", P, R, V, K);
 		}
 	}
-	fclose(file);	
+	
 	
 	// ADDED
 	// If matlab not selected
@@ -561,10 +582,12 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			G_local.readFromMatlabFile(InputFolder + "G_local.mat", P, R, V, K);
 		}
 	}
-	fclose(file);
+
 	
 	// ADDED
 	// If matlab not selected
@@ -582,10 +605,12 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			G_radial.readFromMatlabFile(InputFolder + "G_radial.mat", P, R, V, K);
 		}
 	}
-	fclose(file);	
+	
 
 	// if (!VL.readFromIniFile(InputFolder + "VR.tab", P, R, V, K))
 	// 	VL.readFromFile(InputFolder + "VR.plt", P, R, V, K);
@@ -617,10 +642,12 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			Sources.readFromMatlabFile(InputFolder + "Sources.mat", P, R, V, K);
 		}
 	}
-	fclose(file);	
+	
 	
 	// ADDED
 	// If matlab not selected
@@ -657,9 +684,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			Losses.readFromFile(InputFolder + "Losses_losscone.plt", P, R, V, K);
 		}
-		fclose(file);	
+		
 	}
 	
 	
@@ -752,9 +781,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			PSD_l_R.readFromMatlabFile(InputFolder + "Rl_BC.mat", P.xSlice(0), V.xSlice(0), K.xSlice(0));
 		}
-		fclose(file);	
+
 		if (!(file = fopen((InputFolder + "Ru_BC.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		 
 		{
@@ -763,9 +794,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			PSD_u_R.readFromMatlabFile(InputFolder + "Ru_BC.mat",P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1));
 		}
-		fclose(file);
+
 		
 		// L boundary conditions
 		
@@ -776,9 +809,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			PSD_l_L.readFromMatlabFile(InputFolder + "Ll_BC.mat", P.xSlice(0), V.xSlice(0), K.xSlice(0));
 		}
-		fclose(file);
+
 		if (!(file = fopen((InputFolder + "Lu_BC.mat").c_str() , "r"))) // Check to see if .mat file is there  
 		{
 				if (!PSD_u_L.readFromIniFile(InputFolder + "Lu_BC.tab", P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1)))
@@ -786,9 +821,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			PSD_u_L.readFromMatlabFile(InputFolder + "Lu_BC.mat",P.xSlice(P.size_x-1), V.xSlice(V.size_x-1), K.xSlice(K.size_x-1));
 		}
-		fclose(file);
+
 		
 		
 		
@@ -801,9 +838,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			PSD_l_V.readFromMatlabFile(InputFolder + "Vl_BC.mat", P.ySlice(0), R.ySlice(0), K.ySlice(0));
 		}
-		fclose(file);
+
 		if (!(file = fopen((InputFolder + "Vu_BC.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!PSD_u_V.readFromIniFile(InputFolder + "Vu_BC.tab", P.ySlice(P.size_y-1), R.ySlice(R.size_y-1), K.ySlice(K.size_y-1)))
@@ -811,9 +850,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			PSD_u_V.readFromMatlabFile(InputFolder + "Vu_BC.mat",P.ySlice(P.size_y-1), R.ySlice(R.size_y-1), K.ySlice(K.size_y-1));
 		}
-		fclose(file);
+		
 		
 		
 		
@@ -826,9 +867,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			PSD_l_K.readFromMatlabFile(InputFolder + "Kl_BC.mat", P.zSlice(0), R.zSlice(0), V.zSlice(0));
 		}
-		fclose(file);
+		
 		if (!(file = fopen((InputFolder + "Ku_BC.mat").c_str() , "r"))) // Check to see if .mat file is there 
 		{
 				if (!PSD_u_K.readFromIniFile(InputFolder + "Ku_BC.tab", P.zSlice(P.size_z-1), R.zSlice(R.size_z-1), V.zSlice(V.size_z-1)))
@@ -836,9 +879,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 		else
 		{
+			if (file != NULL)
+				fclose(file);
 			PSD_u_K.readFromMatlabFile(InputFolder + "Ku_BC.mat",P.zSlice(P.size_z-1), R.zSlice(R.size_z-1), V.zSlice(V.size_z-1));
 		}		
-		fclose(file);
+		
 	}
 	
 	// For Testing
