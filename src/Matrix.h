@@ -12,9 +12,6 @@
 #ifndef matrix_array_MATRIX_H
 #define matrix_array_MATRIX_H
 
-// ADDED
-//#include "include/mat.h"
-//#include "include/mex.h"
 
 #include <assert.h>
 #include <string>

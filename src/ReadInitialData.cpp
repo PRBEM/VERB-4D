@@ -15,7 +15,6 @@ using namespace std;
 	#define strcasecmp _stricmp
 #endif
 
-
 /** 
 * Allocates the memory for all the matrices using Matrix4D::AllocateMemory() for everything except boundary conditions which use Matrix3D::AllocateMemory()
 *
@@ -171,8 +170,14 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	parameters.getParameter("input_folder", InputFolder);
 	parameters.getParameter("output_folder", OutputFolder);
 
+
+#if !defined(MATLAB_CAPABLE)
+{
+	use_matlab = "false";
+}
+#endif
+
 	FILE *file;
-	//if (file = fopen(name.c_str(), "r"))
 	
 	
 	if ( (!(file = fopen((InputFolder + "grid.mat").c_str() , "r"))) || use_matlab == "false")
@@ -377,6 +382,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		}
 	
 	}
+	
+	// P.writeToFile(OutputFolder + "p.plt");
+	// R.writeToFile(OutputFolder + "r.plt");
+	// V.writeToFile(OutputFolder + "v.plt");
+	// K.writeToFile(OutputFolder + "k.plt");
 	
 
 	

@@ -100,8 +100,9 @@
 
 
 // ADDED
-// #include "/Applications/MATLAB_R2015a.app/extern/include/mat.h"
+// included to be able to read/write .mat files
 #include <mat.h>
+
 
 #include <iostream>
 #include <iomanip>
@@ -187,7 +188,7 @@ int main(int argc, char* argv[]) {
 	// Diffusion coefficient, 4D
 	UpdatableListMatrix<Matrix4D<double> > DLL, DVV, DKK, DVK;
 
-	// Convection (advection																																																		) velocities, 4D arrays
+	// Convection (advection) velocities, 4D arrays
 	UpdatableMatrix<Matrix4D<double> > VR, VP;
 
 	// Additional sources and losses
@@ -272,6 +273,7 @@ int main(int argc, char* argv[]) {
 	Logger::message << "Output each " << output_step << " step. " << endl;
 
 	// Save initial conditions
+	
 	
 	if (use_matlab == "false")
 		PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
@@ -460,21 +462,8 @@ int main(int argc, char* argv[]) {
 			//L_LBC.original_arr =(PSD.xSlice(0));
 			Ll_BC.update(time, P.xSlice(0), V.xSlice(0), K.xSlice(0));
 			//L_UBC.original_arr =(PSD.xSlice(PSD.size_x - 1));
-			// UNCOMMENT NEXT LINE
 			Lu_BC.update(time, P.xSlice(R.size_x - 1), V.xSlice(R.size_x - 1), K.xSlice(R.size_x - 1));
-			
-			
-			
-			// // ADDED FOR TESTING PURPOSES
-			// if (!Lu_BC.update(time, P.xSlice(R.size_x - 1), V.xSlice(R.size_x - 1), K.xSlice(R.size_x - 1)))
-			// {
-			// 	Lu_BC.writeToFile( to_string(time) + "LUBC_NO.plt");
-			// }
-			
-			
-			
-			
-			
+						
 		}
 		if (V_size > 3) {
 			//V_LBC.original_arr =(PSD.ySlice(0));
@@ -512,7 +501,9 @@ int main(int argc, char* argv[]) {
 			cout << "           ";
  
 			Matrix2D<double> PSD_PR(P_size, R_size);
-			// omp-paraller loop
+			
+			
+// If you have OPENMP 3.0 with collapse functionality you can use this. (Visual Studios does not)			
 #if defined _OPENMP && _OPENMP >= 200711
             #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_PR) shared(progress_total, progress_count) schedule(dynamic,1) collapse(2)
                 for (iV = V_size-1; iV >= 0; iV--) { 	// Looping it backward allows to speed-up the multithread simulation
@@ -544,11 +535,12 @@ int main(int argc, char* argv[]) {
 				}
 			}
             
-#else
+#else // If you dont have the latest OPENMP will manually collapse indeces for you
                 #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_PR) shared(progress_total, progress_count) schedule(dynamic,1)
                 for (int index = (V_size * K_size) - 1; index >= 0; index--) { 	// Looping it backward allows to speed-up the multithread simulation
                     // due to the highest energies being the slowest to calculate - calculating highest energy first
                     
+					// Manually collapsing into a single for loop in order to optimize
                     iV = index % V_size;
                     iK = (K_size - 1) - (index / V_size);
                     // Output current progress percentage when number of threads = 0
@@ -580,11 +572,16 @@ int main(int argc, char* argv[]) {
 			cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
 		}
 
-				// ADDED FOR TESTING
-                //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_before_radial.plt");			
 
 
-		// Radial diffusion
+// RADIAL DIFFUSION STEP
+
+
+					// ADDED FOR TESTING
+               		//  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_before_radial.plt");			
+
+
+
 		if (L_size >= 3) {
 			progress_count = 0;
 			progress_total = P_size * V_size * K_size; // total size of solution matrix 
@@ -592,43 +589,19 @@ int main(int argc, char* argv[]) {
 			cout<< "           ";
 
 			Matrix1D<double> PSD_L(L_size);
-            
-#if defined _OPENMP && _OPENMP >= 200711
-            
+       
+	        
+#if defined _OPENMP && _OPENMP >= 200711    
 #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
-// #pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total) reduction(+ : progress_count) schedule(static) 
-//#pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic)  
 			 for (iP = 0; iP < P_size; iP++) {
-				// if (omp_get_thread_num() != 0){
-				// 			cout << "[" << omp_get_thread_num() << "]"  << endl;
-				// 	}
-//#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1)  
-//#pragma omp parallel for private(iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) 
-//#pragma omp parallel for
 				 for (iV = 0; iV < V_size; iV++) {
-					// if (omp_get_thread_num() != 0){
-					// 		cout << "#" << omp_get_thread_num() << "#"  << endl;
-					// }
-//#pragma omp parallel for private(iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) 
-//#pragma omp parallel for
-
 					 for (iK = 0; iK < K_size; iK++) {
-// #pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total, progress_count)
-// for (int index = 0 ; index < P_size*V_size*K_size; index++)
-// 	{
-// 		iP = index / (V_size*K_size);
-// 		iV = (index/K_size) % V_size;
-// 		iK = index % K_size;
 
 
-
-						 //if (omp_get_thread_num() == 0){
-						 //	cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
-						 //}
-						// else
-						// {
-						// cout << "(" << omp_get_thread_num() << ")" << endl;
-						// }
+						 // print percentage done
+						 if (omp_get_thread_num() == 0){
+						 	cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+						 }
 
 						// 1d slice
 						PSD_L = PSD.wyzSlice(iP, iV, iK);
@@ -643,9 +616,7 @@ int main(int argc, char* argv[]) {
 						for (iL = 0; iL < L_size; iL++)
 							PSD[iP][iL][iV][iK] = PSD_L[iL];
                 
-			
-
-
+		
 #pragma omp critical // Progress output
 						progress_count += 1;
 
@@ -653,9 +624,9 @@ int main(int argc, char* argv[]) {
 				  }
 			 }
                 
-				// ADDED FOR TESTING
-                //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_after_radial.plt");			
-				
+					// ADDED FOR TESTING
+	                //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_after_radial.plt");			
+					
         
 #else
                 #pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total, progress_count)
@@ -665,9 +636,11 @@ int main(int argc, char* argv[]) {
                     iV = (index/K_size) % V_size;
                     iK = index % K_size;
                 
-                    //if (omp_get_thread_num() == 0){
-                    //    cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
-                    //}
+				
+					// print percentage done
+                    if (omp_get_thread_num() == 0){
+                       cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+                    }
                     // 1d slice
                     PSD_L = PSD.wyzSlice(iP, iV, iK);
                 
@@ -686,6 +659,8 @@ int main(int argc, char* argv[]) {
                 progress_count += 1;
             }
 #endif
+
+
 			cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%"
 					<< endl;
 		}
@@ -694,7 +669,10 @@ int main(int argc, char* argv[]) {
                 //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_after_radial.plt");			
 
 
-		// Local diffusion
+
+
+// LOCAL DIFFUSION
+
 		if (V_size >= 3 && K_size >= 3) {
 			int number_of_skipped_points = 0;
 			progress_count = 0;
@@ -703,6 +681,8 @@ int main(int argc, char* argv[]) {
 			cout << "           ";
 
 			Matrix2D<double> PSD_IK(V_size, K_size);
+
+
 #if defined _OPENMP && _OPENMP >= 200711
                 #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1) collapse(2)
                 for (iP = 0; iP < P_size; iP++) {
@@ -784,7 +764,7 @@ int main(int argc, char* argv[]) {
             
 #else
             
-                #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1)
+#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1)
                 for ( int index = 0; index < P_size * R_size; index++) {
                     iP = index / R_size;
                     iR = index % R_size;

@@ -12,6 +12,10 @@
 #ifndef matrix_array_MATRIX_CPP
 #define matrix_array_MATRIX_CPP
 	
+
+	
+	
+	
 #include "Matrix.h"
 #include "Logger.h"
 
@@ -566,6 +570,7 @@ void Matrix1D<T>::readFromFile(string filename) {
 template<class T>
 void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
 {
+	
 	Logger::message << "Reading " << file << ": " << endl;	
 	
 	MATFile *mfPtr; /* MAT-file pointer */
@@ -862,6 +867,8 @@ void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
     }
 	
 	mxDestroyArray(aPtr);
+	
+
 }
 
 
@@ -928,6 +935,7 @@ void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
 template<class T>
 void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 {
+
 	Logger::message << "Reading " << file << ": " << endl;	
 	
 	MATFile *mfPtr; /* MAT-file pointer */
@@ -1196,6 +1204,8 @@ void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
     }
 	
 	mxDestroyArray(aPtr);
+	
+
 }
 
 
@@ -1712,6 +1722,9 @@ void Matrix2D<T>::readFromFile(string filename, int read_column) {
 template<class T>
 void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
 {
+
+
+	
 	Logger::message << "Reading " << file << ": " << endl;	
 	
 	MATFile *mfPtr; /* MAT-file pointer */
@@ -2008,6 +2021,8 @@ void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
     }
 	
 	mxDestroyArray(aPtr);
+		
+
 }
 
 
@@ -2077,6 +2092,8 @@ void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const 
 template<class T>
 void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, const Matrix2D<T> grid_y)
 {
+
+	
 	Logger::message << "Reading " << file << ": " << endl;	
 	
 	MATFile *mfPtr; /* MAT-file pointer */
@@ -2363,6 +2380,8 @@ void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, con
     }
 	
 	mxDestroyArray(aPtr);
+		
+	
 }
 
 
@@ -2875,6 +2894,8 @@ void Matrix3D<T>::readFromFile(string filename, int read_column) {
 template<class T>
 void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
 {
+	
+		
 	Logger::message << "Reading " << file << ": " << endl;	
 	
 	MATFile *mfPtr; /* MAT-file pointer */
@@ -3177,6 +3198,8 @@ void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
     }
 	
 	mxDestroyArray(aPtr);
+	
+	
 }
 
 
@@ -3253,6 +3276,8 @@ void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const 
 template<class T>
 void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, const Matrix3D<T> grid_y, const Matrix3D<T> grid_z)
 {
+
+	
 	Logger::message << "Reading " << file << ": " << endl;	
 	
 	MATFile *mfPtr; /* MAT-file pointer */
@@ -3525,6 +3550,8 @@ void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, con
     }
 	
 	mxDestroyArray(aPtr);
+	
+
 }
 
 
@@ -4093,9 +4120,14 @@ void Matrix4D<T>::writeToFile(string filename, string info) {
 
 
 
+
+
+	
+	
 template<class T>
 mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
 {
+		
 	int w,x,y,z;
 	int status;
     // create a struct array with two fields
@@ -4191,8 +4223,8 @@ mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
 		}	
     }
 	return s;
-}
 
+}
 
 
 
@@ -4205,7 +4237,8 @@ mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
 template<class T>
 void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
 	
-	
+
+		
 	// for testing
 	//writeToFile((filename.substr(0, filename.size()-5) + ".plt"), info);
 	
@@ -4326,6 +4359,8 @@ void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
     mxDestroyArray(s);
     matClose(pmat);
 
+
+
 }
 
 
@@ -4367,7 +4402,7 @@ void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> 
 */ 
 template<class T>
 void Matrix4D<T>::writeToMatlabFile(string file, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) {
-	
+
 	
 	Logger::message << "writing " << file << ": " << endl;	
 	MATFile *pmat = matOpen( file.c_str(), "w");
@@ -4392,6 +4427,8 @@ void Matrix4D<T>::writeToMatlabFile(string file, Matrix4D<T> &grid_w, Matrix4D<T
 	mxDestroyArray(y);
 	mxDestroyArray(z);
     matClose(pmat);
+	
+
 }
 
 
@@ -4474,6 +4511,8 @@ void Matrix4D<T>::readFromFile(string filename, int read_column) {
 template<class T>
 void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 {
+	
+	
 	Logger::message << "Reading " << file << ": " << endl;	
 	
 	MATFile *mfPtr; /* MAT-file pointer */
@@ -4806,6 +4845,8 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 	
 	// free allocated memory
 	mxDestroyArray(aPtr);
+		
+	
 }
 
 
@@ -4918,6 +4959,8 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 template<class T>
 void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z)
 {
+		
+	
 	Logger::message << "Reading " << file << ": " << endl;	
 	
 	MATFile *mfPtr; /* MAT-file pointer */
@@ -5180,6 +5223,8 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
     }
 	
 	mxDestroyArray(aPtr);
+	
+	
 }
 
 
