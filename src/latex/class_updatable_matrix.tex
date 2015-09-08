@@ -1,0 +1,188 @@
+\hypertarget{class_updatable_matrix}{}\section{Updatable\+Matrix$<$ Matrix\+N\+D $>$ Class Template Reference}
+\label{class_updatable_matrix}\index{Updatable\+Matrix$<$ Matrix\+N\+D $>$@{Updatable\+Matrix$<$ Matrix\+N\+D $>$}}
+
+
+A matrix that can be created in 1, 2, 3, or 4 dimensions with the ability to be updated.  
+
+
+
+
+{\ttfamily \#include $<$Updatable\+Matrix.\+h$>$}
+
+Inheritance diagram for Updatable\+Matrix$<$ Matrix\+N\+D $>$\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_updatable_matrix}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_matrix_n_d}{Matrix\+N\+D} \& \hyperlink{class_updatable_matrix_a6aed93610d60720a50de4ad805fa8b7e}{operator=} (const \hyperlink{class_matrix_n_d}{Matrix\+N\+D} \&M)
+\item 
+\hyperlink{class_matrix_n_d}{Matrix\+N\+D} \& \hyperlink{class_updatable_matrix_aea4ca4ff840f247a3a683ca03cae5885}{operator=} (const double Val)
+\item 
+void \hyperlink{class_updatable_matrix_a422ab8daeeb8ff09803d9623d92eb28e}{save\+Current} ()
+\item 
+bool \hyperlink{class_updatable_matrix_a624e5f24c93915ccac0dd189b0646e7a}{read\+From\+Ini\+File} (string ini\+\_\+filename, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} Q1, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} Q2, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} Q3, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} Q4=\hyperlink{class_matrix_n_d}{Matrix\+N\+D}())
+\item 
+bool \hyperlink{class_updatable_matrix_a022a0730e7310b0c6f7c51dbb48d59d7}{read\+From\+String} (string file\+\_\+line\+\_\+string, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} \&Q1, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} \&Q2, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} \&Q3, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} \&Q4)
+\item 
+bool \hyperlink{class_updatable_matrix_a57fe16cce1982a1df412fe9a3e1d28ea}{update} (double time, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} Q1, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} Q2, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} Q3, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} Q4=\hyperlink{class_matrix_n_d}{Matrix\+N\+D}())
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_updatable_matrix_ae79f618a746822c858e40af708c786af}{}\hyperlink{class_matrix_n_d}{Matrix\+N\+D} \hyperlink{class_updatable_matrix_ae79f618a746822c858e40af708c786af}{original\+\_\+arr}\label{class_updatable_matrix_ae79f618a746822c858e40af708c786af}
+
+\begin{DoxyCompactList}\small\item\em Indicates when the Matrix was updated last time. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_updatable_matrix_a5af841b9937ec327b1774a80f5419933}{}string {\bfseries scale\+\_\+string}\label{class_updatable_matrix_a5af841b9937ec327b1774a80f5419933}
+
+\item 
+\hypertarget{class_updatable_matrix_a1251811f61cd781c010eb2d80d31afa1}{}string \hyperlink{class_updatable_matrix_a1251811f61cd781c010eb2d80d31afa1}{update\+\_\+filename}\label{class_updatable_matrix_a1251811f61cd781c010eb2d80d31afa1}
+
+\begin{DoxyCompactList}\small\item\em Filename for matrix scaling. \end{DoxyCompactList}\item 
+\hypertarget{class_updatable_matrix_aa75594fbb280ca076f76ee92672afe25}{}string \hyperlink{class_updatable_matrix_aa75594fbb280ca076f76ee92672afe25}{Q1\+\_\+from\+\_\+string}\label{class_updatable_matrix_aa75594fbb280ca076f76ee92672afe25}
+
+\begin{DoxyCompactList}\small\item\em Filename for Matrix data updating (e.\+g. to load a completely different data) \end{DoxyCompactList}\item 
+\hypertarget{class_updatable_matrix_a65fcb6c628c92fa7c29d887665c2b1b0}{}string \hyperlink{class_updatable_matrix_a65fcb6c628c92fa7c29d887665c2b1b0}{Q1\+\_\+to\+\_\+string}\label{class_updatable_matrix_a65fcb6c628c92fa7c29d887665c2b1b0}
+
+\begin{DoxyCompactList}\small\item\em Filename for limiting Q1 (usually it\textquotesingle{}s M\+L\+T, lower limit) \end{DoxyCompactList}\item 
+\hypertarget{class_updatable_matrix_a05ca54f981ebba0c2889eaf6127457d3}{}string \hyperlink{class_updatable_matrix_a05ca54f981ebba0c2889eaf6127457d3}{Q2\+\_\+from\+\_\+string}\label{class_updatable_matrix_a05ca54f981ebba0c2889eaf6127457d3}
+
+\begin{DoxyCompactList}\small\item\em Filename for limiting Q1 (usually it\textquotesingle{}s M\+L\+T, upper limit) \end{DoxyCompactList}\item 
+\hypertarget{class_updatable_matrix_a6f6dec0874e2d95f71b9cfc712214bb5}{}string \hyperlink{class_updatable_matrix_a6f6dec0874e2d95f71b9cfc712214bb5}{Q2\+\_\+to\+\_\+string}\label{class_updatable_matrix_a6f6dec0874e2d95f71b9cfc712214bb5}
+
+\begin{DoxyCompactList}\small\item\em Filename for limiting Q2 (usually it\textquotesingle{}s the radial distance range, e.\+g. above or below plasmapause) \end{DoxyCompactList}\item 
+\hypertarget{class_updatable_matrix_a1ea1c233ed77177f662e406ad0ad8d1b}{}string \hyperlink{class_updatable_matrix_a1ea1c233ed77177f662e406ad0ad8d1b}{Q3\+\_\+from\+\_\+string}\label{class_updatable_matrix_a1ea1c233ed77177f662e406ad0ad8d1b}
+
+\begin{DoxyCompactList}\small\item\em Filename for limiting Q2 (usually it\textquotesingle{}s the radial distance range, e.\+g. above or below plasmapause) \end{DoxyCompactList}\item 
+\hypertarget{class_updatable_matrix_a9a31ee7fd00632594c8b34dbe9596d67}{}string \hyperlink{class_updatable_matrix_a9a31ee7fd00632594c8b34dbe9596d67}{Q3\+\_\+to\+\_\+string}\label{class_updatable_matrix_a9a31ee7fd00632594c8b34dbe9596d67}
+
+\begin{DoxyCompactList}\small\item\em Filename for limiting Q3 (usually it\textquotesingle{}s V, lower limit) \end{DoxyCompactList}\item 
+\hypertarget{class_updatable_matrix_a447bb6290fb58483a6cb7b6a97a6426d}{}string \hyperlink{class_updatable_matrix_a447bb6290fb58483a6cb7b6a97a6426d}{Q4\+\_\+from\+\_\+string}\label{class_updatable_matrix_a447bb6290fb58483a6cb7b6a97a6426d}
+
+\begin{DoxyCompactList}\small\item\em Filename for limiting Q3 (usually it\textquotesingle{}s V, upper limit) \end{DoxyCompactList}\item 
+\hypertarget{class_updatable_matrix_ae9b01bb02376078fa32378cd4e3622b3}{}string \hyperlink{class_updatable_matrix_ae9b01bb02376078fa32378cd4e3622b3}{Q4\+\_\+to\+\_\+string}\label{class_updatable_matrix_ae9b01bb02376078fa32378cd4e3622b3}
+
+\begin{DoxyCompactList}\small\item\em Filename for limiting Q4 (usually it\textquotesingle{}s K, lower limit) \end{DoxyCompactList}\item 
+\hypertarget{class_updatable_matrix_a9002d11dd833b30678db3d6dbefcb0e0}{}double \hyperlink{class_updatable_matrix_a9002d11dd833b30678db3d6dbefcb0e0}{last\+\_\+update\+\_\+time}\label{class_updatable_matrix_a9002d11dd833b30678db3d6dbefcb0e0}
+
+\begin{DoxyCompactList}\small\item\em Filename for limiting Q4 (usually it\textquotesingle{}s K, upper limit) \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$typename Matrix\+N\+D$>$class Updatable\+Matrix$<$ Matrix\+N\+D $>$}
+
+A matrix that can be created in 1, 2, 3, or 4 dimensions with the ability to be updated. 
+
+Updatable matrix -\/ 1,2,3,4 dimensions.
+
+It\textquotesingle{}s a template because it\textquotesingle{}s easier to create, maintain, and debug one class, instead of 4 classes with the same functionality
+
+It\textquotesingle{}s just like a normal matrix (and can be used just like one), but it can also be updated according to rules from an ini-\/file
+
+The read\+From\+Ini\+File function is used to load data into an \hyperlink{class_updatable_matrix}{Updatable\+Matrix} by storing the contents of a .tab file. The .tab file will either list a .plt file to load or a .lst file which in turn has both time steps and .plt files. The update function is called at every time step in the main function and will execute any updates that can be found from these files that match the designated timestep. 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_updatable_matrix_a6aed93610d60720a50de4ad805fa8b7e}{}\index{Updatable\+Matrix@{Updatable\+Matrix}!operator=@{operator=}}
+\index{operator=@{operator=}!Updatable\+Matrix@{Updatable\+Matrix}}
+\subsubsection[{operator=(const Matrix\+N\+D \&\+M)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename Matrix\+N\+D $>$ {\bf Matrix\+N\+D} \& {\bf Updatable\+Matrix}$<$ {\bf Matrix\+N\+D} $>$\+::operator= (
+\begin{DoxyParamCaption}
+\item[{const {\bf Matrix\+N\+D} \&}]{M}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_updatable_matrix_a6aed93610d60720a50de4ad805fa8b7e}
+Overloaded = operator for any size Updatable Matrix. Copies every element from M and returns current matrix \hypertarget{class_updatable_matrix_aea4ca4ff840f247a3a683ca03cae5885}{}\index{Updatable\+Matrix@{Updatable\+Matrix}!operator=@{operator=}}
+\index{operator=@{operator=}!Updatable\+Matrix@{Updatable\+Matrix}}
+\subsubsection[{operator=(const double Val)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename Matrix\+N\+D $>$ {\bf Matrix\+N\+D} \& {\bf Updatable\+Matrix}$<$ {\bf Matrix\+N\+D} $>$\+::operator= (
+\begin{DoxyParamCaption}
+\item[{const double}]{Val}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_updatable_matrix_aea4ca4ff840f247a3a683ca03cae5885}
+Overloaded = operator for any size Updatable Matrix. Sets every elemenet to Val and returns current matrix \hypertarget{class_updatable_matrix_a624e5f24c93915ccac0dd189b0646e7a}{}\index{Updatable\+Matrix@{Updatable\+Matrix}!read\+From\+Ini\+File@{read\+From\+Ini\+File}}
+\index{read\+From\+Ini\+File@{read\+From\+Ini\+File}!Updatable\+Matrix@{Updatable\+Matrix}}
+\subsubsection[{read\+From\+Ini\+File(string ini\+\_\+filename, Matrix\+N\+D Q1, Matrix\+N\+D Q2, Matrix\+N\+D Q3, Matrix\+N\+D Q4=\+Matrix\+N\+D())}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename Matrix\+N\+D $>$ bool {\bf Updatable\+Matrix}$<$ {\bf Matrix\+N\+D} $>$\+::read\+From\+Ini\+File (
+\begin{DoxyParamCaption}
+\item[{string}]{ini\+\_\+filename, }
+\item[{{\bf Matrix\+N\+D}}]{q1, }
+\item[{{\bf Matrix\+N\+D}}]{q2, }
+\item[{{\bf Matrix\+N\+D}}]{q3, }
+\item[{{\bf Matrix\+N\+D}}]{q4 = {\ttfamily {\bf Matrix\+N\+D}()}}
+\end{DoxyParamCaption}
+)}\label{class_updatable_matrix_a624e5f24c93915ccac0dd189b0646e7a}
+Read \hyperlink{class_updatable_matrix}{Updatable\+Matrix} rules from ini-\/file
+
+Gets parameters from the first line using \hyperlink{class_updatable_matrix_a022a0730e7310b0c6f7c51dbb48d59d7}{read\+From\+String()}
+
+File will either be data file (such as .plt which will store data immediately) or update file (such as .lst which will update matrix values at corresponding timestep from main function)
+
+\begin{DoxyReturn}{Returns}
+True if success, False if failure 
+\end{DoxyReturn}
+\hypertarget{class_updatable_matrix_a022a0730e7310b0c6f7c51dbb48d59d7}{}\index{Updatable\+Matrix@{Updatable\+Matrix}!read\+From\+String@{read\+From\+String}}
+\index{read\+From\+String@{read\+From\+String}!Updatable\+Matrix@{Updatable\+Matrix}}
+\subsubsection[{read\+From\+String(string file\+\_\+line\+\_\+string, Matrix\+N\+D \&\+Q1, Matrix\+N\+D \&\+Q2, Matrix\+N\+D \&\+Q3, Matrix\+N\+D \&\+Q4)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename Matrix\+N\+D $>$ bool {\bf Updatable\+Matrix}$<$ {\bf Matrix\+N\+D} $>$\+::read\+From\+String (
+\begin{DoxyParamCaption}
+\item[{string}]{file\+\_\+line\+\_\+string, }
+\item[{{\bf Matrix\+N\+D} \&}]{q1, }
+\item[{{\bf Matrix\+N\+D} \&}]{q2, }
+\item[{{\bf Matrix\+N\+D} \&}]{q3, }
+\item[{{\bf Matrix\+N\+D} \&}]{q4}
+\end{DoxyParamCaption}
+)}\label{class_updatable_matrix_a022a0730e7310b0c6f7c51dbb48d59d7}
+Read Update\+Matrix parameters from a string
+
+Will traverse the string and get the entire lines values -\/ starting with parameter q1 and getting values until reaching q4 or running out of values for the line
+
+If a data file (such as .plt) is selected then the contents will be stored into the matrix. If a update-\/file (such as .lst) is selected then no matrix values will be saved, however the update\+\_\+filename field will be saved. Upon every timestep the main file will call \hyperlink{class_updatable_matrix_a57fe16cce1982a1df412fe9a3e1d28ea}{update()} on this matrix, and inside update will look for the update\+\_\+filename field. If present it will update the matrix to the corresponding timestep
+
+
+\begin{DoxyParams}{Parameters}
+{\em file\+\_\+line\+\_\+string} & -\/ string which contains one line of values spanning from q1 to q4\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if success, False if failure 
+\end{DoxyReturn}
+\hypertarget{class_updatable_matrix_a422ab8daeeb8ff09803d9623d92eb28e}{}\index{Updatable\+Matrix@{Updatable\+Matrix}!save\+Current@{save\+Current}}
+\index{save\+Current@{save\+Current}!Updatable\+Matrix@{Updatable\+Matrix}}
+\subsubsection[{save\+Current()}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename Matrix\+N\+D $>$ void {\bf Updatable\+Matrix}$<$ {\bf Matrix\+N\+D} $>$\+::save\+Current (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)}\label{class_updatable_matrix_a422ab8daeeb8ff09803d9623d92eb28e}
+\hyperlink{class_updatable_matrix}{Updatable\+Matrix} has 2 arrays\+: original and current (=parent). We need to allocate memory for both of them when the memory is allocated for the aprent array. So we use polymorphism concept to override parent method Allocate\+Memory and to allocate memory for both arrays Similar to Allocate\+Momory, we need to update both arrays\+: original and current (parent) when we read values from a file Save current matrix as \textquotesingle{}original\textquotesingle{} to be scaled/limited later \hypertarget{class_updatable_matrix_a57fe16cce1982a1df412fe9a3e1d28ea}{}\index{Updatable\+Matrix@{Updatable\+Matrix}!update@{update}}
+\index{update@{update}!Updatable\+Matrix@{Updatable\+Matrix}}
+\subsubsection[{update(double time, Matrix\+N\+D Q1, Matrix\+N\+D Q2, Matrix\+N\+D Q3, Matrix\+N\+D Q4=\+Matrix\+N\+D())}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename Matrix\+N\+D $>$ bool {\bf Updatable\+Matrix}$<$ {\bf Matrix\+N\+D} $>$\+::update (
+\begin{DoxyParamCaption}
+\item[{double}]{current\+\_\+time, }
+\item[{{\bf Matrix\+N\+D}}]{q1, }
+\item[{{\bf Matrix\+N\+D}}]{q2, }
+\item[{{\bf Matrix\+N\+D}}]{q3, }
+\item[{{\bf Matrix\+N\+D}}]{q4 = {\ttfamily {\bf Matrix\+N\+D}()}}
+\end{DoxyParamCaption}
+)}\label{class_updatable_matrix_a57fe16cce1982a1df412fe9a3e1d28ea}
+Update the Matrix if last update time is less than current update time
+
+Scaling coefficients are added
+
+Limits are set for the coefficients for q1 through q4
+
+The limits are applied using \hyperlink{_updatable_matrix_8cpp_a7c31dffc9739867a97c8a80a4391b4d5}{Matrix\+Limit()}
+
+Record which limits were applied
+
+This function is called at every time step from the main function. It will look to see if this matrix has the update\+\_\+filename field set. If so at any time where the update\+\_\+time is less than current\+\_\+time it will use the update\+\_\+filename to load the new matrix. This pertains to .lst files mainly
+
+\begin{DoxyReturn}{Returns}
+True if updated, False if not 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_updatable_matrix_8h}{Updatable\+Matrix.\+h}\item 
+\hyperlink{_updatable_matrix_8cpp}{Updatable\+Matrix.\+cpp}\end{DoxyCompactItemize}

@@ -1,0 +1,44 @@
+Includes classes, namespaces, and files
+
+For use in conjunction with Matlab in order to solve for Phase Space Density, Diffusion, Convection etc.
+
+Diffusion + convection code, V\+E\+R\+B4\+D.
+
+The code solves the Fokker-\/\+Planck equation with convection terms\+: \[ \frac{\partial f}{\partial t} = v_{\Phi} \frac{\partial f}{\partial \Pi} + v_{R} \frac{\partial f}{\partial R} + \frac{1}{G} \frac{\partial}{\partial L} G D_{LL} \frac{\partial f}{\partial L} + \frac{1}{G} \frac{\partial}{\partial V} G (D_{VV} \frac{\partial f}{\partial V} + D_{VK} \frac{\partial f}{\partial K}) + \frac{1}{G} \frac{\partial}{\partial K} G (D_{KV} \frac{\partial f}{\partial V} + D_{KK} \frac{\partial f}{\partial K}) + Losses * f + Sources \] where f is a Phase Space Density (P\+S\+D); Φ is M\+L\+T angle, R is radial distance from Earth center, $ V≡μ∙(K+0.5)^2 $ is a combination of adiabatic invariants μ and $ K≡ {J}{\sqrt{8μ}} $; L is the third adiabatic invariant; D are bounce-\/averaged diffusion coefficients; $ v_Φ $, $ v_R $ are drift velocities; G is the Jacobian of the transformation from (μ,J,L) to (V,K,L)
+
+Books, required to understand the code\+:
+\begin{DoxyItemize}
+\item Stroustrup C++
+\item Schulz and Lanzerotti, 1974
+\end{DoxyItemize}
+
+V\+A\+R\+I\+A\+B\+L\+E\+S for understanding code
+\begin{DoxyItemize}
+\item P\+S\+D -\/ Phase Space Density
+\item P -\/ Phi\+: magnetic local time
+\item R -\/ Radial distance actual
+\item V -\/ Energy
+\item K -\/ Pitch andle
+\item L -\/ Radial distance distorted
+\item Dxx -\/ Diffusion -\/ subscripts denote with respect to what derivative
+\end{DoxyItemize}
+
+Convection is solved using \hyperlink{_convection__1_d___u_l_t_i_m_a_t_e___q_u_i_c_k_e_s_t6_8h}{Convection\+\_\+1\+D\+\_\+\+U\+L\+T\+I\+M\+A\+T\+E\+\_\+\+Q\+U\+I\+C\+K\+E\+S\+T6.\+h} which implements Leonard B\+P (1988) Universal Limiter for transient interpolation modeling of the advective transport equations\+: the U\+L\+T\+I\+M\+A\+T\+E conservative difference scheme, N\+A\+S\+A technical Memorandum 100916 I\+C\+O\+M\+P-\/88-\/11 \href{http://www.hadian.ir/teaching/CompHydr/3.pdf}{\tt http\+://www.\+hadian.\+ir/teaching/\+Comp\+Hydr/3.\+pdf}
+
+Diffusion is solved using \hyperlink{_diffusion__1_d_8cpp_ae15e469cb777a21a2dbd751f1c072618}{Diffusion\+\_\+1\+D()} and \hyperlink{_diffusion__2_d_8cpp_ad5785270d5a28bd7a7b8ca31f206c8ee}{Diffusion\+\_\+2\+D()} for the standard cases.
+
+Three other methods are also used for finding diffusion in 2\+D\+: these can be found in \hyperlink{_diffusion___a_d_i1_8h}{Diffusion\+\_\+\+A\+D\+I1.\+h}, \hyperlink{_diffusion___a_d_i2_8h}{Diffusion\+\_\+\+A\+D\+I2.\+h}, and \hyperlink{_diffusion___a_d_i3_8h}{Diffusion\+\_\+\+A\+D\+I3.\+h}
+
+The parameters.\+ini file created in matlab will specify the inversion method. If \char`\"{}\+Lapack\char`\"{} is specified then \hyperlink{_diffusion__2_d_8cpp_ad5785270d5a28bd7a7b8ca31f206c8ee}{Diffusion\+\_\+2\+D()} will be used. Otherwise 1 of the 3 A\+D\+I methods will be used to inversion. All 3 A\+D\+I methods can use multiple threads while Lapack can only use 1. The current chosen method of inversion is Diffusion\+\_\+\+A\+D\+I3() if \char`\"{}\+A\+D\+I\char`\"{} is specified. It can be changed in \hyperlink{_v_e_r_b4_d___solver_8cpp}{V\+E\+R\+B4\+D\+\_\+\+S\+O\+L\+V\+E\+R.\+cpp}
+
+The main solver function can be found in \hyperlink{_v_e_r_b4_d___solver_8cpp}{V\+E\+R\+B4\+D\+\_\+\+Solver.\+cpp}
+
+This will be used in order to take the input data from matlab store them into \hyperlink{class_matrix1_d}{Matrix1\+D}, \hyperlink{class_matrix2_d}{Matrix2\+D}, \hyperlink{class_matrix3_d}{Matrix3\+D}, and \hyperlink{class_matrix4_d}{Matrix4\+D} using \hyperlink{_read_initial_data_8h}{Read\+Initial\+Data.\+h}
+
+The matrix classes listed above are used to store the data in 1,2,3 or 4 dimension. One example is a 4\+D matrix containing P,R,V,K
+
+There is also the standardized \hyperlink{class_matrix_n_d}{Matrix\+N\+D} for any size matrices which is used in conjunction with \hyperlink{class_updatable_matrix}{Updatable\+Matrix} which can be updated with new data.
+
+Most of the computation such as numerically approximating derivatives are done with \hyperlink{_matrix_solver_8h}{Matrix\+Solver.\+h} using \hyperlink{class_calculation_matrix}{Calculation\+Matrix}. These calculation matrices are made up of \hyperlink{class_diag_matrix}{Diag\+Matrix} which is a mapping of an int (which diagonal number) to a 1d matrix of values (for that diagonal).
+
+There is also a \hyperlink{class_parameters}{Parameters} class which holds paramters and their value as defined in the file they came from 

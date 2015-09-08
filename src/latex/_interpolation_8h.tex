@@ -1,0 +1,35 @@
+\hypertarget{_interpolation_8h}{}\section{Interpolation.\+h File Reference}
+\label{_interpolation_8h}\index{Interpolation.\+h@{Interpolation.\+h}}
+
+
+Wrapper around interpolation library, interpolates values into new grid using \hyperlink{_monot_cubic_interpolator_8cpp}{Monot\+Cubic\+Interpolator.\+cpp}.  
+
+
+{\ttfamily \#include \char`\"{}Matrix.\+h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ \hyperlink{_interpolation_8h_a785af04709e2ccb19ae567d350baba4a}{Cubic1\+D} (\hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ \&old\+\_\+grid, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ \&f, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ \&new\+\_\+grid)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Wrapper around interpolation library, interpolates values into new grid using \hyperlink{_monot_cubic_interpolator_8cpp}{Monot\+Cubic\+Interpolator.\+cpp}. 
+
+Created on\+: Sep 14, 2013 Author\+: dimath 
+
+\subsection{Function Documentation}
+\hypertarget{_interpolation_8h_a785af04709e2ccb19ae567d350baba4a}{}\index{Interpolation.\+h@{Interpolation.\+h}!Cubic1\+D@{Cubic1\+D}}
+\index{Cubic1\+D@{Cubic1\+D}!Interpolation.\+h@{Interpolation.\+h}}
+\subsubsection[{Cubic1\+D(\+Matrix1\+D$<$ double $>$ \&old\+\_\+grid, Matrix1\+D$<$ double $>$ \&f, Matrix1\+D$<$ double $>$ \&new\+\_\+grid)}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Matrix1\+D}$<$double$>$ Cubic1\+D (
+\begin{DoxyParamCaption}
+\item[{{\bf Matrix1\+D}$<$ double $>$ \&}]{old\+\_\+grid, }
+\item[{{\bf Matrix1\+D}$<$ double $>$ \&}]{values, }
+\item[{{\bf Matrix1\+D}$<$ double $>$ \&}]{new\+\_\+grid}
+\end{DoxyParamCaption}
+)}\label{_interpolation_8h_a785af04709e2ccb19ae567d350baba4a}
+One-\/dimensional interpolation
+
+Wrapper around interpolation library, Interpolates values into new grid, Grid size should be the same
+
+Using interpolator from \hyperlink{class_opm_1_1_monot_cubic_interpolator}{Opm\+::\+Monot\+Cubic\+Interpolator} 

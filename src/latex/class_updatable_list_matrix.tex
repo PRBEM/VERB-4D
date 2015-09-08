@@ -1,0 +1,129 @@
+\hypertarget{class_updatable_list_matrix}{}\section{Updatable\+List\+Matrix$<$ Matrix\+N\+D $>$ Class Template Reference}
+\label{class_updatable_list_matrix}\index{Updatable\+List\+Matrix$<$ Matrix\+N\+D $>$@{Updatable\+List\+Matrix$<$ Matrix\+N\+D $>$}}
+
+
+A matrix that can be created in 1, 2, 3, or 4 dimensions with the ability to be updated.  
+
+
+
+
+{\ttfamily \#include $<$Updatable\+Matrix.\+h$>$}
+
+Inheritance diagram for Updatable\+List\+Matrix$<$ Matrix\+N\+D $>$\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_updatable_list_matrix}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_matrix_n_d}{Matrix\+N\+D} \& \hyperlink{class_updatable_list_matrix_ad9de5205787993ebc44400dd3b5cd136}{operator=} (const \hyperlink{class_matrix_n_d}{Matrix\+N\+D} \&M)
+\item 
+\hyperlink{class_matrix_n_d}{Matrix\+N\+D} \& \hyperlink{class_updatable_list_matrix_ae475be1727e48267d4912a902c498a83}{operator=} (const double Val)
+\item 
+bool \hyperlink{class_updatable_list_matrix_a983fe8b18695cb86c1cc43f24b2c2e74}{read\+From\+Ini\+File} (string ini\+\_\+filename, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} \&Q1, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} \&Q2, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} \&Q3, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} \&Q4)
+\item 
+void \hyperlink{class_updatable_list_matrix_a4aa339d08698137e3ac149d0a0f1dc87}{update} (double time, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} Q1, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} Q2, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} Q3, \hyperlink{class_matrix_n_d}{Matrix\+N\+D} Q4=\hyperlink{class_matrix_n_d}{Matrix\+N\+D}())
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_updatable_list_matrix_a04b21c7757c329838c6238ebec80327f}{}vector$<$ \hyperlink{class_updatable_matrix}{Updatable\+Matrix}$<$ \hyperlink{class_matrix_n_d}{Matrix\+N\+D} $>$ $>$ \hyperlink{class_updatable_list_matrix_a04b21c7757c329838c6238ebec80327f}{matrices\+List}\label{class_updatable_list_matrix_a04b21c7757c329838c6238ebec80327f}
+
+\begin{DoxyCompactList}\small\item\em These are the matrices that need to be combined to get the final, updated matrix. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$typename Matrix\+N\+D$>$class Updatable\+List\+Matrix$<$ Matrix\+N\+D $>$}
+
+A matrix that can be created in 1, 2, 3, or 4 dimensions with the ability to be updated. 
+
+Updatable list of matrix -\/ 1,2,3,4 dimensions. Currently set up to be used for diffusion coefficients, Sources, and Losses only. All other matrices use \hyperlink{class_updatable_matrix}{Updatable\+Matrix}
+
+It\textquotesingle{}s a template because it\textquotesingle{}s easier to create, maintain, and debug one class, instead of 4 classes with the same functionality
+
+It\textquotesingle{}s just like a normal matrix (and can be used just like one), but it can also be updated according to rules from an ini-\/file
+
+The ini-\/files specify several matrices that are added to each other, e.\+g. diffusion coefficients for different waves to get one diffusion coefficient The read\+From\+Ini\+File function is used to load data into an \hyperlink{class_updatable_list_matrix}{Updatable\+List\+Matrix} by storing line by line the contents of the ini file into a vector of \hyperlink{class_updatable_matrix}{Updatable\+Matrix} At every time step the update function is called from the main file. The vector is then traversed and any valid updates are completed. The standard method is to save diffusion coefficients, Sources, or Losses in a .tab file which is comprised of either .plt or .lst files or both. 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_updatable_list_matrix_ad9de5205787993ebc44400dd3b5cd136}{}\index{Updatable\+List\+Matrix@{Updatable\+List\+Matrix}!operator=@{operator=}}
+\index{operator=@{operator=}!Updatable\+List\+Matrix@{Updatable\+List\+Matrix}}
+\subsubsection[{operator=(const Matrix\+N\+D \&\+M)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename Matrix\+N\+D $>$ {\bf Matrix\+N\+D} \& {\bf Updatable\+List\+Matrix}$<$ {\bf Matrix\+N\+D} $>$\+::operator= (
+\begin{DoxyParamCaption}
+\item[{const {\bf Matrix\+N\+D} \&}]{M}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_updatable_list_matrix_ad9de5205787993ebc44400dd3b5cd136}
+Overloaded = operator for any size Updatable List Matrix. Copies every element from M and returns current matrix \hypertarget{class_updatable_list_matrix_ae475be1727e48267d4912a902c498a83}{}\index{Updatable\+List\+Matrix@{Updatable\+List\+Matrix}!operator=@{operator=}}
+\index{operator=@{operator=}!Updatable\+List\+Matrix@{Updatable\+List\+Matrix}}
+\subsubsection[{operator=(const double Val)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename Matrix\+N\+D $>$ {\bf Matrix\+N\+D} \& {\bf Updatable\+List\+Matrix}$<$ {\bf Matrix\+N\+D} $>$\+::operator= (
+\begin{DoxyParamCaption}
+\item[{const double}]{Val}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_updatable_list_matrix_ae475be1727e48267d4912a902c498a83}
+Overloaded = operator for any size Updatable List Matrix. Sets every elemenet to Val and returns current matrix \hypertarget{class_updatable_list_matrix_a983fe8b18695cb86c1cc43f24b2c2e74}{}\index{Updatable\+List\+Matrix@{Updatable\+List\+Matrix}!read\+From\+Ini\+File@{read\+From\+Ini\+File}}
+\index{read\+From\+Ini\+File@{read\+From\+Ini\+File}!Updatable\+List\+Matrix@{Updatable\+List\+Matrix}}
+\subsubsection[{read\+From\+Ini\+File(string ini\+\_\+filename, Matrix\+N\+D \&\+Q1, Matrix\+N\+D \&\+Q2, Matrix\+N\+D \&\+Q3, Matrix\+N\+D \&\+Q4)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename Matrix\+N\+D $>$ bool {\bf Updatable\+List\+Matrix}$<$ {\bf Matrix\+N\+D} $>$\+::read\+From\+Ini\+File (
+\begin{DoxyParamCaption}
+\item[{string}]{ini\+\_\+filename, }
+\item[{{\bf Matrix\+N\+D} \&}]{Q1, }
+\item[{{\bf Matrix\+N\+D} \&}]{Q2, }
+\item[{{\bf Matrix\+N\+D} \&}]{Q3, }
+\item[{{\bf Matrix\+N\+D} \&}]{Q4}
+\end{DoxyParamCaption}
+)}\label{class_updatable_list_matrix_a983fe8b18695cb86c1cc43f24b2c2e74}
+Read \hyperlink{class_updatable_list_matrix}{Updatable\+List\+Matrix} rules from ini-\/file \hyperlink{class_updatable_list_matrix}{Updatable\+List\+Matrix} is a list (vector) or Updatable\+Matrices They are combined together to form one matrix (e.\+g. diffusion coefficients for different waves)
+
+The inputted file can be of any format. If it is a data file (such as .plt) the data will be stored into the matrix. If the file is an update file then the matrix will only be updated on the corresponding timestep from the main file. The inputted file may be a .tab file that has a combination of data and update files. This function goes through the inputted file and stores the contents individually into a vector of \hyperlink{class_updatable_matrix}{Updatable\+Matrix}, which in turn will be evaluated from the calls to the \hyperlink{class_updatable_matrix}{Updatable\+Matrix} functions
+
+
+\begin{DoxyParams}{Parameters}
+{\em ini\+\_\+filename} & -\/ ini filename with appropriate structure \\
+\hline
+{\em Q1} & -\/ corresponding grid coordinate \\
+\hline
+{\em Q2} & -\/ corresponding grid coordinate \\
+\hline
+{\em Q3} & -\/ corresponding grid coordinate \\
+\hline
+{\em Q4} & -\/ corresponding grid coordinate \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if success, False if failure 
+\end{DoxyReturn}
+\hypertarget{class_updatable_list_matrix_a4aa339d08698137e3ac149d0a0f1dc87}{}\index{Updatable\+List\+Matrix@{Updatable\+List\+Matrix}!update@{update}}
+\index{update@{update}!Updatable\+List\+Matrix@{Updatable\+List\+Matrix}}
+\subsubsection[{update(double time, Matrix\+N\+D Q1, Matrix\+N\+D Q2, Matrix\+N\+D Q3, Matrix\+N\+D Q4=\+Matrix\+N\+D())}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename Matrix\+N\+D $>$ void {\bf Updatable\+List\+Matrix}$<$ {\bf Matrix\+N\+D} $>$\+::update (
+\begin{DoxyParamCaption}
+\item[{double}]{current\+\_\+time, }
+\item[{{\bf Matrix\+N\+D}}]{Q1, }
+\item[{{\bf Matrix\+N\+D}}]{Q2, }
+\item[{{\bf Matrix\+N\+D}}]{Q3, }
+\item[{{\bf Matrix\+N\+D}}]{Q4 = {\ttfamily {\bf Matrix\+N\+D}()}}
+\end{DoxyParamCaption}
+)}\label{class_updatable_list_matrix_a4aa339d08698137e3ac149d0a0f1dc87}
+Update the \hyperlink{class_updatable_list_matrix}{Updatable\+List\+Matrix} -\/ call \hyperlink{class_updatable_list_matrix_a4aa339d08698137e3ac149d0a0f1dc87}{update()} for each \hyperlink{class_updatable_matrix}{Updatable\+Matrix} in the list, then sum all the Updatable\+Matrices together
+
+
+\begin{DoxyParams}{Parameters}
+{\em iteration} & -\/ current iteration number \\
+\hline
+{\em dt} & -\/ time step \\
+\hline
+{\em Q1} & -\/ corresponding grid coordinate \\
+\hline
+{\em Q2} & -\/ corresponding grid coordinate \\
+\hline
+{\em Q3} & -\/ corresponding grid coordinate \\
+\hline
+{\em Q4} & -\/ corresponding grid coordinate \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_updatable_matrix_8h}{Updatable\+Matrix.\+h}\item 
+\hyperlink{_updatable_matrix_8cpp}{Updatable\+Matrix.\+cpp}\end{DoxyCompactItemize}

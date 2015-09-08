@@ -1,0 +1,362 @@
+\hypertarget{_matrix_solver_8cpp}{}\section{Matrix\+Solver.\+cpp File Reference}
+\label{_matrix_solver_8cpp}\index{Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}}
+
+
+Solves model matrices for diffusion calculations and has functionality for derivative approximations of matrices.  
+
+
+{\ttfamily \#include \char`\"{}Matrix\+Solver.\+h\char`\"{}}\\*
+{\ttfamily \#include $<$math.\+h$>$}\\*
+{\ttfamily \#include $<$stdlib.\+h$>$}\\*
+{\ttfamily \#include $<$string$>$}\\*
+{\ttfamily \#include $<$ctime$>$}\\*
+{\ttfamily \#include $<$iostream$>$}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{_matrix_solver_8cpp_a12cd82186153942f82fd664da558ef8f}{Add\+Boundary} (\hyperlink{class_diag_matrix}{Diag\+Matrix} \&matr\+\_\+\+A, string type, int in, int id1, double dh)
+\item 
+bool \hyperlink{_matrix_solver_8cpp_a637a4943e0c65a0fd4be81a9e291a92f}{Add\+Boundaries\+\_\+1\+D} (\hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+A, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+B, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ \&x, int x\+\_\+size, double x\+\_\+\+L\+B\+C, double x\+\_\+\+U\+B\+C, string x\+\_\+\+L\+B\+C\+\_\+type, string x\+\_\+\+U\+B\+C\+\_\+type, int ix)
+\item 
+bool \hyperlink{_matrix_solver_8cpp_adfcdb3cd90eb88a7f14d762edfaa8d66}{Add\+Boundaries\+\_\+2\+D} (\hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+A, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+B, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+C, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&x, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&y, int x\+\_\+size, int y\+\_\+size, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ x\+\_\+\+L\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ x\+\_\+\+U\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ y\+\_\+\+L\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ y\+\_\+\+U\+B\+C, string \&x\+\_\+\+L\+B\+C\+\_\+type, string \&x\+\_\+\+U\+B\+C\+\_\+type, string \&y\+\_\+\+L\+B\+C\+\_\+type, string \&y\+\_\+\+U\+B\+C\+\_\+type, int ix, int iy, int in)
+\item 
+\hypertarget{_matrix_solver_8cpp_a0d7ac991e107955df9ca1aca298040a0}{}bool \hyperlink{_matrix_solver_8cpp_a0d7ac991e107955df9ca1aca298040a0}{Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I1\+\_\+x} (\hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+A, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+B, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+C, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&x, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&y, int x\+\_\+size, int y\+\_\+size, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ x\+\_\+\+L\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ x\+\_\+\+U\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ y\+\_\+\+L\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ y\+\_\+\+U\+B\+C, string x\+\_\+\+L\+B\+C\+\_\+type, string x\+\_\+\+U\+B\+C\+\_\+type, string y\+\_\+\+L\+B\+C\+\_\+type, string y\+\_\+\+U\+B\+C\+\_\+type, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dxx, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dyy, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dxy, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dyx, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&G, double dt)\label{_matrix_solver_8cpp_a0d7ac991e107955df9ca1aca298040a0}
+
+\begin{DoxyCompactList}\small\item\em T\+H\+I\+S F\+U\+N\+C\+T\+I\+O\+N I\+S C\+U\+R\+R\+E\+N\+T\+L\+Y N\+O\+T B\+E\+I\+N\+G U\+S\+E\+D. \end{DoxyCompactList}\item 
+\hypertarget{_matrix_solver_8cpp_a6ec500c9c849bde034e6c95c89686254}{}bool \hyperlink{_matrix_solver_8cpp_a6ec500c9c849bde034e6c95c89686254}{Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I1\+\_\+y} (\hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+A, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+B, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+C, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&x, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&y, int x\+\_\+size, int y\+\_\+size, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ x\+\_\+\+L\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ x\+\_\+\+U\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ y\+\_\+\+L\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ y\+\_\+\+U\+B\+C, string x\+\_\+\+L\+B\+C\+\_\+type, string x\+\_\+\+U\+B\+C\+\_\+type, string y\+\_\+\+L\+B\+C\+\_\+type, string y\+\_\+\+U\+B\+C\+\_\+type, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dxx, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dyy, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dxy, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dyx, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&G, double dt)\label{_matrix_solver_8cpp_a6ec500c9c849bde034e6c95c89686254}
+
+\begin{DoxyCompactList}\small\item\em T\+H\+I\+S F\+U\+N\+C\+T\+I\+O\+N I\+S C\+U\+R\+R\+E\+N\+T\+L\+Y N\+O\+T B\+E\+I\+N\+G U\+S\+E\+D. \end{DoxyCompactList}\item 
+\hypertarget{_matrix_solver_8cpp_afa9d4e36b69ce890e433d74f40ea1409}{}bool \hyperlink{_matrix_solver_8cpp_afa9d4e36b69ce890e433d74f40ea1409}{Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I2\+\_\+x} (\hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+A, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+B, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+C, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&x, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&y, int x\+\_\+size, int y\+\_\+size, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ x\+\_\+\+L\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ x\+\_\+\+U\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ y\+\_\+\+L\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ y\+\_\+\+U\+B\+C, string x\+\_\+\+L\+B\+C\+\_\+type, string x\+\_\+\+U\+B\+C\+\_\+type, string y\+\_\+\+L\+B\+C\+\_\+type, string y\+\_\+\+U\+B\+C\+\_\+type, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dxx, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dyy, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dxy, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dyx, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&G, double dt)\label{_matrix_solver_8cpp_afa9d4e36b69ce890e433d74f40ea1409}
+
+\begin{DoxyCompactList}\small\item\em T\+H\+I\+S F\+U\+N\+C\+T\+I\+O\+N I\+S C\+U\+R\+R\+E\+N\+T\+L\+Y N\+O\+T B\+E\+I\+N\+G U\+S\+E\+D. \end{DoxyCompactList}\item 
+\hypertarget{_matrix_solver_8cpp_a1c6c681f7f44aa16d2d862248741c53d}{}bool \hyperlink{_matrix_solver_8cpp_a1c6c681f7f44aa16d2d862248741c53d}{Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I2\+\_\+y} (\hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+A, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+B, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+C, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&x, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&y, int x\+\_\+size, int y\+\_\+size, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ x\+\_\+\+L\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ x\+\_\+\+U\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ y\+\_\+\+L\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ y\+\_\+\+U\+B\+C, string x\+\_\+\+L\+B\+C\+\_\+type, string x\+\_\+\+U\+B\+C\+\_\+type, string y\+\_\+\+L\+B\+C\+\_\+type, string y\+\_\+\+U\+B\+C\+\_\+type, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dxx, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dyy, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dxy, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dyx, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&G, double dt)\label{_matrix_solver_8cpp_a1c6c681f7f44aa16d2d862248741c53d}
+
+\begin{DoxyCompactList}\small\item\em T\+H\+I\+S F\+U\+N\+C\+T\+I\+O\+N I\+S C\+U\+R\+R\+E\+N\+T\+L\+Y N\+O\+T B\+E\+I\+N\+G U\+S\+E\+D. \end{DoxyCompactList}\item 
+\hypertarget{_matrix_solver_8cpp_a60eb15c384ad186e5958adf8af3c7c53}{}bool \hyperlink{_matrix_solver_8cpp_a60eb15c384ad186e5958adf8af3c7c53}{Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I3\+\_\+x} (\hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+A, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+B, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+C, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&x, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&y, int x\+\_\+size, int y\+\_\+size, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ x\+\_\+\+L\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ x\+\_\+\+U\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ y\+\_\+\+L\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ y\+\_\+\+U\+B\+C, string x\+\_\+\+L\+B\+C\+\_\+type, string x\+\_\+\+U\+B\+C\+\_\+type, string y\+\_\+\+L\+B\+C\+\_\+type, string y\+\_\+\+U\+B\+C\+\_\+type, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dxx, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dyy, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dxy, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dyx, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&G, double dt)\label{_matrix_solver_8cpp_a60eb15c384ad186e5958adf8af3c7c53}
+
+\begin{DoxyCompactList}\small\item\em T\+H\+I\+S F\+U\+N\+C\+T\+I\+O\+N I\+S C\+U\+R\+R\+E\+N\+T\+L\+Y N\+O\+T B\+E\+I\+N\+G U\+S\+E\+D. \end{DoxyCompactList}\item 
+\hypertarget{_matrix_solver_8cpp_aeba76c1b03dc6ed9daa0743a54f96e7d}{}bool \hyperlink{_matrix_solver_8cpp_aeba76c1b03dc6ed9daa0743a54f96e7d}{Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I3\+\_\+y} (\hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+A, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+B, \hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+C, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&x, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&y, int x\+\_\+size, int y\+\_\+size, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ x\+\_\+\+L\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ x\+\_\+\+U\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ y\+\_\+\+L\+B\+C, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ y\+\_\+\+U\+B\+C, string x\+\_\+\+L\+B\+C\+\_\+type, string x\+\_\+\+U\+B\+C\+\_\+type, string y\+\_\+\+L\+B\+C\+\_\+type, string y\+\_\+\+U\+B\+C\+\_\+type, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dxx, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dyy, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dxy, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Dyx, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&G, double dt)\label{_matrix_solver_8cpp_aeba76c1b03dc6ed9daa0743a54f96e7d}
+
+\begin{DoxyCompactList}\small\item\em T\+H\+I\+S F\+U\+N\+C\+T\+I\+O\+N I\+S C\+U\+R\+R\+E\+N\+T\+L\+Y N\+O\+T B\+E\+I\+N\+G U\+S\+E\+D. \end{DoxyCompactList}\item 
+void \hyperlink{_matrix_solver_8cpp_a2d1c3b2bf64ff6bce0d21ceed0e07287}{Lapack} (\hyperlink{class_diag_matrix}{Diag\+Matrix} \&A, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ \&B, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ \&X)
+\item 
+void \hyperlink{_matrix_solver_8cpp_a4aa1e5a2ed7139d8acddf8dd6fffb886}{Second\+Derivative\+Approximation\+\_\+1\+D} (\hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+A, int ix, string First\+Derivative, string Second\+Derivative, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ \&x, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ \&D, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ \&G, double multiplicator)
+\item 
+void \hyperlink{_matrix_solver_8cpp_a92166f2f5c8c31d7c03c7fd72be8f5e6}{Get\+Derivative\+Vector\+\_\+2\+D} (string derivative\+Type, int \&dx, int \&dy)
+\item 
+void \hyperlink{_matrix_solver_8cpp_aab431ba2c1718ca1d21596558008b10d}{Second\+Derivative\+Approximation\+\_\+2\+D} (\hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+A, int ix, int iy, string First\+Derivative, string Second\+Derivative, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&x, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&y, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&D, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&G, double multiplicator)
+\item 
+void \hyperlink{_matrix_solver_8cpp_a5997c40fddb153030bec04b3083a3415}{Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y} (\hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+A, int ix, int iy, string First\+Derivative, string Second\+Derivative, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&x, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&y, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&D, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&G, double multiplicator)
+\item 
+void \hyperlink{_matrix_solver_8cpp_a8254f19a81273c0d089ebe71c6bbeb90}{Any\+Second\+Derivative\+Approximation\+\_\+2\+D} (\hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+A, int ix, int iy, string First\+Derivative, string Second\+Derivative, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&x, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&y, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Coef1, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Coef2, double multiplicator)
+\item 
+void \hyperlink{_matrix_solver_8cpp_a91bc7fb01ebea27ea7b0a19ffebdcefc}{Any\+Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y} (\hyperlink{class_calculation_matrix}{Calculation\+Matrix} \&matr\+\_\+\+A, int ix, int iy, string First\+Derivative, string Second\+Derivative, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&x, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&y, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Coef1, \hyperlink{class_matrix2_d}{Matrix2\+D}$<$ double $>$ \&Coef2, double multiplicator)
+\item 
+bool \hyperlink{_matrix_solver_8cpp_a6cefd898c34c83f3f504d638384ce5cf}{tridag} (double a\mbox{[}$\,$\mbox{]}, double b\mbox{[}$\,$\mbox{]}, double c\mbox{[}$\,$\mbox{]}, double r\mbox{[}$\,$\mbox{]}, double u\mbox{[}$\,$\mbox{]}, long n)
+\begin{DoxyCompactList}\small\item\em Solve the A\+U=R system of equations, where A -\/ tridiagonal matrix nxn with diagonals a\mbox{[}\mbox{]}, b\mbox{[}\mbox{]}, c\mbox{[}\mbox{]}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Solves model matrices for diffusion calculations and has functionality for derivative approximations of matrices. 
+
+Making model matrixes, solving model matrixes.
+
+Matrix form of linear equations\+: A$\ast$\+X\mbox{[}t+1\mbox{]} = B$\ast$\+X\mbox{[}t\mbox{]}, where A -\/ model matrix, B -\/ R\+H\+S, X\mbox{[}t\mbox{]} -\/ known values of function (P\+S\+D), X\mbox{[}t+1\mbox{]} -\/ unknown values of function.
+
+In that file there are procedures for making model matrix for 1d-\/diffusion, 2d-\/diffusion, some ideas of 3d-\/diffusion and mixed terms. Solver for tridiagonal matrix, solver by gauss method and iteration method (upper relaxation).
+
+This file is under development, and has a lot of commented code, unfinished etc code.
+
+There is a checked version for 1d diffusion (or split method of 2d, 3d diffusions) -\/ 1d\+\_\+universal\+\_\+solver.
+
+\begin{DoxyAuthor}{Author}
+Developed under supervision of the P\+I Yuri Shprits 
+\end{DoxyAuthor}
+
+
+\subsection{Function Documentation}
+\hypertarget{_matrix_solver_8cpp_a637a4943e0c65a0fd4be81a9e291a92f}{}\index{Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}!Add\+Boundaries\+\_\+1\+D@{Add\+Boundaries\+\_\+1\+D}}
+\index{Add\+Boundaries\+\_\+1\+D@{Add\+Boundaries\+\_\+1\+D}!Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}}
+\subsubsection[{Add\+Boundaries\+\_\+1\+D(\+Calculation\+Matrix \&matr\+\_\+\+A, Calculation\+Matrix \&matr\+\_\+\+B, Calculation\+Matrix \&matr\+\_\+\+C, Matrix1\+D$<$ double $>$ \&x, int x\+\_\+size, double x\+\_\+\+L\+B\+C, double x\+\_\+\+U\+B\+C, string x\+\_\+\+L\+B\+C\+\_\+type, string x\+\_\+\+U\+B\+C\+\_\+type, int ix)}]{\setlength{\rightskip}{0pt plus 5cm}bool Add\+Boundaries\+\_\+1\+D (
+\begin{DoxyParamCaption}
+\item[{{\bf Calculation\+Matrix} \&}]{matr\+\_\+\+A, }
+\item[{{\bf Calculation\+Matrix} \&}]{matr\+\_\+\+B, }
+\item[{{\bf Calculation\+Matrix} \&}]{matr\+\_\+\+C, }
+\item[{{\bf Matrix1\+D}$<$ double $>$ \&}]{x, }
+\item[{int}]{x\+\_\+size, }
+\item[{double}]{x\+\_\+\+L\+B\+C, }
+\item[{double}]{x\+\_\+\+U\+B\+C, }
+\item[{string}]{x\+\_\+\+L\+B\+C\+\_\+type, }
+\item[{string}]{x\+\_\+\+U\+B\+C\+\_\+type, }
+\item[{int}]{ix}
+\end{DoxyParamCaption}
+)}\label{_matrix_solver_8cpp_a637a4943e0c65a0fd4be81a9e291a92f}
+Adds in the upper and lower boundaries for the 1\+D case when x is at first or last index 
+\begin{DoxyParams}{Parameters}
+{\em matr\+\_\+\+A,B,C} & -\/ calculation matrices \\
+\hline
+{\em x\+\_\+\+L\+B\+C,x\+\_\+\+U\+B\+C,x\+\_\+\+L\+B\+C\+\_\+type,x\+\_\+\+U\+B\+C\+\_\+type} & -\/ predefined 1\+D boundaries/types \\
+\hline
+\end{DoxyParams}
+\hypertarget{_matrix_solver_8cpp_adfcdb3cd90eb88a7f14d762edfaa8d66}{}\index{Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}!Add\+Boundaries\+\_\+2\+D@{Add\+Boundaries\+\_\+2\+D}}
+\index{Add\+Boundaries\+\_\+2\+D@{Add\+Boundaries\+\_\+2\+D}!Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}}
+\subsubsection[{Add\+Boundaries\+\_\+2\+D(\+Calculation\+Matrix \&matr\+\_\+\+A, Calculation\+Matrix \&matr\+\_\+\+B, Calculation\+Matrix \&matr\+\_\+\+C, Matrix2\+D$<$ double $>$ \&x, Matrix2\+D$<$ double $>$ \&y, int x\+\_\+size, int y\+\_\+size, Matrix1\+D$<$ double $>$ x\+\_\+\+L\+B\+C, Matrix1\+D$<$ double $>$ x\+\_\+\+U\+B\+C, Matrix1\+D$<$ double $>$ y\+\_\+\+L\+B\+C, Matrix1\+D$<$ double $>$ y\+\_\+\+U\+B\+C, string \&x\+\_\+\+L\+B\+C\+\_\+type, string \&x\+\_\+\+U\+B\+C\+\_\+type, string \&y\+\_\+\+L\+B\+C\+\_\+type, string \&y\+\_\+\+U\+B\+C\+\_\+type, int ix, int iy, int in)}]{\setlength{\rightskip}{0pt plus 5cm}bool Add\+Boundaries\+\_\+2\+D (
+\begin{DoxyParamCaption}
+\item[{{\bf Calculation\+Matrix} \&}]{matr\+\_\+\+A, }
+\item[{{\bf Calculation\+Matrix} \&}]{matr\+\_\+\+B, }
+\item[{{\bf Calculation\+Matrix} \&}]{matr\+\_\+\+C, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{x, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{y, }
+\item[{int}]{x\+\_\+size, }
+\item[{int}]{y\+\_\+size, }
+\item[{{\bf Matrix1\+D}$<$ double $>$}]{x\+\_\+\+L\+B\+C, }
+\item[{{\bf Matrix1\+D}$<$ double $>$}]{x\+\_\+\+U\+B\+C, }
+\item[{{\bf Matrix1\+D}$<$ double $>$}]{y\+\_\+\+L\+B\+C, }
+\item[{{\bf Matrix1\+D}$<$ double $>$}]{y\+\_\+\+U\+B\+C, }
+\item[{string \&}]{x\+\_\+\+L\+B\+C\+\_\+type, }
+\item[{string \&}]{x\+\_\+\+U\+B\+C\+\_\+type, }
+\item[{string \&}]{y\+\_\+\+L\+B\+C\+\_\+type, }
+\item[{string \&}]{y\+\_\+\+U\+B\+C\+\_\+type, }
+\item[{int}]{ix, }
+\item[{int}]{iy, }
+\item[{int}]{in}
+\end{DoxyParamCaption}
+)}\label{_matrix_solver_8cpp_adfcdb3cd90eb88a7f14d762edfaa8d66}
+Adds in the upper and lower boundaries for the 2\+D case when x or y is at first or last index 
+\begin{DoxyParams}{Parameters}
+{\em matr\+\_\+\+A,B,C} & -\/ calculation matrices \\
+\hline
+{\em L\+B\+C,U\+B\+C} & for x and y -\/ predefined 2\+D boundaries/types \\
+\hline
+\end{DoxyParams}
+\hypertarget{_matrix_solver_8cpp_a12cd82186153942f82fd664da558ef8f}{}\index{Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}!Add\+Boundary@{Add\+Boundary}}
+\index{Add\+Boundary@{Add\+Boundary}!Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}}
+\subsubsection[{Add\+Boundary(\+Diag\+Matrix \&matr\+\_\+\+A, string type, int in, int id1, double dh)}]{\setlength{\rightskip}{0pt plus 5cm}void Add\+Boundary (
+\begin{DoxyParamCaption}
+\item[{{\bf Diag\+Matrix} \&}]{matr\+\_\+\+A, }
+\item[{string}]{type, }
+\item[{int}]{in, }
+\item[{int}]{id1, }
+\item[{double}]{dh}
+\end{DoxyParamCaption}
+)}\label{_matrix_solver_8cpp_a12cd82186153942f82fd664da558ef8f}
+Supportive sub-\/function to add boundary conditions to model matrix \hypertarget{_matrix_solver_8cpp_a8254f19a81273c0d089ebe71c6bbeb90}{}\index{Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}!Any\+Second\+Derivative\+Approximation\+\_\+2\+D@{Any\+Second\+Derivative\+Approximation\+\_\+2\+D}}
+\index{Any\+Second\+Derivative\+Approximation\+\_\+2\+D@{Any\+Second\+Derivative\+Approximation\+\_\+2\+D}!Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}}
+\subsubsection[{Any\+Second\+Derivative\+Approximation\+\_\+2\+D(\+Calculation\+Matrix \&matr\+\_\+\+A, int ix, int iy, string First\+Derivative, string Second\+Derivative, Matrix2\+D$<$ double $>$ \&x, Matrix2\+D$<$ double $>$ \&y, Matrix2\+D$<$ double $>$ \&\+Coef1, Matrix2\+D$<$ double $>$ \&\+Coef2, double multiplicator)}]{\setlength{\rightskip}{0pt plus 5cm}void Any\+Second\+Derivative\+Approximation\+\_\+2\+D (
+\begin{DoxyParamCaption}
+\item[{{\bf Calculation\+Matrix} \&}]{matr\+\_\+\+A, }
+\item[{int}]{ix, }
+\item[{int}]{iy, }
+\item[{string}]{First\+Derivative, }
+\item[{string}]{Second\+Derivative, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{x, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{y, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{Coef1, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{Coef2, }
+\item[{double}]{multiplicator}
+\end{DoxyParamCaption}
+)}\label{_matrix_solver_8cpp_a8254f19a81273c0d089ebe71c6bbeb90}
+Second derivative approximation, returns coefficients to be put into the model matrix. $ \frac {m Coef1 Coef2}{\frac{d}{dx} \frac{d}{dy}} $ 
+\begin{DoxyParams}{Parameters}
+{\em x} & Coordinate x \\
+\hline
+{\em y} & Coordinate y \\
+\hline
+{\em Coef1} & Coefficient outside of the term \\
+\hline
+{\em Coef2} & Coefficient inside the first derivative \\
+\hline
+\end{DoxyParams}
+\hypertarget{_matrix_solver_8cpp_a91bc7fb01ebea27ea7b0a19ffebdcefc}{}\index{Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}!Any\+Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y@{Any\+Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y}}
+\index{Any\+Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y@{Any\+Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y}!Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}}
+\subsubsection[{Any\+Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y(\+Calculation\+Matrix \&matr\+\_\+\+A, int ix, int iy, string First\+Derivative, string Second\+Derivative, Matrix2\+D$<$ double $>$ \&x, Matrix2\+D$<$ double $>$ \&y, Matrix2\+D$<$ double $>$ \&\+Coef1, Matrix2\+D$<$ double $>$ \&\+Coef2, double multiplicator)}]{\setlength{\rightskip}{0pt plus 5cm}void Any\+Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y (
+\begin{DoxyParamCaption}
+\item[{{\bf Calculation\+Matrix} \&}]{matr\+\_\+\+A, }
+\item[{int}]{ix, }
+\item[{int}]{iy, }
+\item[{string}]{First\+Derivative, }
+\item[{string}]{Second\+Derivative, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{x, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{y, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{Coef1, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{Coef2, }
+\item[{double}]{multiplicator}
+\end{DoxyParamCaption}
+)}\label{_matrix_solver_8cpp_a91bc7fb01ebea27ea7b0a19ffebdcefc}
+Second derivative approximation in the y direction first, returns coefficients to be put into the model matrix. $ \frac {m Coef1 Coef2}{\frac{d}{dx} \frac{d}{dy}} $ 
+\begin{DoxyParams}{Parameters}
+{\em x} & Coordinate x \\
+\hline
+{\em y} & Coordinate y \\
+\hline
+{\em Coef1} & Coefficient outside of the term \\
+\hline
+{\em Coef2} & Coefficient inside the first derivative \\
+\hline
+\end{DoxyParams}
+\hypertarget{_matrix_solver_8cpp_a92166f2f5c8c31d7c03c7fd72be8f5e6}{}\index{Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}!Get\+Derivative\+Vector\+\_\+2\+D@{Get\+Derivative\+Vector\+\_\+2\+D}}
+\index{Get\+Derivative\+Vector\+\_\+2\+D@{Get\+Derivative\+Vector\+\_\+2\+D}!Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}}
+\subsubsection[{Get\+Derivative\+Vector\+\_\+2\+D(string derivative\+Type, int \&dx, int \&dy)}]{\setlength{\rightskip}{0pt plus 5cm}void Get\+Derivative\+Vector\+\_\+2\+D (
+\begin{DoxyParamCaption}
+\item[{string}]{derivative\+Type, }
+\item[{int \&}]{dx, }
+\item[{int \&}]{dy}
+\end{DoxyParamCaption}
+)}\label{_matrix_solver_8cpp_a92166f2f5c8c31d7c03c7fd72be8f5e6}
+Get change in indexes according to the derivatives direction.
+
+Used in approximation. If it gets derivative\+Type == D\+T\+\_\+\+A\+L\+P\+H\+A\+\_\+left, for example, that means we have alpha-\/left-\/derivative, which is ( f(alpha) -\/ f(alpha-\/1) ) / ( delta alpha ). So it returns d\+Alpha = -\/1, as a derivative direction vector. \hypertarget{_matrix_solver_8cpp_a2d1c3b2bf64ff6bce0d21ceed0e07287}{}\index{Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}!Lapack@{Lapack}}
+\index{Lapack@{Lapack}!Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}}
+\subsubsection[{Lapack(\+Diag\+Matrix \&\+A, Matrix1\+D$<$ double $>$ \&\+B, Matrix1\+D$<$ double $>$ \&\+X)}]{\setlength{\rightskip}{0pt plus 5cm}void Lapack (
+\begin{DoxyParamCaption}
+\item[{{\bf Diag\+Matrix} \&}]{A, }
+\item[{{\bf Matrix1\+D}$<$ double $>$ \&}]{B, }
+\item[{{\bf Matrix1\+D}$<$ double $>$ \&}]{X}
+\end{DoxyParamCaption}
+)}\label{_matrix_solver_8cpp_a2d1c3b2bf64ff6bce0d21ceed0e07287}
+Lapack inversion.
+
+A $\ast$ X = B -\/ equation
+
+L\+A\+P\+A\+C\+K -\/ Linear Algebra P\+A\+C\+Kage. For linear algebra methods. Using the lapack library from \href{http://www.netlib.org/lapack/}{\tt http\+://www.\+netlib.\+org/lapack/} \hypertarget{_matrix_solver_8cpp_a4aa1e5a2ed7139d8acddf8dd6fffb886}{}\index{Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}!Second\+Derivative\+Approximation\+\_\+1\+D@{Second\+Derivative\+Approximation\+\_\+1\+D}}
+\index{Second\+Derivative\+Approximation\+\_\+1\+D@{Second\+Derivative\+Approximation\+\_\+1\+D}!Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}}
+\subsubsection[{Second\+Derivative\+Approximation\+\_\+1\+D(\+Calculation\+Matrix \&matr\+\_\+\+A, int ix, string First\+Derivative, string Second\+Derivative, Matrix1\+D$<$ double $>$ \&x, Matrix1\+D$<$ double $>$ \&\+D, Matrix1\+D$<$ double $>$ \&\+G, double multiplicator)}]{\setlength{\rightskip}{0pt plus 5cm}void Second\+Derivative\+Approximation\+\_\+1\+D (
+\begin{DoxyParamCaption}
+\item[{{\bf Calculation\+Matrix} \&}]{matr\+\_\+\+A, }
+\item[{int}]{ix, }
+\item[{string}]{First\+Derivative, }
+\item[{string}]{Second\+Derivative, }
+\item[{{\bf Matrix1\+D}$<$ double $>$ \&}]{x, }
+\item[{{\bf Matrix1\+D}$<$ double $>$ \&}]{D, }
+\item[{{\bf Matrix1\+D}$<$ double $>$ \&}]{G, }
+\item[{double}]{multiplicator}
+\end{DoxyParamCaption}
+)}\label{_matrix_solver_8cpp_a4aa1e5a2ed7139d8acddf8dd6fffb886}
+numerical derivative approximation of a matrix in 1\+D
+
+$ Coef1 \frac{d}{dx} $ which is approximatied using the method\+:
+
+$ \frac{m G(x) D(x)}{[f(x) - f'(x)]G(x)[(f(x) - f''(x))]} $
+
+Done for a couple locations near x\mbox{[}ix\mbox{]} each location has a slightly modified equation 
+\begin{DoxyParams}{Parameters}
+{\em ix} & index for current location \\
+\hline
+{\em First\+Derivative} & determines whether first derivative approx. is with the point to the right or left of ix \\
+\hline
+{\em Second\+Derivative} & determines whether second derivative approx. is with the point to the right or left of ix \\
+\hline
+{\em x} & x matrix \\
+\hline
+{\em D} & Diffusion coefficient \\
+\hline
+{\em G} & Jacobian \\
+\hline
+{\em multiplicator} & multiplier based on number of iterations done (m) \\
+\hline
+\end{DoxyParams}
+\hypertarget{_matrix_solver_8cpp_aab431ba2c1718ca1d21596558008b10d}{}\index{Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}!Second\+Derivative\+Approximation\+\_\+2\+D@{Second\+Derivative\+Approximation\+\_\+2\+D}}
+\index{Second\+Derivative\+Approximation\+\_\+2\+D@{Second\+Derivative\+Approximation\+\_\+2\+D}!Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}}
+\subsubsection[{Second\+Derivative\+Approximation\+\_\+2\+D(\+Calculation\+Matrix \&matr\+\_\+\+A, int ix, int iy, string First\+Derivative, string Second\+Derivative, Matrix2\+D$<$ double $>$ \&x, Matrix2\+D$<$ double $>$ \&y, Matrix2\+D$<$ double $>$ \&\+D, Matrix2\+D$<$ double $>$ \&\+G, double multiplicator)}]{\setlength{\rightskip}{0pt plus 5cm}void Second\+Derivative\+Approximation\+\_\+2\+D (
+\begin{DoxyParamCaption}
+\item[{{\bf Calculation\+Matrix} \&}]{matr\+\_\+\+A, }
+\item[{int}]{ix, }
+\item[{int}]{iy, }
+\item[{string}]{First\+Derivative, }
+\item[{string}]{Second\+Derivative, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{x, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{y, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{D, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{G, }
+\item[{double}]{multiplicator}
+\end{DoxyParamCaption}
+)}\label{_matrix_solver_8cpp_aab431ba2c1718ca1d21596558008b10d}
+Second derivative approximation, returns coefficients to be put into the model matrix.
+
+$ Coef1 \frac{d}{dx} * Coef2 \frac{df}{dy} $
+
+The approximation is done in a similar fashion to Second\+Derivative\+Approximation\+\_\+1\+D
+
+$ \frac{m G(x,y) D(x,y)}{[f(x,y) - f'(x , y)]G(x,y)[(f(x,y) - f''(x , y)]} $
+
+Returns coefficients to be put into model matrix for an approximation of a second derivative. 
+\begin{DoxyParams}{Parameters}
+{\em x} & Coordinate x \\
+\hline
+{\em y} & Coordinate y \\
+\hline
+{\em D} & Diffusion coefficient \\
+\hline
+{\em G} & Jacobian \\
+\hline
+\end{DoxyParams}
+\hypertarget{_matrix_solver_8cpp_a5997c40fddb153030bec04b3083a3415}{}\index{Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}!Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y@{Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y}}
+\index{Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y@{Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y}!Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}}
+\subsubsection[{Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y(\+Calculation\+Matrix \&matr\+\_\+\+A, int ix, int iy, string First\+Derivative, string Second\+Derivative, Matrix2\+D$<$ double $>$ \&x, Matrix2\+D$<$ double $>$ \&y, Matrix2\+D$<$ double $>$ \&\+D, Matrix2\+D$<$ double $>$ \&\+G, double multiplicator)}]{\setlength{\rightskip}{0pt plus 5cm}void Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y (
+\begin{DoxyParamCaption}
+\item[{{\bf Calculation\+Matrix} \&}]{matr\+\_\+\+A, }
+\item[{int}]{ix, }
+\item[{int}]{iy, }
+\item[{string}]{First\+Derivative, }
+\item[{string}]{Second\+Derivative, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{x, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{y, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{D, }
+\item[{{\bf Matrix2\+D}$<$ double $>$ \&}]{G, }
+\item[{double}]{multiplicator}
+\end{DoxyParamCaption}
+)}\label{_matrix_solver_8cpp_a5997c40fddb153030bec04b3083a3415}
+Second derivative approximation in the y direction first, returns coefficients to be put into the model matrix.
+
+$ Coef1 \frac{d}{dx} * Coef2 \frac{df}{dy} $
+
+The approximation is done in a similar fashion to Second\+Derivative\+Approximation\+\_\+1\+D
+
+$ \frac{m G(x,y) D(x,y)}{[f(x,y) - f'(x , y )]G(x,y)[(f(x,y) - f''(x , y)]} $
+
+Returns coefficients to be put into model matrix for an approximation of a second derivative. 
+\begin{DoxyParams}{Parameters}
+{\em x} & Coordinate x \\
+\hline
+{\em y} & Coordinate y \\
+\hline
+{\em D} & Diffusion coefficient \\
+\hline
+{\em G} & Jacobian \\
+\hline
+\end{DoxyParams}
+\hypertarget{_matrix_solver_8cpp_a6cefd898c34c83f3f504d638384ce5cf}{}\index{Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}!tridag@{tridag}}
+\index{tridag@{tridag}!Matrix\+Solver.\+cpp@{Matrix\+Solver.\+cpp}}
+\subsubsection[{tridag(double a[], double b[], double c[], double r[], double u[], long n)}]{\setlength{\rightskip}{0pt plus 5cm}bool tridag (
+\begin{DoxyParamCaption}
+\item[{double}]{a\mbox{[}$\,$\mbox{]}, }
+\item[{double}]{b\mbox{[}$\,$\mbox{]}, }
+\item[{double}]{c\mbox{[}$\,$\mbox{]}, }
+\item[{double}]{r\mbox{[}$\,$\mbox{]}, }
+\item[{double}]{u\mbox{[}$\,$\mbox{]}, }
+\item[{long}]{n}
+\end{DoxyParamCaption}
+)}\label{_matrix_solver_8cpp_a6cefd898c34c83f3f504d638384ce5cf}
+
+
+Solve the A\+U=R system of equations, where A -\/ tridiagonal matrix nxn with diagonals a\mbox{[}\mbox{]}, b\mbox{[}\mbox{]}, c\mbox{[}\mbox{]}. 
+
+Solver for a system of equations with 3-\/diagonal matrix.
+
+Au = r Where A = diag(a, b, c),
+
+
+\begin{DoxyParams}{Parameters}
+{\em a\mbox{[}$\,$\mbox{]}} & -\/ array, diagonal \textquotesingle{}-\/1\textquotesingle{} of the matrix \\
+\hline
+{\em b\mbox{[}$\,$\mbox{]}} & -\/ array, diagonal \textquotesingle{}0\textquotesingle{} of the matrix \\
+\hline
+{\em c\mbox{[}$\,$\mbox{]}} & -\/ array, diagonal \textquotesingle{}+1\textquotesingle{} of the matrix \\
+\hline
+{\em r\mbox{[}$\,$\mbox{]}} & -\/ array, r-\/vector -\/ the Right Hand Side (R\+H\+S) \\
+\hline
+{\em u\mbox{[}$\,$\mbox{]}} & -\/ array, result \\
+\hline
+{\em n} & -\/ size of the matrix \\
+\hline
+\end{DoxyParams}

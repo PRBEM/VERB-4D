@@ -1,0 +1,34 @@
+\hypertarget{_interpolation_8cpp}{}\section{Interpolation.\+cpp File Reference}
+\label{_interpolation_8cpp}\index{Interpolation.\+cpp@{Interpolation.\+cpp}}
+
+
+Wrapper around interpolation library, interpolates values into new grid using \hyperlink{_monot_cubic_interpolator_8cpp}{Monot\+Cubic\+Interpolator.\+cpp}.  
+
+
+{\ttfamily \#include \char`\"{}Interpolation.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Monot\+Cubic\+Interpolator.\+hpp\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ \hyperlink{_interpolation_8cpp_a80d0e71a50aa60eb34af707a5415a37f}{Cubic1\+D} (\hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ \&old\+\_\+grid, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ \&values, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ \&new\+\_\+grid)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Wrapper around interpolation library, interpolates values into new grid using \hyperlink{_monot_cubic_interpolator_8cpp}{Monot\+Cubic\+Interpolator.\+cpp}. 
+
+Created on\+: Sep 14, 2013 Author\+: dimath 
+
+\subsection{Function Documentation}
+\hypertarget{_interpolation_8cpp_a80d0e71a50aa60eb34af707a5415a37f}{}\index{Interpolation.\+cpp@{Interpolation.\+cpp}!Cubic1\+D@{Cubic1\+D}}
+\index{Cubic1\+D@{Cubic1\+D}!Interpolation.\+cpp@{Interpolation.\+cpp}}
+\subsubsection[{Cubic1\+D(\+Matrix1\+D$<$ double $>$ \&old\+\_\+grid, Matrix1\+D$<$ double $>$ \&values, Matrix1\+D$<$ double $>$ \&new\+\_\+grid)}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Matrix1\+D}$<$double$>$ Cubic1\+D (
+\begin{DoxyParamCaption}
+\item[{{\bf Matrix1\+D}$<$ double $>$ \&}]{old\+\_\+grid, }
+\item[{{\bf Matrix1\+D}$<$ double $>$ \&}]{values, }
+\item[{{\bf Matrix1\+D}$<$ double $>$ \&}]{new\+\_\+grid}
+\end{DoxyParamCaption}
+)}\label{_interpolation_8cpp_a80d0e71a50aa60eb34af707a5415a37f}
+Wrapper around interpolation library, Interpolates values into new grid, Grid size should be the same
+
+Using interpolator from \hyperlink{class_opm_1_1_monot_cubic_interpolator}{Opm\+::\+Monot\+Cubic\+Interpolator} 

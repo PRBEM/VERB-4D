@@ -1,0 +1,634 @@
+\hypertarget{class_opm_1_1_monot_cubic_interpolator}{}\section{Opm\+:\+:Monot\+Cubic\+Interpolator Class Reference}
+\label{class_opm_1_1_monot_cubic_interpolator}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+
+
+Represents one dimensional function f with single valued argument x that can be interpolated using monotone cubic interpolation.  
+
+
+
+
+{\ttfamily \#include $<$Monot\+Cubic\+Interpolator.\+hpp$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_opm_1_1_monot_cubic_interpolator_a867a219e8593ecfa5bb274b4fe194822}{Monot\+Cubic\+Interpolator} (const std\+::string \&datafilename)  throw (const char$\ast$)
+\item 
+\hyperlink{class_opm_1_1_monot_cubic_interpolator_aa68657c5ef757b3b0e60757d8821bc35}{Monot\+Cubic\+Interpolator} (const char $\ast$datafilename)  throw (const char$\ast$)
+\item 
+\hyperlink{class_opm_1_1_monot_cubic_interpolator_a8dcc3dfc593124de2b4c8314252c2d5b}{Monot\+Cubic\+Interpolator} (const char $\ast$datafilename, int x\+Column, int f\+Column)  throw (const char$\ast$)
+\item 
+\hyperlink{class_opm_1_1_monot_cubic_interpolator_aeefb12231546d10c188f2bd22c65b4c4}{Monot\+Cubic\+Interpolator} (const std\+::string \&datafilename, int x\+Column, int f\+Column)  throw (const char$\ast$)
+\item 
+\hyperlink{class_opm_1_1_monot_cubic_interpolator_ad332b4fc09fe97bc78db0e118dcb54ce}{Monot\+Cubic\+Interpolator} (const std\+::vector$<$ double $>$ \&x, const std\+::vector$<$ double $>$ \&f)
+\item 
+\hyperlink{class_opm_1_1_monot_cubic_interpolator_aa4447da095a37573f1daf2e2f0cf19ed}{Monot\+Cubic\+Interpolator} ()
+\item 
+bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_a16c8f0f27938d06bbcc8ea0ffa82a07d}{read} (const std\+::string \&datafilename)
+\item 
+bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_ad5468e1ee8f963c91ad5bf22d63eacc7}{read} (const std\+::string \&datafilename, int x\+Column, int f\+Column)
+\item 
+double \hyperlink{class_opm_1_1_monot_cubic_interpolator_ad131f46d15412e6cfe7d0972129012e2}{operator()} (double x) const 
+\item 
+double \hyperlink{class_opm_1_1_monot_cubic_interpolator_a64a19de4f6494e2979ddafdad4ba7aa3}{evaluate} (double x) const   throw (const char$\ast$)
+\item 
+double \hyperlink{class_opm_1_1_monot_cubic_interpolator_a730f97422b4384e3e59555560a7336af}{evaluate} (double x, double \&errorestimate\+\_\+output) const 
+\item 
+std\+::pair$<$ double, double $>$ \hyperlink{class_opm_1_1_monot_cubic_interpolator_a6c1755584ecc64ccb8dd5cb2d002c806}{get\+Minimum\+X} () const 
+\item 
+std\+::pair$<$ double, double $>$ \hyperlink{class_opm_1_1_monot_cubic_interpolator_a653d28fd284318da18dde0e092c17109}{get\+Maximum\+X} () const 
+\item 
+std\+::pair$<$ double, double $>$ \hyperlink{class_opm_1_1_monot_cubic_interpolator_aa9c7fc234139d6a09b140c22461a4233}{get\+Maximum\+F} () const   throw (const char$\ast$)
+\item 
+std\+::pair$<$ double, double $>$ \hyperlink{class_opm_1_1_monot_cubic_interpolator_aa9e901d08354fc7f96340e8985171882}{get\+Minimum\+F} () const   throw (const char$\ast$)
+\item 
+std\+::vector$<$ double $>$ \hyperlink{class_opm_1_1_monot_cubic_interpolator_ada882d70e9149f4bfa5f7f4d5118480a}{get\+\_\+x\+Vector} () const 
+\item 
+std\+::vector$<$ double $>$ \hyperlink{class_opm_1_1_monot_cubic_interpolator_ab9940de57be4671201a96dab55ccb8a1}{get\+\_\+f\+Vector} () const 
+\item 
+void \hyperlink{class_opm_1_1_monot_cubic_interpolator_ab2ea032189594f43357b6ea53cd0aa1e}{scale\+Data} (double factor)
+\item 
+bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_a5c038e58cc6b06cceb0933743bdbcd0b}{is\+Strictly\+Monotone} ()
+\item 
+bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_a07f1efb0f4740087f0388e18dabc44df}{is\+Monotone} () const 
+\item 
+bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_adbdc068cc30c1496610d12f6f73f1306}{is\+Strictly\+Increasing} ()
+\item 
+bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_af77b7dc3389dac4f0d8fb6a81b9e976b}{is\+Monotone\+Increasing} () const 
+\item 
+bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_a05cb94dbbafa98918518c64226a7d7ca}{is\+Strictly\+Decreasing} ()
+\item 
+bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_a176828cbeabb928ce5626fd3205f6bad}{is\+Monotone\+Decreasing} () const 
+\item 
+void \hyperlink{class_opm_1_1_monot_cubic_interpolator_a6bdbc5403259458f5e7d90d3b77e25a6}{add\+Pair} (double newx, double newf)  throw (const char$\ast$)
+\item 
+std\+::pair$<$ double, double $>$ \hyperlink{class_opm_1_1_monot_cubic_interpolator_a80670052827881e3d1c45effa60d5d78}{get\+Missing\+X} () const   throw (const char$\ast$)
+\item 
+std\+::string \hyperlink{class_opm_1_1_monot_cubic_interpolator_a2ee2475e52a42f3982e30c5f78cf70b3}{to\+String} () const 
+\item 
+int \hyperlink{class_opm_1_1_monot_cubic_interpolator_a5027415906f0bb1ea7d57f5456d7ab2b}{get\+Size} () const 
+\item 
+void \hyperlink{class_opm_1_1_monot_cubic_interpolator_a83a92d8a6e6bd6719ef9102af51ca74a}{chop\+Flat\+Endpoints} (const double)
+\item 
+void \hyperlink{class_opm_1_1_monot_cubic_interpolator_afd92b5866850437e66e01e092fc8f8b2}{chop\+Flat\+Endpoints} ()
+\item 
+void \hyperlink{class_opm_1_1_monot_cubic_interpolator_af953fcbdfb83802b103516eff55fb26e}{shrink\+Flat\+Areas} (const double)
+\item 
+void \hyperlink{class_opm_1_1_monot_cubic_interpolator_aa853561e3084f7d5220b958b8b9df9ae}{shrink\+Flat\+Areas} ()
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a230b148ef09fed6a279f369fdd9847f9}{}double \hyperlink{class_opm_1_1_monot_cubic_interpolator_a230b148ef09fed6a279f369fdd9847f9}{H00} (double t) const \label{class_opm_1_1_monot_cubic_interpolator_a230b148ef09fed6a279f369fdd9847f9}
+
+\begin{DoxyCompactList}\small\item\em Hermite Basis function -\/ H00. \end{DoxyCompactList}\item 
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_ac0fdcab4f1e44cd828b56dee39c0ce6a}{}double \hyperlink{class_opm_1_1_monot_cubic_interpolator_ac0fdcab4f1e44cd828b56dee39c0ce6a}{H10} (double t) const \label{class_opm_1_1_monot_cubic_interpolator_ac0fdcab4f1e44cd828b56dee39c0ce6a}
+
+\begin{DoxyCompactList}\small\item\em Hermite Basis function -\/ H10. \end{DoxyCompactList}\item 
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a35c50499a60debc0e0505243c4cf0ade}{}double \hyperlink{class_opm_1_1_monot_cubic_interpolator_a35c50499a60debc0e0505243c4cf0ade}{H01} (double t) const \label{class_opm_1_1_monot_cubic_interpolator_a35c50499a60debc0e0505243c4cf0ade}
+
+\begin{DoxyCompactList}\small\item\em Hermite Basis function -\/ H01. \end{DoxyCompactList}\item 
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a9a337b2d5f0e5819c292a0f7574833f8}{}double \hyperlink{class_opm_1_1_monot_cubic_interpolator_a9a337b2d5f0e5819c292a0f7574833f8}{H11} (double t) const \label{class_opm_1_1_monot_cubic_interpolator_a9a337b2d5f0e5819c292a0f7574833f8}
+
+\begin{DoxyCompactList}\small\item\em Hermite Basis function -\/ H11. \end{DoxyCompactList}\item 
+void \hyperlink{class_opm_1_1_monot_cubic_interpolator_a0fb655f39c0428a162e0bab3a9dfab03}{compute\+Internal\+Function\+Data} () const 
+\item 
+void \hyperlink{class_opm_1_1_monot_cubic_interpolator_a3d03d08341bfd5e7ebaee7c58fed9bfc}{compute\+Simple\+Derivatives} () const 
+\item 
+void \hyperlink{class_opm_1_1_monot_cubic_interpolator_ae8a470ce196ba2dbf882dd1cf86d1567}{adjust\+Derivatives\+For\+Monotoneness} () const 
+\item 
+bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_a6d2b977b318a7c78e2156105b9384837}{is\+Monotone\+Coeff} (double alpha, double beta) const 
+\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_afd0b97a51e1aeef7f8688a2c20c64273}{}std\+::map$<$ double, double $>$ \hyperlink{class_opm_1_1_monot_cubic_interpolator_afd0b97a51e1aeef7f8688a2c20c64273}{data}\label{class_opm_1_1_monot_cubic_interpolator_afd0b97a51e1aeef7f8688a2c20c64273}
+
+\begin{DoxyCompactList}\small\item\em Data structure to store x-\/ and f-\/values. \end{DoxyCompactList}\item 
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a28418ab9be03135feafcf983bdb8d0aa}{}std\+::map$<$ double, double $>$ \hyperlink{class_opm_1_1_monot_cubic_interpolator_a28418ab9be03135feafcf983bdb8d0aa}{ddata}\label{class_opm_1_1_monot_cubic_interpolator_a28418ab9be03135feafcf983bdb8d0aa}
+
+\begin{DoxyCompactList}\small\item\em Data structure to store x-\/ and d-\/values. \end{DoxyCompactList}\item 
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a502a4814e58bbaffa7593e81cca6a3a0}{}bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_a502a4814e58bbaffa7593e81cca6a3a0}{strictly\+Monotone\+Cached}\label{class_opm_1_1_monot_cubic_interpolator_a502a4814e58bbaffa7593e81cca6a3a0}
+
+\begin{DoxyCompactList}\small\item\em Flag to determine whether the boolean strictly\+Monotone can be trusted. \end{DoxyCompactList}\item 
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_aa5e0006858d26e9f9d57956dea7852d9}{}bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_aa5e0006858d26e9f9d57956dea7852d9}{monotone\+Cached}\label{class_opm_1_1_monot_cubic_interpolator_aa5e0006858d26e9f9d57956dea7852d9}
+
+\begin{DoxyCompactList}\small\item\em Flag to determine whether the boolean Monotone can be trusted. \end{DoxyCompactList}\item 
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a88975c8e338ba67dedc671c9efdb2e6d}{}bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_a88975c8e338ba67dedc671c9efdb2e6d}{strictly\+Monotone}\label{class_opm_1_1_monot_cubic_interpolator_a88975c8e338ba67dedc671c9efdb2e6d}
+
+\begin{DoxyCompactList}\small\item\em strictly monotone function \end{DoxyCompactList}\item 
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_ae15b2de33cee75db27ce8dc2f1749a74}{}bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_ae15b2de33cee75db27ce8dc2f1749a74}{monotone}\label{class_opm_1_1_monot_cubic_interpolator_ae15b2de33cee75db27ce8dc2f1749a74}
+
+\begin{DoxyCompactList}\small\item\em monotone function, not strictly monotone \end{DoxyCompactList}\item 
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_aa619585bf1668674e7706dbd70d8e164}{}bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_aa619585bf1668674e7706dbd70d8e164}{strictly\+Decreasing}\label{class_opm_1_1_monot_cubic_interpolator_aa619585bf1668674e7706dbd70d8e164}
+
+\begin{DoxyCompactList}\small\item\em if strictly\+Monotone is true, tells whether function is strictly decreasing \end{DoxyCompactList}\item 
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_abd2aa7ffd6729b9bf4aacf706e29cf9e}{}bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_abd2aa7ffd6729b9bf4aacf706e29cf9e}{strictly\+Increasing}\label{class_opm_1_1_monot_cubic_interpolator_abd2aa7ffd6729b9bf4aacf706e29cf9e}
+
+\begin{DoxyCompactList}\small\item\em if strictly\+Monotone is true, tells whether function is strictly increasing \end{DoxyCompactList}\item 
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_ab30db3bdd5b15213be0ba594fbae69a1}{}bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_ab30db3bdd5b15213be0ba594fbae69a1}{decreasing}\label{class_opm_1_1_monot_cubic_interpolator_ab30db3bdd5b15213be0ba594fbae69a1}
+
+\begin{DoxyCompactList}\small\item\em tells whether function is decreasing \end{DoxyCompactList}\item 
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a01c003d595168786fea3c3896754134e}{}bool \hyperlink{class_opm_1_1_monot_cubic_interpolator_a01c003d595168786fea3c3896754134e}{increasing}\label{class_opm_1_1_monot_cubic_interpolator_a01c003d595168786fea3c3896754134e}
+
+\begin{DoxyCompactList}\small\item\em tells whether function is increasing \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Represents one dimensional function f with single valued argument x that can be interpolated using monotone cubic interpolation. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a867a219e8593ecfa5bb274b4fe194822}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!Monot\+Cubic\+Interpolator@{Monot\+Cubic\+Interpolator}}
+\index{Monot\+Cubic\+Interpolator@{Monot\+Cubic\+Interpolator}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{Monot\+Cubic\+Interpolator(const std\+::string \&datafilename)}]{\setlength{\rightskip}{0pt plus 5cm}Opm\+::\+Monot\+Cubic\+Interpolator\+::\+Monot\+Cubic\+Interpolator (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{datafilename}
+\end{DoxyParamCaption}
+) throw  const char $\ast$) \hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_a867a219e8593ecfa5bb274b4fe194822}
+
+\begin{DoxyParams}{Parameters}
+{\em datafilename} & A datafile with the x values and the corresponding f(x) values\\
+\hline
+\end{DoxyParams}
+Accepts a filename as input and parses this file for two-\/column floating point data, interpreting the data as representing function values x and f(x).
+
+Ignores all lines not conforming to $<$whitespace$>$$<$float$>$$<$whitespace$>$$<$float$>$$<$whatever$>$$<$newline$>$ \hypertarget{class_opm_1_1_monot_cubic_interpolator_aa68657c5ef757b3b0e60757d8821bc35}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!Monot\+Cubic\+Interpolator@{Monot\+Cubic\+Interpolator}}
+\index{Monot\+Cubic\+Interpolator@{Monot\+Cubic\+Interpolator}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{Monot\+Cubic\+Interpolator(const char $\ast$datafilename)}]{\setlength{\rightskip}{0pt plus 5cm}Opm\+::\+Monot\+Cubic\+Interpolator\+::\+Monot\+Cubic\+Interpolator (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{datafilename}
+\end{DoxyParamCaption}
+) throw  const char $\ast$) \hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_aa68657c5ef757b3b0e60757d8821bc35}
+
+\begin{DoxyParams}{Parameters}
+{\em datafilename} & A datafile with the x values and the corresponding f(x) values\\
+\hline
+\end{DoxyParams}
+Accepts a filename as input and parses this file for two-\/column floating point data, interpreting the data as representing function values x and f(x).
+
+Ignores all lines not conforming to $<$whitespace$>$$<$float$>$$<$whitespace$>$$<$float$>$$<$whatever$>$$<$newline$>$
+
+All commas in the file will be treated as spaces when parsing. \hypertarget{class_opm_1_1_monot_cubic_interpolator_a8dcc3dfc593124de2b4c8314252c2d5b}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!Monot\+Cubic\+Interpolator@{Monot\+Cubic\+Interpolator}}
+\index{Monot\+Cubic\+Interpolator@{Monot\+Cubic\+Interpolator}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{Monot\+Cubic\+Interpolator(const char $\ast$datafilename, int x\+Column, int f\+Column)}]{\setlength{\rightskip}{0pt plus 5cm}Opm\+::\+Monot\+Cubic\+Interpolator\+::\+Monot\+Cubic\+Interpolator (
+\begin{DoxyParamCaption}
+\item[{const char $\ast$}]{datafilename, }
+\item[{int}]{x\+Column, }
+\item[{int}]{f\+Column}
+\end{DoxyParamCaption}
+) throw  const char $\ast$) \hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_a8dcc3dfc593124de2b4c8314252c2d5b}
+
+\begin{DoxyParams}{Parameters}
+{\em datafilename} & data file \\
+\hline
+{\em X\+Column} & x values \\
+\hline
+{\em f\+Column} & f values\\
+\hline
+\end{DoxyParams}
+Accepts a filename as input, and parses the chosen columns in that file. \hypertarget{class_opm_1_1_monot_cubic_interpolator_aeefb12231546d10c188f2bd22c65b4c4}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!Monot\+Cubic\+Interpolator@{Monot\+Cubic\+Interpolator}}
+\index{Monot\+Cubic\+Interpolator@{Monot\+Cubic\+Interpolator}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{Monot\+Cubic\+Interpolator(const std\+::string \&datafilename, int x\+Column, int f\+Column)}]{\setlength{\rightskip}{0pt plus 5cm}Opm\+::\+Monot\+Cubic\+Interpolator\+::\+Monot\+Cubic\+Interpolator (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{datafilename, }
+\item[{int}]{x\+Column, }
+\item[{int}]{f\+Column}
+\end{DoxyParamCaption}
+) throw  const char $\ast$) \hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_aeefb12231546d10c188f2bd22c65b4c4}
+
+\begin{DoxyParams}{Parameters}
+{\em datafilename} & data file \\
+\hline
+{\em X\+Column} & x values \\
+\hline
+{\em f\+Column} & f values\\
+\hline
+\end{DoxyParams}
+Accepts a filename as input, and parses the chosen columns in that file. \hypertarget{class_opm_1_1_monot_cubic_interpolator_ad332b4fc09fe97bc78db0e118dcb54ce}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!Monot\+Cubic\+Interpolator@{Monot\+Cubic\+Interpolator}}
+\index{Monot\+Cubic\+Interpolator@{Monot\+Cubic\+Interpolator}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{Monot\+Cubic\+Interpolator(const std\+::vector$<$ double $>$ \&x, const std\+::vector$<$ double $>$ \&f)}]{\setlength{\rightskip}{0pt plus 5cm}Opm\+::\+Monot\+Cubic\+Interpolator\+::\+Monot\+Cubic\+Interpolator (
+\begin{DoxyParamCaption}
+\item[{const std\+::vector$<$ double $>$ \&}]{x, }
+\item[{const std\+::vector$<$ double $>$ \&}]{f}
+\end{DoxyParamCaption}
+)}\label{class_opm_1_1_monot_cubic_interpolator_ad332b4fc09fe97bc78db0e118dcb54ce}
+
+\begin{DoxyParams}{Parameters}
+{\em x} & vector of x values \\
+\hline
+{\em f} & vector of corresponding f values\\
+\hline
+\end{DoxyParams}
+Accepts two equal-\/length vectors as input for constructing the interpolation object. First vector is the x-\/values, the second vector is the function values \hypertarget{class_opm_1_1_monot_cubic_interpolator_aa4447da095a37573f1daf2e2f0cf19ed}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!Monot\+Cubic\+Interpolator@{Monot\+Cubic\+Interpolator}}
+\index{Monot\+Cubic\+Interpolator@{Monot\+Cubic\+Interpolator}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{Monot\+Cubic\+Interpolator()}]{\setlength{\rightskip}{0pt plus 5cm}Opm\+::\+Monot\+Cubic\+Interpolator\+::\+Monot\+Cubic\+Interpolator (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_aa4447da095a37573f1daf2e2f0cf19ed}
+No input, an empty function object is created.
+
+This object must be treated with care until populated. 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a6bdbc5403259458f5e7d90d3b77e25a6}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!add\+Pair@{add\+Pair}}
+\index{add\+Pair@{add\+Pair}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{add\+Pair(double newx, double newf)}]{\setlength{\rightskip}{0pt plus 5cm}void Opm\+::\+Monot\+Cubic\+Interpolator\+::add\+Pair (
+\begin{DoxyParamCaption}
+\item[{double}]{newx, }
+\item[{double}]{newf}
+\end{DoxyParamCaption}
+) throw  const char $\ast$) }\label{class_opm_1_1_monot_cubic_interpolator_a6bdbc5403259458f5e7d90d3b77e25a6}
+
+\begin{DoxyParams}{Parameters}
+{\em newx} & New x point \\
+\hline
+{\em newf} & New f(x) point\\
+\hline
+\end{DoxyParams}
+Adds a new datapoint to the function.
+
+This causes all the derivatives at all points of the functions to be recomputed and then adjusted for monotone cubic interpolation. If this function ever enters a critical part of any code, the locality of the algorithm for monotone adjustment must be exploited. \hypertarget{class_opm_1_1_monot_cubic_interpolator_ae8a470ce196ba2dbf882dd1cf86d1567}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!adjust\+Derivatives\+For\+Monotoneness@{adjust\+Derivatives\+For\+Monotoneness}}
+\index{adjust\+Derivatives\+For\+Monotoneness@{adjust\+Derivatives\+For\+Monotoneness}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{adjust\+Derivatives\+For\+Monotoneness() const }]{\setlength{\rightskip}{0pt plus 5cm}void Opm\+::\+Monot\+Cubic\+Interpolator\+::adjust\+Derivatives\+For\+Monotoneness (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [private]}}\label{class_opm_1_1_monot_cubic_interpolator_ae8a470ce196ba2dbf882dd1cf86d1567}
+Adjusts the derivative values (ddata) so that we can guarantee that the resulting piecewise Hermite polymial is monotone. This is done according to the algorithm of Fritsch and Carlsson 1980, see Section 4, especially the two last lines. \hypertarget{class_opm_1_1_monot_cubic_interpolator_a83a92d8a6e6bd6719ef9102af51ca74a}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!chop\+Flat\+Endpoints@{chop\+Flat\+Endpoints}}
+\index{chop\+Flat\+Endpoints@{chop\+Flat\+Endpoints}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{chop\+Flat\+Endpoints(const double)}]{\setlength{\rightskip}{0pt plus 5cm}void Opm\+::\+Monot\+Cubic\+Interpolator\+::chop\+Flat\+Endpoints (
+\begin{DoxyParamCaption}
+\item[{const double}]{epsilon}
+\end{DoxyParamCaption}
+)}\label{class_opm_1_1_monot_cubic_interpolator_a83a92d8a6e6bd6719ef9102af51ca74a}
+Checks if the function curve is flat at the endpoints, chop off endpoint data points if that is the case.
+
+The notion of \char`\"{}flat\char`\"{} is determined by the input parameter \char`\"{}epsilon\char`\"{} Values whose difference are less than epsilon are regarded as equal.
+
+This is implemented to be able to obtain a strictly monotone curve from a data set that is strictly monotone except at the endpoints.
+
+Example\+: The data points (1,3), (2,3), (3,4), (4,5), (5,5), (6,5) will become (2,3), (3,4), (4,5)
+
+Assumes at least 3 datapoints. If less than three, this function is a loop. \hypertarget{class_opm_1_1_monot_cubic_interpolator_afd92b5866850437e66e01e092fc8f8b2}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!chop\+Flat\+Endpoints@{chop\+Flat\+Endpoints}}
+\index{chop\+Flat\+Endpoints@{chop\+Flat\+Endpoints}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{chop\+Flat\+Endpoints()}]{\setlength{\rightskip}{0pt plus 5cm}void Opm\+::\+Monot\+Cubic\+Interpolator\+::chop\+Flat\+Endpoints (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_afd92b5866850437e66e01e092fc8f8b2}
+Wrapper function for \hyperlink{class_opm_1_1_monot_cubic_interpolator_a83a92d8a6e6bd6719ef9102af51ca74a}{chop\+Flat\+Endpoints(const double)} providing a default epsilon parameter \hypertarget{class_opm_1_1_monot_cubic_interpolator_a0fb655f39c0428a162e0bab3a9dfab03}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!compute\+Internal\+Function\+Data@{compute\+Internal\+Function\+Data}}
+\index{compute\+Internal\+Function\+Data@{compute\+Internal\+Function\+Data}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{compute\+Internal\+Function\+Data() const }]{\setlength{\rightskip}{0pt plus 5cm}void Opm\+::\+Monot\+Cubic\+Interpolator\+::compute\+Internal\+Function\+Data (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [private]}}\label{class_opm_1_1_monot_cubic_interpolator_a0fb655f39c0428a162e0bab3a9dfab03}
+Sets the following information (booleans) about the function to true or false, default is true for all
+
+strictly\+Monotone, monotone, strictly\+Decreasing, decreasing, strictly\+Increasing, increasing \hypertarget{class_opm_1_1_monot_cubic_interpolator_a3d03d08341bfd5e7ebaee7c58fed9bfc}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!compute\+Simple\+Derivatives@{compute\+Simple\+Derivatives}}
+\index{compute\+Simple\+Derivatives@{compute\+Simple\+Derivatives}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{compute\+Simple\+Derivatives() const }]{\setlength{\rightskip}{0pt plus 5cm}void Opm\+::\+Monot\+Cubic\+Interpolator\+::compute\+Simple\+Derivatives (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [private]}}\label{class_opm_1_1_monot_cubic_interpolator_a3d03d08341bfd5e7ebaee7c58fed9bfc}
+Computes initial derivative values using centered (second order) difference for internal datapoints, and one-\/sided derivative for endpoints
+
+The internal datastructure map$<$double,double$>$ ddata is populated by this method. \hypertarget{class_opm_1_1_monot_cubic_interpolator_a64a19de4f6494e2979ddafdad4ba7aa3}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!evaluate@{evaluate}}
+\index{evaluate@{evaluate}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{evaluate(double x) const }]{\setlength{\rightskip}{0pt plus 5cm}double Opm\+::\+Monot\+Cubic\+Interpolator\+::evaluate (
+\begin{DoxyParamCaption}
+\item[{double}]{x}
+\end{DoxyParamCaption}
+) const throw  const char $\ast$) }\label{class_opm_1_1_monot_cubic_interpolator_a64a19de4f6494e2979ddafdad4ba7aa3}
+
+\begin{DoxyParams}{Parameters}
+{\em x} & x value\\
+\hline
+\end{DoxyParams}
+Returns f(x) for given x (input). Interpolates (monotone cubic or linearly) if necessary.
+
+Extrapolates using the constants f(x\+\_\+min) or f(x\+\_\+max) if input x is outside (x\+\_\+min, x\+\_\+max)
+
+\begin{DoxyReturn}{Returns}
+f(x) for a given x 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a730f97422b4384e3e59555560a7336af}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!evaluate@{evaluate}}
+\index{evaluate@{evaluate}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{evaluate(double x, double \&errorestimate\+\_\+output) const }]{\setlength{\rightskip}{0pt plus 5cm}double Opm\+::\+Monot\+Cubic\+Interpolator\+::evaluate (
+\begin{DoxyParamCaption}
+\item[{double}]{x, }
+\item[{double \&}]{errorestimate\+\_\+output}
+\end{DoxyParamCaption}
+) const}\label{class_opm_1_1_monot_cubic_interpolator_a730f97422b4384e3e59555560a7336af}
+
+\begin{DoxyParams}{Parameters}
+{\em x} & x value \\
+\hline
+{\em errorestimate\+\_\+output} & Returns f(x) and an error estimate for given x (input).\\
+\hline
+\end{DoxyParams}
+Interpolates (linearly) if necessary.
+
+Throws an exception if extrapolation would be necessary for evaluation. We do not want to do extrapolation (yet).
+
+The error estimate for x1 $<$ x $<$ x2 is (x2 -\/ x1)$^\wedge$2/8 $\ast$ f\textquotesingle{}\textquotesingle{}(x) where f\textquotesingle{}\textquotesingle{}(x) is evaluated using the stencil (1 -\/2 1) using either (x0, x1, x2) or (x1, x2, x3);
+
+Throws an exception if the table contains only two x-\/values.
+
+N\+O\+T I\+M\+P\+L\+E\+M\+E\+N\+T\+E\+D Y\+E\+T! \hypertarget{class_opm_1_1_monot_cubic_interpolator_ab9940de57be4671201a96dab55ccb8a1}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!get\+\_\+f\+Vector@{get\+\_\+f\+Vector}}
+\index{get\+\_\+f\+Vector@{get\+\_\+f\+Vector}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{get\+\_\+f\+Vector() const }]{\setlength{\rightskip}{0pt plus 5cm}vector$<$ double $>$ Opm\+::\+Monot\+Cubic\+Interpolator\+::get\+\_\+f\+Vector (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}\label{class_opm_1_1_monot_cubic_interpolator_ab9940de57be4671201a96dab55ccb8a1}
+Provide a copy of tghe function data as a vector
+
+Unspecified order, but corresponds to get\+\_\+x\+Vector
+
+\begin{DoxyReturn}{Returns}
+f values as a vector 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_ada882d70e9149f4bfa5f7f4d5118480a}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!get\+\_\+x\+Vector@{get\+\_\+x\+Vector}}
+\index{get\+\_\+x\+Vector@{get\+\_\+x\+Vector}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{get\+\_\+x\+Vector() const }]{\setlength{\rightskip}{0pt plus 5cm}vector$<$ double $>$ Opm\+::\+Monot\+Cubic\+Interpolator\+::get\+\_\+x\+Vector (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}\label{class_opm_1_1_monot_cubic_interpolator_ada882d70e9149f4bfa5f7f4d5118480a}
+Provide a copy of the x-\/data as a vector
+
+Unspecified order, but corresponds to get\+\_\+f\+Vector.
+
+\begin{DoxyReturn}{Returns}
+x values as a vector 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_aa9c7fc234139d6a09b140c22461a4233}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!get\+Maximum\+F@{get\+Maximum\+F}}
+\index{get\+Maximum\+F@{get\+Maximum\+F}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{get\+Maximum\+F() const }]{\setlength{\rightskip}{0pt plus 5cm}pair$<$ double, double $>$ Opm\+::\+Monot\+Cubic\+Interpolator\+::get\+Maximum\+F (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const throw  const char $\ast$) }\label{class_opm_1_1_monot_cubic_interpolator_aa9c7fc234139d6a09b140c22461a4233}
+Maximum f-\/value, returns both x and f in a pair.
+
+\begin{DoxyReturn}{Returns}
+x value corresponding to maximum f value 
+
+maximum f value 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a653d28fd284318da18dde0e092c17109}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!get\+Maximum\+X@{get\+Maximum\+X}}
+\index{get\+Maximum\+X@{get\+Maximum\+X}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{get\+Maximum\+X() const }]{\setlength{\rightskip}{0pt plus 5cm}std\+::pair$<$double,double$>$ Opm\+::\+Monot\+Cubic\+Interpolator\+::get\+Maximum\+X (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_a653d28fd284318da18dde0e092c17109}
+Maximum x-\/value, returns both x and f in a pair.
+
+\begin{DoxyReturn}{Returns}
+maximum x value 
+
+f(maximum x value) 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_aa9e901d08354fc7f96340e8985171882}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!get\+Minimum\+F@{get\+Minimum\+F}}
+\index{get\+Minimum\+F@{get\+Minimum\+F}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{get\+Minimum\+F() const }]{\setlength{\rightskip}{0pt plus 5cm}pair$<$ double, double $>$ Opm\+::\+Monot\+Cubic\+Interpolator\+::get\+Minimum\+F (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const throw  const char $\ast$) }\label{class_opm_1_1_monot_cubic_interpolator_aa9e901d08354fc7f96340e8985171882}
+Minimum f-\/value, returns both x and f in a pair
+
+\begin{DoxyReturn}{Returns}
+x value corresponding to minimal f value 
+
+minimum f value 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a6c1755584ecc64ccb8dd5cb2d002c806}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!get\+Minimum\+X@{get\+Minimum\+X}}
+\index{get\+Minimum\+X@{get\+Minimum\+X}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{get\+Minimum\+X() const }]{\setlength{\rightskip}{0pt plus 5cm}std\+::pair$<$double,double$>$ Opm\+::\+Monot\+Cubic\+Interpolator\+::get\+Minimum\+X (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_a6c1755584ecc64ccb8dd5cb2d002c806}
+Minimum x-\/value, returns both x and f in a pair.
+
+\begin{DoxyReturn}{Returns}
+minimum x value 
+
+f(minimum x value) 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a80670052827881e3d1c45effa60d5d78}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!get\+Missing\+X@{get\+Missing\+X}}
+\index{get\+Missing\+X@{get\+Missing\+X}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{get\+Missing\+X() const }]{\setlength{\rightskip}{0pt plus 5cm}pair$<$ double, double $>$ Opm\+::\+Monot\+Cubic\+Interpolator\+::get\+Missing\+X (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const throw  const char $\ast$) }\label{class_opm_1_1_monot_cubic_interpolator_a80670052827881e3d1c45effa60d5d78}
+Returns an x-\/value that is believed to yield the best improvement in global accuracy for the interpolation if computed.
+
+Searches for the largest jump in f-\/values, and returns a x value being the average of the two x-\/values representing the f-\/value-\/jump.
+
+\begin{DoxyReturn}{Returns}
+New x value beleived to yield the best improvement in global accuracy 
+
+Maximal difference 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a5027415906f0bb1ea7d57f5456d7ab2b}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!get\+Size@{get\+Size}}
+\index{get\+Size@{get\+Size}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{get\+Size() const }]{\setlength{\rightskip}{0pt plus 5cm}int Opm\+::\+Monot\+Cubic\+Interpolator\+::get\+Size (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_a5027415906f0bb1ea7d57f5456d7ab2b}
+\begin{DoxyReturn}{Returns}
+Number of datapoint pairs in this object 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a07f1efb0f4740087f0388e18dabc44df}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!is\+Monotone@{is\+Monotone}}
+\index{is\+Monotone@{is\+Monotone}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{is\+Monotone() const }]{\setlength{\rightskip}{0pt plus 5cm}bool Opm\+::\+Monot\+Cubic\+Interpolator\+::is\+Monotone (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_a07f1efb0f4740087f0388e18dabc44df}
+Determines if the current function-\/value-\/data is monotone.
+
+\begin{DoxyReturn}{Returns}
+True if f(x) is monotone, else False 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a6d2b977b318a7c78e2156105b9384837}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!is\+Monotone\+Coeff@{is\+Monotone\+Coeff}}
+\index{is\+Monotone\+Coeff@{is\+Monotone\+Coeff}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{is\+Monotone\+Coeff(double alpha, double beta) const }]{\setlength{\rightskip}{0pt plus 5cm}bool Opm\+::\+Monot\+Cubic\+Interpolator\+::is\+Monotone\+Coeff (
+\begin{DoxyParamCaption}
+\item[{double}]{alpha, }
+\item[{double}]{beta}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [private]}}\label{class_opm_1_1_monot_cubic_interpolator_a6d2b977b318a7c78e2156105b9384837}
+Checks if the coefficient alpha and beta is in the region that guarantees monotoneness of the derivative values they represent
+
+See Fritsch and Carlson 1980, Lemma 2, alternatively Step 5 in Wikipedia\textquotesingle{}s article on Monotone cubic interpolation. \hypertarget{class_opm_1_1_monot_cubic_interpolator_a176828cbeabb928ce5626fd3205f6bad}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!is\+Monotone\+Decreasing@{is\+Monotone\+Decreasing}}
+\index{is\+Monotone\+Decreasing@{is\+Monotone\+Decreasing}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{is\+Monotone\+Decreasing() const }]{\setlength{\rightskip}{0pt plus 5cm}bool Opm\+::\+Monot\+Cubic\+Interpolator\+::is\+Monotone\+Decreasing (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_a176828cbeabb928ce5626fd3205f6bad}
+Determines if the current function-\/value-\/data is monotone and decreasing
+
+\begin{DoxyReturn}{Returns}
+True if f(x) is monotone and decreasing, else False 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_af77b7dc3389dac4f0d8fb6a81b9e976b}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!is\+Monotone\+Increasing@{is\+Monotone\+Increasing}}
+\index{is\+Monotone\+Increasing@{is\+Monotone\+Increasing}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{is\+Monotone\+Increasing() const }]{\setlength{\rightskip}{0pt plus 5cm}bool Opm\+::\+Monot\+Cubic\+Interpolator\+::is\+Monotone\+Increasing (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_af77b7dc3389dac4f0d8fb6a81b9e976b}
+Determines if the current function-\/value-\/data is monotone and increasing.
+
+\begin{DoxyReturn}{Returns}
+True if f(x) is monotone and increasing, else False 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a05cb94dbbafa98918518c64226a7d7ca}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!is\+Strictly\+Decreasing@{is\+Strictly\+Decreasing}}
+\index{is\+Strictly\+Decreasing@{is\+Strictly\+Decreasing}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{is\+Strictly\+Decreasing()}]{\setlength{\rightskip}{0pt plus 5cm}bool Opm\+::\+Monot\+Cubic\+Interpolator\+::is\+Strictly\+Decreasing (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_a05cb94dbbafa98918518c64226a7d7ca}
+Determines if the current function-\/value-\/data is strictly decreasing. This is a utility function for outsiders if they want to invert the data for example.
+
+\begin{DoxyReturn}{Returns}
+True if f(x) is strictly decreasing, else False 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_adbdc068cc30c1496610d12f6f73f1306}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!is\+Strictly\+Increasing@{is\+Strictly\+Increasing}}
+\index{is\+Strictly\+Increasing@{is\+Strictly\+Increasing}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{is\+Strictly\+Increasing()}]{\setlength{\rightskip}{0pt plus 5cm}bool Opm\+::\+Monot\+Cubic\+Interpolator\+::is\+Strictly\+Increasing (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_adbdc068cc30c1496610d12f6f73f1306}
+Determines if the current function-\/value-\/data is strictly increasing. This is a utility function for outsiders if they want to invert the data for example.
+
+\begin{DoxyReturn}{Returns}
+True if f(x) is strictly increasing, else False 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a5c038e58cc6b06cceb0933743bdbcd0b}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!is\+Strictly\+Monotone@{is\+Strictly\+Monotone}}
+\index{is\+Strictly\+Monotone@{is\+Strictly\+Monotone}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{is\+Strictly\+Monotone()}]{\setlength{\rightskip}{0pt plus 5cm}bool Opm\+::\+Monot\+Cubic\+Interpolator\+::is\+Strictly\+Monotone (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_a5c038e58cc6b06cceb0933743bdbcd0b}
+Determines if the current function-\/value-\/data is strictly monotone. This is a utility function for outsiders if they want to invert the data for example.
+
+\begin{DoxyReturn}{Returns}
+True if f(x) is strictly monotone, else False 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_ad131f46d15412e6cfe7d0972129012e2}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!operator()@{operator()}}
+\index{operator()@{operator()}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{operator()(double x) const }]{\setlength{\rightskip}{0pt plus 5cm}double Opm\+::\+Monot\+Cubic\+Interpolator\+::operator() (
+\begin{DoxyParamCaption}
+\item[{double}]{x}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_ad131f46d15412e6cfe7d0972129012e2}
+
+\begin{DoxyParams}{Parameters}
+{\em x} & x value\\
+\hline
+\end{DoxyParams}
+Returns f(x) for given x (input). Interpolates (monotone cubic or linearly) if necessary.
+
+Extrapolates using the constants f(x\+\_\+min) or f(x\+\_\+max) if input x is outside (x\+\_\+min, x\+\_\+max)
+
+\begin{DoxyReturn}{Returns}
+f(x) for a given x 
+\end{DoxyReturn}
+\hypertarget{class_opm_1_1_monot_cubic_interpolator_a16c8f0f27938d06bbcc8ea0ffa82a07d}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!read@{read}}
+\index{read@{read}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{read(const std\+::string \&datafilename)}]{\setlength{\rightskip}{0pt plus 5cm}bool Opm\+::\+Monot\+Cubic\+Interpolator\+::read (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{datafilename}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_a16c8f0f27938d06bbcc8ea0ffa82a07d}
+
+\begin{DoxyParams}{Parameters}
+{\em datafilename} & A datafile with the x values and the corresponding f(x) values\\
+\hline
+\end{DoxyParams}
+Accepts a filename as input and parses this file for two-\/column floating point data, interpreting the data as representing function values x and f(x).
+
+returns true on success
+
+All commas in file will be treated as spaces when parsing
+
+Ignores all lines not conforming to $<$whitespace$>$$<$float$>$$<$whitespace$>$$<$float$>$$<$whatever$>$$<$newline$>$ \hypertarget{class_opm_1_1_monot_cubic_interpolator_ad5468e1ee8f963c91ad5bf22d63eacc7}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!read@{read}}
+\index{read@{read}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{read(const std\+::string \&datafilename, int x\+Column, int f\+Column)}]{\setlength{\rightskip}{0pt plus 5cm}bool Opm\+::\+Monot\+Cubic\+Interpolator\+::read (
+\begin{DoxyParamCaption}
+\item[{const std\+::string \&}]{datafilename, }
+\item[{int}]{x\+Column, }
+\item[{int}]{f\+Column}
+\end{DoxyParamCaption}
+)}\label{class_opm_1_1_monot_cubic_interpolator_ad5468e1ee8f963c91ad5bf22d63eacc7}
+
+\begin{DoxyParams}{Parameters}
+{\em datafilename} & data file \\
+\hline
+{\em X\+Column} & x values \\
+\hline
+{\em f\+Column} & f values\\
+\hline
+\end{DoxyParams}
+Accepts a filename as input, and parses the chosen columns in that file. \hypertarget{class_opm_1_1_monot_cubic_interpolator_ab2ea032189594f43357b6ea53cd0aa1e}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!scale\+Data@{scale\+Data}}
+\index{scale\+Data@{scale\+Data}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{scale\+Data(double factor)}]{\setlength{\rightskip}{0pt plus 5cm}void Opm\+::\+Monot\+Cubic\+Interpolator\+::scale\+Data (
+\begin{DoxyParamCaption}
+\item[{double}]{factor}
+\end{DoxyParamCaption}
+)}\label{class_opm_1_1_monot_cubic_interpolator_ab2ea032189594f43357b6ea53cd0aa1e}
+
+\begin{DoxyParams}{Parameters}
+{\em factor} & Scaling constant\\
+\hline
+\end{DoxyParams}
+Scale all the function value data by a constant \hypertarget{class_opm_1_1_monot_cubic_interpolator_af953fcbdfb83802b103516eff55fb26e}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!shrink\+Flat\+Areas@{shrink\+Flat\+Areas}}
+\index{shrink\+Flat\+Areas@{shrink\+Flat\+Areas}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{shrink\+Flat\+Areas(const double)}]{\setlength{\rightskip}{0pt plus 5cm}void Opm\+::\+Monot\+Cubic\+Interpolator\+::shrink\+Flat\+Areas (
+\begin{DoxyParamCaption}
+\item[{const double}]{epsilon}
+\end{DoxyParamCaption}
+)}\label{class_opm_1_1_monot_cubic_interpolator_af953fcbdfb83802b103516eff55fb26e}
+If function is monotone, but not strictly monotone, this function will remove datapoints from intervals with zero derivative so that the curve become strictly monotone.
+
+Example The data points (1,2), (2,3), (3,4), (4,4), (5,5), (6,6) will become (1,2), (2,3), (3,4), (5,5), (6,6)
+
+Assumes at least two datapoints, if one or zero datapoint, this is a noop. \hypertarget{class_opm_1_1_monot_cubic_interpolator_aa853561e3084f7d5220b958b8b9df9ae}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!shrink\+Flat\+Areas@{shrink\+Flat\+Areas}}
+\index{shrink\+Flat\+Areas@{shrink\+Flat\+Areas}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{shrink\+Flat\+Areas()}]{\setlength{\rightskip}{0pt plus 5cm}void Opm\+::\+Monot\+Cubic\+Interpolator\+::shrink\+Flat\+Areas (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}\label{class_opm_1_1_monot_cubic_interpolator_aa853561e3084f7d5220b958b8b9df9ae}
+Wrapper function for \hyperlink{class_opm_1_1_monot_cubic_interpolator_af953fcbdfb83802b103516eff55fb26e}{shrink\+Flat\+Areas(const double)} providing a default epsilon parameter \hypertarget{class_opm_1_1_monot_cubic_interpolator_a2ee2475e52a42f3982e30c5f78cf70b3}{}\index{Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}!to\+String@{to\+String}}
+\index{to\+String@{to\+String}!Opm\+::\+Monot\+Cubic\+Interpolator@{Opm\+::\+Monot\+Cubic\+Interpolator}}
+\subsubsection[{to\+String() const }]{\setlength{\rightskip}{0pt plus 5cm}string Opm\+::\+Monot\+Cubic\+Interpolator\+::to\+String (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const}\label{class_opm_1_1_monot_cubic_interpolator_a2ee2475e52a42f3982e30c5f78cf70b3}
+Constructs a string containing the data in a table
+
+\begin{DoxyReturn}{Returns}
+a string containing the data in a table 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_monot_cubic_interpolator_8hpp}{Monot\+Cubic\+Interpolator.\+hpp}\item 
+\hyperlink{_monot_cubic_interpolator_8cpp}{Monot\+Cubic\+Interpolator.\+cpp}\end{DoxyCompactItemize}

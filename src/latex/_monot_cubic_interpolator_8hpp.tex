@@ -1,0 +1,41 @@
+\hypertarget{_monot_cubic_interpolator_8hpp}{}\section{Monot\+Cubic\+Interpolator.\+hpp File Reference}
+\label{_monot_cubic_interpolator_8hpp}\index{Monot\+Cubic\+Interpolator.\+hpp@{Monot\+Cubic\+Interpolator.\+hpp}}
+
+
+Represents one dimensional function f with single valued argument x that can be interpolated using monotone cubic interpolation.  
+
+
+{\ttfamily \#include $<$vector$>$}\\*
+{\ttfamily \#include $<$map$>$}\\*
+{\ttfamily \#include $<$string$>$}\\*
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{class_opm_1_1_monot_cubic_interpolator}{Opm\+::\+Monot\+Cubic\+Interpolator}
+\begin{DoxyCompactList}\small\item\em Represents one dimensional function f with single valued argument x that can be interpolated using monotone cubic interpolation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+ \hyperlink{namespace_opm}{Opm}
+\begin{DoxyCompactList}\small\item\em Namespace included for using the monotone cubic interpolator. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Represents one dimensional function f with single valued argument x that can be interpolated using monotone cubic interpolation. 
+
+Class to represent a one-\/dimensional function f with single-\/valued argument x. The function is represented by a table of function values. Interpolation between table values is cubic and monotonicity preserving if input values are monotonous.
+
+Outside $ x_{min} $ and $ x_{max} $, the class will extrapolate using the constant $f(x_{min})$ or $f(x_{max})$.
+
+Extra functionality\+:
+\begin{DoxyItemize}
+\item Can return $ (x_1+x_2)/2 $ where $ x_1 $ and $ x_2 $ are such that $ abs(f(x_1) - f(x_2)) $ is maximized. This is used to determine where one should calculate a new value for increased accuracy in the current function
+\end{DoxyItemize}
+
+Monotonicity preserving cubic interpolation algorithm is taken from Fritsch and Carlson, \char`\"{}\+Monotone piecewise cubic interpolation\char`\"{}, S\+I\+A\+M J. Numer. Anal. 17, 238--246, no. 2,
+
+Algorithm also described here\+: \href{http://en.wikipedia.org/wiki/Monotone_cubic_interpolation}{\tt http\+://en.\+wikipedia.\+org/wiki/\+Monotone\+\_\+cubic\+\_\+interpolation}
+
+\begin{DoxyAuthor}{Author}
+Håvard Berland $<$havb (at) statoil.\+com$>$, December 2006 
+\end{DoxyAuthor}

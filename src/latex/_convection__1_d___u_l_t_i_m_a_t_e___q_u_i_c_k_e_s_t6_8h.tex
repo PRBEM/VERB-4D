@@ -1,0 +1,65 @@
+\hypertarget{_convection__1_d___u_l_t_i_m_a_t_e___q_u_i_c_k_e_s_t6_8h}{}\section{Convection\+\_\+1\+D\+\_\+\+U\+L\+T\+I\+M\+A\+T\+E\+\_\+\+Q\+U\+I\+C\+K\+E\+S\+T6.\+h File Reference}
+\label{_convection__1_d___u_l_t_i_m_a_t_e___q_u_i_c_k_e_s_t6_8h}\index{Convection\+\_\+1\+D\+\_\+\+U\+L\+T\+I\+M\+A\+T\+E\+\_\+\+Q\+U\+I\+C\+K\+E\+S\+T6.\+h@{Convection\+\_\+1\+D\+\_\+\+U\+L\+T\+I\+M\+A\+T\+E\+\_\+\+Q\+U\+I\+C\+K\+E\+S\+T6.\+h}}
+
+
+Calculates the convection in 1\+D given a 1\+D matrix of Phase Space Densities, boundary conditions, diffusion, sources and losses.  
+
+
+{\ttfamily \#include \char`\"{}Matrix.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Matrix\+Solver.\+h\char`\"{}}\\*
+{\ttfamily \#include \char`\"{}Logger.\+h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{_convection__1_d___u_l_t_i_m_a_t_e___q_u_i_c_k_e_s_t6_8h_af94a11ee22da26ed27cf9008db9b44e8}{Convection\+\_\+1\+D\+\_\+\+U\+L\+T\+I\+M\+A\+T\+E\+\_\+\+Q\+U\+I\+C\+K\+E\+S\+T6} (\hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ \&P\+S\+D, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ x, int x\+\_\+size, double x\+\_\+\+L\+B\+C, double x\+\_\+\+U\+B\+C, string x\+\_\+\+L\+B\+C\+\_\+type, string x\+\_\+\+U\+B\+C\+\_\+type, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ Ux, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ Sources, \hyperlink{class_matrix1_d}{Matrix1\+D}$<$ double $>$ Losses, double dt)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Calculates the convection in 1\+D given a 1\+D matrix of Phase Space Densities, boundary conditions, diffusion, sources and losses. 
+
+All equations and formulas for these calculations can be found at \href{http://www.hadian.ir/teaching/CompHydr/3.pdf}{\tt http\+://www.\+hadian.\+ir/teaching/\+Comp\+Hydr/3.\+pdf} . Mostly coming from 3.\+5 Simplified Ultimate Quickest strategy from B.\+P Leonard the Ultimate conservative difference scheme. In the source code mathematical equations are numbered corresponding to the numbering of equations found in the paper 
+
+\subsection{Function Documentation}
+\hypertarget{_convection__1_d___u_l_t_i_m_a_t_e___q_u_i_c_k_e_s_t6_8h_af94a11ee22da26ed27cf9008db9b44e8}{}\index{Convection\+\_\+1\+D\+\_\+\+U\+L\+T\+I\+M\+A\+T\+E\+\_\+\+Q\+U\+I\+C\+K\+E\+S\+T6.\+h@{Convection\+\_\+1\+D\+\_\+\+U\+L\+T\+I\+M\+A\+T\+E\+\_\+\+Q\+U\+I\+C\+K\+E\+S\+T6.\+h}!Convection\+\_\+1\+D\+\_\+\+U\+L\+T\+I\+M\+A\+T\+E\+\_\+\+Q\+U\+I\+C\+K\+E\+S\+T6@{Convection\+\_\+1\+D\+\_\+\+U\+L\+T\+I\+M\+A\+T\+E\+\_\+\+Q\+U\+I\+C\+K\+E\+S\+T6}}
+\index{Convection\+\_\+1\+D\+\_\+\+U\+L\+T\+I\+M\+A\+T\+E\+\_\+\+Q\+U\+I\+C\+K\+E\+S\+T6@{Convection\+\_\+1\+D\+\_\+\+U\+L\+T\+I\+M\+A\+T\+E\+\_\+\+Q\+U\+I\+C\+K\+E\+S\+T6}!Convection\+\_\+1\+D\+\_\+\+U\+L\+T\+I\+M\+A\+T\+E\+\_\+\+Q\+U\+I\+C\+K\+E\+S\+T6.\+h@{Convection\+\_\+1\+D\+\_\+\+U\+L\+T\+I\+M\+A\+T\+E\+\_\+\+Q\+U\+I\+C\+K\+E\+S\+T6.\+h}}
+\subsubsection[{Convection\+\_\+1\+D\+\_\+\+U\+L\+T\+I\+M\+A\+T\+E\+\_\+\+Q\+U\+I\+C\+K\+E\+S\+T6(\+Matrix1\+D$<$ double $>$ \&\+P\+S\+D, Matrix1\+D$<$ double $>$ x, int x\+\_\+size, double x\+\_\+\+L\+B\+C, double x\+\_\+\+U\+B\+C, string x\+\_\+\+L\+B\+C\+\_\+type, string x\+\_\+\+U\+B\+C\+\_\+type, Matrix1\+D$<$ double $>$ Ux, Matrix1\+D$<$ double $>$ Sources, Matrix1\+D$<$ double $>$ Losses, double dt)}]{\setlength{\rightskip}{0pt plus 5cm}bool Convection\+\_\+1\+D\+\_\+\+U\+L\+T\+I\+M\+A\+T\+E\+\_\+\+Q\+U\+I\+C\+K\+E\+S\+T6 (
+\begin{DoxyParamCaption}
+\item[{{\bf Matrix1\+D}$<$ double $>$ \&}]{P\+S\+D, }
+\item[{{\bf Matrix1\+D}$<$ double $>$}]{x, }
+\item[{int}]{x\+\_\+size, }
+\item[{double}]{x\+\_\+\+L\+B\+C, }
+\item[{double}]{x\+\_\+\+U\+B\+C, }
+\item[{string}]{x\+\_\+\+L\+B\+C\+\_\+type, }
+\item[{string}]{x\+\_\+\+U\+B\+C\+\_\+type, }
+\item[{{\bf Matrix1\+D}$<$ double $>$}]{Ux, }
+\item[{{\bf Matrix1\+D}$<$ double $>$}]{Sources, }
+\item[{{\bf Matrix1\+D}$<$ double $>$}]{Losses, }
+\item[{double}]{dt}
+\end{DoxyParamCaption}
+)}\label{_convection__1_d___u_l_t_i_m_a_t_e___q_u_i_c_k_e_s_t6_8h_af94a11ee22da26ed27cf9008db9b44e8}
+Function that implements 1\+D Convection Quickest and returns a bool upon completion as referenced in the following publication
+
+All equations and formulas for this function can be found at \href{http://www.hadian.ir/teaching/CompHydr/3.pdf}{\tt http\+://www.\+hadian.\+ir/teaching/\+Comp\+Hydr/3.\+pdf} Mostly coming from 3.\+5 Simplified Ultimate Quickest strategy from B.\+P Leonard the Ultimate conservative difference scheme. In the source code mathematical equations are numbered corresponding to the numbering of equations found in the paper
+
+$ c = u*dt/dx $ where c = Courant number
+
+$ \phi_{i}^{n+1} - \phi_{i}^{n} = -c(\phi_{r}*\phi_{l}) $ where $ \phi_{r} $ and $ \phi_{l} $ refer to the right and left faces (between (i and i-\/1), and (i and i+1)) for P\+S\+D
+
+
+\begin{DoxyParams}{Parameters}
+{\em P\+S\+D} & -\/ 1\+D matrix of phase space densities \\
+\hline
+{\em x} & -\/ matrix for determining step size dx = x\mbox{[}1\mbox{]} -\/ x\mbox{[}0\mbox{]} \\
+\hline
+{\em x\+\_\+size} & -\/ size of matrix x \\
+\hline
+{\em x\+\_\+\+L\+B\+C,x\+\_\+\+U\+B\+C,\+\_\+type} & -\/ The upper and lower boundary conditions including the type of boundary condition \\
+\hline
+{\em Ux} & -\/ diffusion matrix \\
+\hline
+{\em Sources} & -\/ Sources matrix \\
+\hline
+{\em Losses} & -\/ Losses (loss cone) \\
+\hline
+\end{DoxyParams}

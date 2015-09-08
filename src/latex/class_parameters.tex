@@ -1,0 +1,104 @@
+\hypertarget{class_parameters}{}\section{Parameters Class Reference}
+\label{class_parameters}\index{Parameters@{Parameters}}
+
+
+Holds the parameters along with their corresponding file and arguments.  
+
+
+
+
+{\ttfamily \#include $<$Parameters.\+h$>$}
+
+Inheritance diagram for Parameters\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_parameters}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_parameters_acf8511357f87cce3c5a31cdd4c971b19}{Parameters} (string filename, int argc=1, char $\ast$\hyperlink{class_parameters_a87ff08a93065e5d266f31b5238faf95b}{argv}\mbox{[}$\,$\mbox{]}=N\+U\+L\+L)
+\item 
+\hypertarget{class_parameters_a640a1a349975a8cb023696f25e563a5c}{}\hyperlink{class_parameters_a640a1a349975a8cb023696f25e563a5c}{$\sim$\+Parameters} ()\label{class_parameters_a640a1a349975a8cb023696f25e563a5c}
+
+\begin{DoxyCompactList}\small\item\em Destructor -\/ tells this parameter to close its file. \end{DoxyCompactList}\item 
+\hypertarget{class_parameters_a62ef757722bbaecc24642b2c20d7d3bb}{}void \hyperlink{class_parameters_a62ef757722bbaecc24642b2c20d7d3bb}{close} ()\label{class_parameters_a62ef757722bbaecc24642b2c20d7d3bb}
+
+\begin{DoxyCompactList}\small\item\em close parameter file \end{DoxyCompactList}\item 
+\hyperlink{class_parameters}{Parameters} \& \hyperlink{class_parameters_a1f2204e876202ac49694dde3d4951d0a}{find\+Parameter} (string parameter\+Name, string default\+Value=\char`\"{}\char`\"{})
+\begin{DoxyCompactList}\small\item\em Find the parameters given and return them as a parameter struct. \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename T $>$ }\\void \hyperlink{class_parameters_a8f44623c70c710b3f79fc9c12fadc6a3}{get\+Parameter} (string parameter\+Name, T \&variable, bool must\+Be\+Found=false)
+\begin{DoxyCompactList}\small\item\em get the parameter value and store it into variable \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_parameters_a81c5c56dba398fdf54590832d816cb05}{}ifstream \hyperlink{class_parameters_a81c5c56dba398fdf54590832d816cb05}{parameters\+File}\label{class_parameters_a81c5c56dba398fdf54590832d816cb05}
+
+\begin{DoxyCompactList}\small\item\em store the file contents being read in \end{DoxyCompactList}\item 
+\hypertarget{class_parameters_a87ff08a93065e5d266f31b5238faf95b}{}vector$<$ string $>$ \hyperlink{class_parameters_a87ff08a93065e5d266f31b5238faf95b}{argv}\label{class_parameters_a87ff08a93065e5d266f31b5238faf95b}
+
+\begin{DoxyCompactList}\small\item\em store the arguments being sent in \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Holds the parameters along with their corresponding file and arguments. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_parameters_acf8511357f87cce3c5a31cdd4c971b19}{}\index{Parameters@{Parameters}!Parameters@{Parameters}}
+\index{Parameters@{Parameters}!Parameters@{Parameters}}
+\subsubsection[{Parameters(string filename, int argc=1, char $\ast$argv[]=\+N\+U\+L\+L)}]{\setlength{\rightskip}{0pt plus 5cm}Parameters\+::\+Parameters (
+\begin{DoxyParamCaption}
+\item[{string}]{filename, }
+\item[{int}]{argc = {\ttfamily 1}, }
+\item[{char $\ast$}]{argv\mbox{[}$\,$\mbox{]} = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)}\label{class_parameters_acf8511357f87cce3c5a31cdd4c971b19}
+Constructor for \hyperlink{class_parameters}{Parameters}\+: opens file and saves file to \hyperlink{class_parameters}{Parameters} field \textquotesingle{}parameters\+File\textquotesingle{}, stores the char$\ast$ arguments into a vector \textquotesingle{}argv\textquotesingle{} 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_parameters_a1f2204e876202ac49694dde3d4951d0a}{}\index{Parameters@{Parameters}!find\+Parameter@{find\+Parameter}}
+\index{find\+Parameter@{find\+Parameter}!Parameters@{Parameters}}
+\subsubsection[{find\+Parameter(string parameter\+Name, string default\+Value="""")}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Parameters} \& Parameters\+::find\+Parameter (
+\begin{DoxyParamCaption}
+\item[{string}]{parameter\+Name, }
+\item[{string}]{default\+Value = {\ttfamily \char`\"{}\char`\"{}}}
+\end{DoxyParamCaption}
+)}\label{class_parameters_a1f2204e876202ac49694dde3d4951d0a}
+
+
+Find the parameters given and return them as a parameter struct. 
+
+Finds the parameters with parameter\+Name in parameters\+File and saves it to argv 
+\begin{DoxyParams}{Parameters}
+{\em parameter\+Name} & -\/ name of parameter \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_parameters_a8f44623c70c710b3f79fc9c12fadc6a3}{}\index{Parameters@{Parameters}!get\+Parameter@{get\+Parameter}}
+\index{get\+Parameter@{get\+Parameter}!Parameters@{Parameters}}
+\subsubsection[{get\+Parameter(string parameter\+Name, T \&variable, bool must\+Be\+Found=false)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ template void Parameters\+::get\+Parameter (
+\begin{DoxyParamCaption}
+\item[{string}]{parameter\+Name, }
+\item[{T \&}]{variable, }
+\item[{bool}]{must\+Be\+Found = {\ttfamily false}}
+\end{DoxyParamCaption}
+)}\label{class_parameters_a8f44623c70c710b3f79fc9c12fadc6a3}
+
+
+get the parameter value and store it into variable 
+
+Gets the value for a parameters with parameter\+Name and saves it into variable 
+\begin{DoxyParams}{Parameters}
+{\em parameter\+Name} & -\/ name of parameter \\
+\hline
+{\em variable} & -\/ variable for storing parameter \\
+\hline
+{\em must\+Be\+Found} & -\/ if true and parameter not found, error is logged and function exited, default is false \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_parameters_8h}{Parameters.\+h}\item 
+\hyperlink{_parameters_8cpp}{Parameters.\+cpp}\end{DoxyCompactItemize}
