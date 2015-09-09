@@ -63,6 +63,11 @@
 * These calculation matrices are made up of DiagMatrix which is a mapping of an int (which diagonal number) to a 1d matrix of values (for that diagonal).
 *
 * There is also a Parameters class which holds paramters and their value as defined in the file they came from
+*
+* This code was built with MATLAB capabilities including reading and writing .mat files.
+* In order to switch all files to .mat for increased speed and percision change the use_matlab variable in the MATLAB Conv_Dif.m file to true.
+* If the machine this code is being run on does not have matlab installed change the MATLAB_CAPABLE variable in Matrix.h to false
+*
 */
 
 
@@ -98,10 +103,6 @@
  * Continue reading ONLY after familiarizing yourself with these books.
  */
 
-
-// ADDED
-// included to be able to read/write .mat files
-#include <mat.h>
 
 
 #include <iostream>
@@ -140,6 +141,13 @@ using namespace std;
 
 #include "Interpolation.h"
 
+
+// ADDED
+// included to be able to read/write .mat files
+#if (MATLAB_CAPABLE)
+#include <mat.h>
+#endif
+
 #include <omp.h>
 
 using namespace std;
@@ -150,6 +158,11 @@ using namespace std;
 #define strncasecmp _strnicmp
 #define strcasecmp _stricmp
 #endif
+
+
+// #ifndef MATLAB_CAPABLE
+// #define MATLAB_CAPABLE true
+// #endif
 
 
 // Everything below these values will be considered to be zero for computation purpose and will not be calculated

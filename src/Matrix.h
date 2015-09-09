@@ -13,6 +13,17 @@
 #define matrix_array_MATRIX_H
 
 
+
+
+// Set to true if machine code is running on has access to MATLAB libraries
+// If so must link to libraries when compilining - allows reading and writing .mat files
+// If true should mark variable use_matlab in Conv_Dif.m of examples in MATLAB to true
+// If machine does not have MATLAB or MATLAB capabilites set to false
+#ifndef MATLAB_CAPABLE
+#define MATLAB_CAPABLE true
+#endif
+
+
 #include <assert.h>
 #include <string>
 #include <string.h>
@@ -24,8 +35,9 @@
 #include <iostream>
 #include <sstream>
 
+#if (MATLAB_CAPABLE)
 #include <mat.h>
-
+#endif
 
 // Stupid hook to make it works in Visual Studio with Maltab 2013-2015 libs
 //#define printf printf
@@ -404,7 +416,10 @@ public:
 	virtual void readFromFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z); ///< Load matrix to a file
 
 	// ADDED
+#if (MATLAB_CAPABLE)
 	virtual mxArray* createStructMatrix(string filename, string info = "");
+#endif
+
 	virtual void writeToMatlabFile(string filename, string info = ""); 										///< Save matrix to a file
 	virtual void writeToMatlabFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z); 
 	virtual void readFromMatlabFile(string file, int column = 1);  									

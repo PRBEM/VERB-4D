@@ -27,6 +27,8 @@ using namespace std;
 	#define strcasecmp _stricmp
 #endif
 
+
+
 const double err = 1e-6;
 
 // #define DEBUG_MODE
@@ -570,6 +572,7 @@ void Matrix1D<T>::readFromFile(string filename) {
 template<class T>
 void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
 {
+#if (MATLAB_CAPABLE)
 	
 	Logger::message << "Reading " << file << ": " << endl;	
 	
@@ -868,6 +871,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
 	
 	mxDestroyArray(aPtr);
 	
+#endif
 
 }
 
@@ -935,6 +939,8 @@ void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
 template<class T>
 void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 {
+	
+#if (MATLAB_CAPABLE)	
 
 	Logger::message << "Reading " << file << ": " << endl;	
 	
@@ -1205,7 +1211,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 	
 	mxDestroyArray(aPtr);
 	
-
+#endif
 }
 
 
@@ -1213,49 +1219,49 @@ void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 
 
 
-// ADDED
-/* Analyze field FNAME in struct array SPTR. */
-static void
-analyzestructarray(const mxArray *sPtr, const char *fName)
-{
-    mwSize nElements;       /* number of elements in array */
-    mwIndex eIdx;           /* element index */
-    mwIndex fPTRIdx;           /* fptr index */
-    const mxArray *fPtr;    /* field pointer */
-    double *realPtr;        /* pointer to data */
-    mwSize nElementsInRealData; /* number of elements in array */
+// // ADDED
+// /* Analyze field FNAME in struct array SPTR. */
+// static void
+// analyzestructarray(const mxArray *sPtr, const char *fName)
+// {
+//     mwSize nElements;       /* number of elements in array */
+//     mwIndex eIdx;           /* element index */
+//     mwIndex fPTRIdx;           /* fptr index */
+//     const mxArray *fPtr;    /* field pointer */
+//     double *realPtr;        /* pointer to data */
+//     mwSize nElementsInRealData; /* number of elements in array */
     
 	
-	// Goes through all of the structs
-	// I think all of them only have one struct consisting of a couple fields (one or more of which is the double array which we want)
-    nElements = (mwSize)mxGetNumberOfElements(sPtr);
-    for (eIdx = 0; eIdx < nElements; eIdx++) {
-        fPtr = mxGetField(sPtr, eIdx, fName);
-        nElementsInRealData = (mwSize)mxGetNumberOfElements(fPtr);
-        printf("number of elements in %s: %.2d\n", fName, nElementsInRealData);
-        if ((fPtr != NULL)
-            && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) 
-            && (!mxIsComplex(fPtr))) 
-        {
-            realPtr = mxGetPr(fPtr);
-            for (fPTRIdx = 0; fPTRIdx < nElementsInRealData; fPTRIdx++)
-            {
-                printf("%.2f \n", realPtr[fPTRIdx]);
-            }
-        }
-    }
-}
+// 	// Goes through all of the structs
+// 	// I think all of them only have one struct consisting of a couple fields (one or more of which is the double array which we want)
+//     nElements = (mwSize)mxGetNumberOfElements(sPtr);
+//     for (eIdx = 0; eIdx < nElements; eIdx++) {
+//         fPtr = mxGetField(sPtr, eIdx, fName);
+//         nElementsInRealData = (mwSize)mxGetNumberOfElements(fPtr);
+//         printf("number of elements in %s: %.2d\n", fName, nElementsInRealData);
+//         if ((fPtr != NULL)
+//             && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) 
+//             && (!mxIsComplex(fPtr))) 
+//         {
+//             realPtr = mxGetPr(fPtr);
+//             for (fPTRIdx = 0; fPTRIdx < nElementsInRealData; fPTRIdx++)
+//             {
+//                 printf("%.2f \n", realPtr[fPTRIdx]);
+//             }
+//         }
+//     }
+// }
 
-/* Find struct array ARR in MAT-file FILE.
- * Pass field name FIELD to analyzestructarray function. */
-/*int findstructure(
-        const char *file,
-        const char *arr,
-        const char *field) {
+// /* Find struct array ARR in MAT-file FILE.
+//  * Pass field name FIELD to analyzestructarray function. */
+// /*int findstructure(
+//         const char *file,
+//         const char *arr,
+//         const char *field) {
     
    
     
-}*/
+// }*/
 
 
 
@@ -1723,7 +1729,7 @@ template<class T>
 void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
 {
 
-
+#if (MATLAB_CAPABLE)
 	
 	Logger::message << "Reading " << file << ": " << endl;	
 	
@@ -2021,7 +2027,8 @@ void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
     }
 	
 	mxDestroyArray(aPtr);
-		
+
+#endif		
 
 }
 
@@ -2093,6 +2100,7 @@ template<class T>
 void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, const Matrix2D<T> grid_y)
 {
 
+#if (MATLAB_CAPABLE)
 	
 	Logger::message << "Reading " << file << ": " << endl;	
 	
@@ -2381,7 +2389,7 @@ void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, con
 	
 	mxDestroyArray(aPtr);
 		
-	
+#endif
 }
 
 
@@ -2895,7 +2903,8 @@ template<class T>
 void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
 {
 	
-		
+#if (MATLAB_CAPABLE)
+	
 	Logger::message << "Reading " << file << ": " << endl;	
 	
 	MATFile *mfPtr; /* MAT-file pointer */
@@ -3199,7 +3208,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
 	
 	mxDestroyArray(aPtr);
 	
-	
+#endif	
 }
 
 
@@ -3277,6 +3286,7 @@ template<class T>
 void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, const Matrix3D<T> grid_y, const Matrix3D<T> grid_z)
 {
 
+#if (MATLAB_CAPABLE)
 	
 	Logger::message << "Reading " << file << ": " << endl;	
 	
@@ -3551,6 +3561,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, con
 	
 	mxDestroyArray(aPtr);
 	
+#endif
 
 }
 
@@ -4122,7 +4133,7 @@ void Matrix4D<T>::writeToFile(string filename, string info) {
 
 
 
-	
+#if (MATLAB_CAPABLE)
 	
 template<class T>
 mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
@@ -4226,7 +4237,7 @@ mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
 
 }
 
-
+#endif
 
 /**
 * Write matrix to file - with information
@@ -4237,7 +4248,7 @@ mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
 template<class T>
 void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
 	
-
+#if (MATLAB_CAPABLE)
 		
 	// for testing
 	//writeToFile((filename.substr(0, filename.size()-5) + ".plt"), info);
@@ -4359,7 +4370,7 @@ void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
     mxDestroyArray(s);
     matClose(pmat);
 
-
+#endif
 
 }
 
@@ -4403,6 +4414,8 @@ void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> 
 template<class T>
 void Matrix4D<T>::writeToMatlabFile(string file, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) {
 
+#if (MATLAB_CAPABLE)	
+	
 	
 	Logger::message << "writing " << file << ": " << endl;	
 	MATFile *pmat = matOpen( file.c_str(), "w");
@@ -4428,6 +4441,7 @@ void Matrix4D<T>::writeToMatlabFile(string file, Matrix4D<T> &grid_w, Matrix4D<T
 	mxDestroyArray(z);
     matClose(pmat);
 	
+#endif
 
 }
 
@@ -4512,6 +4526,7 @@ template<class T>
 void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 {
 	
+#if (MATLAB_CAPABLE)
 	
 	Logger::message << "Reading " << file << ": " << endl;	
 	
@@ -4846,7 +4861,8 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 	// free allocated memory
 	mxDestroyArray(aPtr);
 		
-	
+#endif
+
 }
 
 
@@ -4959,7 +4975,8 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 template<class T>
 void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z)
 {
-		
+	
+#if (MATLAB_CAPABLE)		
 	
 	Logger::message << "Reading " << file << ": " << endl;	
 	
@@ -5224,6 +5241,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 	
 	mxDestroyArray(aPtr);
 	
+#endif
 	
 }
 

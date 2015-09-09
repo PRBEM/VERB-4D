@@ -171,7 +171,8 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	parameters.getParameter("output_folder", OutputFolder);
 
 
-#if !defined(MATLAB_CAPABLE)
+
+#if !(MATLAB_CAPABLE)
 {
 	use_matlab = "false";
 }
@@ -180,7 +181,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	FILE *file;
 	
 	
-	if ( (!(file = fopen((InputFolder + "grid.mat").c_str() , "r"))) || use_matlab == "false")
+	if ((!(file = fopen((InputFolder + "grid.mat").c_str() , "r"))) || use_matlab == "false")
 	{
 		// Opening up grid.plt in order to get P,R,V,K sizes which are stored in the header
 		ifstream input;
@@ -221,6 +222,8 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		if (file != NULL)
 			fclose(file);
 		
+		
+#if (MATLAB_CAPABLE)		
 
 		MATFile *mfPtr; /* MAT-file pointer */
    		mxArray *aPtr;  /* mxArray pointer */
@@ -328,7 +331,9 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	        }	
 			
 			mxDestroyArray(aPtr);
-    		matClose(mfPtr);  	   
+    		matClose(mfPtr); 
+#endif			
+			 	   
 	}
 	
 	
