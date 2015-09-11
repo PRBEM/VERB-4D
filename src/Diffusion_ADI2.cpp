@@ -21,6 +21,8 @@
  *
  * http://onlinelibrary.wiley.com/store/10.1029/2008JA013580/asset/jgra19599.pdf?v=1&t=ic3m61g2&s=334d50627dee2d592de0ae583e755afce42948a9
  *
+ * \todo Fix this function - currently results in negative PSD values - using Lapack instead
+ *
  * Method:
  *
  * For the x direction and then for the y direction

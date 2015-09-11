@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -44,6 +52,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
@@ -72,6 +81,20 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     </ul>
   </div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('_matrix_solver_8h_source.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -262,13 +285,13 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="_matrix_solver_8h_html_a60eb15c384ad186e5958adf8af3c7c53"><div class="ttname"><a href="_matrix_solver_8h.html#a60eb15c384ad186e5958adf8af3c7c53">MakeModelMatrix_2D_ADI3_x</a></div><div class="ttdeci">bool MakeModelMatrix_2D_ADI3_x(CalculationMatrix &amp;matr_A, CalculationMatrix &amp;matr_B, CalculationMatrix &amp;matr_C, Matrix2D&lt; double &gt; &amp;x, Matrix2D&lt; double &gt; &amp;y, int x_size, int y_size, Matrix1D&lt; double &gt; x_LBC, Matrix1D&lt; double &gt; x_UBC, Matrix1D&lt; double &gt; y_LBC, Matrix1D&lt; double &gt; y_UBC, string x_LBC_type, string x_UBC_type, string y_LBC_type, string y_UBC_type, Matrix2D&lt; double &gt; &amp;Dxx, Matrix2D&lt; double &gt; &amp;Dyy, Matrix2D&lt; double &gt; &amp;Dxy, Matrix2D&lt; double &gt; &amp;Dyx, Matrix2D&lt; double &gt; &amp;G, double dt)</div><div class="ttdoc">THIS FUNCTION IS CURRENTLY NOT BEING USED. </div><div class="ttdef"><b>Definition:</b> MatrixSolver.cpp:760</div></div>
 <div class="ttc" id="_matrix_solver_8h_html_a5997c40fddb153030bec04b3083a3415"><div class="ttname"><a href="_matrix_solver_8h.html#a5997c40fddb153030bec04b3083a3415">SecondDerivativeApproximation_2D_y</a></div><div class="ttdeci">void SecondDerivativeApproximation_2D_y(CalculationMatrix &amp;matr_A, int ix, int iy, string FirstDerivative, string SecondDerivative, Matrix2D&lt; double &gt; &amp;x, Matrix2D&lt; double &gt; &amp;y, Matrix2D&lt; double &gt; &amp;D, Matrix2D&lt; double &gt; &amp;G, double multiplicator)</div><div class="ttdef"><b>Definition:</b> MatrixSolver.cpp:1264</div></div>
 <div class="ttc" id="_matrix_solver_8h_html_a6ec500c9c849bde034e6c95c89686254"><div class="ttname"><a href="_matrix_solver_8h.html#a6ec500c9c849bde034e6c95c89686254">MakeModelMatrix_2D_ADI1_y</a></div><div class="ttdeci">bool MakeModelMatrix_2D_ADI1_y(CalculationMatrix &amp;matr_A, CalculationMatrix &amp;matr_B, CalculationMatrix &amp;matr_C, Matrix2D&lt; double &gt; &amp;x, Matrix2D&lt; double &gt; &amp;y, int x_size, int y_size, Matrix1D&lt; double &gt; x_LBC, Matrix1D&lt; double &gt; x_UBC, Matrix1D&lt; double &gt; y_LBC, Matrix1D&lt; double &gt; y_UBC, string x_LBC_type, string x_UBC_type, string y_LBC_type, string y_UBC_type, Matrix2D&lt; double &gt; &amp;Dxx, Matrix2D&lt; double &gt; &amp;Dyy, Matrix2D&lt; double &gt; &amp;Dxy, Matrix2D&lt; double &gt; &amp;Dyx, Matrix2D&lt; double &gt; &amp;G, double dt)</div><div class="ttdoc">THIS FUNCTION IS CURRENTLY NOT BEING USED. </div><div class="ttdef"><b>Definition:</b> MatrixSolver.cpp:335</div></div>
-<div class="ttc" id="class_calculation_matrix_html"><div class="ttname"><a href="class_calculation_matrix.html">CalculationMatrix</a></div><div class="ttdoc">A matrix used primarily for diagonalized calculations. </div><div class="ttdef"><b>Definition:</b> Matrix.h:466</div></div>
-<div class="ttc" id="class_matrix1_d_html"><div class="ttname"><a href="class_matrix1_d.html">Matrix1D</a></div><div class="ttdoc">A matrix of 1 dimensions that is immutable. </div><div class="ttdef"><b>Definition:</b> Matrix.h:46</div></div>
+<div class="ttc" id="class_calculation_matrix_html"><div class="ttname"><a href="class_calculation_matrix.html">CalculationMatrix</a></div><div class="ttdoc">A matrix used primarily for diagonalized calculations. </div><div class="ttdef"><b>Definition:</b> Matrix.h:489</div></div>
+<div class="ttc" id="class_matrix1_d_html"><div class="ttname"><a href="class_matrix1_d.html">Matrix1D</a></div><div class="ttdoc">A matrix of 1 dimensions that is immutable. </div><div class="ttdef"><b>Definition:</b> Matrix.h:66</div></div>
 <div class="ttc" id="_matrix_solver_8h_html_a637a4943e0c65a0fd4be81a9e291a92f"><div class="ttname"><a href="_matrix_solver_8h.html#a637a4943e0c65a0fd4be81a9e291a92f">AddBoundaries_1D</a></div><div class="ttdeci">bool AddBoundaries_1D(CalculationMatrix &amp;matr_A, CalculationMatrix &amp;matr_B, CalculationMatrix &amp;matr_C, Matrix1D&lt; double &gt; &amp;x, int x_size, double x_LBC, double x_UBC, string x_LBC_type, string x_UBC_type, int ix)</div><div class="ttdef"><b>Definition:</b> MatrixSolver.cpp:63</div></div>
 <div class="ttc" id="_matrix_solver_8h_html_ab5901c7399bdfa9370dad6df1815ecbd"><div class="ttname"><a href="_matrix_solver_8h.html#ab5901c7399bdfa9370dad6df1815ecbd">dgbsv_</a></div><div class="ttdeci">void dgbsv_(long int *n, long int *kl, long int *ku, long int *nrhs, double *ab, long int *ldab, long int *ipiv, double *b, long int *ldb, long int *info)</div><div class="ttdoc">Lapack function for matrix inversion declaration. </div></div>
 <div class="ttc" id="class_diag_matrix_html"><div class="ttname"><a href="class_diag_matrix.html">DiagMatrix</a></div><div class="ttdoc">Diagonals of matrix stored as map (diagonal number, 1d diagonal array) </div></div>
 <div class="ttc" id="_matrix_solver_8h_html_a4aa1e5a2ed7139d8acddf8dd6fffb886"><div class="ttname"><a href="_matrix_solver_8h.html#a4aa1e5a2ed7139d8acddf8dd6fffb886">SecondDerivativeApproximation_1D</a></div><div class="ttdeci">void SecondDerivativeApproximation_1D(CalculationMatrix &amp;matr_A, int ix, string FirstDerivative, string SecondDerivative, Matrix1D&lt; double &gt; &amp;x, Matrix1D&lt; double &gt; &amp;D, Matrix1D&lt; double &gt; &amp;G, double multiplicator)</div><div class="ttdef"><b>Definition:</b> MatrixSolver.cpp:1109</div></div>
-<div class="ttc" id="class_matrix2_d_html"><div class="ttname"><a href="class_matrix2_d.html">Matrix2D</a></div><div class="ttdoc">A matrix of 2 dimensions that is immutable. </div><div class="ttdef"><b>Definition:</b> Matrix.h:136</div></div>
+<div class="ttc" id="class_matrix2_d_html"><div class="ttname"><a href="class_matrix2_d.html">Matrix2D</a></div><div class="ttdoc">A matrix of 2 dimensions that is immutable. </div><div class="ttdef"><b>Definition:</b> Matrix.h:156</div></div>
 <div class="ttc" id="_matrix_solver_8h_html_aab431ba2c1718ca1d21596558008b10d"><div class="ttname"><a href="_matrix_solver_8h.html#aab431ba2c1718ca1d21596558008b10d">SecondDerivativeApproximation_2D</a></div><div class="ttdeci">void SecondDerivativeApproximation_2D(CalculationMatrix &amp;matr_A, int ix, int iy, string FirstDerivative, string SecondDerivative, Matrix2D&lt; double &gt; &amp;x, Matrix2D&lt; double &gt; &amp;y, Matrix2D&lt; double &gt; &amp;D, Matrix2D&lt; double &gt; &amp;G, double multiplicator)</div><div class="ttdef"><b>Definition:</b> MatrixSolver.cpp:1195</div></div>
 <div class="ttc" id="_matrix_solver_8h_html_a9fa923427bdd121ab4dbc3221299ec4a"><div class="ttname"><a href="_matrix_solver_8h.html#a9fa923427bdd121ab4dbc3221299ec4a">AddBoundary</a></div><div class="ttdeci">void AddBoundary(DiagMatrix &amp;Matrix_A, string type, int in, int id1, double dh)</div><div class="ttdef"><b>Definition:</b> MatrixSolver.cpp:43</div></div>
 <div class="ttc" id="_matrix_solver_8h_html_adfcdb3cd90eb88a7f14d762edfaa8d66"><div class="ttname"><a href="_matrix_solver_8h.html#adfcdb3cd90eb88a7f14d762edfaa8d66">AddBoundaries_2D</a></div><div class="ttdeci">bool AddBoundaries_2D(CalculationMatrix &amp;matr_A, CalculationMatrix &amp;matr_B, CalculationMatrix &amp;matr_C, Matrix2D&lt; double &gt; &amp;x, Matrix2D&lt; double &gt; &amp;y, int x_size, int y_size, Matrix1D&lt; double &gt; x_LBC, Matrix1D&lt; double &gt; x_UBC, Matrix1D&lt; double &gt; y_LBC, Matrix1D&lt; double &gt; y_UBC, string &amp;x_LBC_type, string &amp;x_UBC_type, string &amp;y_LBC_type, string &amp;y_UBC_type, int ix, int iy, int in)</div><div class="ttdef"><b>Definition:</b> MatrixSolver.cpp:123</div></div>
@@ -279,11 +302,15 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="_matrix_solver_8h_html_a2d1c3b2bf64ff6bce0d21ceed0e07287"><div class="ttname"><a href="_matrix_solver_8h.html#a2d1c3b2bf64ff6bce0d21ceed0e07287">Lapack</a></div><div class="ttdeci">void Lapack(DiagMatrix &amp;A, Matrix1D&lt; double &gt; &amp;B, Matrix1D&lt; double &gt; &amp;X)</div><div class="ttdef"><b>Definition:</b> MatrixSolver.cpp:1018</div></div>
 <div class="ttc" id="_matrix_solver_8h_html_a1c6c681f7f44aa16d2d862248741c53d"><div class="ttname"><a href="_matrix_solver_8h.html#a1c6c681f7f44aa16d2d862248741c53d">MakeModelMatrix_2D_ADI2_y</a></div><div class="ttdeci">bool MakeModelMatrix_2D_ADI2_y(CalculationMatrix &amp;matr_A, CalculationMatrix &amp;matr_B, CalculationMatrix &amp;matr_C, Matrix2D&lt; double &gt; &amp;x, Matrix2D&lt; double &gt; &amp;y, int x_size, int y_size, Matrix1D&lt; double &gt; x_LBC, Matrix1D&lt; double &gt; x_UBC, Matrix1D&lt; double &gt; y_LBC, Matrix1D&lt; double &gt; y_UBC, string x_LBC_type, string x_UBC_type, string y_LBC_type, string y_UBC_type, Matrix2D&lt; double &gt; &amp;Dxx, Matrix2D&lt; double &gt; &amp;Dyy, Matrix2D&lt; double &gt; &amp;Dxy, Matrix2D&lt; double &gt; &amp;Dyx, Matrix2D&lt; double &gt; &amp;G, double dt)</div><div class="ttdoc">THIS FUNCTION IS CURRENTLY NOT BEING USED. </div><div class="ttdef"><b>Definition:</b> MatrixSolver.cpp:604</div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.10
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="_matrix_solver_8h.html">MatrixSolver.h</a></li>
+    <li class="footer">Generated by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
+  </ul>
+</div>
 </body>
 </html>

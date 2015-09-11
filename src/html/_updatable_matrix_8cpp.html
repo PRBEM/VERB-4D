@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -44,6 +52,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
@@ -71,6 +80,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('_updatable_matrix_8cpp.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -85,7 +109,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#define-members">Macros</a> &#124;
@@ -181,6 +204,10 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd></dd></dl>
 
+<p>References <a class="el" href="_updatable_matrix_8cpp.html#a53d02df1713071578c4b6a030269739b">is_number()</a>.</p>
+
+<p>Referenced by <a class="el" href="class_updatable_matrix.html#a57fe16cce1982a1df412fe9a3e1d28ea">UpdatableMatrix&lt; MatrixND &gt;::update()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a53d02df1713071578c4b6a030269739b"></a>
@@ -205,6 +232,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>True if it's a number, false if it's not </dd></dl>
+
+<p>Referenced by <a class="el" href="_updatable_matrix_8h.html#a51fc43d4dbfc1dc8f09913c4cd037b86">GetCurrentTimeValue()</a>.</p>
 
 </div>
 </div>
@@ -259,6 +288,10 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Allocates memory using the allocate memory function for <a class="el" href="class_matrix1_d.html" title="A matrix of 1 dimensions that is immutable. ">Matrix1D</a> </p>
 
+<p>References <a class="el" href="class_matrix1_d.html#a570f4a6b7df1811f2c3029ce026a6223">Matrix1D&lt; T &gt;::size_q1</a>.</p>
+
+<p>Referenced by <a class="el" href="class_updatable_list_matrix.html#a983fe8b18695cb86c1cc43f24b2c2e74">UpdatableListMatrix&lt; MatrixND &gt;::readFromIniFile()</a>, <a class="el" href="class_updatable_matrix.html#a022a0730e7310b0c6f7c51dbb48d59d7">UpdatableMatrix&lt; MatrixND &gt;::readFromString()</a>, and <a class="el" href="class_updatable_matrix.html#a57fe16cce1982a1df412fe9a3e1d28ea">UpdatableMatrix&lt; MatrixND &gt;::update()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a214b6175386560bca4b043b2bafcd879"></a>
@@ -311,6 +344,8 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <p>Allocates memory using the allocate memory function for <a class="el" href="class_matrix2_d.html" title="A matrix of 2 dimensions that is immutable. ">Matrix2D</a> </p>
+
+<p>References <a class="el" href="class_matrix2_d.html#aa0f54dbae7f59acd18606277b03f505e">Matrix2D&lt; T &gt;::size_q1</a>, and <a class="el" href="class_matrix2_d.html#af6b3e94e8b47cbfcd7cb90ca25cca1ac">Matrix2D&lt; T &gt;::size_q2</a>.</p>
 
 </div>
 </div>
@@ -365,6 +400,8 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Allocates memory using the allocate memory function for <a class="el" href="class_matrix3_d.html" title="A matrix of 3 dimensions that is immutable. ">Matrix3D</a> </p>
 
+<p>References <a class="el" href="class_matrix3_d.html#a17b970c10970ba4afb4eeeceac982923">Matrix3D&lt; T &gt;::size_q1</a>, <a class="el" href="class_matrix3_d.html#a67850dcae2638afe85050b8cf304a98c">Matrix3D&lt; T &gt;::size_q2</a>, and <a class="el" href="class_matrix3_d.html#a7da71b86af303a7d565763ff808df477">Matrix3D&lt; T &gt;::size_q3</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="adb16d1bc762f5419f1de6696d0e7f9de"></a>
@@ -417,6 +454,8 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <p>Allocates memory using the allocate memory function for <a class="el" href="class_matrix4_d.html" title="A matrix of 4 dimensions that is immutable. ">Matrix4D</a> </p>
+
+<p>References <a class="el" href="class_matrix4_d.html#a31cea34356ad05c4ceb7d30335dce12c">Matrix4D&lt; T &gt;::size_w</a>, <a class="el" href="class_matrix4_d.html#a54dd815737a0dc10f0aa5e6275d07511">Matrix4D&lt; T &gt;::size_x</a>, <a class="el" href="class_matrix4_d.html#a0aedb1cd50bb694fbf74eb7068069da8">Matrix4D&lt; T &gt;::size_y</a>, and <a class="el" href="class_matrix4_d.html#a8db60ddcda3b507665e2a4fb0dcf638a">Matrix4D&lt; T &gt;::size_z</a>.</p>
 
 </div>
 </div>
@@ -518,6 +557,10 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
+<p>References <a class="el" href="class_matrix1_d.html#a216f6e6ae23697298280b6f8ce14a14d">Matrix1D&lt; T &gt;::max()</a>, <a class="el" href="class_matrix1_d.html#ae159f2f24d303d933888c6fc8b8caee0">Matrix1D&lt; T &gt;::min()</a>, and <a class="el" href="class_matrix1_d.html#a570f4a6b7df1811f2c3029ce026a6223">Matrix1D&lt; T &gt;::size_q1</a>.</p>
+
+<p>Referenced by <a class="el" href="class_updatable_matrix.html#a57fe16cce1982a1df412fe9a3e1d28ea">UpdatableMatrix&lt; MatrixND &gt;::update()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="acfe7f43cf754847b36c7e6c747b8cd1c"></a>
@@ -617,6 +660,8 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+<p>References <a class="el" href="class_matrix2_d.html#a5d017d890c1dbb9c8fcc809a05127a52">Matrix2D&lt; T &gt;::max()</a>, <a class="el" href="class_matrix2_d.html#a6c5a6ca8264f7acd2617ec5d2a6a50cc">Matrix2D&lt; T &gt;::min()</a>, <a class="el" href="class_matrix2_d.html#aa0f54dbae7f59acd18606277b03f505e">Matrix2D&lt; T &gt;::size_q1</a>, and <a class="el" href="class_matrix2_d.html#af6b3e94e8b47cbfcd7cb90ca25cca1ac">Matrix2D&lt; T &gt;::size_q2</a>.</p>
 
 </div>
 </div>
@@ -718,6 +763,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
+<p>References <a class="el" href="class_matrix3_d.html#ad40e82f2b8be5bc392b5b7197e53318f">Matrix3D&lt; T &gt;::max()</a>, <a class="el" href="class_matrix3_d.html#a5a15d93a8739a595384e67bbb84f3dc4">Matrix3D&lt; T &gt;::min()</a>, <a class="el" href="class_matrix3_d.html#a17b970c10970ba4afb4eeeceac982923">Matrix3D&lt; T &gt;::size_q1</a>, <a class="el" href="class_matrix3_d.html#a67850dcae2638afe85050b8cf304a98c">Matrix3D&lt; T &gt;::size_q2</a>, and <a class="el" href="class_matrix3_d.html#a7da71b86af303a7d565763ff808df477">Matrix3D&lt; T &gt;::size_q3</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="ad9ec88a7a061e63f94cf36b5da815805"></a>
@@ -818,6 +865,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
+<p>References <a class="el" href="class_matrix4_d.html#a9be35a7ac5ae55f677b36cfb7780ba11">Matrix4D&lt; T &gt;::max()</a>, <a class="el" href="class_matrix4_d.html#a01fb2d7332fb36eee1d62a83b006363a">Matrix4D&lt; T &gt;::min()</a>, <a class="el" href="class_matrix4_d.html#a31cea34356ad05c4ceb7d30335dce12c">Matrix4D&lt; T &gt;::size_w</a>, <a class="el" href="class_matrix4_d.html#a54dd815737a0dc10f0aa5e6275d07511">Matrix4D&lt; T &gt;::size_x</a>, <a class="el" href="class_matrix4_d.html#a0aedb1cd50bb694fbf74eb7068069da8">Matrix4D&lt; T &gt;::size_y</a>, and <a class="el" href="class_matrix4_d.html#a8db60ddcda3b507665e2a4fb0dcf638a">Matrix4D&lt; T &gt;::size_z</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a2d58c1db7c71922134f9293c2115228e"></a>
@@ -869,6 +918,8 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Reading from a file using <a class="el" href="class_matrix1_d.html#a6a89f2308563474cdbe95d67016f7483">Matrix1D::readFromFile(string filename, const Matrix1D&lt; T &gt; grid_x)</a></p>
 <p>Only using Q1 </p>
+
+<p>Referenced by <a class="el" href="class_updatable_matrix.html#a022a0730e7310b0c6f7c51dbb48d59d7">UpdatableMatrix&lt; MatrixND &gt;::readFromString()</a>, and <a class="el" href="class_updatable_matrix.html#a57fe16cce1982a1df412fe9a3e1d28ea">UpdatableMatrix&lt; MatrixND &gt;::update()</a>.</p>
 
 </div>
 </div>
@@ -1029,11 +1080,15 @@ Functions</h2></td></tr>
 </div>
 </div>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.10
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="_updatable_matrix_8cpp.html">UpdatableMatrix.cpp</a></li>
+    <li class="footer">Generated by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
+  </ul>
+</div>
 </body>
 </html>

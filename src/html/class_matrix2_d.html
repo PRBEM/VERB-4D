@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -44,6 +52,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
@@ -73,6 +82,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('class_matrix2_d.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -87,7 +111,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -182,11 +205,9 @@ const <a class="el" href="class_matrix2_d.html">Matrix2D</a>&#160;</td><td class
 <tr class="separator:aeaea285c427a29615e23177df74b9d24"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6212224265ff7f64ecd9350cce46dbe5"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_matrix2_d.html#a6212224265ff7f64ecd9350cce46dbe5">readFromFile</a> (string filename, const <a class="el" href="class_matrix2_d.html">Matrix2D</a>&lt; T &gt; grid_q1, const <a class="el" href="class_matrix2_d.html">Matrix2D</a>&lt; T &gt; grid_q2)</td></tr>
 <tr class="separator:a6212224265ff7f64ecd9350cce46dbe5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afa167f838658f70c0991b96053106292"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="afa167f838658f70c0991b96053106292"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>readFromMatlabFile</b> (string filename, int column=1)</td></tr>
+<tr class="memitem:afa167f838658f70c0991b96053106292"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_matrix2_d.html#afa167f838658f70c0991b96053106292">readFromMatlabFile</a> (string filename, int column=1)</td></tr>
 <tr class="separator:afa167f838658f70c0991b96053106292"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8c7a0fa973619449e77b20051a10425a"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8c7a0fa973619449e77b20051a10425a"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>readFromMatlabFile</b> (string filename, const <a class="el" href="class_matrix2_d.html">Matrix2D</a>&lt; T &gt; grid_q1, const <a class="el" href="class_matrix2_d.html">Matrix2D</a>&lt; T &gt; grid_q2)</td></tr>
+<tr class="memitem:a8c7a0fa973619449e77b20051a10425a"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_matrix2_d.html#a8c7a0fa973619449e77b20051a10425a">readFromMatlabFile</a> (string filename, const <a class="el" href="class_matrix2_d.html">Matrix2D</a>&lt; T &gt; grid_q1, const <a class="el" href="class_matrix2_d.html">Matrix2D</a>&lt; T &gt; grid_q2)</td></tr>
 <tr class="separator:a8c7a0fa973619449e77b20051a10425a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a238207d50bbbe972b75a832cdc94914e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_matrix1_d.html">Matrix1D</a>&lt; T &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_matrix2_d.html#a238207d50bbbe972b75a832cdc94914e">xSlice</a> (int p_q1) const </td></tr>
 <tr class="separator:a238207d50bbbe972b75a832cdc94914e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -283,6 +304,8 @@ template&lt;class T &gt; </div>
   </table>
   </dd>
 </dl>
+
+<p>References <a class="el" href="_read_initial_data_8cpp.html#af81ca2f109737a6467888b7597906c38">AllocateMemory()</a>.</p>
 
 </div>
 </div>
@@ -442,6 +465,8 @@ template&lt;class T &gt; </div>
   </dd>
 </dl>
 
+<p>Referenced by <a class="el" href="_diffusion__2_d_8h.html#ad5785270d5a28bd7a7b8ca31f206c8ee">Diffusion_2D()</a>, <a class="el" href="_diffusion___a_d_i1_8h.html#a1375f6615ed36b26ef22189609023621">Diffusion_2D_ADI1()</a>, <a class="el" href="_diffusion___a_d_i2_8h.html#a653431b2d66478fe8b92143b56a3fd00">Diffusion_2D_ADI2()</a>, and <a class="el" href="_diffusion___a_d_i3_8h.html#adb56be815523ab6a8d0d5be158463fd6">Diffusion_2D_ADI3()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a5d017d890c1dbb9c8fcc809a05127a52"></a>
@@ -459,6 +484,8 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 <p>Return maximum value of the 2d matrix. Default value seet to 0 </p>
+
+<p>Referenced by <a class="el" href="_updatable_matrix_8cpp.html#acfe7f43cf754847b36c7e6c747b8cd1c">MatrixLimit()</a>.</p>
 
 </div>
 </div>
@@ -503,6 +530,8 @@ template&lt;class T &gt; </div>
 </div><div class="memdoc">
 <p>Return absolute maximum value of the 2d matrix. Default value set to 0 </p>
 
+<p>Referenced by <a class="el" href="_convection__2_d_8h.html#a9c0f4ebd3cb7e921a243fc8ad34e28ce">Convection_2D()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a6c5a6ca8264f7acd2617ec5d2a6a50cc"></a>
@@ -520,6 +549,8 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 <p>Return minimum value of the 2d matrix. Default value set to 1e99 </p>
+
+<p>Referenced by <a class="el" href="_updatable_matrix_8cpp.html#acfe7f43cf754847b36c7e6c747b8cd1c">MatrixLimit()</a>.</p>
 
 </div>
 </div>
@@ -608,6 +639,8 @@ template&lt;class T &gt; </div>
 </div><div class="memdoc">
 <p>Matrix summation, result is stored into applied matrix (left hand side matrix) </p>
 
+<p>References <a class="el" href="class_matrix2_d.html#acb9613c54d199662979a7ab376e4acce">Matrix2D&lt; T &gt;::matrix_array</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a14d897df200232ef72e45712d3e05239"></a>
@@ -634,6 +667,8 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 <p>Matrix subtraction, result is stored into applied matrix (left hand side matrix) </p>
+
+<p>References <a class="el" href="class_matrix2_d.html#acb9613c54d199662979a7ab376e4acce">Matrix2D&lt; T &gt;::matrix_array</a>.</p>
 
 </div>
 </div>
@@ -700,6 +735,8 @@ template&lt;class T &gt; </div>
   </table>
   </dd>
 </dl>
+
+<p>References <a class="el" href="_read_initial_data_8cpp.html#af81ca2f109737a6467888b7597906c38">AllocateMemory()</a>, <a class="el" href="class_matrix2_d.html#acd8fc17999f1ac046a457373dcdf018e">Matrix2D&lt; T &gt;::initialized</a>, <a class="el" href="class_matrix2_d.html#acb9613c54d199662979a7ab376e4acce">Matrix2D&lt; T &gt;::matrix_array</a>, <a class="el" href="class_matrix2_d.html#aa0f54dbae7f59acd18606277b03f505e">Matrix2D&lt; T &gt;::size_q1</a>, and <a class="el" href="class_matrix2_d.html#af6b3e94e8b47cbfcd7cb90ca25cca1ac">Matrix2D&lt; T &gt;::size_q2</a>.</p>
 
 </div>
 </div>
@@ -830,6 +867,86 @@ template&lt;class T &gt; </div>
 
 </div>
 </div>
+<a class="anchor" id="afa167f838658f70c0991b96053106292"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="class_matrix2_d.html">Matrix2D</a>&lt; T &gt;::readFromMatlabFile </td>
+          <td>(</td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>columnNumber</em> = <code>1</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Function for reading from matlab file in 2-dimensions Will check the variables, order them in (P, R/L, V, K, Val) format and then set matrix_array to be the variable with the corresponding column number This is the same as the <a class="el" href="class_matrix2_d.html#aeaea285c427a29615e23177df74b9d24">readFromFile()</a> function although only compatible with .mat files instead of .plt or other text files </p>
+
+</div>
+</div>
+<a class="anchor" id="a8c7a0fa973619449e77b20051a10425a"></a>
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="class_matrix2_d.html">Matrix2D</a>&lt; T &gt;::readFromMatlabFile </td>
+          <td>(</td>
+          <td class="paramtype">string&#160;</td>
+          <td class="paramname"><em>file</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="class_matrix2_d.html">Matrix2D</a>&lt; T &gt;&#160;</td>
+          <td class="paramname"><em>grid_x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="class_matrix2_d.html">Matrix2D</a>&lt; T &gt;&#160;</td>
+          <td class="paramname"><em>grid_y</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Function for reading from matlab file in 2-dimensions Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard The variables will be checked against the input grid parameters in order to make sure the right variables/values are being loaded This is the same as the <a class="el" href="class_matrix2_d.html#aeaea285c427a29615e23177df74b9d24">readFromFile()</a> function although only compatible with .mat files instead of .plt or other text files </p>
+
+</div>
+</div>
 <a class="anchor" id="a83d78e9d137db632a53fd89616dcfb9d"></a>
 <div class="memitem">
 <div class="memproto">
@@ -939,6 +1056,8 @@ template&lt;class T &gt; </div>
 </div><div class="memdoc">
 <p>Write the matrix to a file using other two matrixes as a grid. Simply that means - write all three matrixes to a file. </p>
 
+<p>References <a class="el" href="class_matrix2_d.html#adbb2532f522c7fb08e1eea5dd31f6392">Matrix2D&lt; T &gt;::name</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a238207d50bbbe972b75a832cdc94914e"></a>
@@ -958,6 +1077,8 @@ template&lt;class T &gt; </div>
 </div><div class="memdoc">
 <p>Make x-slice of 2d matrix = 1d matrix. </p>
 
+<p>Referenced by <a class="el" href="_convection__2_d_8h.html#a9c0f4ebd3cb7e921a243fc8ad34e28ce">Convection_2D()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="aaab861f594bec1eb6436b1941f80a9e5"></a>
@@ -976,6 +1097,8 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 <p>Make y-slice of 2d matrix = 1d matrix. </p>
+
+<p>Referenced by <a class="el" href="_convection__2_d_8h.html#a9c0f4ebd3cb7e921a243fc8ad34e28ce">Convection_2D()</a>.</p>
 
 </div>
 </div>
@@ -1001,6 +1124,8 @@ template&lt;typename T&gt; </div>
 </div><div class="memdoc">
 <p>Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y] can be used. Also, all rows saved in the memory one after another as a big array. So Matrix[x+x_size*y] can be also used. </p>
 
+<p>Referenced by <a class="el" href="class_matrix2_d.html#a14d8f8a8e1486b651ea89eab42b3a656">Matrix2D&lt; T &gt;::operator+=()</a>, <a class="el" href="class_matrix2_d.html#a14d897df200232ef72e45712d3e05239">Matrix2D&lt; T &gt;::operator-=()</a>, and <a class="el" href="class_matrix2_d.html#af1ebb386ce4617c538d439b9a49a2c8a">Matrix2D&lt; T &gt;::operator=()</a>.</p>
+
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
@@ -1008,11 +1133,15 @@ template&lt;typename T&gt; </div>
 <li><a class="el" href="_matrix_8cpp.html">Matrix.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.10
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="class_matrix2_d.html">Matrix2D</a></li>
+    <li class="footer">Generated by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
+  </ul>
+</div>
 </body>
 </html>

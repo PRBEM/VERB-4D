@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -44,6 +52,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
@@ -72,6 +81,20 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     </ul>
   </div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('_read_initial_data_8h_source.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -152,16 +175,20 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="_logger_8h_html"><div class="ttname"><a href="_logger_8h.html">Logger.h</a></div><div class="ttdoc">Logs the messages sent, including information, warnings, and errors. </div></div>
 <div class="ttc" id="_updatable_matrix_8h_html"><div class="ttname"><a href="_updatable_matrix_8h.html">UpdatableMatrix.h</a></div><div class="ttdoc">Same functionality as matrices found in Matrix.h but can also be updated from ini-files. </div></div>
 <div class="ttc" id="class_updatable_list_matrix_html"><div class="ttname"><a href="class_updatable_list_matrix.html">UpdatableListMatrix</a></div><div class="ttdoc">A matrix that can be created in 1, 2, 3, or 4 dimensions with the ability to be updated. </div><div class="ttdef"><b>Definition:</b> UpdatableMatrix.h:103</div></div>
-<div class="ttc" id="class_matrix3_d_html"><div class="ttname"><a href="class_matrix3_d.html">Matrix3D</a></div><div class="ttdoc">A matrix of 3 dimensions that is immutable. </div><div class="ttdef"><b>Definition:</b> Matrix.h:232</div></div>
-<div class="ttc" id="class_matrix4_d_html"><div class="ttname"><a href="class_matrix4_d.html">Matrix4D</a></div><div class="ttdoc">A matrix of 4 dimensions that is immutable. </div><div class="ttdef"><b>Definition:</b> Matrix.h:337</div></div>
+<div class="ttc" id="class_matrix3_d_html"><div class="ttname"><a href="class_matrix3_d.html">Matrix3D</a></div><div class="ttdoc">A matrix of 3 dimensions that is immutable. </div><div class="ttdef"><b>Definition:</b> Matrix.h:252</div></div>
+<div class="ttc" id="class_matrix4_d_html"><div class="ttname"><a href="class_matrix4_d.html">Matrix4D</a></div><div class="ttdoc">A matrix of 4 dimensions that is immutable. </div><div class="ttdef"><b>Definition:</b> Matrix.h:357</div></div>
 <div class="ttc" id="class_updatable_matrix_html"><div class="ttname"><a href="class_updatable_matrix.html">UpdatableMatrix</a></div><div class="ttdoc">A matrix that can be created in 1, 2, 3, or 4 dimensions with the ability to be updated. </div><div class="ttdef"><b>Definition:</b> UpdatableMatrix.h:38</div></div>
 <div class="ttc" id="_read_initial_data_8h_html_a6e531ceeb4d28c16117f638642c8fe51"><div class="ttname"><a href="_read_initial_data_8h.html#a6e531ceeb4d28c16117f638642c8fe51">ReadInitialData</a></div><div class="ttdeci">bool ReadInitialData(string &amp;InputFolder, string &amp;OutputFolder, int argc, char *argv[], double &amp;total_time, double &amp;dt, double &amp;output_time, double &amp;time_first, long int &amp;it_first, int &amp;max_threads, string &amp;inversion_method, string &amp;use_matlab, string &amp;include_boundary, Matrix4D&lt; double &gt; &amp;PSD, Matrix4D&lt; double &gt; &amp;P, Matrix4D&lt; double &gt; &amp;R, Matrix4D&lt; double &gt; &amp;V, Matrix4D&lt; double &gt; &amp;K, UpdatableMatrix&lt; Matrix4D&lt; double &gt; &gt; &amp;L, int &amp;P_size, int &amp;R_size, int &amp;V_size, int &amp;K_size, int &amp;L_size, Matrix3D&lt; double &gt; &amp;P_LBC, Matrix3D&lt; double &gt; &amp;P_UBC, UpdatableMatrix&lt; Matrix3D&lt; double &gt; &gt; &amp;R_LBC, UpdatableMatrix&lt; Matrix3D&lt; double &gt; &gt; &amp;R_UBC, UpdatableMatrix&lt; Matrix3D&lt; double &gt; &gt; &amp;V_LBC, UpdatableMatrix&lt; Matrix3D&lt; double &gt; &gt; &amp;V_UBC, UpdatableMatrix&lt; Matrix3D&lt; double &gt; &gt; &amp;K_LBC, UpdatableMatrix&lt; Matrix3D&lt; double &gt; &gt; &amp;K_UBC, UpdatableMatrix&lt; Matrix3D&lt; double &gt; &gt; &amp;L_LBC, UpdatableMatrix&lt; Matrix3D&lt; double &gt; &gt; &amp;L_UBC, string &amp;P_LBC_type, string &amp;P_UBC_type, string &amp;R_LBC_type, string &amp;R_UBC_type, string &amp;V_LBC_type, string &amp;V_UBC_type, string &amp;K_LBC_type, string &amp;K_UBC_type, string &amp;L_LBC_type, string &amp;L_UBC_type, UpdatableListMatrix&lt; Matrix4D&lt; double &gt; &gt; &amp;DLL, UpdatableListMatrix&lt; Matrix4D&lt; double &gt; &gt; &amp;DVV, UpdatableListMatrix&lt; Matrix4D&lt; double &gt; &gt; &amp;DKK, UpdatableListMatrix&lt; Matrix4D&lt; double &gt; &gt; &amp;DVK, UpdatableMatrix&lt; Matrix4D&lt; double &gt; &gt; &amp;VP, UpdatableMatrix&lt; Matrix4D&lt; double &gt; &gt; &amp;VL, UpdatableMatrix&lt; Matrix4D&lt; double &gt; &gt; &amp;G_local, UpdatableMatrix&lt; Matrix4D&lt; double &gt; &gt; &amp;G_radial, UpdatableListMatrix&lt; Matrix4D&lt; double &gt; &gt; &amp;Sources, UpdatableListMatrix&lt; Matrix4D&lt; double &gt; &gt; &amp;Losses)</div><div class="ttdef"><b>Definition:</b> ReadInitialData.cpp:139</div></div>
 </div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.10
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="_read_initial_data_8h.html">ReadInitialData.h</a></li>
+    <li class="footer">Generated by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
+  </ul>
+</div>
 </body>
 </html>

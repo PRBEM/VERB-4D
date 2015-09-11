@@ -51,6 +51,10 @@ Created on\+: May 28, 2011 Author\+: dimath
 )}\label{_diffusion___a_d_i1_8cpp_a1375f6615ed36b26ef22189609023621}
 Create model matrices and solve the system, Implicit implementation of diagonal terms, explicit implementation of mixed terms
 
+\begin{DoxyRefDesc}{Todo}
+\item[\hyperlink{todo__todo000001}{Todo}]Fix this function -\/ currently results in negative P\+S\+D values -\/ using Lapack instead\end{DoxyRefDesc}
+
+
 Method\+:
 
 For the x direction and then for the y direction
@@ -109,3 +113,6 @@ For the x direction and then for the y direction
 \hline
 \end{DoxyParams}
 $<$ Rearranged P\+S\+D into one vector of unknown variables 
+
+References Add\+Boundary(), Calculation\+Matrix\+::change\+\_\+ind, Matrix2\+D$<$ T $>$\+::index1d(), Second\+Derivative\+Approximation\+\_\+2\+D(), Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y(), Matrix1\+D$<$ T $>$\+::size\+\_\+q1, Matrix2\+D$<$ T $>$\+::size\+\_\+q1, Matrix2\+D$<$ T $>$\+::size\+\_\+q2, and tridag().
+

@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -44,6 +52,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
@@ -73,6 +82,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('class_opm_1_1_monot_cubic_interpolator.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -87,11 +111,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><a class="el" href="namespace_opm.html">Opm</a></li><li class="navelem"><a class="el" href="class_opm_1_1_monot_cubic_interpolator.html">MonotCubicInterpolator</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -284,6 +303,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <p>Accepts a filename as input and parses this file for two-column floating point data, interpreting the data as representing function values x and f(x).</p>
 <p>Ignores all lines not conforming to &lt;whitespace&gt;&lt;float&gt;&lt;whitespace&gt;&lt;float&gt;&lt;whatever&gt;&lt;newline&gt; </p>
 
+<p>References <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a16c8f0f27938d06bbcc8ea0ffa82a07d">read()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="aa68657c5ef757b3b0e60757d8821bc35"></a>
@@ -322,6 +343,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <p>Accepts a filename as input and parses this file for two-column floating point data, interpreting the data as representing function values x and f(x).</p>
 <p>Ignores all lines not conforming to &lt;whitespace&gt;&lt;float&gt;&lt;whitespace&gt;&lt;float&gt;&lt;whatever&gt;&lt;newline&gt;</p>
 <p>All commas in the file will be treated as spaces when parsing. </p>
+
+<p>References <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a16c8f0f27938d06bbcc8ea0ffa82a07d">read()</a>.</p>
 
 </div>
 </div>
@@ -378,6 +401,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </dl>
 <p>Accepts a filename as input, and parses the chosen columns in that file. </p>
 
+<p>References <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a16c8f0f27938d06bbcc8ea0ffa82a07d">read()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="aeefb12231546d10c188f2bd22c65b4c4"></a>
@@ -432,6 +457,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
   </dd>
 </dl>
 <p>Accepts a filename as input, and parses the chosen columns in that file. </p>
+
+<p>References <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a16c8f0f27938d06bbcc8ea0ffa82a07d">read()</a>.</p>
 
 </div>
 </div>
@@ -628,6 +655,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <p>Sets the following information (booleans) about the function to true or false, default is true for all</p>
 <p>strictlyMonotone, monotone, strictlyDecreasing, decreasing, strictlyIncreasing, increasing </p>
 
+<p>Referenced by <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a07f1efb0f4740087f0388e18dabc44df">isMonotone()</a>, <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a176828cbeabb928ce5626fd3205f6bad">isMonotoneDecreasing()</a>, <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#af77b7dc3389dac4f0d8fb6a81b9e976b">isMonotoneIncreasing()</a>, <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a05cb94dbbafa98918518c64226a7d7ca">isStrictlyDecreasing()</a>, <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#adbdc068cc30c1496610d12f6f73f1306">isStrictlyIncreasing()</a>, and <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a5c038e58cc6b06cceb0933743bdbcd0b">isStrictlyMonotone()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a3d03d08341bfd5e7ebaee7c58fed9bfc"></a>
@@ -683,6 +712,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <p>Returns f(x) for given x (input). Interpolates (monotone cubic or linearly) if necessary.</p>
 <p>Extrapolates using the constants f(x_min) or f(x_max) if input x is outside (x_min, x_max)</p>
 <dl class="section return"><dt>Returns</dt><dd>f(x) for a given x </dd></dl>
+
+<p>Referenced by <a class="el" href="_interpolation_8h.html#a785af04709e2ccb19ae567d350baba4a">Cubic1D()</a>, and <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#ad131f46d15412e6cfe7d0972129012e2">operator()()</a>.</p>
 
 </div>
 </div>
@@ -810,6 +841,8 @@ maximum f value </dd></dl>
 <dd>
 f(maximum x value) </dd></dl>
 
+<p>References <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#afd0b97a51e1aeef7f8688a2c20c64273">data</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="aa9e901d08354fc7f96340e8985171882"></a>
@@ -862,6 +895,8 @@ minimum f value </dd></dl>
 <dd>
 f(minimum x value) </dd></dl>
 
+<p>References <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#afd0b97a51e1aeef7f8688a2c20c64273">data</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a80670052827881e3d1c45effa60d5d78"></a>
@@ -912,6 +947,8 @@ Maximal difference </dd></dl>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>Number of datapoint pairs in this object </dd></dl>
 
+<p>References <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#afd0b97a51e1aeef7f8688a2c20c64273">data</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a07f1efb0f4740087f0388e18dabc44df"></a>
@@ -936,6 +973,8 @@ Maximal difference </dd></dl>
 </div><div class="memdoc">
 <p>Determines if the current function-value-data is monotone.</p>
 <dl class="section return"><dt>Returns</dt><dd>True if f(x) is monotone, else False </dd></dl>
+
+<p>References <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a0fb655f39c0428a162e0bab3a9dfab03">computeInternalFunctionData()</a>, <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#ae15b2de33cee75db27ce8dc2f1749a74">monotone</a>, and <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#aa5e0006858d26e9f9d57956dea7852d9">monotoneCached</a>.</p>
 
 </div>
 </div>
@@ -998,6 +1037,8 @@ Maximal difference </dd></dl>
 <p>Determines if the current function-value-data is monotone and decreasing</p>
 <dl class="section return"><dt>Returns</dt><dd>True if f(x) is monotone and decreasing, else False </dd></dl>
 
+<p>References <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a0fb655f39c0428a162e0bab3a9dfab03">computeInternalFunctionData()</a>, <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#ab30db3bdd5b15213be0ba594fbae69a1">decreasing</a>, <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#ae15b2de33cee75db27ce8dc2f1749a74">monotone</a>, and <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#aa5e0006858d26e9f9d57956dea7852d9">monotoneCached</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="af77b7dc3389dac4f0d8fb6a81b9e976b"></a>
@@ -1022,6 +1063,8 @@ Maximal difference </dd></dl>
 </div><div class="memdoc">
 <p>Determines if the current function-value-data is monotone and increasing.</p>
 <dl class="section return"><dt>Returns</dt><dd>True if f(x) is monotone and increasing, else False </dd></dl>
+
+<p>References <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a0fb655f39c0428a162e0bab3a9dfab03">computeInternalFunctionData()</a>, <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a01c003d595168786fea3c3896754134e">increasing</a>, <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#ae15b2de33cee75db27ce8dc2f1749a74">monotone</a>, and <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#aa5e0006858d26e9f9d57956dea7852d9">monotoneCached</a>.</p>
 
 </div>
 </div>
@@ -1048,6 +1091,8 @@ Maximal difference </dd></dl>
 <p>Determines if the current function-value-data is strictly decreasing. This is a utility function for outsiders if they want to invert the data for example.</p>
 <dl class="section return"><dt>Returns</dt><dd>True if f(x) is strictly decreasing, else False </dd></dl>
 
+<p>References <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a0fb655f39c0428a162e0bab3a9dfab03">computeInternalFunctionData()</a>, <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#aa619585bf1668674e7706dbd70d8e164">strictlyDecreasing</a>, <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a88975c8e338ba67dedc671c9efdb2e6d">strictlyMonotone</a>, and <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a502a4814e58bbaffa7593e81cca6a3a0">strictlyMonotoneCached</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="adbdc068cc30c1496610d12f6f73f1306"></a>
@@ -1073,6 +1118,8 @@ Maximal difference </dd></dl>
 <p>Determines if the current function-value-data is strictly increasing. This is a utility function for outsiders if they want to invert the data for example.</p>
 <dl class="section return"><dt>Returns</dt><dd>True if f(x) is strictly increasing, else False </dd></dl>
 
+<p>References <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a0fb655f39c0428a162e0bab3a9dfab03">computeInternalFunctionData()</a>, <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#abd2aa7ffd6729b9bf4aacf706e29cf9e">strictlyIncreasing</a>, <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a88975c8e338ba67dedc671c9efdb2e6d">strictlyMonotone</a>, and <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a502a4814e58bbaffa7593e81cca6a3a0">strictlyMonotoneCached</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a5c038e58cc6b06cceb0933743bdbcd0b"></a>
@@ -1097,6 +1144,8 @@ Maximal difference </dd></dl>
 </div><div class="memdoc">
 <p>Determines if the current function-value-data is strictly monotone. This is a utility function for outsiders if they want to invert the data for example.</p>
 <dl class="section return"><dt>Returns</dt><dd>True if f(x) is strictly monotone, else False </dd></dl>
+
+<p>References <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a0fb655f39c0428a162e0bab3a9dfab03">computeInternalFunctionData()</a>, <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a88975c8e338ba67dedc671c9efdb2e6d">strictlyMonotone</a>, and <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a502a4814e58bbaffa7593e81cca6a3a0">strictlyMonotoneCached</a>.</p>
 
 </div>
 </div>
@@ -1131,6 +1180,8 @@ Maximal difference </dd></dl>
 <p>Extrapolates using the constants f(x_min) or f(x_max) if input x is outside (x_min, x_max)</p>
 <dl class="section return"><dt>Returns</dt><dd>f(x) for a given x </dd></dl>
 
+<p>References <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a64a19de4f6494e2979ddafdad4ba7aa3">evaluate()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a16c8f0f27938d06bbcc8ea0ffa82a07d"></a>
@@ -1164,6 +1215,8 @@ Maximal difference </dd></dl>
 <p>returns true on success</p>
 <p>All commas in file will be treated as spaces when parsing</p>
 <p>Ignores all lines not conforming to &lt;whitespace&gt;&lt;float&gt;&lt;whitespace&gt;&lt;float&gt;&lt;whatever&gt;&lt;newline&gt; </p>
+
+<p>Referenced by <a class="el" href="class_opm_1_1_monot_cubic_interpolator.html#a867a219e8593ecfa5bb274b4fe194822">MonotCubicInterpolator()</a>.</p>
 
 </div>
 </div>
@@ -1296,11 +1349,15 @@ Maximal difference </dd></dl>
 <li><a class="el" href="_monot_cubic_interpolator_8cpp.html">MonotCubicInterpolator.cpp</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.10
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="namespace_opm.html">Opm</a></li><li class="navelem"><a class="el" href="class_opm_1_1_monot_cubic_interpolator.html">MonotCubicInterpolator</a></li>
+    <li class="footer">Generated by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
+  </ul>
+</div>
 </body>
 </html>

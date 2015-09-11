@@ -31,7 +31,9 @@ Three other methods are also used for finding diffusion in 2\+D\+: these can be 
 
 The parameters.\+ini file created in matlab will specify the inversion method. If \char`\"{}\+Lapack\char`\"{} is specified then \hyperlink{_diffusion__2_d_8cpp_ad5785270d5a28bd7a7b8ca31f206c8ee}{Diffusion\+\_\+2\+D()} will be used. Otherwise 1 of the 3 A\+D\+I methods will be used to inversion. All 3 A\+D\+I methods can use multiple threads while Lapack can only use 1. The current chosen method of inversion is Diffusion\+\_\+\+A\+D\+I3() if \char`\"{}\+A\+D\+I\char`\"{} is specified. It can be changed in \hyperlink{_v_e_r_b4_d___solver_8cpp}{V\+E\+R\+B4\+D\+\_\+\+S\+O\+L\+V\+E\+R.\+cpp}
 
-The main solver function can be found in \hyperlink{_v_e_r_b4_d___solver_8cpp}{V\+E\+R\+B4\+D\+\_\+\+Solver.\+cpp}
+From current testing all of the A\+D\+I methods produce bad results -\/ namely negative P\+S\+D values. All examples should thus be run with Lapack until the A\+D\+I methods are fixed. Unfortunately Lapack is not compatable with multiple threads so running the examples with Lapack will be much slower than A\+D\+I and not scalable. Newer versions of Lapack may allow multithreading however.
+
+The main solver function can be found in \hyperlink{_v_e_r_b4_d___solver_8cpp}{V\+E\+R\+B4\+D\+\_\+\+Solver.\+cpp} It consists of a series of P\+S\+D calculations done for every time step that is specified.
 
 This will be used in order to take the input data from matlab store them into \hyperlink{class_matrix1_d}{Matrix1\+D}, \hyperlink{class_matrix2_d}{Matrix2\+D}, \hyperlink{class_matrix3_d}{Matrix3\+D}, and \hyperlink{class_matrix4_d}{Matrix4\+D} using \hyperlink{_read_initial_data_8h}{Read\+Initial\+Data.\+h}
 
@@ -41,4 +43,6 @@ There is also the standardized \hyperlink{class_matrix_n_d}{Matrix\+N\+D} for an
 
 Most of the computation such as numerically approximating derivatives are done with \hyperlink{_matrix_solver_8h}{Matrix\+Solver.\+h} using \hyperlink{class_calculation_matrix}{Calculation\+Matrix}. These calculation matrices are made up of \hyperlink{class_diag_matrix}{Diag\+Matrix} which is a mapping of an int (which diagonal number) to a 1d matrix of values (for that diagonal).
 
-There is also a \hyperlink{class_parameters}{Parameters} class which holds paramters and their value as defined in the file they came from 
+There is also a \hyperlink{class_parameters}{Parameters} class which holds paramters and their value as defined in the file they came from. These parameters get the values specified in the parameters.\+ini text file and set variables to determine inversion method, number of threads, using .mat files, etc.
+
+This code was built with M\+A\+T\+L\+A\+B capabilities including reading and writing .mat files. In order to switch all files to .mat for increased speed and percision change the use\+\_\+matlab variable in the M\+A\+T\+L\+A\+B Conv\+\_\+\+Dif.\+m file for whichever example you are running to true. If the machine that this code is being run on does not have matlab installed change the M\+A\+T\+L\+A\+B\+\_\+\+C\+A\+P\+A\+B\+L\+E variable in \hyperlink{_matrix_8h}{Matrix.\+h} to false 

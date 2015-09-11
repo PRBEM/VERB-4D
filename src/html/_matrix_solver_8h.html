@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -44,6 +52,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li class="current"><a href="files.html"><span>Files</span></a></li>
@@ -71,6 +80,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('_matrix_solver_8h.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -85,7 +109,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#func-members">Functions</a>  </div>
@@ -246,6 +269,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_mat
   </dd>
 </dl>
 
+<p>References <a class="el" href="class_calculation_matrix.html#a9baeb7c02e63eee92f28be2d89022931">CalculationMatrix::index1d()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="adfcdb3cd90eb88a7f14d762edfaa8d66"></a>
@@ -375,6 +400,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_mat
   </dd>
 </dl>
 
+<p>References <a class="el" href="class_calculation_matrix.html#a9baeb7c02e63eee92f28be2d89022931">CalculationMatrix::index1d()</a>.</p>
+
+<p>Referenced by <a class="el" href="_diffusion__2_d_8h.html#ad5785270d5a28bd7a7b8ca31f206c8ee">Diffusion_2D()</a>, <a class="el" href="_matrix_solver_8h.html#a60eb15c384ad186e5958adf8af3c7c53">MakeModelMatrix_2D_ADI3_x()</a>, and <a class="el" href="_matrix_solver_8h.html#aeba76c1b03dc6ed9daa0743a54f96e7d">MakeModelMatrix_2D_ADI3_y()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a9fa923427bdd121ab4dbc3221299ec4a"></a>
@@ -419,6 +448,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_mat
       </table>
 </div><div class="memdoc">
 <p>Supportive sub-function to add boundary conditions to model matrix </p>
+
+<p>Referenced by <a class="el" href="_diffusion___a_d_i1_8h.html#a1375f6615ed36b26ef22189609023621">Diffusion_2D_ADI1()</a>, <a class="el" href="_diffusion___a_d_i2_8h.html#a653431b2d66478fe8b92143b56a3fd00">Diffusion_2D_ADI2()</a>, <a class="el" href="_diffusion___a_d_i3_8h.html#adb56be815523ab6a8d0d5be158463fd6">Diffusion_2D_ADI3()</a>, <a class="el" href="_matrix_solver_8h.html#a0d7ac991e107955df9ca1aca298040a0">MakeModelMatrix_2D_ADI1_x()</a>, <a class="el" href="_matrix_solver_8h.html#a6ec500c9c849bde034e6c95c89686254">MakeModelMatrix_2D_ADI1_y()</a>, <a class="el" href="_matrix_solver_8h.html#afa9d4e36b69ce890e433d74f40ea1409">MakeModelMatrix_2D_ADI2_x()</a>, and <a class="el" href="_matrix_solver_8h.html#a1c6c681f7f44aa16d2d862248741c53d">MakeModelMatrix_2D_ADI2_y()</a>.</p>
 
 </div>
 </div>
@@ -504,6 +535,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_mat
   </dd>
 </dl>
 
+<p>References <a class="el" href="_matrix_solver_8cpp.html#a92166f2f5c8c31d7c03c7fd72be8f5e6">GetDerivativeVector_2D()</a>, and <a class="el" href="class_calculation_matrix.html#a9baeb7c02e63eee92f28be2d89022931">CalculationMatrix::index1d()</a>.</p>
+
+<p>Referenced by <a class="el" href="_diffusion___a_d_i2_8h.html#a653431b2d66478fe8b92143b56a3fd00">Diffusion_2D_ADI2()</a>, and <a class="el" href="_matrix_solver_8h.html#afa9d4e36b69ce890e433d74f40ea1409">MakeModelMatrix_2D_ADI2_x()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a91bc7fb01ebea27ea7b0a19ffebdcefc"></a>
@@ -588,6 +623,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_mat
   </dd>
 </dl>
 
+<p>References <a class="el" href="_matrix_solver_8cpp.html#a92166f2f5c8c31d7c03c7fd72be8f5e6">GetDerivativeVector_2D()</a>, and <a class="el" href="class_calculation_matrix.html#a9baeb7c02e63eee92f28be2d89022931">CalculationMatrix::index1d()</a>.</p>
+
+<p>Referenced by <a class="el" href="_diffusion___a_d_i2_8h.html#a653431b2d66478fe8b92143b56a3fd00">Diffusion_2D_ADI2()</a>, and <a class="el" href="_matrix_solver_8h.html#a1c6c681f7f44aa16d2d862248741c53d">MakeModelMatrix_2D_ADI2_y()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a92166f2f5c8c31d7c03c7fd72be8f5e6"></a>
@@ -621,6 +660,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_mat
 </div><div class="memdoc">
 <p>Get change in indexes according to the derivatives direction.</p>
 <p>Used in approximation. If it gets derivativeType == DT_ALPHA_left, for example, that means we have alpha-left-derivative, which is ( f(alpha) - f(alpha-1) ) / ( delta alpha ). So it returns dAlpha = -1, as a derivative direction vector. </p>
+
+<p>Referenced by <a class="el" href="_matrix_solver_8h.html#a8254f19a81273c0d089ebe71c6bbeb90">AnySecondDerivativeApproximation_2D()</a>, <a class="el" href="_matrix_solver_8h.html#a91bc7fb01ebea27ea7b0a19ffebdcefc">AnySecondDerivativeApproximation_2D_y()</a>, <a class="el" href="_matrix_solver_8h.html#aab431ba2c1718ca1d21596558008b10d">SecondDerivativeApproximation_2D()</a>, and <a class="el" href="_matrix_solver_8h.html#a5997c40fddb153030bec04b3083a3415">SecondDerivativeApproximation_2D_y()</a>.</p>
 
 </div>
 </div>
@@ -656,6 +697,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_mat
 <p>Lapack inversion.</p>
 <p>A * X = B - equation</p>
 <p>LAPACK - Linear Algebra PACKage. For linear algebra methods. Using the lapack library from <a href="http://www.netlib.org/lapack/">http://www.netlib.org/lapack/</a> </p>
+
+<p>References <a class="el" href="_matrix_solver_8h.html#ab5901c7399bdfa9370dad6df1815ecbd">dgbsv_()</a>, and <a class="el" href="class_matrix1_d.html#a570f4a6b7df1811f2c3029ce026a6223">Matrix1D&lt; T &gt;::size_q1</a>.</p>
+
+<p>Referenced by <a class="el" href="_diffusion__2_d_8h.html#ad5785270d5a28bd7a7b8ca31f206c8ee">Diffusion_2D()</a>.</p>
 
 </div>
 </div>
@@ -734,6 +779,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_mat
   </table>
   </dd>
 </dl>
+
+<p>References <a class="el" href="class_calculation_matrix.html#a9baeb7c02e63eee92f28be2d89022931">CalculationMatrix::index1d()</a>.</p>
+
+<p>Referenced by <a class="el" href="_diffusion__1_d_8h.html#ae15e469cb777a21a2dbd751f1c072618">Diffusion_1D()</a>.</p>
 
 </div>
 </div>
@@ -823,6 +872,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_mat
   </dd>
 </dl>
 
+<p>References <a class="el" href="_matrix_solver_8cpp.html#a92166f2f5c8c31d7c03c7fd72be8f5e6">GetDerivativeVector_2D()</a>, and <a class="el" href="class_calculation_matrix.html#a9baeb7c02e63eee92f28be2d89022931">CalculationMatrix::index1d()</a>.</p>
+
+<p>Referenced by <a class="el" href="_diffusion__2_d_8h.html#ad5785270d5a28bd7a7b8ca31f206c8ee">Diffusion_2D()</a>, <a class="el" href="_diffusion___a_d_i1_8h.html#a1375f6615ed36b26ef22189609023621">Diffusion_2D_ADI1()</a>, <a class="el" href="_diffusion___a_d_i2_8h.html#a653431b2d66478fe8b92143b56a3fd00">Diffusion_2D_ADI2()</a>, <a class="el" href="_diffusion___a_d_i3_8h.html#adb56be815523ab6a8d0d5be158463fd6">Diffusion_2D_ADI3()</a>, <a class="el" href="_matrix_solver_8h.html#a0d7ac991e107955df9ca1aca298040a0">MakeModelMatrix_2D_ADI1_x()</a>, <a class="el" href="_matrix_solver_8h.html#afa9d4e36b69ce890e433d74f40ea1409">MakeModelMatrix_2D_ADI2_x()</a>, and <a class="el" href="_matrix_solver_8h.html#a60eb15c384ad186e5958adf8af3c7c53">MakeModelMatrix_2D_ADI3_x()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a5997c40fddb153030bec04b3083a3415"></a>
@@ -911,6 +964,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_mat
   </dd>
 </dl>
 
+<p>References <a class="el" href="_matrix_solver_8cpp.html#a92166f2f5c8c31d7c03c7fd72be8f5e6">GetDerivativeVector_2D()</a>, and <a class="el" href="class_calculation_matrix.html#a9baeb7c02e63eee92f28be2d89022931">CalculationMatrix::index1d()</a>.</p>
+
+<p>Referenced by <a class="el" href="_diffusion___a_d_i1_8h.html#a1375f6615ed36b26ef22189609023621">Diffusion_2D_ADI1()</a>, <a class="el" href="_diffusion___a_d_i2_8h.html#a653431b2d66478fe8b92143b56a3fd00">Diffusion_2D_ADI2()</a>, <a class="el" href="_diffusion___a_d_i3_8h.html#adb56be815523ab6a8d0d5be158463fd6">Diffusion_2D_ADI3()</a>, <a class="el" href="_matrix_solver_8h.html#a6ec500c9c849bde034e6c95c89686254">MakeModelMatrix_2D_ADI1_y()</a>, <a class="el" href="_matrix_solver_8h.html#a1c6c681f7f44aa16d2d862248741c53d">MakeModelMatrix_2D_ADI2_y()</a>, and <a class="el" href="_matrix_solver_8h.html#aeba76c1b03dc6ed9daa0743a54f96e7d">MakeModelMatrix_2D_ADI3_y()</a>.</p>
+
 </div>
 </div>
 <a class="anchor" id="a6cefd898c34c83f3f504d638384ce5cf"></a>
@@ -976,14 +1033,20 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="_mat
   </dd>
 </dl>
 
+<p>Referenced by <a class="el" href="_diffusion__1_d_8h.html#ae15e469cb777a21a2dbd751f1c072618">Diffusion_1D()</a>, <a class="el" href="_diffusion___a_d_i1_8h.html#a1375f6615ed36b26ef22189609023621">Diffusion_2D_ADI1()</a>, <a class="el" href="_diffusion___a_d_i2_8h.html#a653431b2d66478fe8b92143b56a3fd00">Diffusion_2D_ADI2()</a>, and <a class="el" href="_diffusion___a_d_i3_8h.html#adb56be815523ab6a8d0d5be158463fd6">Diffusion_2D_ADI3()</a>.</p>
+
 </div>
 </div>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.10
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="_matrix_solver_8h.html">MatrixSolver.h</a></li>
+    <li class="footer">Generated by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
+  </ul>
+</div>
 </body>
 </html>

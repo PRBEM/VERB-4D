@@ -18,6 +18,8 @@
  * Create model matrices and solve the system, 
  * Implicit implementation of diagonal terms, explicit implementation of mixed terms
  *
+ * \todo Fix this function - currently results in negative PSD values - using Lapack instead
+ *
  * Method:
  *
  * For the x direction and then for the y direction

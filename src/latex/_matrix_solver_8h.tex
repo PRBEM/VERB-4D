@@ -99,6 +99,10 @@ Adds in the upper and lower boundaries for the 1\+D case when x is at first or l
 {\em x\+\_\+\+L\+B\+C,x\+\_\+\+U\+B\+C,x\+\_\+\+L\+B\+C\+\_\+type,x\+\_\+\+U\+B\+C\+\_\+type} & -\/ predefined 1\+D boundaries/types \\
 \hline
 \end{DoxyParams}
+
+
+References Calculation\+Matrix\+::index1d().
+
 \hypertarget{_matrix_solver_8h_adfcdb3cd90eb88a7f14d762edfaa8d66}{}\index{Matrix\+Solver.\+h@{Matrix\+Solver.\+h}!Add\+Boundaries\+\_\+2\+D@{Add\+Boundaries\+\_\+2\+D}}
 \index{Add\+Boundaries\+\_\+2\+D@{Add\+Boundaries\+\_\+2\+D}!Matrix\+Solver.\+h@{Matrix\+Solver.\+h}}
 \subsubsection[{Add\+Boundaries\+\_\+2\+D(\+Calculation\+Matrix \&matr\+\_\+\+A, Calculation\+Matrix \&matr\+\_\+\+B, Calculation\+Matrix \&matr\+\_\+\+C, Matrix2\+D$<$ double $>$ \&x, Matrix2\+D$<$ double $>$ \&y, int x\+\_\+size, int y\+\_\+size, Matrix1\+D$<$ double $>$ x\+\_\+\+L\+B\+C, Matrix1\+D$<$ double $>$ x\+\_\+\+U\+B\+C, Matrix1\+D$<$ double $>$ y\+\_\+\+L\+B\+C, Matrix1\+D$<$ double $>$ y\+\_\+\+U\+B\+C, string \&x\+\_\+\+L\+B\+C\+\_\+type, string \&x\+\_\+\+U\+B\+C\+\_\+type, string \&y\+\_\+\+L\+B\+C\+\_\+type, string \&y\+\_\+\+U\+B\+C\+\_\+type, int ix, int iy, int in)}]{\setlength{\rightskip}{0pt plus 5cm}bool Add\+Boundaries\+\_\+2\+D (
@@ -130,6 +134,14 @@ Adds in the upper and lower boundaries for the 2\+D case when x or y is at first
 {\em L\+B\+C,U\+B\+C} & for x and y -\/ predefined 2\+D boundaries/types \\
 \hline
 \end{DoxyParams}
+
+
+References Calculation\+Matrix\+::index1d().
+
+
+
+Referenced by Diffusion\+\_\+2\+D(), Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I3\+\_\+x(), and Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I3\+\_\+y().
+
 \hypertarget{_matrix_solver_8h_a9fa923427bdd121ab4dbc3221299ec4a}{}\index{Matrix\+Solver.\+h@{Matrix\+Solver.\+h}!Add\+Boundary@{Add\+Boundary}}
 \index{Add\+Boundary@{Add\+Boundary}!Matrix\+Solver.\+h@{Matrix\+Solver.\+h}}
 \subsubsection[{Add\+Boundary(\+Diag\+Matrix \&\+Matrix\+\_\+\+A, string type, int in, int id1, double dh)}]{\setlength{\rightskip}{0pt plus 5cm}void Add\+Boundary (
@@ -141,7 +153,11 @@ Adds in the upper and lower boundaries for the 2\+D case when x or y is at first
 \item[{double}]{dh}
 \end{DoxyParamCaption}
 )}\label{_matrix_solver_8h_a9fa923427bdd121ab4dbc3221299ec4a}
-Supportive sub-\/function to add boundary conditions to model matrix \hypertarget{_matrix_solver_8h_a8254f19a81273c0d089ebe71c6bbeb90}{}\index{Matrix\+Solver.\+h@{Matrix\+Solver.\+h}!Any\+Second\+Derivative\+Approximation\+\_\+2\+D@{Any\+Second\+Derivative\+Approximation\+\_\+2\+D}}
+Supportive sub-\/function to add boundary conditions to model matrix 
+
+Referenced by Diffusion\+\_\+2\+D\+\_\+\+A\+D\+I1(), Diffusion\+\_\+2\+D\+\_\+\+A\+D\+I2(), Diffusion\+\_\+2\+D\+\_\+\+A\+D\+I3(), Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I1\+\_\+x(), Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I1\+\_\+y(), Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I2\+\_\+x(), and Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I2\+\_\+y().
+
+\hypertarget{_matrix_solver_8h_a8254f19a81273c0d089ebe71c6bbeb90}{}\index{Matrix\+Solver.\+h@{Matrix\+Solver.\+h}!Any\+Second\+Derivative\+Approximation\+\_\+2\+D@{Any\+Second\+Derivative\+Approximation\+\_\+2\+D}}
 \index{Any\+Second\+Derivative\+Approximation\+\_\+2\+D@{Any\+Second\+Derivative\+Approximation\+\_\+2\+D}!Matrix\+Solver.\+h@{Matrix\+Solver.\+h}}
 \subsubsection[{Any\+Second\+Derivative\+Approximation\+\_\+2\+D(\+Calculation\+Matrix \&matr\+\_\+\+A, int ix, int iy, string First\+Derivative, string Second\+Derivative, Matrix2\+D$<$ double $>$ \&x, Matrix2\+D$<$ double $>$ \&y, Matrix2\+D$<$ double $>$ \&\+Coef1, Matrix2\+D$<$ double $>$ \&\+Coef2, double multiplicator)}]{\setlength{\rightskip}{0pt plus 5cm}void Any\+Second\+Derivative\+Approximation\+\_\+2\+D (
 \begin{DoxyParamCaption}
@@ -168,6 +184,14 @@ Second derivative approximation, returns coefficients to be put into the model m
 {\em Coef2} & Coefficient inside the first derivative \\
 \hline
 \end{DoxyParams}
+
+
+References Get\+Derivative\+Vector\+\_\+2\+D(), and Calculation\+Matrix\+::index1d().
+
+
+
+Referenced by Diffusion\+\_\+2\+D\+\_\+\+A\+D\+I2(), and Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I2\+\_\+x().
+
 \hypertarget{_matrix_solver_8h_a91bc7fb01ebea27ea7b0a19ffebdcefc}{}\index{Matrix\+Solver.\+h@{Matrix\+Solver.\+h}!Any\+Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y@{Any\+Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y}}
 \index{Any\+Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y@{Any\+Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y}!Matrix\+Solver.\+h@{Matrix\+Solver.\+h}}
 \subsubsection[{Any\+Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y(\+Calculation\+Matrix \&matr\+\_\+\+A, int ix, int iy, string First\+Derivative, string Second\+Derivative, Matrix2\+D$<$ double $>$ \&x, Matrix2\+D$<$ double $>$ \&y, Matrix2\+D$<$ double $>$ \&\+Coef1, Matrix2\+D$<$ double $>$ \&\+Coef2, double multiplicator)}]{\setlength{\rightskip}{0pt plus 5cm}void Any\+Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y (
@@ -195,6 +219,14 @@ Second derivative approximation in the y direction first, returns coefficients t
 {\em Coef2} & Coefficient inside the first derivative \\
 \hline
 \end{DoxyParams}
+
+
+References Get\+Derivative\+Vector\+\_\+2\+D(), and Calculation\+Matrix\+::index1d().
+
+
+
+Referenced by Diffusion\+\_\+2\+D\+\_\+\+A\+D\+I2(), and Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I2\+\_\+y().
+
 \hypertarget{_matrix_solver_8h_a92166f2f5c8c31d7c03c7fd72be8f5e6}{}\index{Matrix\+Solver.\+h@{Matrix\+Solver.\+h}!Get\+Derivative\+Vector\+\_\+2\+D@{Get\+Derivative\+Vector\+\_\+2\+D}}
 \index{Get\+Derivative\+Vector\+\_\+2\+D@{Get\+Derivative\+Vector\+\_\+2\+D}!Matrix\+Solver.\+h@{Matrix\+Solver.\+h}}
 \subsubsection[{Get\+Derivative\+Vector\+\_\+2\+D(string derivative\+Type, int \&dx, int \&dy)}]{\setlength{\rightskip}{0pt plus 5cm}void Get\+Derivative\+Vector\+\_\+2\+D (
@@ -206,7 +238,11 @@ Second derivative approximation in the y direction first, returns coefficients t
 )}\label{_matrix_solver_8h_a92166f2f5c8c31d7c03c7fd72be8f5e6}
 Get change in indexes according to the derivatives direction.
 
-Used in approximation. If it gets derivative\+Type == D\+T\+\_\+\+A\+L\+P\+H\+A\+\_\+left, for example, that means we have alpha-\/left-\/derivative, which is ( f(alpha) -\/ f(alpha-\/1) ) / ( delta alpha ). So it returns d\+Alpha = -\/1, as a derivative direction vector. \hypertarget{_matrix_solver_8h_a2d1c3b2bf64ff6bce0d21ceed0e07287}{}\index{Matrix\+Solver.\+h@{Matrix\+Solver.\+h}!Lapack@{Lapack}}
+Used in approximation. If it gets derivative\+Type == D\+T\+\_\+\+A\+L\+P\+H\+A\+\_\+left, for example, that means we have alpha-\/left-\/derivative, which is ( f(alpha) -\/ f(alpha-\/1) ) / ( delta alpha ). So it returns d\+Alpha = -\/1, as a derivative direction vector. 
+
+Referenced by Any\+Second\+Derivative\+Approximation\+\_\+2\+D(), Any\+Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y(), Second\+Derivative\+Approximation\+\_\+2\+D(), and Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y().
+
+\hypertarget{_matrix_solver_8h_a2d1c3b2bf64ff6bce0d21ceed0e07287}{}\index{Matrix\+Solver.\+h@{Matrix\+Solver.\+h}!Lapack@{Lapack}}
 \index{Lapack@{Lapack}!Matrix\+Solver.\+h@{Matrix\+Solver.\+h}}
 \subsubsection[{Lapack(\+Diag\+Matrix \&\+A, Matrix1\+D$<$ double $>$ \&\+B, Matrix1\+D$<$ double $>$ \&\+X)}]{\setlength{\rightskip}{0pt plus 5cm}void Lapack (
 \begin{DoxyParamCaption}
@@ -219,7 +255,15 @@ Lapack inversion.
 
 A $\ast$ X = B -\/ equation
 
-L\+A\+P\+A\+C\+K -\/ Linear Algebra P\+A\+C\+Kage. For linear algebra methods. Using the lapack library from \href{http://www.netlib.org/lapack/}{\tt http\+://www.\+netlib.\+org/lapack/} \hypertarget{_matrix_solver_8h_a4aa1e5a2ed7139d8acddf8dd6fffb886}{}\index{Matrix\+Solver.\+h@{Matrix\+Solver.\+h}!Second\+Derivative\+Approximation\+\_\+1\+D@{Second\+Derivative\+Approximation\+\_\+1\+D}}
+L\+A\+P\+A\+C\+K -\/ Linear Algebra P\+A\+C\+Kage. For linear algebra methods. Using the lapack library from \href{http://www.netlib.org/lapack/}{\tt http\+://www.\+netlib.\+org/lapack/} 
+
+References dgbsv\+\_\+(), and Matrix1\+D$<$ T $>$\+::size\+\_\+q1.
+
+
+
+Referenced by Diffusion\+\_\+2\+D().
+
+\hypertarget{_matrix_solver_8h_a4aa1e5a2ed7139d8acddf8dd6fffb886}{}\index{Matrix\+Solver.\+h@{Matrix\+Solver.\+h}!Second\+Derivative\+Approximation\+\_\+1\+D@{Second\+Derivative\+Approximation\+\_\+1\+D}}
 \index{Second\+Derivative\+Approximation\+\_\+1\+D@{Second\+Derivative\+Approximation\+\_\+1\+D}!Matrix\+Solver.\+h@{Matrix\+Solver.\+h}}
 \subsubsection[{Second\+Derivative\+Approximation\+\_\+1\+D(\+Calculation\+Matrix \&matr\+\_\+\+A, int ix, string First\+Derivative, string Second\+Derivative, Matrix1\+D$<$ double $>$ \&x, Matrix1\+D$<$ double $>$ \&\+D, Matrix1\+D$<$ double $>$ \&\+G, double multiplicator)}]{\setlength{\rightskip}{0pt plus 5cm}void Second\+Derivative\+Approximation\+\_\+1\+D (
 \begin{DoxyParamCaption}
@@ -256,6 +300,14 @@ Done for a couple locations near x\mbox{[}ix\mbox{]} each location has a slightl
 {\em multiplicator} & multiplier based on number of iterations done (m) \\
 \hline
 \end{DoxyParams}
+
+
+References Calculation\+Matrix\+::index1d().
+
+
+
+Referenced by Diffusion\+\_\+1\+D().
+
 \hypertarget{_matrix_solver_8h_aab431ba2c1718ca1d21596558008b10d}{}\index{Matrix\+Solver.\+h@{Matrix\+Solver.\+h}!Second\+Derivative\+Approximation\+\_\+2\+D@{Second\+Derivative\+Approximation\+\_\+2\+D}}
 \index{Second\+Derivative\+Approximation\+\_\+2\+D@{Second\+Derivative\+Approximation\+\_\+2\+D}!Matrix\+Solver.\+h@{Matrix\+Solver.\+h}}
 \subsubsection[{Second\+Derivative\+Approximation\+\_\+2\+D(\+Calculation\+Matrix \&matr\+\_\+\+A, int ix, int iy, string First\+Derivative, string Second\+Derivative, Matrix2\+D$<$ double $>$ \&x, Matrix2\+D$<$ double $>$ \&y, Matrix2\+D$<$ double $>$ \&\+D, Matrix2\+D$<$ double $>$ \&\+G, double multiplicator)}]{\setlength{\rightskip}{0pt plus 5cm}void Second\+Derivative\+Approximation\+\_\+2\+D (
@@ -291,6 +343,14 @@ Returns coefficients to be put into model matrix for an approximation of a secon
 {\em G} & Jacobian \\
 \hline
 \end{DoxyParams}
+
+
+References Get\+Derivative\+Vector\+\_\+2\+D(), and Calculation\+Matrix\+::index1d().
+
+
+
+Referenced by Diffusion\+\_\+2\+D(), Diffusion\+\_\+2\+D\+\_\+\+A\+D\+I1(), Diffusion\+\_\+2\+D\+\_\+\+A\+D\+I2(), Diffusion\+\_\+2\+D\+\_\+\+A\+D\+I3(), Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I1\+\_\+x(), Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I2\+\_\+x(), and Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I3\+\_\+x().
+
 \hypertarget{_matrix_solver_8h_a5997c40fddb153030bec04b3083a3415}{}\index{Matrix\+Solver.\+h@{Matrix\+Solver.\+h}!Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y@{Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y}}
 \index{Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y@{Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y}!Matrix\+Solver.\+h@{Matrix\+Solver.\+h}}
 \subsubsection[{Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y(\+Calculation\+Matrix \&matr\+\_\+\+A, int ix, int iy, string First\+Derivative, string Second\+Derivative, Matrix2\+D$<$ double $>$ \&x, Matrix2\+D$<$ double $>$ \&y, Matrix2\+D$<$ double $>$ \&\+D, Matrix2\+D$<$ double $>$ \&\+G, double multiplicator)}]{\setlength{\rightskip}{0pt plus 5cm}void Second\+Derivative\+Approximation\+\_\+2\+D\+\_\+y (
@@ -326,6 +386,14 @@ Returns coefficients to be put into model matrix for an approximation of a secon
 {\em G} & Jacobian \\
 \hline
 \end{DoxyParams}
+
+
+References Get\+Derivative\+Vector\+\_\+2\+D(), and Calculation\+Matrix\+::index1d().
+
+
+
+Referenced by Diffusion\+\_\+2\+D\+\_\+\+A\+D\+I1(), Diffusion\+\_\+2\+D\+\_\+\+A\+D\+I2(), Diffusion\+\_\+2\+D\+\_\+\+A\+D\+I3(), Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I1\+\_\+y(), Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I2\+\_\+y(), and Make\+Model\+Matrix\+\_\+2\+D\+\_\+\+A\+D\+I3\+\_\+y().
+
 \hypertarget{_matrix_solver_8h_a6cefd898c34c83f3f504d638384ce5cf}{}\index{Matrix\+Solver.\+h@{Matrix\+Solver.\+h}!tridag@{tridag}}
 \index{tridag@{tridag}!Matrix\+Solver.\+h@{Matrix\+Solver.\+h}}
 \subsubsection[{tridag(double a[], double b[], double c[], double r[], double u[], long n)}]{\setlength{\rightskip}{0pt plus 5cm}bool tridag (
@@ -361,3 +429,7 @@ Au = r Where A = diag(a, b, c),
 {\em n} & -\/ size of the matrix \\
 \hline
 \end{DoxyParams}
+
+
+Referenced by Diffusion\+\_\+1\+D(), Diffusion\+\_\+2\+D\+\_\+\+A\+D\+I1(), Diffusion\+\_\+2\+D\+\_\+\+A\+D\+I2(), and Diffusion\+\_\+2\+D\+\_\+\+A\+D\+I3().
+

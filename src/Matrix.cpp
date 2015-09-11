@@ -567,12 +567,15 @@ void Matrix1D<T>::readFromFile(string filename) {
 
 
 
-// Function for reading from matlab file in 1-dimension
-// Will always be stored in PRVK format so 1 = P, 2 = R ... 
+/**
+* Function for reading from matlab file in 1-dimension
+* Will check the variables, order them in (P, R/L, V, K, Val) format and then set matrix_array to be the variable with the corresponding column number 
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
 template<class T>
 void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
 {
-#if (MATLAB_CAPABLE)
+#if (MATLAB_CAPABLE) 
 	
 	Logger::message << "Reading " << file << ": " << endl;	
 	
@@ -934,8 +937,12 @@ void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
 
 
 
-// Function for reading from matlab file in 1-dimension
-// Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard 
+/**
+* Function for reading from matlab file in 1-dimension
+* Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard
+* The variables will be checked against the input grid parameters in order to make sure the right variables/values are being loaded
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
 template<class T>
 void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 {
@@ -1723,8 +1730,11 @@ void Matrix2D<T>::readFromFile(string filename, int read_column) {
 
 
 
-// Function for reading from matlab file in 1-dimension
-// Will always be stored in PRVK format so 1 = P, 2 = R ... 
+/**
+* Function for reading from matlab file in 2-dimensions
+* Will check the variables, order them in (P, R/L, V, K, Val) format and then set matrix_array to be the variable with the corresponding column number 
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
 template<class T>
 void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
 {
@@ -2093,9 +2103,12 @@ void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const 
 
 
 
-
-// Function for reading from matlab file in 1-dimension
-// Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard 
+/**
+* Function for reading from matlab file in 2-dimensions
+* Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard
+* The variables will be checked against the input grid parameters in order to make sure the right variables/values are being loaded
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
 template<class T>
 void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, const Matrix2D<T> grid_y)
 {
@@ -2898,7 +2911,11 @@ void Matrix3D<T>::readFromFile(string filename, int read_column) {
 
 
 
-
+/**
+* Function for reading from matlab file in 3-dimensions
+* Will check the variables, order them in (P, R/L, V, K, Val) format and then set matrix_array to be the variable with the corresponding column number 
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
 template<class T>
 void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
 {
@@ -3280,8 +3297,12 @@ void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const 
 
 
 
-// Function for reading from matlab file in 1-dimension
-// Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard 
+/**
+* Function for reading from matlab file in 3-dimensions
+* Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard
+* The variables will be checked against the input grid parameters in order to make sure the right variables/values are being loaded
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
 template<class T>
 void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, const Matrix3D<T> grid_y, const Matrix3D<T> grid_z)
 {
@@ -4135,15 +4156,21 @@ void Matrix4D<T>::writeToFile(string filename, string info) {
 
 #if (MATLAB_CAPABLE)
 	
+	
+	
+/**
+* Packaging function that turns a Matrix4D into a variable that can be stored into a .mat file.
+* Used in conjunction with writeToMatlabFile() to save the 4 grid variables and val into a single .mat file
+*/	
 template<class T>
 mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
 {
 		
 	int w,x,y,z;
 	int status;
-    // create a struct array with two fields
+    // create a struct array with 7 fields
     const char *fieldnames[7] = {"arr", "time", "size", "size1", "size2" , "size3" , "size4"};
-	// create a 1x1 struct that will hold the array of values and the time info
+	// create a 1x1 struct that will hold the array of values and the time info, as well as the size of the dimensions
 	mxArray *s = mxCreateStructMatrix(1, 1, 7, fieldnames);
 	mwSize size_W = size_w;
 	mwSize size_X = size_x;
@@ -4154,7 +4181,9 @@ mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
 
     // fill struct fields
     for (mwIndex i=0; i<7; i++) {
-        // For the arr variable in the 1x1 struct
+        
+		// For the arr variable in the 1x1 struct
+		// Holds the contents of matrix_array
 		if (i== 0)
 		{
 			// create array of doubles and give it the data in matrix_array
@@ -4166,7 +4195,6 @@ mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
     			exit(EXIT_FAILURE);
   			}
 			double *data = mxGetPr(aPtr);
-			//int bytes_to_copy = size_w * size_x * size_y * size_z * mxGetElementSize(aPtr);
 			for (w = 0; w < size_w; w++) {
 				for (x = 0; x < size_x; x++) {
 					for (y = 0; y < size_y; y++) {
@@ -4178,6 +4206,7 @@ mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
 			}
 			mxSetField(s, 0, fieldnames[i], aPtr);
 		}
+		
 		// For the time variable in the 1x1 struct
 		if ( i == 1 )
 		{
@@ -4191,42 +4220,46 @@ mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
 			data[0] = temp;
 			mxSetField(s, 0, fieldnames[i], aPtr);
 		}	
+		
 		// For the size variable in the 1x1 struct
 		if ( i == 2 )
 		{
-			// Create a string that has the inputted time
 			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
 			double *data = mxGetPr(aPtr);
 			data[0] = 1;
 			mxSetField(s, 0, fieldnames[i], aPtr);
-		}	
+		}
+			
+		// size of dimension 1 or w	
 		if ( i == 3 )
 		{
-			// Create a string that has the inputted time
 			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
 			double *data = mxGetPr(aPtr);
 			data[0] = size_w;
 			mxSetField(s, 0, fieldnames[i], aPtr);
 		}	
+		
+		// size of dimension 2 or x
 		if ( i == 4 )
 		{
-			// Create a string that has the inputted time
 			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
 			double *data = mxGetPr(aPtr);
 			data[0] = size_x;
 			mxSetField(s, 0, fieldnames[i], aPtr);
 		}	
+		
+		// size of dimension 3 or y			
 		if ( i == 5 )
 		{
-			// Create a string that has the inputted time
 			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
 			double *data = mxGetPr(aPtr);
 			data[0] = size_y;
 			mxSetField(s, 0, fieldnames[i], aPtr);
 		}	
+		
+		// size of dimension 4 or z		
 		if ( i == 6 )
 		{
-			// Create a string that has the inputted time
 			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
 			double *data = mxGetPr(aPtr);
 			data[0] = size_z;
@@ -4240,9 +4273,8 @@ mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
 #endif
 
 /**
-* Write matrix to file - with information
-* Function for matlab files
-* Creates a .mat struct for the matrix 
+* Write matrix to .mat file.
+* Creates a struct for the matrix.
 * Struct has 7 fields in including - arr time size, size1, size2, size3, size4
 */ 
 template<class T>
@@ -4250,9 +4282,6 @@ void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
 	
 #if (MATLAB_CAPABLE)
 		
-	// for testing
-	//writeToFile((filename.substr(0, filename.size()-5) + ".plt"), info);
-	
 	
 	Logger::message << "writing " << filename << ": " << endl;	
 	
@@ -4406,10 +4435,10 @@ void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> 
 }
 
 
-// ADDED
+
 /**
 * Write matrix to file, using 4 other matrixes as a grid (simply - write all 5 matrixes to the file).
-* Function for matlab files
+* Uses the createStructMatrix() function to pack all the grid dimensions into seperate variables and then combines these variables into a single matlab structure to save in .mat
 */ 
 template<class T>
 void Matrix4D<T>::writeToMatlabFile(string file, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) {
@@ -4428,7 +4457,6 @@ void Matrix4D<T>::writeToMatlabFile(string file, Matrix4D<T> &grid_w, Matrix4D<T
 	mxArray* z = grid_z.createStructMatrix(file);
 	
 	// Save the struct into the .mat file
-	// hardcoded to get rid of the "./output_folder/" and only get PSD_XXXXX
     matPutVariable(pmat, this->name.c_str(), current);
 	matPutVariable(pmat, "grid_w", w);
 	matPutVariable(pmat, "grid_x", x);
@@ -4520,8 +4548,11 @@ void Matrix4D<T>::readFromFile(string filename, int read_column) {
 }
 
 
-// Function for reading from matlab file in 4-dimensions
-// Will check the variables, order them in P R/L V K Val format and then set matrix_array to be the variable with the corresponding column number 
+/**
+* Function for reading from matlab file in 4-dimensions
+* Will check the variables, order them in (P, R/L, V, K, Val) format and then set matrix_array to be the variable with the corresponding column number 
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
 template<class T>
 void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 {
@@ -4969,9 +5000,12 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 
 
 
-
-// Function for reading from matlab file in 1-dimension
-// Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard 
+/**
+* Function for reading from matlab file in 4-dimensions
+* Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard
+* The variables will be checked against the input grid parameters in order to make sure the right variables/values are being loaded
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
 template<class T>
 void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z)
 {

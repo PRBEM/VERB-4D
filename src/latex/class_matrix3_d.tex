@@ -82,11 +82,9 @@ virtual void \hyperlink{class_matrix3_d_a8ec06237d02ba61aed804cebd03ab59b}{read\
 \begin{DoxyCompactList}\small\item\em Load matrix from a file. \end{DoxyCompactList}\item 
 virtual void \hyperlink{class_matrix3_d_a85ba47159cc0f55f16b6138beec6e05f}{read\+From\+File} (string filename, const \hyperlink{class_matrix3_d}{Matrix3\+D}$<$ T $>$ grid\+\_\+q1, const \hyperlink{class_matrix3_d}{Matrix3\+D}$<$ T $>$ grid\+\_\+q2, const \hyperlink{class_matrix3_d}{Matrix3\+D}$<$ T $>$ grid\+\_\+q3)
 \begin{DoxyCompactList}\small\item\em Load matrix to a file. \end{DoxyCompactList}\item 
-\hypertarget{class_matrix3_d_a9534855c7f8005376991630e0a069194}{}virtual void {\bfseries read\+From\+Matlab\+File} (string filename, int column=1)\label{class_matrix3_d_a9534855c7f8005376991630e0a069194}
-
+virtual void \hyperlink{class_matrix3_d_a9534855c7f8005376991630e0a069194}{read\+From\+Matlab\+File} (string filename, int column=1)
 \item 
-\hypertarget{class_matrix3_d_a42c7e0031c91326c3637d6b0f6a3345d}{}virtual void {\bfseries read\+From\+Matlab\+File} (string filename, const \hyperlink{class_matrix3_d}{Matrix3\+D}$<$ T $>$ grid\+\_\+q1, const \hyperlink{class_matrix3_d}{Matrix3\+D}$<$ T $>$ grid\+\_\+q2, const \hyperlink{class_matrix3_d}{Matrix3\+D}$<$ T $>$ grid\+\_\+q3)\label{class_matrix3_d_a42c7e0031c91326c3637d6b0f6a3345d}
-
+virtual void \hyperlink{class_matrix3_d_a42c7e0031c91326c3637d6b0f6a3345d}{read\+From\+Matlab\+File} (string filename, const \hyperlink{class_matrix3_d}{Matrix3\+D}$<$ T $>$ grid\+\_\+q1, const \hyperlink{class_matrix3_d}{Matrix3\+D}$<$ T $>$ grid\+\_\+q2, const \hyperlink{class_matrix3_d}{Matrix3\+D}$<$ T $>$ grid\+\_\+q3)
 \item 
 int \hyperlink{class_matrix3_d_ad7e89a87409444fade7f6d35dca52877}{index1d} (int q1, int q2, int q3)
 \begin{DoxyCompactList}\small\item\em Returns index of the element (x,y,z) in 1d array. \end{DoxyCompactList}\item 
@@ -175,7 +173,11 @@ Constructor. Create matrix equal to Matrix M.
 \item[{int}]{size\+\_\+q3}
 \end{DoxyParamCaption}
 )}\label{class_matrix3_d_a23dca87cfdc4f3a6e9d8d102f7800102}
-Constructor. Allocate memory. \hypertarget{class_matrix3_d_a7fda610223910a2b4dcfea445d2eb6c7}{}\index{Matrix3\+D@{Matrix3\+D}!````~Matrix3\+D@{$\sim$\+Matrix3\+D}}
+Constructor. Allocate memory. 
+
+References Allocate\+Memory().
+
+\hypertarget{class_matrix3_d_a7fda610223910a2b4dcfea445d2eb6c7}{}\index{Matrix3\+D@{Matrix3\+D}!````~Matrix3\+D@{$\sim$\+Matrix3\+D}}
 \index{````~Matrix3\+D@{$\sim$\+Matrix3\+D}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{$\sim$\+Matrix3\+D()}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix3\+D}$<$ T $>$\+::$\sim${\bf Matrix3\+D} (
 \begin{DoxyParamCaption}
@@ -201,7 +203,11 @@ Return absolute value of the 3d matrix. Changes every element to a positive valu
 \item[{int}]{size\+\_\+q3}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily [virtual]}}\label{class_matrix3_d_a516afefd35f6077c149b172e5e0e1cda}
-Allocating memory and filling it with zero-\/values. \hypertarget{class_matrix3_d_a62ddd2402b078e9df43daa85aa7f8709}{}\index{Matrix3\+D@{Matrix3\+D}!divide@{divide}}
+Allocating memory and filling it with zero-\/values. 
+
+Referenced by Allocate\+Memory().
+
+\hypertarget{class_matrix3_d_a62ddd2402b078e9df43daa85aa7f8709}{}\index{Matrix3\+D@{Matrix3\+D}!divide@{divide}}
 \index{divide@{divide}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{divide(const Matrix3\+D$<$ T $>$ \&\+M) const }]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix3\+D}$<$ T $>$ {\bf Matrix3\+D}$<$ T $>$\+::divide (
 \begin{DoxyParamCaption}
@@ -212,7 +218,11 @@ Allocating memory and filling it with zero-\/values. \hypertarget{class_matrix3_
 
 Arraywise division (A./\+B), stores result in a new matrix. 
 
-Divide each element of the matrix to corresponds element of matrix M. \hypertarget{class_matrix3_d_a206ed85138499120f59b610aeace4ed1}{}\index{Matrix3\+D@{Matrix3\+D}!divide\+\_\+equal@{divide\+\_\+equal}}
+Divide each element of the matrix to corresponds element of matrix M. 
+
+References Matrix3\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix3_d_a206ed85138499120f59b610aeace4ed1}{}\index{Matrix3\+D@{Matrix3\+D}!divide\+\_\+equal@{divide\+\_\+equal}}
 \index{divide\+\_\+equal@{divide\+\_\+equal}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{divide\+\_\+equal(const Matrix3\+D$<$ T $>$ \&\+M)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix3\+D}$<$ T $>$ \& {\bf Matrix3\+D}$<$ T $>$\+::divide\+\_\+equal (
 \begin{DoxyParamCaption}
@@ -223,7 +233,11 @@ Divide each element of the matrix to corresponds element of matrix M. \hypertarg
 
 Arraywise division (A./\+B), stores result in the matrix it\textquotesingle{}s applied to. 
 
-Division of each element of one matrices to the element of another. Result is stored into applied matrix (left hand side matrix) \hypertarget{class_matrix3_d_ad7e89a87409444fade7f6d35dca52877}{}\index{Matrix3\+D@{Matrix3\+D}!index1d@{index1d}}
+Division of each element of one matrices to the element of another. Result is stored into applied matrix (left hand side matrix) 
+
+References Matrix3\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix3_d_ad7e89a87409444fade7f6d35dca52877}{}\index{Matrix3\+D@{Matrix3\+D}!index1d@{index1d}}
 \index{index1d@{index1d}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{index1d(int q1, int q2, int q3)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ int {\bf Matrix3\+D}$<$ T $>$\+::index1d (
 \begin{DoxyParamCaption}
@@ -248,7 +262,11 @@ Returns corresponding index of 3d matrix if represented as a 1d array
 {}
 \end{DoxyParamCaption}
 )}\label{class_matrix3_d_ad40e82f2b8be5bc392b5b7197e53318f}
-Return maximum value of the 3d matrix. Default value seet to 0 \hypertarget{class_matrix3_d_a693a1e9134c7ffcd80221292015e8180}{}\index{Matrix3\+D@{Matrix3\+D}!maxabs@{maxabs}}
+Return maximum value of the 3d matrix. Default value seet to 0 
+
+Referenced by Matrix\+Limit().
+
+\hypertarget{class_matrix3_d_a693a1e9134c7ffcd80221292015e8180}{}\index{Matrix3\+D@{Matrix3\+D}!maxabs@{maxabs}}
 \index{maxabs@{maxabs}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{maxabs()}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ T {\bf Matrix3\+D}$<$ T $>$\+::maxabs (
 \begin{DoxyParamCaption}
@@ -262,7 +280,11 @@ Return absolute maximum value of the 3d matrix. Default value set to 0 \hypertar
 {}
 \end{DoxyParamCaption}
 )}\label{class_matrix3_d_a5a15d93a8739a595384e67bbb84f3dc4}
-Return minimum value of the 3d matrix. Default value set to 1e99 \hypertarget{class_matrix3_d_a6e52e634897ee731afd0ec4d4b80ddbd}{}\index{Matrix3\+D@{Matrix3\+D}!operator()@{operator()}}
+Return minimum value of the 3d matrix. Default value set to 1e99 
+
+Referenced by Matrix\+Limit().
+
+\hypertarget{class_matrix3_d_a6e52e634897ee731afd0ec4d4b80ddbd}{}\index{Matrix3\+D@{Matrix3\+D}!operator()@{operator()}}
 \index{operator()@{operator()}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{operator()(int q1, int q2, int q3)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ T \& {\bf Matrix3\+D}$<$ T $>$\+::operator() (
 \begin{DoxyParamCaption}
@@ -296,14 +318,22 @@ Multiplication to a value. Result is stored into applied matrix (left hand side 
 \item[{const {\bf Matrix3\+D}$<$ T $>$ \&}]{M}
 \end{DoxyParamCaption}
 ) const\hspace{0.3cm}{\ttfamily [inline]}}\label{class_matrix3_d_a6fc700597fd5050e0f76e48fbe4d0de0}
-Add each element of the matrix to corresponds element of matrix M. \hypertarget{class_matrix3_d_a68424be89288793730069618b4ea72f9}{}\index{Matrix3\+D@{Matrix3\+D}!operator+=@{operator+=}}
+Add each element of the matrix to corresponds element of matrix M. 
+
+References Matrix3\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix3_d_a68424be89288793730069618b4ea72f9}{}\index{Matrix3\+D@{Matrix3\+D}!operator+=@{operator+=}}
 \index{operator+=@{operator+=}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{operator+=(const Matrix3\+D$<$ T $>$ \&\+M)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix3\+D}$<$ T $>$ \& {\bf Matrix3\+D}$<$ T $>$\+::operator+= (
 \begin{DoxyParamCaption}
 \item[{const {\bf Matrix3\+D}$<$ T $>$ \&}]{M}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily [inline]}}\label{class_matrix3_d_a68424be89288793730069618b4ea72f9}
-Matrix summation, result is stored into applied matrix (left hand side matrix) \hypertarget{class_matrix3_d_aa5365a674fd6ff9a8a8826253d951cf6}{}\index{Matrix3\+D@{Matrix3\+D}!operator+=@{operator+=}}
+Matrix summation, result is stored into applied matrix (left hand side matrix) 
+
+References Matrix3\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix3_d_aa5365a674fd6ff9a8a8826253d951cf6}{}\index{Matrix3\+D@{Matrix3\+D}!operator+=@{operator+=}}
 \index{operator+=@{operator+=}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{operator+=(const T Val)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix3\+D}$<$ T $>$ \& {\bf Matrix3\+D}$<$ T $>$\+::operator+= (
 \begin{DoxyParamCaption}
@@ -321,14 +351,22 @@ Summation with a value. Result is stored into applied matrix (left hand side mat
 \item[{const {\bf Matrix3\+D}$<$ T $>$ \&}]{M}
 \end{DoxyParamCaption}
 ) const\hspace{0.3cm}{\ttfamily [inline]}}\label{class_matrix3_d_ae383b01a3aa6746ee6dc92f3f97fcb88}
-Substract each element of the matrix to corresponds element of matrix M. \hypertarget{class_matrix3_d_ad0c3f843c76a18f238dc010f17d2c347}{}\index{Matrix3\+D@{Matrix3\+D}!operator-\/=@{operator-\/=}}
+Substract each element of the matrix to corresponds element of matrix M. 
+
+References Matrix3\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix3_d_ad0c3f843c76a18f238dc010f17d2c347}{}\index{Matrix3\+D@{Matrix3\+D}!operator-\/=@{operator-\/=}}
 \index{operator-\/=@{operator-\/=}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{operator-\/=(const Matrix3\+D$<$ T $>$ \&\+M)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix3\+D}$<$ T $>$ \& {\bf Matrix3\+D}$<$ T $>$\+::operator-\/= (
 \begin{DoxyParamCaption}
 \item[{const {\bf Matrix3\+D}$<$ T $>$ \&}]{M}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily [inline]}}\label{class_matrix3_d_ad0c3f843c76a18f238dc010f17d2c347}
-Matrix subtraction, result is stored into applied matrix (left hand side matrix) \hypertarget{class_matrix3_d_a245098d64b34dd706368524af27ac332}{}\index{Matrix3\+D@{Matrix3\+D}!operator-\/=@{operator-\/=}}
+Matrix subtraction, result is stored into applied matrix (left hand side matrix) 
+
+References Matrix3\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix3_d_a245098d64b34dd706368524af27ac332}{}\index{Matrix3\+D@{Matrix3\+D}!operator-\/=@{operator-\/=}}
 \index{operator-\/=@{operator-\/=}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{operator-\/=(const T Val)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix3\+D}$<$ T $>$ \& {\bf Matrix3\+D}$<$ T $>$\+::operator-\/= (
 \begin{DoxyParamCaption}
@@ -367,6 +405,10 @@ Makes matrix equal to Matrix M.
 {\em \&\+M} & -\/ Matrix M. \\
 \hline
 \end{DoxyParams}
+
+
+References Allocate\+Memory(), Matrix3\+D$<$ T $>$\+::initialized, Matrix3\+D$<$ T $>$\+::matrix\+\_\+array, Matrix3\+D$<$ T $>$\+::size\+\_\+q1, Matrix3\+D$<$ T $>$\+::size\+\_\+q2, and Matrix3\+D$<$ T $>$\+::size\+\_\+q3.
+
 \hypertarget{class_matrix3_d_ac7a5828927adbd5ff83b07f08eb68026}{}\index{Matrix3\+D@{Matrix3\+D}!operator=@{operator=}}
 \index{operator=@{operator=}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{operator=(const T Val)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix3\+D}$<$ T $>$ \& {\bf Matrix3\+D}$<$ T $>$\+::operator= (
@@ -413,6 +455,10 @@ Overloaded read\+From\+File function
 {\em read\+\_\+column} & -\/ read up to this column from file \\
 \hline
 \end{DoxyParams}
+
+
+Referenced by Read\+Boundary\+Condition(), and Read\+Initial\+Data().
+
 \hypertarget{class_matrix3_d_a85ba47159cc0f55f16b6138beec6e05f}{}\index{Matrix3\+D@{Matrix3\+D}!read\+From\+File@{read\+From\+File}}
 \index{read\+From\+File@{read\+From\+File}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{read\+From\+File(string filename, const Matrix3\+D$<$ T $>$ grid\+\_\+q1, const Matrix3\+D$<$ T $>$ grid\+\_\+q2, const Matrix3\+D$<$ T $>$ grid\+\_\+q3)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ void {\bf Matrix3\+D}$<$ T $>$\+::read\+From\+File (
@@ -436,7 +482,25 @@ Overloaded read\+From\+File function
 {\em grids} & x,y,z -\/ checks grids data against the file data \\
 \hline
 \end{DoxyParams}
-\hypertarget{class_matrix3_d_a6ffde505058b7de9b3075aea28694a41}{}\index{Matrix3\+D@{Matrix3\+D}!times@{times}}
+\hypertarget{class_matrix3_d_a9534855c7f8005376991630e0a069194}{}\index{Matrix3\+D@{Matrix3\+D}!read\+From\+Matlab\+File@{read\+From\+Matlab\+File}}
+\index{read\+From\+Matlab\+File@{read\+From\+Matlab\+File}!Matrix3\+D@{Matrix3\+D}}
+\subsubsection[{read\+From\+Matlab\+File(string filename, int column=1)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ void {\bf Matrix3\+D}$<$ T $>$\+::read\+From\+Matlab\+File (
+\begin{DoxyParamCaption}
+\item[{string}]{file, }
+\item[{int}]{column\+Number = {\ttfamily 1}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\label{class_matrix3_d_a9534855c7f8005376991630e0a069194}
+Function for reading from matlab file in 3-\/dimensions Will check the variables, order them in (P, R/\+L, V, K, Val) format and then set matrix\+\_\+array to be the variable with the corresponding column number This is the same as the \hyperlink{class_matrix3_d_a8ec06237d02ba61aed804cebd03ab59b}{read\+From\+File()} function although only compatible with .mat files instead of .plt or other text files \hypertarget{class_matrix3_d_a42c7e0031c91326c3637d6b0f6a3345d}{}\index{Matrix3\+D@{Matrix3\+D}!read\+From\+Matlab\+File@{read\+From\+Matlab\+File}}
+\index{read\+From\+Matlab\+File@{read\+From\+Matlab\+File}!Matrix3\+D@{Matrix3\+D}}
+\subsubsection[{read\+From\+Matlab\+File(string filename, const Matrix3\+D$<$ T $>$ grid\+\_\+q1, const Matrix3\+D$<$ T $>$ grid\+\_\+q2, const Matrix3\+D$<$ T $>$ grid\+\_\+q3)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ void {\bf Matrix3\+D}$<$ T $>$\+::read\+From\+Matlab\+File (
+\begin{DoxyParamCaption}
+\item[{string}]{file, }
+\item[{const {\bf Matrix3\+D}$<$ T $>$}]{grid\+\_\+x, }
+\item[{const {\bf Matrix3\+D}$<$ T $>$}]{grid\+\_\+y, }
+\item[{const {\bf Matrix3\+D}$<$ T $>$}]{grid\+\_\+z}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\label{class_matrix3_d_a42c7e0031c91326c3637d6b0f6a3345d}
+Function for reading from matlab file in 3-\/dimensions Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard The variables will be checked against the input grid parameters in order to make sure the right variables/values are being loaded This is the same as the \hyperlink{class_matrix3_d_a8ec06237d02ba61aed804cebd03ab59b}{read\+From\+File()} function although only compatible with .mat files instead of .plt or other text files \hypertarget{class_matrix3_d_a6ffde505058b7de9b3075aea28694a41}{}\index{Matrix3\+D@{Matrix3\+D}!times@{times}}
 \index{times@{times}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{times(const Matrix3\+D$<$ T $>$ \&\+M) const }]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix3\+D}$<$ T $>$ {\bf Matrix3\+D}$<$ T $>$\+::times (
 \begin{DoxyParamCaption}
@@ -447,7 +511,11 @@ Overloaded read\+From\+File function
 
 Arraywise multiplication (A.$\ast$\+B), stores result in a new matrix. 
 
-Multiply each element of the matrix to corresponds element of matrix M. \hypertarget{class_matrix3_d_a3dfa227d8f3a785f41774aa3fa93f06c}{}\index{Matrix3\+D@{Matrix3\+D}!times\+\_\+equal@{times\+\_\+equal}}
+Multiply each element of the matrix to corresponds element of matrix M. 
+
+References Matrix3\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix3_d_a3dfa227d8f3a785f41774aa3fa93f06c}{}\index{Matrix3\+D@{Matrix3\+D}!times\+\_\+equal@{times\+\_\+equal}}
 \index{times\+\_\+equal@{times\+\_\+equal}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{times\+\_\+equal(const Matrix3\+D$<$ T $>$ \&\+M)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix3\+D}$<$ T $>$ \& {\bf Matrix3\+D}$<$ T $>$\+::times\+\_\+equal (
 \begin{DoxyParamCaption}
@@ -458,7 +526,11 @@ Multiply each element of the matrix to corresponds element of matrix M. \hyperta
 
 Arraywise multiplication (A.$\ast$\+B), stores result in the matrix it\textquotesingle{}s applied to. 
 
-Multiplication between each element of the matrices (not a matrix multiplication). Result is stored into applied matrix (left hand side matrix) \hypertarget{class_matrix3_d_a945ea3926bf746e3fd7aa076fd59c9bd}{}\index{Matrix3\+D@{Matrix3\+D}!write\+To\+File@{write\+To\+File}}
+Multiplication between each element of the matrices (not a matrix multiplication). Result is stored into applied matrix (left hand side matrix) 
+
+References Matrix3\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix3_d_a945ea3926bf746e3fd7aa076fd59c9bd}{}\index{Matrix3\+D@{Matrix3\+D}!write\+To\+File@{write\+To\+File}}
 \index{write\+To\+File@{write\+To\+File}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{write\+To\+File(string filename, string info="""")}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ void {\bf Matrix3\+D}$<$ T $>$\+::write\+To\+File (
 \begin{DoxyParamCaption}
@@ -484,7 +556,11 @@ Write matrix to file. File has two header lines. \hypertarget{class_matrix3_d_a3
 
 Save matrix to a file, including grid. 
 
-Write matrix to file, using 3 other matrixes as a grid (simply -\/ write all 4 matrixes to the file). File has two header lines. \hypertarget{class_matrix3_d_a927f87171f4dd79d37899824e88e254c}{}\index{Matrix3\+D@{Matrix3\+D}!x\+Slice@{x\+Slice}}
+Write matrix to file, using 3 other matrixes as a grid (simply -\/ write all 4 matrixes to the file). File has two header lines. 
+
+References Matrix3\+D$<$ T $>$\+::name.
+
+\hypertarget{class_matrix3_d_a927f87171f4dd79d37899824e88e254c}{}\index{Matrix3\+D@{Matrix3\+D}!x\+Slice@{x\+Slice}}
 \index{x\+Slice@{x\+Slice}!Matrix3\+D@{Matrix3\+D}}
 \subsubsection[{x\+Slice(int p\+\_\+q1) const }]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix2\+D}$<$ T $>$ {\bf Matrix3\+D}$<$ T $>$\+::x\+Slice (
 \begin{DoxyParamCaption}

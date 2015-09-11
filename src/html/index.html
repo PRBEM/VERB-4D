@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -44,6 +52,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li class="current"><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
@@ -66,6 +75,20 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     </ul>
   </div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('index.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -109,18 +132,23 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <p>Diffusion is solved using <a class="el" href="_diffusion__1_d_8cpp.html#ae15e469cb777a21a2dbd751f1c072618">Diffusion_1D()</a> and <a class="el" href="_diffusion__2_d_8cpp.html#ad5785270d5a28bd7a7b8ca31f206c8ee">Diffusion_2D()</a> for the standard cases.</p>
 <p>Three other methods are also used for finding diffusion in 2D: these can be found in <a class="el" href="_diffusion___a_d_i1_8h.html" title="Calculating the diffusion in 2D using implicit implementation of diagonal terms, explicit implementat...">Diffusion_ADI1.h</a>, <a class="el" href="_diffusion___a_d_i2_8h.html" title="Calculating the diffusion in 2D using multidimensional diffusion process - Xiao, F., Z. Su, H. Zheng, and S. Wang (2009) ">Diffusion_ADI2.h</a>, and <a class="el" href="_diffusion___a_d_i3_8h.html" title="Calculating the diffusion in 2D using method from Jihye Shin and Sungsoo Kim (2008) ...">Diffusion_ADI3.h</a></p>
 <p>The parameters.ini file created in matlab will specify the inversion method. If "Lapack" is specified then <a class="el" href="_diffusion__2_d_8cpp.html#ad5785270d5a28bd7a7b8ca31f206c8ee">Diffusion_2D()</a> will be used. Otherwise 1 of the 3 ADI methods will be used to inversion. All 3 ADI methods can use multiple threads while Lapack can only use 1. The current chosen method of inversion is Diffusion_ADI3() if "ADI" is specified. It can be changed in <a class="el" href="_v_e_r_b4_d___solver_8cpp.html" title="Holds main function that solves all of the matrices using the help of the other classes/functions. ">VERB4D_SOLVER.cpp</a></p>
-<p>The main solver function can be found in <a class="el" href="_v_e_r_b4_d___solver_8cpp.html" title="Holds main function that solves all of the matrices using the help of the other classes/functions. ">VERB4D_Solver.cpp</a></p>
+<p>From current testing all of the ADI methods produce bad results - namely negative PSD values. All examples should thus be run with Lapack until the ADI methods are fixed. Unfortunately Lapack is not compatable with multiple threads so running the examples with Lapack will be much slower than ADI and not scalable. Newer versions of Lapack may allow multithreading however.</p>
+<p>The main solver function can be found in <a class="el" href="_v_e_r_b4_d___solver_8cpp.html" title="Holds main function that solves all of the matrices using the help of the other classes/functions. ">VERB4D_Solver.cpp</a> It consists of a series of PSD calculations done for every time step that is specified.</p>
 <p>This will be used in order to take the input data from matlab store them into <a class="el" href="class_matrix1_d.html" title="A matrix of 1 dimensions that is immutable. ">Matrix1D</a>, <a class="el" href="class_matrix2_d.html" title="A matrix of 2 dimensions that is immutable. ">Matrix2D</a>, <a class="el" href="class_matrix3_d.html" title="A matrix of 3 dimensions that is immutable. ">Matrix3D</a>, and <a class="el" href="class_matrix4_d.html" title="A matrix of 4 dimensions that is immutable. ">Matrix4D</a> using <a class="el" href="_read_initial_data_8h.html" title="Reads in all the data files created in Matlab in order to initialize the parameters. ">ReadInitialData.h</a></p>
 <p>The matrix classes listed above are used to store the data in 1,2,3 or 4 dimension. One example is a 4D matrix containing P,R,V,K</p>
 <p>There is also the standardized <a class="el" href="class_matrix_n_d.html" title="A normal matrix that can be defined to have 1, 2, 3, or 4 dimensions which is templated for Updatable...">MatrixND</a> for any size matrices which is used in conjunction with <a class="el" href="class_updatable_matrix.html" title="A matrix that can be created in 1, 2, 3, or 4 dimensions with the ability to be updated. ">UpdatableMatrix</a> which can be updated with new data.</p>
 <p>Most of the computation such as numerically approximating derivatives are done with <a class="el" href="_matrix_solver_8h.html" title="Solves model matrices for diffusion calculations and has functionality for derivative approximations ...">MatrixSolver.h</a> using <a class="el" href="class_calculation_matrix.html" title="A matrix used primarily for diagonalized calculations. ">CalculationMatrix</a>. These calculation matrices are made up of <a class="el" href="class_diag_matrix.html" title="Diagonals of matrix stored as map (diagonal number, 1d diagonal array) ">DiagMatrix</a> which is a mapping of an int (which diagonal number) to a 1d matrix of values (for that diagonal).</p>
-<p>There is also a <a class="el" href="class_parameters.html" title="Holds the parameters along with their corresponding file and arguments. ">Parameters</a> class which holds paramters and their value as defined in the file they came from </p>
+<p>There is also a <a class="el" href="class_parameters.html" title="Holds the parameters along with their corresponding file and arguments. ">Parameters</a> class which holds paramters and their value as defined in the file they came from. These parameters get the values specified in the parameters.ini text file and set variables to determine inversion method, number of threads, using .mat files, etc.</p>
+<p>This code was built with MATLAB capabilities including reading and writing .mat files. In order to switch all files to .mat for increased speed and percision change the use_matlab variable in the MATLAB Conv_Dif.m file for whichever example you are running to true. If the machine that this code is being run on does not have matlab installed change the MATLAB_CAPABLE variable in <a class="el" href="_matrix_8h.html" title="Matrix 1D, 2D, 3D and 4D and operations with them. ">Matrix.h</a> to false </p>
 </div></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.10
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
+  </ul>
+</div>
 </body>
 </html>

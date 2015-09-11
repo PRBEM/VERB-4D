@@ -51,7 +51,13 @@
 * All 3 ADI methods can use multiple threads while Lapack can only use 1.
 * The current chosen method of inversion is Diffusion_ADI3() if "ADI" is specified. It can be changed in VERB4D_SOLVER.cpp 
 * 
+* From current testing all of the ADI methods produce bad results - namely negative PSD values.
+* All examples should thus be run with Lapack until the ADI methods are fixed.
+* Unfortunately Lapack is not compatable with multiple threads so running the examples with Lapack will be much slower than ADI and not scalable. 
+* Newer versions of Lapack may allow multithreading however.
+*
 * The main solver function can be found in VERB4D_Solver.cpp
+* It consists of a series of PSD calculations done for every time step that is specified.
 *
 * This will be used in order to take the input data from matlab store them into Matrix1D, Matrix2D, Matrix3D, and Matrix4D using ReadInitialData.h
 * 
@@ -62,11 +68,12 @@
 * Most of the computation such as numerically approximating derivatives are done with MatrixSolver.h using CalculationMatrix.
 * These calculation matrices are made up of DiagMatrix which is a mapping of an int (which diagonal number) to a 1d matrix of values (for that diagonal).
 *
-* There is also a Parameters class which holds paramters and their value as defined in the file they came from
+* There is also a Parameters class which holds paramters and their value as defined in the file they came from. 
+* These parameters get the values specified in the parameters.ini text file and set variables to determine inversion method, number of threads, using .mat files, etc.
 *
 * This code was built with MATLAB capabilities including reading and writing .mat files.
-* In order to switch all files to .mat for increased speed and percision change the use_matlab variable in the MATLAB Conv_Dif.m file to true.
-* If the machine this code is being run on does not have matlab installed change the MATLAB_CAPABLE variable in Matrix.h to false
+* In order to switch all files to .mat for increased speed and percision change the use_matlab variable in the MATLAB Conv_Dif.m file for whichever example you are running to true.
+* If the machine that this code is being run on does not have matlab installed change the MATLAB_CAPABLE variable in Matrix.h to false
 *
 */
 
@@ -100,7 +107,9 @@
  * Schulz and Lanzerotti, 1974
  * Stroustrup C++
  *
- * Continue reading ONLY after familiarizing yourself with these books.
+ * The main function in the standard case calculates PSD by doing radial and then local diffusion at every timestep.
+ * The code is set up to have the PSD output at a time step be the initial PSD for the next time step.
+ * The PSD output files are usually analyzed/plotted using Matlab function plot_results which is found in every VERB4D example
  */
 
 
@@ -142,12 +151,6 @@ using namespace std;
 #include "Interpolation.h"
 
 
-// ADDED
-// included to be able to read/write .mat files
-#if (MATLAB_CAPABLE)
-#include <mat.h>
-#endif
-
 #include <omp.h>
 
 using namespace std;
@@ -159,10 +162,6 @@ using namespace std;
 #define strcasecmp _stricmp
 #endif
 
-
-// #ifndef MATLAB_CAPABLE
-// #define MATLAB_CAPABLE true
-// #endif
 
 
 // Everything below these values will be considered to be zero for computation purpose and will not be calculated

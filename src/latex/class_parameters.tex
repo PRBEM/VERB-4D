@@ -56,6 +56,10 @@ Holds the parameters along with their corresponding file and arguments.
 )}\label{class_parameters_acf8511357f87cce3c5a31cdd4c971b19}
 Constructor for \hyperlink{class_parameters}{Parameters}\+: opens file and saves file to \hyperlink{class_parameters}{Parameters} field \textquotesingle{}parameters\+File\textquotesingle{}, stores the char$\ast$ arguments into a vector \textquotesingle{}argv\textquotesingle{} 
 
+References parameters\+File.
+
+
+
 \subsection{Member Function Documentation}
 \hypertarget{class_parameters_a1f2204e876202ac49694dde3d4951d0a}{}\index{Parameters@{Parameters}!find\+Parameter@{find\+Parameter}}
 \index{find\+Parameter@{find\+Parameter}!Parameters@{Parameters}}
@@ -74,6 +78,14 @@ Finds the parameters with parameter\+Name in parameters\+File and saves it to ar
 {\em parameter\+Name} & -\/ name of parameter \\
 \hline
 \end{DoxyParams}
+
+
+References argv, and parameters\+File.
+
+
+
+Referenced by Read\+Initial\+Data().
+
 \hypertarget{class_parameters_a8f44623c70c710b3f79fc9c12fadc6a3}{}\index{Parameters@{Parameters}!get\+Parameter@{get\+Parameter}}
 \index{get\+Parameter@{get\+Parameter}!Parameters@{Parameters}}
 \subsubsection[{get\+Parameter(string parameter\+Name, T \&variable, bool must\+Be\+Found=false)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$typename T $>$ template void Parameters\+::get\+Parameter (
@@ -96,6 +108,14 @@ Gets the value for a parameters with parameter\+Name and saves it into variable
 {\em must\+Be\+Found} & -\/ if true and parameter not found, error is logged and function exited, default is false \\
 \hline
 \end{DoxyParams}
+
+
+References argv, and parameters\+File.
+
+
+
+Referenced by Read\+Initial\+Data().
+
 
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}

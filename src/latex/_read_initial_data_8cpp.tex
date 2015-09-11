@@ -81,6 +81,14 @@ Allocates the memory for all the matrices using \hyperlink{class_matrix4_d_a6c54
 {\em Sources,Losses} & -\/ matrices for calculating Sources and Losses(loss cone) \\
 \hline
 \end{DoxyParams}
+
+
+References Matrix3\+D$<$ T $>$\+::\+Allocate\+Memory(), and Matrix4\+D$<$ T $>$\+::\+Allocate\+Memory().
+
+
+
+Referenced by Matrix1\+D$<$ T $>$\+::\+Matrix1\+D(), Matrix2\+D$<$ T $>$\+::\+Matrix2\+D(), Matrix3\+D$<$ T $>$\+::\+Matrix3\+D(), Matrix4\+D$<$ T $>$\+::\+Matrix4\+D(), Matrix1\+D$<$ T $>$\+::operator=(), Matrix2\+D$<$ T $>$\+::operator=(), Matrix3\+D$<$ T $>$\+::operator=(), Matrix4\+D$<$ T $>$\+::operator=(), and Read\+Initial\+Data().
+
 \hypertarget{_read_initial_data_8cpp_a95d3543118e91d4ac0932b573ae255fe}{}\index{Read\+Initial\+Data.\+cpp@{Read\+Initial\+Data.\+cpp}!Read\+Initial\+Data@{Read\+Initial\+Data}}
 \index{Read\+Initial\+Data@{Read\+Initial\+Data}!Read\+Initial\+Data.\+cpp@{Read\+Initial\+Data.\+cpp}}
 \subsubsection[{Read\+Initial\+Data(string \&\+Input\+Folder, string \&\+Output\+Folder, int argc, char $\ast$argv[], double \&time\+\_\+total, double \&time\+\_\+step, double \&time\+\_\+output, double \&time\+\_\+first, long int \&it\+\_\+first, int \&max\+\_\+threads, string \&inversion\+\_\+method, string \&use\+\_\+matlab, string \&include\+\_\+boundary, Matrix4\+D$<$ double $>$ \&\+P\+S\+D, Matrix4\+D$<$ double $>$ \&\+P, Matrix4\+D$<$ double $>$ \&\+R, Matrix4\+D$<$ double $>$ \&\+V, Matrix4\+D$<$ double $>$ \&\+K, Updatable\+Matrix$<$ Matrix4\+D$<$ double $>$ $>$ \&\+L, int \&\+P\+\_\+size, int \&\+R\+\_\+size, int \&\+V\+\_\+size, int \&\+K\+\_\+size, int \&\+L\+\_\+size, Matrix3\+D$<$ double $>$ \&\+P\+S\+D\+\_\+l\+\_\+\+P, Matrix3\+D$<$ double $>$ \&\+P\+S\+D\+\_\+u\+\_\+\+P, Updatable\+Matrix$<$ Matrix3\+D$<$ double $>$ $>$ \&\+P\+S\+D\+\_\+l\+\_\+\+R, Updatable\+Matrix$<$ Matrix3\+D$<$ double $>$ $>$ \&\+P\+S\+D\+\_\+u\+\_\+\+R, Updatable\+Matrix$<$ Matrix3\+D$<$ double $>$ $>$ \&\+P\+S\+D\+\_\+l\+\_\+\+V, Updatable\+Matrix$<$ Matrix3\+D$<$ double $>$ $>$ \&\+P\+S\+D\+\_\+u\+\_\+\+V, Updatable\+Matrix$<$ Matrix3\+D$<$ double $>$ $>$ \&\+P\+S\+D\+\_\+l\+\_\+\+K, Updatable\+Matrix$<$ Matrix3\+D$<$ double $>$ $>$ \&\+P\+S\+D\+\_\+u\+\_\+\+K, Updatable\+Matrix$<$ Matrix3\+D$<$ double $>$ $>$ \&\+P\+S\+D\+\_\+l\+\_\+\+L, Updatable\+Matrix$<$ Matrix3\+D$<$ double $>$ $>$ \&\+P\+S\+D\+\_\+u\+\_\+\+L, string \&\+Pl\+\_\+\+B\+C\+\_\+type, string \&\+Pu\+\_\+\+B\+C\+\_\+type, string \&\+Rl\+\_\+\+B\+C\+\_\+type, string \&\+Ru\+\_\+\+B\+C\+\_\+type, string \&\+Vl\+\_\+\+B\+C\+\_\+type, string \&\+Vu\+\_\+\+B\+C\+\_\+type, string \&\+Kl\+\_\+\+B\+C\+\_\+type, string \&\+Ku\+\_\+\+B\+C\+\_\+type, string \&\+Ll\+\_\+\+B\+C\+\_\+type, string \&\+Lu\+\_\+\+B\+C\+\_\+type, Updatable\+List\+Matrix$<$ Matrix4\+D$<$ double $>$ $>$ \&\+D\+L\+L, Updatable\+List\+Matrix$<$ Matrix4\+D$<$ double $>$ $>$ \&\+D\+V\+V, Updatable\+List\+Matrix$<$ Matrix4\+D$<$ double $>$ $>$ \&\+D\+K\+K, Updatable\+List\+Matrix$<$ Matrix4\+D$<$ double $>$ $>$ \&\+D\+V\+K, Updatable\+Matrix$<$ Matrix4\+D$<$ double $>$ $>$ \&\+V\+P, Updatable\+Matrix$<$ Matrix4\+D$<$ double $>$ $>$ \&\+V\+L, Updatable\+Matrix$<$ Matrix4\+D$<$ double $>$ $>$ \&\+G\+\_\+local, Updatable\+Matrix$<$ Matrix4\+D$<$ double $>$ $>$ \&\+G\+\_\+radial, Updatable\+List\+Matrix$<$ Matrix4\+D$<$ double $>$ $>$ \&\+Sources, Updatable\+List\+Matrix$<$ Matrix4\+D$<$ double $>$ $>$ \&\+Losses)}]{\setlength{\rightskip}{0pt plus 5cm}bool Read\+Initial\+Data (
@@ -186,3 +194,7 @@ Using \hyperlink{class_updatable_matrix_a624e5f24c93915ccac0dd189b0646e7a}{Updat
 {\em Sources,Losses} & -\/ matrices for calculating Sources and Losses(loss cone) \\
 \hline
 \end{DoxyParams}
+
+
+References Allocate\+Memory(), Parameters\+::find\+Parameter(), Parameters\+::get\+Parameter(), Matrix3\+D$<$ T $>$\+::read\+From\+File(), Matrix4\+D$<$ T $>$\+::read\+From\+File(), Matrix4\+D$<$ T $>$\+::read\+From\+Matlab\+File(), Matrix4\+D$<$ T $>$\+::size\+\_\+x, Matrix4\+D$<$ T $>$\+::size\+\_\+y, Matrix4\+D$<$ T $>$\+::size\+\_\+z, Matrix4\+D$<$ T $>$\+::x\+Slice(), Matrix4\+D$<$ T $>$\+::y\+Slice(), and Matrix4\+D$<$ T $>$\+::z\+Slice().
+

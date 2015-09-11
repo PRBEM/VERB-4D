@@ -8,6 +8,14 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript">
+  $(document).ready(initResizable);
+  $(window).load(resizeHeight);
+</script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -44,6 +52,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
@@ -73,6 +82,21 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+$(document).ready(function(){initNavTree('class_matrix1_d.html','');});
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -87,7 +111,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-</div><!-- top -->
 <div class="header">
   <div class="headertitle">
 <div class="title">Matrix1D&lt; T &gt; Member List</div>  </div>
@@ -129,8 +152,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <tr class="even"><td class="entry"><a class="el" href="class_matrix1_d.html#adb3fb9a6de487ad9ede64c57c9612d5e">operator[]</a>(int i) const </td><td class="entry"><a class="el" href="class_matrix1_d.html">Matrix1D&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
   <tr><td class="entry"><a class="el" href="class_matrix1_d.html#ab9b4a17c073f8794ae7e459816c1a935">readFromFile</a>(string filename)</td><td class="entry"><a class="el" href="class_matrix1_d.html">Matrix1D&lt; T &gt;</a></td><td class="entry"><span class="mlabel">virtual</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="class_matrix1_d.html#a6a89f2308563474cdbe95d67016f7483">readFromFile</a>(string filename, const Matrix1D&lt; T &gt; grid_q1)</td><td class="entry"><a class="el" href="class_matrix1_d.html">Matrix1D&lt; T &gt;</a></td><td class="entry"><span class="mlabel">virtual</span></td></tr>
-  <tr bgcolor="#f0f0f0"><td class="entry"><b>readFromMatlabFile</b>(string filename, int columnNumber=1) (defined in <a class="el" href="class_matrix1_d.html">Matrix1D&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="class_matrix1_d.html">Matrix1D&lt; T &gt;</a></td><td class="entry"><span class="mlabel">virtual</span></td></tr>
-  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>readFromMatlabFile</b>(string filename, const Matrix1D&lt; T &gt; grid_q1) (defined in <a class="el" href="class_matrix1_d.html">Matrix1D&lt; T &gt;</a>)</td><td class="entry"><a class="el" href="class_matrix1_d.html">Matrix1D&lt; T &gt;</a></td><td class="entry"><span class="mlabel">virtual</span></td></tr>
+  <tr><td class="entry"><a class="el" href="class_matrix1_d.html#ac26d2d71072abba536990c9eeda1aed2">readFromMatlabFile</a>(string filename, int columnNumber=1)</td><td class="entry"><a class="el" href="class_matrix1_d.html">Matrix1D&lt; T &gt;</a></td><td class="entry"><span class="mlabel">virtual</span></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="class_matrix1_d.html#a306e22d26353d241abe716d4fee9cd2f">readFromMatlabFile</a>(string filename, const Matrix1D&lt; T &gt; grid_q1)</td><td class="entry"><a class="el" href="class_matrix1_d.html">Matrix1D&lt; T &gt;</a></td><td class="entry"><span class="mlabel">virtual</span></td></tr>
   <tr><td class="entry"><a class="el" href="class_matrix1_d.html#a570f4a6b7df1811f2c3029ce026a6223">size_q1</a></td><td class="entry"><a class="el" href="class_matrix1_d.html">Matrix1D&lt; T &gt;</a></td><td class="entry"></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="class_matrix1_d.html#a9d3021574a07b36aac54ce52c88847bf">times</a>(const Matrix1D&lt; T &gt; &amp;M) const </td><td class="entry"><a class="el" href="class_matrix1_d.html">Matrix1D&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
   <tr><td class="entry"><a class="el" href="class_matrix1_d.html#a5027f2a1352c1f08ad848aca9e6db27a">Value</a>(int q1)</td><td class="entry"><a class="el" href="class_matrix1_d.html">Matrix1D&lt; T &gt;</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
@@ -138,11 +161,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <tr><td class="entry"><a class="el" href="class_matrix1_d.html#a48a87ff7df5ad9c3a643ef67299ff331">writeToFile</a>(string filename, Matrix1D&lt; T &gt; &amp;grid_q1)</td><td class="entry"><a class="el" href="class_matrix1_d.html">Matrix1D&lt; T &gt;</a></td><td class="entry"><span class="mlabel">virtual</span></td></tr>
   <tr class="even"><td class="entry"><a class="el" href="class_matrix1_d.html#a7b9b926c9a367272c2815db41489a938">~Matrix1D</a>()</td><td class="entry"><a class="el" href="class_matrix1_d.html">Matrix1D&lt; T &gt;</a></td><td class="entry"></td></tr>
 </table></div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by &#160;<a href="http://www.doxygen.org/index.html">
-<img class="footer" src="doxygen.png" alt="doxygen"/>
-</a> 1.8.10
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.10 </li>
+  </ul>
+</div>
 </body>
 </html>

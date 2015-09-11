@@ -82,18 +82,13 @@ virtual void \hyperlink{class_matrix4_d_af5fcef655a9a8ca3efb0f9e653080abb}{read\
 \begin{DoxyCompactList}\small\item\em Load matrix from a file. \end{DoxyCompactList}\item 
 virtual void \hyperlink{class_matrix4_d_aa8be7ad88a70143d037472811bda825c}{read\+From\+File} (string filename, const \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ grid\+\_\+w, const \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ grid\+\_\+x, const \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ grid\+\_\+y, const \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ grid\+\_\+z)
 \begin{DoxyCompactList}\small\item\em Load matrix to a file. \end{DoxyCompactList}\item 
-\hypertarget{class_matrix4_d_a4b423b2df6492a9544e7a861cd6a9412}{}virtual mx\+Array $\ast$ {\bfseries create\+Struct\+Matrix} (string filename, string info=\char`\"{}\char`\"{})\label{class_matrix4_d_a4b423b2df6492a9544e7a861cd6a9412}
-
-\item 
 virtual void \hyperlink{class_matrix4_d_aa4a2e0586327e772f83b6e377b9f31f4}{write\+To\+Matlab\+File} (string filename, string info=\char`\"{}\char`\"{})
 \begin{DoxyCompactList}\small\item\em Save matrix to a file. \end{DoxyCompactList}\item 
 virtual void \hyperlink{class_matrix4_d_abb235654193dbc4e9d0f12e360e65f9d}{write\+To\+Matlab\+File} (string filename, \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ \&grid\+\_\+w, \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ \&grid\+\_\+x, \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ \&grid\+\_\+y, \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ \&grid\+\_\+z)
 \item 
-\hypertarget{class_matrix4_d_af931115c686508ca52ba31085aac6cda}{}virtual void {\bfseries read\+From\+Matlab\+File} (string file, int column=1)\label{class_matrix4_d_af931115c686508ca52ba31085aac6cda}
-
+virtual void \hyperlink{class_matrix4_d_af931115c686508ca52ba31085aac6cda}{read\+From\+Matlab\+File} (string file, int column=1)
 \item 
-\hypertarget{class_matrix4_d_ae53e29f2daa8b6c2e8f0e9f423e3ec4d}{}virtual void {\bfseries read\+From\+Matlab\+File} (string filename, const \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ grid\+\_\+w, const \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ grid\+\_\+x, const \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ grid\+\_\+y, const \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ grid\+\_\+z)\label{class_matrix4_d_ae53e29f2daa8b6c2e8f0e9f423e3ec4d}
-
+virtual void \hyperlink{class_matrix4_d_ae53e29f2daa8b6c2e8f0e9f423e3ec4d}{read\+From\+Matlab\+File} (string filename, const \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ grid\+\_\+w, const \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ grid\+\_\+x, const \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ grid\+\_\+y, const \hyperlink{class_matrix4_d}{Matrix4\+D}$<$ T $>$ grid\+\_\+z)
 \item 
 int \hyperlink{class_matrix4_d_a6e43a921bf8b175fa8c5dac4f7cde2b0}{index1d} (int w, int x, int y, int z)
 \begin{DoxyCompactList}\small\item\em Returns index of the element (x,y,z) in 1d array. \end{DoxyCompactList}\item 
@@ -202,7 +197,11 @@ Constructor. Create matrix equal to Matrix M.
 \item[{int}]{z\+\_\+size}
 \end{DoxyParamCaption}
 )}\label{class_matrix4_d_a2ea183891bdf8361b090460dd67726fd}
-Constructor. Allocate memory. \hypertarget{class_matrix4_d_a2062fdb472d0426e49c62169c93e3b26}{}\index{Matrix4\+D@{Matrix4\+D}!````~Matrix4\+D@{$\sim$\+Matrix4\+D}}
+Constructor. Allocate memory. 
+
+References Allocate\+Memory().
+
+\hypertarget{class_matrix4_d_a2062fdb472d0426e49c62169c93e3b26}{}\index{Matrix4\+D@{Matrix4\+D}!````~Matrix4\+D@{$\sim$\+Matrix4\+D}}
 \index{````~Matrix4\+D@{$\sim$\+Matrix4\+D}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{$\sim$\+Matrix4\+D()}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix4\+D}$<$ T $>$\+::$\sim${\bf Matrix4\+D} (
 \begin{DoxyParamCaption}
@@ -229,7 +228,11 @@ Return absolute value of the 4d matrix. Changes every element to a positive valu
 \item[{int}]{z\+\_\+size}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily [virtual]}}\label{class_matrix4_d_a6c541778e431631eaeb78bfa8e44af70}
-Allocating memory and filling it with zero-\/values. \hypertarget{class_matrix4_d_a8ae451e518544537360f67d6c07a37a6}{}\index{Matrix4\+D@{Matrix4\+D}!divide@{divide}}
+Allocating memory and filling it with zero-\/values. 
+
+Referenced by Allocate\+Memory().
+
+\hypertarget{class_matrix4_d_a8ae451e518544537360f67d6c07a37a6}{}\index{Matrix4\+D@{Matrix4\+D}!divide@{divide}}
 \index{divide@{divide}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{divide(const Matrix4\+D$<$ T $>$ \&\+M) const }]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix4\+D}$<$ T $>$ {\bf Matrix4\+D}$<$ T $>$\+::divide (
 \begin{DoxyParamCaption}
@@ -240,7 +243,11 @@ Allocating memory and filling it with zero-\/values. \hypertarget{class_matrix4_
 
 Arraywise division (A./\+B), stores result in a new matrix. 
 
-Divide each element of the current matrix by the corresponding element of matrix M and return new matrix \hypertarget{class_matrix4_d_aedfcd6e4f4672f9b4a313f0b5c2d8b27}{}\index{Matrix4\+D@{Matrix4\+D}!divide\+\_\+equal@{divide\+\_\+equal}}
+Divide each element of the current matrix by the corresponding element of matrix M and return new matrix 
+
+References Matrix4\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix4_d_aedfcd6e4f4672f9b4a313f0b5c2d8b27}{}\index{Matrix4\+D@{Matrix4\+D}!divide\+\_\+equal@{divide\+\_\+equal}}
 \index{divide\+\_\+equal@{divide\+\_\+equal}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{divide\+\_\+equal(const Matrix4\+D$<$ T $>$ \&\+M)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix4\+D}$<$ T $>$ \& {\bf Matrix4\+D}$<$ T $>$\+::divide\+\_\+equal (
 \begin{DoxyParamCaption}
@@ -251,7 +258,11 @@ Divide each element of the current matrix by the corresponding element of matrix
 
 Arraywise division (A./\+B), stores result in the matrix it\textquotesingle{}s applied to. 
 
-Divide each element of the current matrix by the corresponding element of matrix M and return this matrix \hypertarget{class_matrix4_d_a6e43a921bf8b175fa8c5dac4f7cde2b0}{}\index{Matrix4\+D@{Matrix4\+D}!index1d@{index1d}}
+Divide each element of the current matrix by the corresponding element of matrix M and return this matrix 
+
+References Matrix4\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix4_d_a6e43a921bf8b175fa8c5dac4f7cde2b0}{}\index{Matrix4\+D@{Matrix4\+D}!index1d@{index1d}}
 \index{index1d@{index1d}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{index1d(int w, int x, int y, int z)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ int {\bf Matrix4\+D}$<$ T $>$\+::index1d (
 \begin{DoxyParamCaption}
@@ -277,7 +288,11 @@ Returns corresponding index of 4d matrix if represented as a 1d array
 {}
 \end{DoxyParamCaption}
 )}\label{class_matrix4_d_a9be35a7ac5ae55f677b36cfb7780ba11}
-Return maximum value of the 4d matrix. Default value set to 0 \hypertarget{class_matrix4_d_a2d79b11ab54ea0139e8c906b684c2e92}{}\index{Matrix4\+D@{Matrix4\+D}!maxabs@{maxabs}}
+Return maximum value of the 4d matrix. Default value set to 0 
+
+Referenced by Matrix\+Limit().
+
+\hypertarget{class_matrix4_d_a2d79b11ab54ea0139e8c906b684c2e92}{}\index{Matrix4\+D@{Matrix4\+D}!maxabs@{maxabs}}
 \index{maxabs@{maxabs}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{maxabs()}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ T {\bf Matrix4\+D}$<$ T $>$\+::maxabs (
 \begin{DoxyParamCaption}
@@ -291,7 +306,11 @@ Return absolute maximum value of the 4d matrix. Default value set to 0 \hypertar
 {}
 \end{DoxyParamCaption}
 )}\label{class_matrix4_d_a01fb2d7332fb36eee1d62a83b006363a}
-Return minimum value of the 4d matrix. Default value set to 1e99 \hypertarget{class_matrix4_d_a2b4696749011a90e6b8e3c22cc564556}{}\index{Matrix4\+D@{Matrix4\+D}!operator()@{operator()}}
+Return minimum value of the 4d matrix. Default value set to 1e99 
+
+Referenced by Matrix\+Limit().
+
+\hypertarget{class_matrix4_d_a2b4696749011a90e6b8e3c22cc564556}{}\index{Matrix4\+D@{Matrix4\+D}!operator()@{operator()}}
 \index{operator()@{operator()}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{operator()(int w, int x, int y, int z)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ T \& {\bf Matrix4\+D}$<$ T $>$\+::operator() (
 \begin{DoxyParamCaption}
@@ -326,14 +345,22 @@ Multiply each element of the current matrix by Val and return this matrix \hyper
 \item[{const {\bf Matrix4\+D}$<$ T $>$ \&}]{M}
 \end{DoxyParamCaption}
 ) const\hspace{0.3cm}{\ttfamily [inline]}}\label{class_matrix4_d_aeab56cc66087eeb25fe7d9a731d2a89b}
-Add each element of the matrix by the corresponding element of matrix M and return new matrix \hypertarget{class_matrix4_d_ae8ea629894c325c30e0c0d1d7fc6eb4b}{}\index{Matrix4\+D@{Matrix4\+D}!operator+=@{operator+=}}
+Add each element of the matrix by the corresponding element of matrix M and return new matrix 
+
+References Matrix4\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix4_d_ae8ea629894c325c30e0c0d1d7fc6eb4b}{}\index{Matrix4\+D@{Matrix4\+D}!operator+=@{operator+=}}
 \index{operator+=@{operator+=}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{operator+=(const Matrix4\+D$<$ T $>$ \&\+M)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix4\+D}$<$ T $>$ \& {\bf Matrix4\+D}$<$ T $>$\+::operator+= (
 \begin{DoxyParamCaption}
 \item[{const {\bf Matrix4\+D}$<$ T $>$ \&}]{M}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily [inline]}}\label{class_matrix4_d_ae8ea629894c325c30e0c0d1d7fc6eb4b}
-Add each element of the current matrix by the corresponding element in M and return this matrix \hypertarget{class_matrix4_d_adda7723310f22158d13de9ce6a901f14}{}\index{Matrix4\+D@{Matrix4\+D}!operator+=@{operator+=}}
+Add each element of the current matrix by the corresponding element in M and return this matrix 
+
+References Matrix4\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix4_d_adda7723310f22158d13de9ce6a901f14}{}\index{Matrix4\+D@{Matrix4\+D}!operator+=@{operator+=}}
 \index{operator+=@{operator+=}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{operator+=(const T Val)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix4\+D}$<$ T $>$ \& {\bf Matrix4\+D}$<$ T $>$\+::operator+= (
 \begin{DoxyParamCaption}
@@ -351,14 +378,22 @@ Add each element of the current matrix by Val and return this matrix \hypertarge
 \item[{const {\bf Matrix4\+D}$<$ T $>$ \&}]{M}
 \end{DoxyParamCaption}
 ) const\hspace{0.3cm}{\ttfamily [inline]}}\label{class_matrix4_d_acca77985b70ac893e4f34687e5b43aa7}
-Substract each element of the matrix by the corresponding element of matrix M and return new matrix \hypertarget{class_matrix4_d_ae7002affc7094edd7f49e503b7971c35}{}\index{Matrix4\+D@{Matrix4\+D}!operator-\/=@{operator-\/=}}
+Substract each element of the matrix by the corresponding element of matrix M and return new matrix 
+
+References Matrix4\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix4_d_ae7002affc7094edd7f49e503b7971c35}{}\index{Matrix4\+D@{Matrix4\+D}!operator-\/=@{operator-\/=}}
 \index{operator-\/=@{operator-\/=}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{operator-\/=(const Matrix4\+D$<$ T $>$ \&\+M)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix4\+D}$<$ T $>$ \& {\bf Matrix4\+D}$<$ T $>$\+::operator-\/= (
 \begin{DoxyParamCaption}
 \item[{const {\bf Matrix4\+D}$<$ T $>$ \&}]{M}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily [inline]}}\label{class_matrix4_d_ae7002affc7094edd7f49e503b7971c35}
-Subtract each element of the current matrix by the corresponding element in M and return this matrix \hypertarget{class_matrix4_d_a610cc82cf688bbead1054438f927adde}{}\index{Matrix4\+D@{Matrix4\+D}!operator-\/=@{operator-\/=}}
+Subtract each element of the current matrix by the corresponding element in M and return this matrix 
+
+References Matrix4\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix4_d_a610cc82cf688bbead1054438f927adde}{}\index{Matrix4\+D@{Matrix4\+D}!operator-\/=@{operator-\/=}}
 \index{operator-\/=@{operator-\/=}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{operator-\/=(const T Val)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix4\+D}$<$ T $>$ \& {\bf Matrix4\+D}$<$ T $>$\+::operator-\/= (
 \begin{DoxyParamCaption}
@@ -397,6 +432,10 @@ Makes current matrix equal to Matrix M and returns the current matrix
 {\em \&\+M} & -\/ Matrix M. \\
 \hline
 \end{DoxyParams}
+
+
+References Allocate\+Memory(), Matrix4\+D$<$ T $>$\+::initialized, Matrix4\+D$<$ T $>$\+::matrix\+\_\+array, Matrix4\+D$<$ T $>$\+::name, Matrix4\+D$<$ T $>$\+::size\+\_\+w, Matrix4\+D$<$ T $>$\+::size\+\_\+x, Matrix4\+D$<$ T $>$\+::size\+\_\+y, and Matrix4\+D$<$ T $>$\+::size\+\_\+z.
+
 \hypertarget{class_matrix4_d_a89d84d26cb35499e32e2d9fef5057f19}{}\index{Matrix4\+D@{Matrix4\+D}!operator=@{operator=}}
 \index{operator=@{operator=}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{operator=(const T Val)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix4\+D}$<$ T $>$ \& {\bf Matrix4\+D}$<$ T $>$\+::operator= (
@@ -443,6 +482,10 @@ Overloaded read\+From\+File function
 {\em read\+\_\+column} & -\/ read up to this column from file \\
 \hline
 \end{DoxyParams}
+
+
+Referenced by Read\+Initial\+Data().
+
 \hypertarget{class_matrix4_d_aa8be7ad88a70143d037472811bda825c}{}\index{Matrix4\+D@{Matrix4\+D}!read\+From\+File@{read\+From\+File}}
 \index{read\+From\+File@{read\+From\+File}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{read\+From\+File(string filename, const Matrix4\+D$<$ T $>$ grid\+\_\+w, const Matrix4\+D$<$ T $>$ grid\+\_\+x, const Matrix4\+D$<$ T $>$ grid\+\_\+y, const Matrix4\+D$<$ T $>$ grid\+\_\+z)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ void {\bf Matrix4\+D}$<$ T $>$\+::read\+From\+File (
@@ -467,7 +510,30 @@ Overloaded read\+From\+File function
 {\em grids} & w,x,y,z -\/ checks grids data against the file data \\
 \hline
 \end{DoxyParams}
-\hypertarget{class_matrix4_d_a7c4b56f0c611564955f74e975e5e0548}{}\index{Matrix4\+D@{Matrix4\+D}!times@{times}}
+\hypertarget{class_matrix4_d_af931115c686508ca52ba31085aac6cda}{}\index{Matrix4\+D@{Matrix4\+D}!read\+From\+Matlab\+File@{read\+From\+Matlab\+File}}
+\index{read\+From\+Matlab\+File@{read\+From\+Matlab\+File}!Matrix4\+D@{Matrix4\+D}}
+\subsubsection[{read\+From\+Matlab\+File(string file, int column=1)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ void {\bf Matrix4\+D}$<$ T $>$\+::read\+From\+Matlab\+File (
+\begin{DoxyParamCaption}
+\item[{string}]{file, }
+\item[{int}]{column\+Number = {\ttfamily 1}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\label{class_matrix4_d_af931115c686508ca52ba31085aac6cda}
+Function for reading from matlab file in 4-\/dimensions Will check the variables, order them in (P, R/\+L, V, K, Val) format and then set matrix\+\_\+array to be the variable with the corresponding column number This is the same as the \hyperlink{class_matrix4_d_af5fcef655a9a8ca3efb0f9e653080abb}{read\+From\+File()} function although only compatible with .mat files instead of .plt or other text files 
+
+Referenced by Read\+Initial\+Data().
+
+\hypertarget{class_matrix4_d_ae53e29f2daa8b6c2e8f0e9f423e3ec4d}{}\index{Matrix4\+D@{Matrix4\+D}!read\+From\+Matlab\+File@{read\+From\+Matlab\+File}}
+\index{read\+From\+Matlab\+File@{read\+From\+Matlab\+File}!Matrix4\+D@{Matrix4\+D}}
+\subsubsection[{read\+From\+Matlab\+File(string filename, const Matrix4\+D$<$ T $>$ grid\+\_\+w, const Matrix4\+D$<$ T $>$ grid\+\_\+x, const Matrix4\+D$<$ T $>$ grid\+\_\+y, const Matrix4\+D$<$ T $>$ grid\+\_\+z)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ void {\bf Matrix4\+D}$<$ T $>$\+::read\+From\+Matlab\+File (
+\begin{DoxyParamCaption}
+\item[{string}]{file, }
+\item[{const {\bf Matrix4\+D}$<$ T $>$}]{grid\+\_\+w, }
+\item[{const {\bf Matrix4\+D}$<$ T $>$}]{grid\+\_\+x, }
+\item[{const {\bf Matrix4\+D}$<$ T $>$}]{grid\+\_\+y, }
+\item[{const {\bf Matrix4\+D}$<$ T $>$}]{grid\+\_\+z}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [virtual]}}\label{class_matrix4_d_ae53e29f2daa8b6c2e8f0e9f423e3ec4d}
+Function for reading from matlab file in 4-\/dimensions Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard The variables will be checked against the input grid parameters in order to make sure the right variables/values are being loaded This is the same as the \hyperlink{class_matrix4_d_af5fcef655a9a8ca3efb0f9e653080abb}{read\+From\+File()} function although only compatible with .mat files instead of .plt or other text files \hypertarget{class_matrix4_d_a7c4b56f0c611564955f74e975e5e0548}{}\index{Matrix4\+D@{Matrix4\+D}!times@{times}}
 \index{times@{times}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{times(const Matrix4\+D$<$ T $>$ \&\+M) const }]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix4\+D}$<$ T $>$ {\bf Matrix4\+D}$<$ T $>$\+::times (
 \begin{DoxyParamCaption}
@@ -478,7 +544,11 @@ Overloaded read\+From\+File function
 
 Arraywise multiplication (A.$\ast$\+B), stores result in a new matrix. 
 
-Multiply each element of the matrix by the corresponding element of matrix M and return new matrix \hypertarget{class_matrix4_d_af9524d248b05e422177487de44d44547}{}\index{Matrix4\+D@{Matrix4\+D}!times\+\_\+equal@{times\+\_\+equal}}
+Multiply each element of the matrix by the corresponding element of matrix M and return new matrix 
+
+References Matrix4\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix4_d_af9524d248b05e422177487de44d44547}{}\index{Matrix4\+D@{Matrix4\+D}!times\+\_\+equal@{times\+\_\+equal}}
 \index{times\+\_\+equal@{times\+\_\+equal}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{times\+\_\+equal(const Matrix4\+D$<$ T $>$ \&\+M)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix4\+D}$<$ T $>$ \& {\bf Matrix4\+D}$<$ T $>$\+::times\+\_\+equal (
 \begin{DoxyParamCaption}
@@ -489,7 +559,11 @@ Multiply each element of the matrix by the corresponding element of matrix M and
 
 Arraywise multiplication (A.$\ast$\+B), stores result in the matrix it\textquotesingle{}s applied to. 
 
-Multiply each element of the current matrix by the corresponding element of matrix M and return this matrix \hypertarget{class_matrix4_d_aa28c986248dd73ef541620cee0324cd5}{}\index{Matrix4\+D@{Matrix4\+D}!write\+To\+File@{write\+To\+File}}
+Multiply each element of the current matrix by the corresponding element of matrix M and return this matrix 
+
+References Matrix4\+D$<$ T $>$\+::matrix\+\_\+array.
+
+\hypertarget{class_matrix4_d_aa28c986248dd73ef541620cee0324cd5}{}\index{Matrix4\+D@{Matrix4\+D}!write\+To\+File@{write\+To\+File}}
 \index{write\+To\+File@{write\+To\+File}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{write\+To\+File(string filename, string info="""")}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ void {\bf Matrix4\+D}$<$ T $>$\+::write\+To\+File (
 \begin{DoxyParamCaption}
@@ -516,7 +590,11 @@ Write matrix to file. File has two header lines. \hypertarget{class_matrix4_d_a2
 
 Save matrix to a file, including grid. 
 
-Write matrix to file, using 4 other matrixes as a grid (simply -\/ write all 5 matrixes to the file). File has two header lines. \hypertarget{class_matrix4_d_aa4a2e0586327e772f83b6e377b9f31f4}{}\index{Matrix4\+D@{Matrix4\+D}!write\+To\+Matlab\+File@{write\+To\+Matlab\+File}}
+Write matrix to file, using 4 other matrixes as a grid (simply -\/ write all 5 matrixes to the file). File has two header lines. 
+
+References Matrix4\+D$<$ T $>$\+::name.
+
+\hypertarget{class_matrix4_d_aa4a2e0586327e772f83b6e377b9f31f4}{}\index{Matrix4\+D@{Matrix4\+D}!write\+To\+Matlab\+File@{write\+To\+Matlab\+File}}
 \index{write\+To\+Matlab\+File@{write\+To\+Matlab\+File}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{write\+To\+Matlab\+File(string filename, string info="""")}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ void {\bf Matrix4\+D}$<$ T $>$\+::write\+To\+Matlab\+File (
 \begin{DoxyParamCaption}
@@ -528,7 +606,7 @@ Write matrix to file, using 4 other matrixes as a grid (simply -\/ write all 5 m
 
 Save matrix to a file. 
 
-Write matrix to file -\/ with information Function for matlab files Creates a .mat struct for the matrix Struct has 7 fields in including -\/ arr time size, size1, size2, size3, size4 \hypertarget{class_matrix4_d_abb235654193dbc4e9d0f12e360e65f9d}{}\index{Matrix4\+D@{Matrix4\+D}!write\+To\+Matlab\+File@{write\+To\+Matlab\+File}}
+Write matrix to .mat file. Creates a struct for the matrix. Struct has 7 fields in including -\/ arr time size, size1, size2, size3, size4 \hypertarget{class_matrix4_d_abb235654193dbc4e9d0f12e360e65f9d}{}\index{Matrix4\+D@{Matrix4\+D}!write\+To\+Matlab\+File@{write\+To\+Matlab\+File}}
 \index{write\+To\+Matlab\+File@{write\+To\+Matlab\+File}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{write\+To\+Matlab\+File(string filename, Matrix4\+D$<$ T $>$ \&grid\+\_\+w, Matrix4\+D$<$ T $>$ \&grid\+\_\+x, Matrix4\+D$<$ T $>$ \&grid\+\_\+y, Matrix4\+D$<$ T $>$ \&grid\+\_\+z)}]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ void {\bf Matrix4\+D}$<$ T $>$\+::write\+To\+Matlab\+File (
 \begin{DoxyParamCaption}
@@ -539,7 +617,7 @@ Write matrix to file -\/ with information Function for matlab files Creates a .m
 \item[{{\bf Matrix4\+D}$<$ T $>$ \&}]{grid\+\_\+z}
 \end{DoxyParamCaption}
 )\hspace{0.3cm}{\ttfamily [virtual]}}\label{class_matrix4_d_abb235654193dbc4e9d0f12e360e65f9d}
-Write matrix to file, using 4 other matrixes as a grid (simply -\/ write all 5 matrixes to the file). Function for matlab files \hypertarget{class_matrix4_d_a1f3fda217638aa820a58897e61df453c}{}\index{Matrix4\+D@{Matrix4\+D}!w\+Slice@{w\+Slice}}
+Write matrix to file, using 4 other matrixes as a grid (simply -\/ write all 5 matrixes to the file). Uses the create\+Struct\+Matrix() function to pack all the grid dimensions into seperate variables and then combines these variables into a single matlab structure to save in .mat \hypertarget{class_matrix4_d_a1f3fda217638aa820a58897e61df453c}{}\index{Matrix4\+D@{Matrix4\+D}!w\+Slice@{w\+Slice}}
 \index{w\+Slice@{w\+Slice}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{w\+Slice(int p\+\_\+w) const }]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix3\+D}$<$ T $>$ {\bf Matrix4\+D}$<$ T $>$\+::w\+Slice (
 \begin{DoxyParamCaption}
@@ -662,6 +740,10 @@ Take x-\/slice of 4d matrix turining it into 3d matrix. squeeze matrix to 3d get
 {\em p\+\_\+x} & -\/ index at which to slice x dimension \\
 \hline
 \end{DoxyParams}
+
+
+Referenced by Read\+Initial\+Data().
+
 \hypertarget{class_matrix4_d_aec288477883fd993b2ae8ab331156c86}{}\index{Matrix4\+D@{Matrix4\+D}!xy\+Slice@{xy\+Slice}}
 \index{xy\+Slice@{xy\+Slice}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{xy\+Slice(int p\+\_\+x, int p\+\_\+y) const }]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix2\+D}$<$ T $>$ {\bf Matrix4\+D}$<$ T $>$\+::xy\+Slice (
@@ -722,6 +804,10 @@ Take y-\/slice of 4d matrix turning it into 3d matrix. squeeze matrix to 3d gett
 {\em p\+\_\+y} & -\/ index at which to slice y dimension \\
 \hline
 \end{DoxyParams}
+
+
+Referenced by Read\+Initial\+Data().
+
 \hypertarget{class_matrix4_d_add2abd98a79fb8751af93cfcdb542915}{}\index{Matrix4\+D@{Matrix4\+D}!yz\+Slice@{yz\+Slice}}
 \index{yz\+Slice@{yz\+Slice}!Matrix4\+D@{Matrix4\+D}}
 \subsubsection[{yz\+Slice(int p\+\_\+y, int p\+\_\+z) const }]{\setlength{\rightskip}{0pt plus 5cm}template$<$class T $>$ {\bf Matrix2\+D}$<$ T $>$ {\bf Matrix4\+D}$<$ T $>$\+::yz\+Slice (
@@ -749,6 +835,10 @@ Take z-\/slice of 4d matrix turning it into 3d matrix. squeeze matrix to 3d gett
 {\em p\+\_\+z} & -\/ index at which to slice z dimension \\
 \hline
 \end{DoxyParams}
+
+
+Referenced by Read\+Initial\+Data().
+
 
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}

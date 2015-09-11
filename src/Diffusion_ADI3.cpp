@@ -20,6 +20,8 @@
  *
  * http://arxiv.org/pdf/0805.0054v1.pdf
  *
+ * \todo Fix this function - currently results in negative PSD values - using Lapack instead
+ *
  * Method:
  *
  * For the x direction and then for the y direction

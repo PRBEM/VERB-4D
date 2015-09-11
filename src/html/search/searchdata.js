@@ -9,7 +9,7 @@ var indexSectionsWithContent =
   6: "d",
   7: "dm",
   8: "dm",
-  9: "d"
+  9: "dt"
 };
 
 var indexSectionNames =

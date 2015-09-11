@@ -15,10 +15,11 @@
 
 
 
-// Set to true if machine code is running on has access to MATLAB libraries
-// If so must link to libraries when compilining - allows reading and writing .mat files
+// Set to true if the machine that the code is running on has access to MATLAB libraries
+// If so must link to libraries when compilining - allows reading and writing .mat files - use standard makefile
 // If true should mark variable use_matlab in Conv_Dif.m of examples in MATLAB to true
-// If machine does not have MATLAB or MATLAB capabilites set to false
+// If machine does not have MATLAB or MATLAB capabilites set to false and use makefileNoMatlab
+// Throughout the code if anything requires MATLAB libraries the compiler will skip it if set to false (only found in Matrix.h Matrix.cpp ReadInitialData.cpp)
 #ifndef MATLAB_CAPABLE
 #define MATLAB_CAPABLE true
 #endif
@@ -35,6 +36,13 @@
 #include <iostream>
 #include <sstream>
 
+
+
+
+
+// Matlab library which will have to be linked at compile time
+// Usually found in matlabroot/extern/include where matlabroot is the result of typing the matlabroot command into matlab
+// Used for reading/writing functions for .mat files
 #if (MATLAB_CAPABLE)
 #include <mat.h>
 #endif
@@ -417,7 +425,7 @@ public:
 
 	// ADDED
 #if (MATLAB_CAPABLE)
-	virtual mxArray* createStructMatrix(string filename, string info = "");
+	virtual mxArray* createStructMatrix(string filename, string info = ""); ///< Package matrix into matlab variable
 #endif
 
 	virtual void writeToMatlabFile(string filename, string info = ""); 										///< Save matrix to a file
