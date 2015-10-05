@@ -4388,7 +4388,8 @@ void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
     }
 	// Save the struct into the .mat file
 	// hardcoded to get rid of the "./output_folder/" and only get PSD_XXXXX
-    status = matPutVariable(pmat, filename.substr(16,9).c_str(), s);
+    int str_idx = filename.rfind("PSD_");
+    status = matPutVariable(pmat, filename.substr(str_idx,9).c_str(), s);
     if (status != 0) {
     	printf("error matputvariable");
     	exit(EXIT_FAILURE);
