@@ -1,6 +1,6 @@
 CC=g++-5.1.0
 MATPATH = /Applications/MATLAB_R2015a.app/extern/include
-FLAGS = -I$(MATPATH) 
+FLAGS = -I$(MATPATH)
 VERSION=-std=c++0x
 OPTIONS= -g -O -c -fopenmp
 LDFLAGS= -Wl,-rpath,/Applications/MATLAB_R2015a.app/bin/maci64
@@ -23,21 +23,4 @@ all: Convection_1D_ULTIMATE_QUICKEST6.cpp Convection_2D.cpp Diffusion_1D.cpp Dif
 	  $(CC) $(VERSION) $(OPTIONS) $(FLAGS) VERB4D_Solver.cpp
 	  $(CC) $(VERSION) -fopenmp -o VERB4D_Solver VERB4D_Solver.o Convection_1D_ULTIMATE_QUICKEST6.o Convection_2D.o Diffusion_1D.o Diffusion_2D.o Diffusion_ADI1.o Diffusion_ADI2.o Diffusion_ADI3.o Interpolation.o Logger.o Matrix.o MatrixSolver.o MonotCubicInterpolator.o Parameters.o ReadInitialData.o UpdatableMatrix.o -llapack -lblas -L"/Applications/MATLAB_R2015a.app/bin/maci64" -lmx -lmex -lmat -lc++ -leng $(LDFLAGS)
 clean:
-	$(RM) Convection_1D_ULTIMATE_QUICKEST6.o
-	$(RM) Convection_2D.o
-	$(RM) Diffusion_1D.o
-	$(RM) Diffusion_2D.o
-	$(RM) Diffusion_ADI1.o
-	$(RM) Diffusion_ADI2.o
-	$(RM) Diffusion_ADI3.o
-	$(RM) Interpolation.o
-	$(RM) Logger.o
-	$(RM) Matrix.o
-	$(RM) MatrixSolver.o
-	$(RM) MonotCubicInterpolator.o
-	$(RM) Parameters.o
-	$(RM) ReadInitialData.o
-	$(RM) UpdatableMatrix.o
-	$(RM) VERB4D_Solver.o
-	$(RM) VERB4D_Solver
-
+	$(RM) *.o VERB4D_Solver
