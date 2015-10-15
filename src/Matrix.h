@@ -12,19 +12,6 @@
 #ifndef matrix_array_MATRIX_H
 #define matrix_array_MATRIX_H
 
-
-
-
-// Set to true if the machine that the code is running on has access to MATLAB libraries
-// If so must link to libraries when compilining - allows reading and writing .mat files - use standard makefile
-// If true should mark variable use_matlab in Conv_Dif.m of examples in MATLAB to true
-// If machine does not have MATLAB or MATLAB capabilites set to false and use makefileNoMatlab
-// Throughout the code if anything requires MATLAB libraries the compiler will skip it if set to false (only found in Matrix.h Matrix.cpp ReadInitialData.cpp)
-#ifndef MATLAB_CAPABLE
-#define MATLAB_CAPABLE true
-#endif
-
-
 #include <assert.h>
 #include <string>
 #include <string.h>
@@ -35,10 +22,6 @@
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
-
-
-
-
 
 // Matlab library which will have to be linked at compile time
 // Usually found in matlabroot/extern/include where matlabroot is the result of typing the matlabroot command into matlab
@@ -59,7 +42,7 @@ using namespace std;
  * Matrix 1D class
  *
  * Matrixes and operations.
- * 
+ *
  * @brief A matrix of 1 dimensions that is immutable
  */
 template <typename T>
@@ -134,7 +117,7 @@ public:
 	virtual void writeToFile(string filename, Matrix1D<T> &grid_q1);
 	virtual void readFromFile(string filename);
 	virtual void readFromFile(string filename, const Matrix1D<T> grid_q1);
-	
+
 	//ADDED
 	virtual void readFromMatlabFile(string filename, int columnNumber = 1);
 	virtual void readFromMatlabFile(string filename, const Matrix1D<T> grid_q1);
@@ -150,7 +133,7 @@ public:
  * Matrix 2D class
  *
  * Matrixes and operations.
- * 
+ *
  * @brief A matrix of 2 dimensions that is immutable
  */
 template <typename T> class Matrix2D {
@@ -183,7 +166,7 @@ public:
 	inline Matrix2D<T>& MatrixArray () { return *this; }					///< Return pointer to the instance of the class.
 
 	// unary
-	inline const Matrix2D& operator+() const { return *this; } ///< unary : return the matrix 
+	inline const Matrix2D& operator+() const { return *this; } ///< unary : return the matrix
 	inline const Matrix2D operator-() const { return ((*this)*(-1)); } ///< unary : return the matrix with all values multiplied by -1
 
 	// The following operators modify the matrix they applied to
@@ -245,7 +228,7 @@ public:
  * Matrix 3D class
  *
  * Matrixes and operations.
- * 
+ *
  * @brief A matrix of 3 dimensions that is immutable
  */
 template <typename T>
@@ -318,9 +301,9 @@ public:
 	virtual void writeToFile(string filename, Matrix3D<T> &grid_q1, Matrix3D<T> &grid_q2, Matrix3D<T> &grid_q3); ///< Save matrix to a file, including grid
 	virtual void readFromFile(string filename, int column = 1);  									///< Load matrix from a file
 	virtual void readFromFile(string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3); ///< Load matrix to a file
-	
+
 	// ADDED
-	virtual void readFromMatlabFile(string filename, int column = 1);  									
+	virtual void readFromMatlabFile(string filename, int column = 1);
 	virtual void readFromMatlabFile(string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3);
 
 	// Some other stuff
@@ -351,7 +334,7 @@ public:
  * Matrix 4D class
  *
  * Matrixes and operations.
- * 
+ *
  * @brief A matrix of 4 dimensions that is immutable
  */
 template <typename T> class Matrix4D {
@@ -429,9 +412,9 @@ public:
 #endif
 
 	virtual void writeToMatlabFile(string filename, string info = ""); 										///< Save matrix to a file
-	virtual void writeToMatlabFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z); 
-	virtual void readFromMatlabFile(string file, int column = 1);  									
-	virtual void readFromMatlabFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z); 
+	virtual void writeToMatlabFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z);
+	virtual void readFromMatlabFile(string file, int column = 1);
+	virtual void readFromMatlabFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z);
 
 	// Some other stuff
 	string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
@@ -476,14 +459,14 @@ public:
  * This method of storage for matrices is convenient for diagonal (spread) matrices.
  * Stored as map (diagonal number, 1d diagonal array)
  * The USED diagonals of the matrix are stored in 1d arrays.
- * This typedef is used in CalculationMatrix 
+ * This typedef is used in CalculationMatrix
  * @brief Diagonals of matrix stored as map (diagonal number, 1d diagonal array)
  */
 typedef map <int , Matrix1D<double> > DiagMatrix;
 
 /** Model matrix (or related matrices)
  * It is based on DiagMatrix and have methods for conversion from 3D or 2D PSD (and related) arrays into 1d array of unknown elements
- * 
+ *
  * @brief A matrix used primarily for diagonalized calculations
  */
 class CalculationMatrix : public DiagMatrix {

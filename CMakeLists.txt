@@ -16,6 +16,12 @@ endif(OPENMP_FOUND)
 find_package(MATLAB)
 if(MATLAB_FOUND)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MATLAB_CXXFLAGS}")
+    include_directories(${MATLAB_INCLUDE_DIR})
+    list(APPEND DEPLIBS
+        ${MATLAB_MAT_LIBRARY}
+        ${MATLAB_MX_LIBRARY}
+        ${MATLAB_ENG_LIBRARY})
+    add_definitions(-DMATLAB_FOUND)
 endif(MATLAB_FOUND)
 
 if(WIN32)
@@ -26,18 +32,13 @@ else(WIN32)
     find_package(BLAS REQUIRED)
 endif(WIN32)
 
-# Add directories for include files
-include_directories(
-    ${MATLAB_INCLUDE_DIR}
-    ${PROJECT_SOURCE_DIR}/src)
-
 # Libraries to link against
 list(APPEND DEPLIBS
-    ${MATLAB_MAT_LIBRARY}
-    ${MATLAB_MX_LIBRARY}
-    ${MATLAB_ENG_LIBRARY}
     ${LAPACK_LIBRARIES}
     ${BLAS_LIBRARIES})
+
+# Add directories for include files
+include_directories(${PROJECT_SOURCE_DIR}/src)
 
 # Set the source files to compile
 set(VERB4D_SOURCES
