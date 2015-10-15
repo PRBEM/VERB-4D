@@ -21,7 +21,7 @@ if(MATLAB_FOUND)
         ${MATLAB_MAT_LIBRARY}
         ${MATLAB_MX_LIBRARY}
         ${MATLAB_ENG_LIBRARY})
-    add_definitions(-DMATLAB_FOUND)
+    add_definitions(-DMATLAB_CAPABLE=true)
 endif(MATLAB_FOUND)
 
 if(WIN32)
