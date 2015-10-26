@@ -1,3 +1,8 @@
+# CMakeLists.txt
+# Buildsystem for VERB4D - See README.md for build instructions
+#
+# Author: Anthony Miyaguchi (acmiyaguchi@gmail.com)
+
 cmake_minimum_required(VERSION 2.8)
 project(VERB4D C CXX)
 add_definitions(-std=c++11)
@@ -21,13 +26,17 @@ if(MATLAB_FOUND)
         ${MATLAB_MAT_LIBRARY}
         ${MATLAB_MX_LIBRARY}
         ${MATLAB_ENG_LIBRARY})
+    # Set the definition for MATLAB_CAPABLE
     add_definitions(-DMATLAB_CAPABLE=true)
 endif(MATLAB_FOUND)
 
 if(WIN32)
+    # The libraries for lapack and BLAS for windows are in the lib folder
     set(LAPACK_LIBRARIES ${CMAKE_SOURCE_DIR}/lib/clapack.lib)
-    set(BLAS_LIBRARIES ${CMAKE_SOURCE_DIR}/lib/BLAS.lib)
+    set(BLAS_LIBRARIES   ${CMAKE_SOURCE_DIR}/lib/BLAS.lib)
+    set(F2C_LIBRARIES    ${CMAKE_SOURCE_DIR}/lib/libf2c.lib)
 else(WIN32)
+    # Installed by distribution's package manager
     find_package(LAPACK REQUIRED)
     find_package(BLAS REQUIRED)
 endif(WIN32)
@@ -37,10 +46,19 @@ list(APPEND DEPLIBS
     ${LAPACK_LIBRARIES}
     ${BLAS_LIBRARIES})
 
+# Fortran to C library for windows, needed by lapack
+if(WIN32)
+    list(APPEND DEPLIBS ${F2C_LIBRARIES})
+endif(WIN32)
+
 # Add directories for include files
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
-# Set the source files to compile
+# Recursively search for header files to include for project files.  This isn't
+# necessary to compile, but its nice to have in Visual Studio solutions.
+file(GLOB_RECURSE VERB4D_HEADERS *.h)
+
+# Add new source files here and re-run cmake
 set(VERB4D_SOURCES
     src/Convection_1D_ULTIMATE_QUICKEST6.cpp
     src/Convection_2D.cpp
@@ -60,5 +78,5 @@ set(VERB4D_SOURCES
     src/VERB4D_Solver.cpp)
 
 # Build and link
-add_executable(VERB4D_Solver ${VERB4D_SOURCES})
+add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
 target_link_libraries(VERB4D_Solver ${DEPLIBS})
