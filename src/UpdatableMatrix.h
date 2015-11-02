@@ -1,6 +1,6 @@
-/*
- * UpdatableMatrix.h
- *
+/**
+ * \file UpdatableMatrix.h
+ * \brief Same functionality as matrices found in Matrix.h but can also be updated from ini-files
  */
 
 #ifndef UPDATABLEMATRIX_H_
@@ -14,8 +14,13 @@
 #include "Matrix.h"
 #include "Logger.h"
 
+/** @class MatrixND
+ * 
+ * @brief A normal matrix that can be defined to have 1, 2, 3, or 4 dimensions which is templated for UpdatableMatrix and UpdatableListMatrix
+ */
 
-/*
+
+/**
  * Updatable matrix - 1,2,3,4 dimensions.
  *
  * It's a template because it's easier to create, maintain, and debug one class, instead of 4 classes with the same functionality
@@ -23,7 +28,11 @@
  * It's just like a normal matrix (and can be used just like one),
  * but it can also be updated according to rules from an ini-file
  *
- * TODO: delete this class, all it's functionality is inside UpdatableListMatrix
+ * The readFromIniFile function is used to load data into an UpdatableMatrix by storing the contents of a .tab file.
+ * The .tab file will either list a .plt file to load or a .lst file which in turn has both time steps and .plt files.
+ * The update function is called at every time step in the main function and will execute any updates that can be found from these files that match the designated timestep.
+ *
+ * @brief A matrix that can be created in 1, 2, 3, or 4 dimensions with the ability to be updated
  */
 template <typename MatrixND>
 class UpdatableMatrix : public MatrixND { // current array is the parent array - whenever we use UpdatableMatrix as an array, the parent class is used
@@ -72,22 +81,28 @@ public:
 
 };
 
-/*
- * Updatable list of matrix - 1,2,3,4 dimensions.
+/**
+ * Updatable list of matrix - 1,2,3,4 dimensions. Currently set up to be used for diffusion coefficients, Sources, and Losses only.
+ * All other matrices use UpdatableMatrix
  *
  * It's a template because it's easier to create, maintain, and debug one class, instead of 4 classes with the same functionality
  *
  * It's just like a normal matrix (and can be used just like one),
  * but it can also be updated according to rules from an ini-file
  *
- * The ini-files have specify several matrices that are added to each other,
+ * The ini-files specify several matrices that are added to each other,
  * e.g. diffusion coefficients for different waves to get one diffusion coefficient
- *
+ * The readFromIniFile function is used to load data into an UpdatableListMatrix by storing line by line the contents of the ini file into a vector of UpdatableMatrix
+ * At every time step the update function is called from the main file. The vector is then traversed and any valid updates are completed.
+ * The standard method is to save diffusion coefficients, Sources, or Losses in a .tab file which is comprised of either .plt or .lst files or both.
+ * 
+ * 
+ * @brief A matrix that can be created in 1, 2, 3, or 4 dimensions with the ability to be updated
  */
 template <typename MatrixND>
 class UpdatableListMatrix : public MatrixND {
 private:
-	// These are the matrices that need to be sum to get the final, updated matrix
+	/// These are the matrices that need to be combined to get the final, updated matrix
 	vector < UpdatableMatrix<MatrixND> > matricesList;
 
 public:
@@ -104,6 +119,7 @@ public:
 // couple of helpful functions
 string GetCurrentTimeValue(string filename, double current_time, double &update_time);
 bool is_number(const std::string& s);
+/// FUNCTION NOT IMPLEMENTED
 double stringToValue(string string_value, double current_time);
 
 #endif /* UPDATABLEMATRIX_H_ */

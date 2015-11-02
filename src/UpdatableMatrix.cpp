@@ -1,10 +1,11 @@
 /**
- *  UpdatableMatrix.cpp
- *
+ *  \file UpdatableMatrix.cpp
+ *	
  *  These can act just like matrices, but have the ability to be updated from ini-files at any point in time.
  *
  *  Templetes are used so we don't repeat exactly the same code 4 times - for 1D, 2D, 3D, and 4D matrices
  *
+ * \brief Same functionality as matrices found in Matrix.h but can also be updated from ini-files
  */
 
 #include "UpdatableMatrix.h"
@@ -19,18 +20,32 @@ using namespace std;
 // We need to create functions with the same number of arguments for 1D-4D so they can be called in a similar manner
 
 // Allocating memory
+
+/**  Allocates memory using the allocate memory function for Matrix1D
+*/
 void inline MatrixAllocateMemory(Matrix1D<double> &M, const Matrix1D<double> Q1, const Matrix1D<double> Q2, const Matrix1D<double> Q3, const Matrix1D<double> Q4) {
 	M.Matrix1D<double>::AllocateMemory(Q1.size_q1);
 }
+/**  Allocates memory using the allocate memory function for Matrix2D
+*/
 void inline MatrixAllocateMemory(Matrix2D<double> &M, const Matrix2D<double> Q1, const Matrix2D<double> Q2, const Matrix2D<double> Q3, const Matrix2D<double> Q4) {
 	M.Matrix2D<double>::AllocateMemory(Q1.size_q1, Q2.size_q2);
 }
+/**  Allocates memory using the allocate memory function for Matrix3D
+*/
 void inline MatrixAllocateMemory(Matrix3D<double> &M, const Matrix3D<double> Q1, const Matrix3D<double> Q2, const Matrix3D<double> Q3, const Matrix3D<double> Q4) {
 	M.Matrix3D<double>::AllocateMemory(Q1.size_q1, Q2.size_q2, Q3.size_q3);
 }
+/**  Allocates memory using the allocate memory function for Matrix4D
+*/
 void inline MatrixAllocateMemory(Matrix4D<double> &M, const Matrix4D<double> Q1, const Matrix4D<double> Q2, const Matrix4D<double> Q3, const Matrix4D<double> Q4) {
 	M.Matrix4D<double>::AllocateMemory(Q1.size_w, Q2.size_x, Q3.size_y, Q4.size_z);
-}/*
+}
+
+
+
+
+/*
 void MatrixAllocateMemory(Matrix1D<double> &M, int size_Q1, int size_Q2, int size_Q3, int size_Q4) {
 	M.Matrix1D<double>::AllocateMemory(size_Q1);
 }
@@ -44,18 +59,51 @@ void MatrixAllocateMemory(Matrix4D<double> &M, int size_Q1, int size_Q2, int siz
 	M.Matrix4D<double>::AllocateMemory(size_Q1, size_Q2, size_Q3, size_Q4);
 }*/
 
+
+
+
 // Reading from a file
+
+/**  
+* Reading from a file using Matrix1D::readFromFile(string filename, const Matrix1D< T > grid_x)
+*
+* Only using Q1
+*/
 void MatrixReadFromFile(Matrix1D<double> &M, string data_filename, const Matrix1D<double> Q1, const Matrix1D<double> Q2, const Matrix1D<double> Q3, const Matrix1D<double> Q4) {
-	M.Matrix1D<double>::readFromFile(data_filename, Q1);
+	if (data_filename.substr(data_filename.length() - 4 ,4) == ".mat")
+		M.Matrix1D<double>::readFromMatlabFile(data_filename, Q1);
+	else
+		M.Matrix1D<double>::readFromFile(data_filename, Q1);
 }
+/**  Reading from a file using Matrix2D::readFromFile(string filename, const Matrix2D< T > grid_x,const Matrix2D< T > grid_y)
+*
+* Only using Q1, Q2
+*/
 void MatrixReadFromFile(Matrix2D<double> &M, string data_filename, const Matrix2D<double> Q1, const Matrix2D<double> Q2, const Matrix2D<double> Q3, const Matrix2D<double> Q4) {
-	M.Matrix2D<double>::readFromFile(data_filename, Q1, Q2);
+	if (data_filename.substr(data_filename.length() - 4 ,4) == ".mat")
+		M.Matrix2D<double>::readFromMatlabFile(data_filename, Q1,Q2);
+	else
+		M.Matrix2D<double>::readFromFile(data_filename, Q1, Q2);
 }
+/**  Reading from a file using Matrix3D::readFromFile(string filename, const Matrix3D< T > grid_x,const Matrix3D< T > grid_y, const Matrix3D< T > grid_z)
+*
+* Only using Q1, Q2, Q3
+*/
 void MatrixReadFromFile(Matrix3D<double> &M, string data_filename, const Matrix3D<double> Q1, const Matrix3D<double> Q2, const Matrix3D<double> Q3, const Matrix3D<double> Q4) {
-	M.Matrix3D<double>::readFromFile(data_filename, Q1, Q2, Q3);
+	if (data_filename.substr(data_filename.length() - 4 ,4) == ".mat")
+		M.Matrix3D<double>::readFromMatlabFile(data_filename, Q1,Q2,Q3);
+	else
+		M.Matrix3D<double>::readFromFile(data_filename, Q1, Q2, Q3);
 }
+/**  Reading from a file using Matrix4D::readFromFile(string filename, const Matrix4D< T > grid_w, const Matrix4D< T > grid_x,const Matrix4D< T > grid_y, const Matrix4D< T > grid_z) 
+*
+* Using Q1, Q2, Q3, Q4
+*/
 void MatrixReadFromFile(Matrix4D<double> &M, string data_filename, const Matrix4D<double> Q1, const Matrix4D<double> Q2, const Matrix4D<double> Q3, const Matrix4D<double> Q4) {
-	M.Matrix4D<double>::readFromFile(data_filename, Q1, Q2, Q3, Q4);
+	if (data_filename.substr(data_filename.length() - 4 ,4) == ".mat")
+		M.Matrix4D<double>::readFromMatlabFile(data_filename, Q1, Q2, Q3, Q4);
+	else
+		M.Matrix4D<double>::readFromFile(data_filename, Q1, Q2, Q3, Q4);
 }
 
 /**
@@ -123,6 +171,10 @@ void UpdatableMatrix<MatrixND>::saveCurrent() {
 
 /**
  * Function to limit the data on any direction (e.g. only above plasmapause location, or only on day/night side)
+ *
+ * Sets all values to 0 which are not in the range of "from" to "to"
+ *
+ * \param M - The matrix that will be updated(limited)
  */
 void MatrixLimit(UpdatableMatrix< Matrix1D<double> > &M, Matrix1D<double> &Q1, Matrix1D<double> &Q2, Matrix1D<double> &Q3, Matrix1D<double> &Q4,
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
@@ -140,6 +192,13 @@ void MatrixLimit(UpdatableMatrix< Matrix1D<double> > &M, Matrix1D<double> &Q1, M
 	}
 }
 
+/**
+ * Function to limit the data on any direction (e.g. only above plasmapause location, or only on day/night side)
+ *
+ * Sets all values to 0 which are not in the range of "from" to "to"
+ *
+ * \param M - The matrix that will be updated(limited)
+ */
 void MatrixLimit(UpdatableMatrix< Matrix2D<double> > &M, Matrix2D<double> &Q1, Matrix2D<double> &Q2, Matrix2D<double> &Q3, Matrix2D<double> &Q4,
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
@@ -158,6 +217,13 @@ void MatrixLimit(UpdatableMatrix< Matrix2D<double> > &M, Matrix2D<double> &Q1, M
 	}
 }
 
+/**
+ * Function to limit the data on any direction (e.g. only above plasmapause location, or only on day/night side)
+ *
+ * Sets all values to 0 which are not in the range of "from" to "to"
+ *
+ * \param M - The matrix that will be updated(limited)
+ */
 void MatrixLimit(UpdatableMatrix< Matrix3D<double> > &M, Matrix3D<double> &Q1, Matrix3D<double> &Q2, Matrix3D<double> &Q3, Matrix3D<double> &Q4,
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
@@ -179,6 +245,13 @@ void MatrixLimit(UpdatableMatrix< Matrix3D<double> > &M, Matrix3D<double> &Q1, M
 	}
 }
 
+/**
+ * Function to limit the data on any direction (e.g. only above plasmapause location, or only on day/night side)
+ *
+ * Sets all values to 0 which are not in the range of "from" to "to"
+ *
+ * \param M - The matrix that will be updated(limited)
+ */
 void MatrixLimit(UpdatableMatrix< Matrix4D<double> > &M, Matrix4D<double> &Q1, Matrix4D<double> &Q2, Matrix4D<double> &Q3, Matrix4D<double> &Q4,
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
@@ -205,6 +278,12 @@ void MatrixLimit(UpdatableMatrix< Matrix4D<double> > &M, Matrix4D<double> &Q1, M
 
 /**
  * Read UpdatableMatrix rules from ini-file
+ *
+ * Gets parameters from the first line using readFromString()
+ *
+ * File will either be data file (such as .plt which will store data immediately) or update file (such as .lst which will update matrix values at corresponding timestep from main function)
+ *
+ * @return True if success, False if failure
  */
 template <typename MatrixND>
 bool UpdatableMatrix<MatrixND>::readFromIniFile(string ini_filename, MatrixND q1, MatrixND q2, MatrixND q3, MatrixND q4) {
@@ -249,12 +328,16 @@ bool UpdatableMatrix<MatrixND>::readFromIniFile(string ini_filename, MatrixND q1
 /**
  * Read UpdateMatrix parameters from a string
  *
- * @param file_line_string
- * @param q1
- * @param q2
- * @param q3
- * @param q4
- * @return
+ * Will traverse the string and get the entire lines values - 
+ * starting with parameter q1 and getting values until reaching q4 or running out of values for the line
+ * 
+ * If a data file (such as .plt) is selected then the contents will be stored into the matrix.
+ * If a update-file (such as .lst) is selected then no matrix values will be saved, however the update_filename field will be saved.
+ * Upon every timestep the main file will call update() on this matrix, and inside update will look for the update_filename field. If present it will update the matrix to the corresponding timestep
+ *
+ * @param file_line_string - string which contains one line of values spanning from q1 to q4
+ *
+ * @return True if success, False if failure
  */
 template <typename MatrixND>
 bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND &q1, MatrixND &q2, MatrixND &q3, MatrixND &q4) {
@@ -319,7 +402,7 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 	// Check for the end of line
 	if (!file_line_stream.eof()) {
 		// If not the end - read the next parameters, which are 'from' and 'to' boundaries for the array
-		// (like above Lpp or belowe Lpp or something like that)
+		// (like above Lpp or below Lpp or something like that)
 		file_line_stream >> this->Q1_from_string;
 		file_line_stream >> this->Q1_to_string;
 		Logger::message << "	Limits: " << this->Q1_from_string << " to " << this->Q1_to_string << endl;
@@ -373,14 +456,20 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 
 
 /**
- * Update the Matrix according to rules
+ * Update the Matrix if last update time is less than current update time
  *
- * @param iteration
- * @param dt
- * @param q1
- * @param q2
- * @param q3
- * @param q4
+ * Scaling coefficients are added
+ *
+ * Limits are set for the coefficients for q1 through q4
+ *
+ * The limits are applied using MatrixLimit()
+ *
+ * Record which limits were applied
+ *
+ * This function is called at every time step from the main function. It will look to see if this matrix has the update_filename field set.
+ * If so at any time where the update_time is less than current_time it will use the update_filename to load the new matrix. This pertains to .lst files mainly
+ *
+ * @return True if updated, False if not
  */
 template <typename MatrixND>
 bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixND q2, MatrixND q3, MatrixND q4) {
@@ -424,7 +513,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 		// The second column will be data-filename
 		data_filename = GetCurrentTimeValue(this->update_filename, current_time, update_time);
 
-		// Check if data-filename is not and empty-file-marker
+		// Check if data-filename is not an empty-file-marker
 		if (!data_filename.empty()
 				&& data_filename != empty_marker
 				// && data_filename != this->last_data_filename
@@ -436,6 +525,11 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 				this->last_update_time = current_time;
 				// this->last_data_filename = data_filename;
 				updated = true;
+				
+				
+				// // ADDED FOR TESTING
+				// original_arr.writeToFile(to_string(current_time) + "LUBC_Update.plt" );
+				
 			}
 		}
 	}
@@ -446,6 +540,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 	// MatrixND::operator = (original_arr);
 	*this = original_arr;
 
+	
 	// ////////////////////////////////////////////
 	// Scaling
 
@@ -618,7 +713,12 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
  * UpdatableListMatrix is a list (vector) or UpdatableMatrices
  * They are combined together to form one matrix (e.g. diffusion coefficients for different waves)
  *
- * @param ini_filename - ini filename with appropriate structure (see documentation)
+ * The inputted file can be of any format. If it is a data file (such as .plt) the data will be stored into the matrix.
+ * If the file is an update file then the matrix will only be updated on the corresponding timestep from the main file.
+ * The inputted file may be a .tab file that has a combination of data and update files.
+ * This function goes through the inputted file and stores the contents individually into a vector of UpdatableMatrix, which in turn will be evaluated from the calls to the UpdatableMatrix functions
+ *
+ * @param ini_filename - ini filename with appropriate structure
  * @param Q1 - corresponding grid coordinate
  * @param Q2 - corresponding grid coordinate
  * @param Q3 - corresponding grid coordinate
@@ -714,7 +814,7 @@ void UpdatableListMatrix<MatrixND>::update(double current_time, MatrixND Q1, Mat
 
 
 /**
- * Search for current time-step in an update-file and get return the corresponding value
+ * Search for current time-step in an update-file and return the corresponding value
  *
  * @param filename - filename to check. Also can be just a value - then we just return this value!
  * @param current_time - the time we're searching for
@@ -791,8 +891,11 @@ string GetCurrentTimeValue(string filename, double current_time, double &update_
 /**
  * Check if a string is number
  *
+ * Note: Will accept any string (even badly formatted ones) consisting entirely of the following: Numbers, . , e , - , +
+ *
+ * For example 1.2.3-e.4 will be accepted
  * @param s - the string we need to check
- * @return True if it's a number, fase if it's not
+ * @return True if it's a number, false if it's not
  */
 bool is_number(const std::string& s) {
 	// Loop through each character and see if it's one of the allowed characters
@@ -808,27 +911,46 @@ bool is_number(const std::string& s) {
     return !s.empty() && it == s.end();
 }
 
-// to simplify calling of '='
+/**
+* Overloaded = operator for any size Updatable Matrix.
+* Copies every element from M and returns current matrix
+*/
 template <typename MatrixND>
 inline MatrixND& UpdatableMatrix<MatrixND>::operator= (const MatrixND &M) {
 	return MatrixND::operator= (M);
 }
+
+/**
+* Overloaded = operator for any size Updatable Matrix.
+* Sets every elemenet to Val and returns current matrix
+*/
 template <typename MatrixND>
 inline MatrixND& UpdatableMatrix<MatrixND>::operator= (const double Val) {
 	return MatrixND::operator= (Val);
 }
+
+/**
+* Overloaded = operator for any size Updatable List Matrix.
+* Copies every element from M and returns current matrix
+*/
 template <typename MatrixND>
 inline MatrixND& UpdatableListMatrix<MatrixND>::operator= (const MatrixND &M) {
 	return MatrixND::operator= (M);
 }
+
+/**
+* Overloaded = operator for any size Updatable List Matrix.
+* Sets every elemenet to Val and returns current matrix
+*/
 template <typename MatrixND>
 inline MatrixND& UpdatableListMatrix<MatrixND>::operator= (const double Val) {
 	return MatrixND::operator= (Val);
 }
 
-// ////////////////////////////////////////
-// Implementations
-// ////////////////////////////////////////
+// ///////////////////////////////////////////////////////////
+// Implementations - Enumerates all possibilities for MatrixND 
+// ///////////////////////////////////////////////////////////
+
 
 template class UpdatableMatrix< Matrix1D<double> >;
 template class UpdatableMatrix< Matrix2D<double> >;

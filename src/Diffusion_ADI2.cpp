@@ -1,5 +1,8 @@
-/*
- * Diffusion.cpp
+/**
+ * \file Diffusion_ADI2.cpp
+ *
+ * \brief Calculating the diffusion in 2D using multidimensional diffusion process - Xiao, F., Z. Su, H. Zheng, and S. Wang (2009)
+ *
  *
  *  Created on: May 28, 2011
  *      Author: dimath
@@ -12,9 +15,49 @@
 #include <time.h>
 
 
-/** Create model matrices and solve the system
+/** Create model matrices and solve the system,
  * The method is from
  * Xiao, F., Z. Su, H. Zheng, and S. Wang (2009), Modeling of outer radiation belt electrons by multidimensional diffusion process, J. Geophys. Res., 114, A03201, doi:10.1029/2008JA013580.
+ *
+ * http://onlinelibrary.wiley.com/store/10.1029/2008JA013580/asset/jgra19599.pdf?v=1&t=ic3m61g2&s=334d50627dee2d592de0ae583e755afce42948a9
+ *
+ * \todo Fix this function - currently results in negative PSD values - using Lapack instead
+ *
+ * Method:
+ *
+ * For the x direction and then for the y direction
+ *
+ * 1. Add boundary conditions AddBoundary()
+ *
+ * 2. Add sources and losses
+ *
+ * 3. get the seond derivative approximation with diffusion coeficient SecondDerivativeApproximation_2D()
+ *
+ * 4. Implicit part (first derivatives)	\f$ \frac{-1}{G} \frac {\partial{(G D_{xy})}}{\partial x} \frac {\partial f}{\partial y} \f$
+ *
+ * 5. solve matrix with tridag()
+ *
+ * @param psd - phase space density
+ * @param x - one dimensional slice
+ * @param y - one dimensional slice 
+ * @param x_size - size of x slice
+ * @param y_size - size of y slice
+ * @param x_LBC - lower boundary condition for param x
+ * @param x_UBC - upper boundary condition for param x
+ * @param y_LBC - lower boundary condition for param y
+ * @param y_UBC - upper boundary condition for param y
+ * @param x_LBC_type - type of lower boundary condition for param x
+ * @param x_UBC_type - type of upper boundary condition for param x
+ * @param y_LBC_type - type of lower boundary condition for param y
+ * @param y_UBC_type - type of upper boundary condition for param y
+ * @param Dxx - 2D Diffusion matrix
+ * @param Dyy - 2D Diffusion matrix
+ * @param Dxy - 2D Diffusion matrix
+ * @param Dyx - 2D Diffusion matrix
+ * @param G - 2D used for Jacobian to normalize matrix
+ * @param Sources - matrix used for Sources
+ * @param Losses - Matrix used for Losses (loss cone)
+ * @param dt - change in time of single time step
  */
 bool Diffusion_2D_ADI2(
 				  Matrix2D<double> &psd,
@@ -29,7 +72,7 @@ bool Diffusion_2D_ADI2(
 
 	DiagMatrix::iterator it_B, it_A;
 	static Matrix1D<double> RHS(x_size * y_size);
-	static Matrix1D<double> psd_1d(x_size * y_size); ///< Rearranged PSD into one vector of unknown variables
+	static Matrix1D<double> psd_1d(x_size * y_size); // Rearranged PSD into one vector of unknown variables
 	int ix, iy, in, id;
 	double coef;
 	DiagMatrix::iterator it;

@@ -1,5 +1,6 @@
-/*
- * ReadInitialData.h
+/**
+ * \file ReadInitialData.h
+ * \brief Reads in all the data files created in Matlab in order to initialize the parameters
  *
  *  Created on: Oct 5, 2012
  *      Author: dimath
@@ -36,7 +37,7 @@ using namespace std;
 //		long int &it_total, double &dt, double &output_time, double &total_time, int &output_step);
 bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* argv[],
 		double &total_time, double &dt, double &output_time, double &time_first, long int &it_first, int &max_threads,
-		string &inversion_method,
+		string &inversion_method, string &use_matlab, string &include_boundary,
 		Matrix4D<double> &PSD,
 		Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V, Matrix4D<double> &K, UpdatableMatrix < Matrix4D<double> > &L,
 		int &P_size, int &R_size, int &V_size, int &K_size, int &L_size,
@@ -47,5 +48,15 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		UpdatableMatrix < Matrix4D<double> > &G_local, UpdatableMatrix < Matrix4D<double> >  &G_radial,
 		UpdatableListMatrix < Matrix4D<double> > &Sources, UpdatableListMatrix < Matrix4D<double> > &Losses);
 
+
+// Implemented function but not ever used
+/* void ReadBoundaryCondition(
+		ifstream &input,
+		Matrix3D<double> psd_slice,
+		// UpdatableMatrix2D &BC,
+		Matrix3D<double> &BC,
+		string &BC_type,
+		Matrix3D<double> Q_slice1, Matrix3D<double> Q_slice2, Matrix3D<double> Q_slice3)
+*/
 
 #endif /* READINITIALDATA_H_ */

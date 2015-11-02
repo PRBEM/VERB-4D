@@ -1,5 +1,7 @@
 /**
- * 1D Diffusion
+ * \file Diffusion_1D.cpp
+ *
+ * \brief Getting the diffusion in 1D for the given a 1D matrix of Phase Space Densities, x, boundary conditions, jacobian, sources, losses and change in time
  *
  */
 
@@ -8,21 +10,30 @@
 
 
 /**
- * 1D Diffusion
+ * 1D Diffusion - returns true on successful completion
  *
- * @param psd
- * @param x
- * @param x_size
- * @param x_LBC
- * @param x_UBC
- * @param x_LBC_type
- * @param x_UBC_type
- * @param Dxx
- * @param G
- * @param Sources
- * @param Losses
- * @param dt
- * @return
+ * Method:
+ *
+ * 1. Add boundary conditions
+ *
+ * 2. Add sources and losses
+ *
+ * 3. get the seond derivative approximation with diffusion coeficient SecondDerivativeApproximation_1D()
+ *
+ * 4. solve matrix with tridag()
+ *
+ * @param psd - phase space density
+ * @param x - one dimensional slice 
+ * @param x_size - size of slice
+ * @param x_LBC - lower boundary condition for param x
+ * @param x_UBC - upper boundary condition for param x
+ * @param x_LBC_type - type of lower boundary condition for param x
+ * @param x_UBC_type - type of upper boundary condition for param x
+ * @param Dxx - 1D Diffusion matrix
+ * @param G - 1D used for Jacobian to normalize matrix
+ * @param Sources - matrix used for Sources
+ * @param Losses - Matrix used for Losses (loss cone)
+ * @param dt - change in time of single time step
  */
 bool Diffusion_1D(	Matrix1D<double> &psd,
 					Matrix1D<double> x, int x_size,
@@ -34,7 +45,7 @@ bool Diffusion_1D(	Matrix1D<double> &psd,
 
 	CalculationMatrix matr_A(x_size, 1, 1, 1), matr_B(x_size, 1, 1, 0), matr_C(x_size, 1, 1, 0);
 
-	// Make diagonals to be equal to zero
+	// Set all diagonals (1-D matrices) to 0
 	DiagMatrix::iterator it;
 	for (it = matr_A.begin(); it != matr_A.end(); it++)	it->second = 0;
 	for (it = matr_B.begin(); it != matr_B.end(); it++)	it->second = 0;
@@ -47,6 +58,8 @@ bool Diffusion_1D(	Matrix1D<double> &psd,
 		// calculating current line number (in)
 		in = ix;
 
+
+		
 		// Boundary conditions
 		if (ix == 0 && x_size >= 3) {
 
@@ -100,16 +113,16 @@ bool Diffusion_1D(	Matrix1D<double> &psd,
 
 			// Dxx
 			if (x_size >= 3) {
-				// Writing the finate difference approximation of the diffusion operator into matrix A
+				// Writing the finite difference approximation of the diffusion operator into matrix A
 				SecondDerivativeApproximation_1D(matr_A, ix, "x_left", "x_right", x, Dxx, G, -0.5);
 				SecondDerivativeApproximation_1D(matr_A, ix, "x_right", "x_left", x, Dxx, G, -0.5);
 			}
 		}
 	}
 
-	//matr_A.writeToFile("./Debug_output/matr_A.dat");
-	//matr_B.writeToFile("./Debug_output/matr_B.dat");
-	//matr_C.writeToFile("./Debug_output/matr_C.dat");
+	// matr_A.writeToFile("matr_A.dat");
+	// matr_B.writeToFile("matr_B.dat");
+	// matr_C.writeToFile("matr_C.dat");
 
 	// Add reanalysis here?
 
@@ -141,4 +154,4 @@ bool Diffusion_1D(	Matrix1D<double> &psd,
 
 	return true;
 }
-
+// ADDS BOUNDARIES FROM SECOND DERIVATIVE APPROXIMATION AND THEN SOLVES THE MATRIX USING TRIDAG

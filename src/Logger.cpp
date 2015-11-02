@@ -1,5 +1,14 @@
+/**
+ * \file Logger.cpp
+ * \brief Logs the messages sent, including information, warnings, and errors
+ *
+ * Contains the definition for Logger and Logger::Streamer
+ */
+
+
 #include "Logger.h"
 
+/// creates logger that will write to log.txt
 void Logger::createInstance()
 {	
 	delete sInstance;
@@ -8,7 +17,7 @@ void Logger::createInstance()
 	logFile.open("log.txt");
 }
 
-
+/// deletes instance of logger and closes log file ('log.txt')
 void Logger::deleteInstance()
 {
 	delete sInstance;	
@@ -16,36 +25,44 @@ void Logger::deleteInstance()
 	logFile.close();
 }
 
+/// Can set the Debug Level
 void Logger::setDebugLevel(Logger::DebugLevel level)
 {
 	mDebugLevel = level;
 }
 
+/// can signify errors while writing message
 void Logger::writeError(const std::string& message)
 {
+	// if level of error is greator than set debug level
 	if (mDebugLevel >= DEBUG_LEVEL_ERROR) {
-
+		// type out [Error]
 		const char *type = "[Error] ";
 		string str = type + message;
-
+		// write out message
 		writeMessage(str, MessageType::MESSAGE_ERROR); // Add [Error] //message = message.append("[Error]: ");....
 	}
 #ifdef _DEBUG
 	assert(0);
 #endif	
+	// exits/fails upon error
 	exit(EXIT_FAILURE);
 }
 
+/// can signify warning while writing message
 void Logger::writeWarning(const std::string& message)
 {
+	// if level of warning is greator than set debug level
 	if (mDebugLevel >= DEBUG_LEVEL_WARNING) {
+		// type out [Error]
 		const char *type = "[Warning] ";
 		string str = type + message;
-
+		// write out message
 		writeMessage(str, MessageType::MESSAGE_WARNING);
 	}
 }
 
+/// Write out message to logger of type MESSAGE_INFO if debug level allows it
 void Logger::writeMessage(const std::string& message)
 {
 	if (mDebugLevel >= DEBUG_LEVEL_MESSAGE) {
@@ -54,15 +71,19 @@ void Logger::writeMessage(const std::string& message)
 	}
 }
 
+/// Add message directly to the end of a file
 void Logger::appendToFile(const std::string& message){
 	logFile << message << flush;
 }
 
+/// Write out message to logger with the inputted message type 
 void Logger::writeMessage(const std::string& message, MessageType type)
 {
 	std::string text(message);
-	//std::replace(text.begin(), text.end(), '\n', ' '); // Fix it later
+			//std::replace(text.begin(), text.end(), '\n', ' '); // Fix it later
+	// Send message to standard console out
 	cout << message;
+	// add message to end of file
 	appendToFile(text);
 #ifdef _DEBUG
 	writeIDEDebugString(text, type);
@@ -75,30 +96,36 @@ void Logger::writeIDEDebugString(const std::string& message, MessageType type)
 	//cerr << message.c_str() << endl;
 }
 
+/// Constructor - must send in message type
 Logger::Streamer::Streamer(Logger::MessageType messageType)
 : std::ostream(new StringBuffer(messageType))
 {
 }
 
+/// Deconstructor - deletes stream buffer
 Logger::Streamer::~Streamer()
 {
 	delete rdbuf();
 }
 
+/// Constructor for StinrgBuffer- must send in message type
 Logger::Streamer::StringBuffer::StringBuffer(Logger::MessageType messageType)
 : mMessageType(messageType)
 {
 }
 
+/// Writes out any unwritten characters to output if string buffers not synchronized, else does nothing
 Logger::Streamer::StringBuffer::~StringBuffer()
 {
 	pubsync();
 }
 
+// Creates message, warning and error variables for Logger
 Logger::Streamer Logger::message(Logger::MESSAGE_INFO);
 Logger::Streamer Logger::warning(Logger::MESSAGE_WARNING);
 Logger::Streamer Logger::error(Logger::MESSAGE_ERROR);
 
+/// Checks to make sure Logger instance is in sync with correct message type
 int Logger::Streamer::StringBuffer::sync()
 {
 	if (Logger::sInstance == NULL) {

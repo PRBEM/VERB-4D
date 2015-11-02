@@ -1,3 +1,8 @@
+/**
+ * \file Logger.h
+ * \brief Logs the messages sent, including information, warnings, and errors
+ */
+
 #pragma once
 
 #include <iostream>
@@ -8,25 +13,33 @@
 #include <assert.h>
 using namespace std;
 
+/**
+* \brief Stores messages about statuses, warning, and errors when computing/solving the matrices
+*/
 class Logger
 {
 public:
 
 	
-
+/**
+* Enum for the Debug Level that the logger is at
+*/
 	enum DebugLevel
 	{
-		DEBUG_LEVEL_DISABLED = 0,
-		DEBUG_LEVEL_MESSAGE = 1,
-		DEBUG_LEVEL_WARNING = 2,
-		DEBUG_LEVEL_ERROR = 3,		
+		DEBUG_LEVEL_DISABLED = 0, /**< Disabled = 0 */
+		DEBUG_LEVEL_MESSAGE = 1, /**< Message = 1 */
+		DEBUG_LEVEL_WARNING = 2, /**< Warning = 2 */
+		DEBUG_LEVEL_ERROR = 3,	/**< Error = 3 */
 	};
 
+/**
+* Enum for the type of Message being recorded
+*/
 	enum MessageType
 	{
-		MESSAGE_INFO = 1,
-		MESSAGE_WARNING = 2,
-		MESSAGE_ERROR = 3,
+		MESSAGE_INFO = 1, /**< Info = 1 */
+		MESSAGE_WARNING = 2, /**< Warning = 2 */
+		MESSAGE_ERROR = 3, /**< Error = 3 */
 	};
 
 	static void createInstance();
@@ -34,14 +47,18 @@ public:
 	static void setDebugLevel(DebugLevel level);
 
 
-
+/**
+* \brief Turns messages from the logger into streams
+*/
 	class Streamer : public std::ostream {
 	public:
-
 		Streamer(Logger::MessageType messageType);
 		~Streamer();
 
 	private:
+		/**
+		* \brief Creates a buffer for use by the Streamer
+		*/
 		class StringBuffer : public std::stringbuf {
 		public:
 			StringBuffer(Logger::MessageType messageType);
@@ -60,16 +77,22 @@ public:
 	
 
 	protected:
+	/// defualt constructor
 	Logger() {};
+	/// copy constructor
 	Logger(const Logger& thisobject);
+	/// overloaded equal for copy constructor
 	Logger& operator=(const Logger&);
+	/// default destructor
 	~Logger() {};
 
+	/// stores message into logger, including message type
 	void writeIDEDebugString(const std::string& message, MessageType type);
 
 	
 
 	private:
+		/// private member function here
 		void writeMessage(const std::string& message);
 		void writeWarning(const std::string& message);
 		void writeError(const std::string& message);

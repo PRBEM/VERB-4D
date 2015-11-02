@@ -1,10 +1,12 @@
-/** Matrix 1D, 2D and 3D and operations with them
+/** Matrix 1D, 2D, 3D and 4D and operations with them
  *
  * \file Matrix.h
  *
- * File has 1D-class, 2D-class and 3D-class of matrixes and variouse functions to work with them.
+ * File has 1D-class, 2D-class 3D-class and 4D-class of matrixes and various functions to work with them.
  *
  * \author Developed under supervision of the PI Yuri Shprits
+ *
+ * \brief Matrix 1D, 2D, 3D and 4D and operations with them
  *
  */
 #ifndef matrix_array_MATRIX_H
@@ -21,12 +23,27 @@
 #include <iostream>
 #include <sstream>
 
+// Matlab library which will have to be linked at compile time
+// Usually found in matlabroot/extern/include where matlabroot is the result of typing the matlabroot command into matlab
+// Used for reading/writing functions for .mat files
+#if (MATLAB_CAPABLE)
+#include <mat.h>
+#endif
+
+// Stupid hook to make it works in Visual Studio with Maltab 2013-2015 libs
+//#define printf printf
+
+// Another way is to not include mex.h into the matrix.h
+//#include <mex.h>
+
 using namespace std;
 
 /**
  * Matrix 1D class
  *
  * Matrixes and operations.
+ *
+ * @brief A matrix of 1 dimensions that is immutable
  */
 template <typename T>
 class Matrix1D {
@@ -47,50 +64,50 @@ public:
 	virtual void AllocateMemory( int size_q1 );
 
 	// Operators
-	inline T& operator[](int i);													///< Return the i-th value of matrix
-	inline T& operator[](int i) const;
-	inline T& operator()(int q1);													///< Return the x-th value of matrix
-	inline T& Value (int q1) { return operator()(q1); }								///< Return the (x,y) value of matrix
-	inline Matrix1D<T>& MatrixArray () { return *this; }							///< Return pointer to the instance of the class.
-	inline T* MatrixArrayPointer () { return matrix_array; }							///< Return pointer to the instance of the class.
+	T& operator[](int i);													///< Return the i-th value of matrix
+	T& operator[](int i) const;												///< const function to return the i-th value of matrix
+	T& operator()(int q1);													///< Return the x-th value of matrix
+	T& Value (int q1) { return operator()(q1); }								///< Return the (x,y) value of matrix
+	Matrix1D<T>& MatrixArray () { return *this; }							///< Return pointer to the instance of the class.
+	T* MatrixArrayPointer () { return matrix_array; }							///< Return pointer to the instance of the class.
 
 	// unary
-	inline const Matrix1D& operator+() const { return *this; }
-	inline const Matrix1D operator-() const { return ((*this)*(-1)); }
+	const Matrix1D& operator+() const { return *this; }						 ///< Return the matrix
+	const Matrix1D operator-() const { return ((*this)*(-1)); } 				///< Return the matrix with all values multiplied by -1
 
 	// The following operators modify the matrix they applied to
-	inline Matrix1D& operator= (const Matrix1D<T> &M);
-	inline Matrix1D& operator= (const T val);
+	Matrix1D& operator= (const Matrix1D<T> &M);
+	Matrix1D& operator= (const T val);
 
 	// \todo Some of the matrix operators still need to be implimented
 	// I didn't have time yet to write these functions - these are matrix opearations
-	//inline Matrix1D& operator*= (const Matrix1D<T> &M); 					// reserved for something good
-	//inline Matrix1D& operator/= (const Matrix1D<T> &M); 					// reserved for something good
-	inline Matrix1D& operator+= (const Matrix1D<T> &M);
-	inline Matrix1D& operator-= (const Matrix1D<T> &M);
-	inline Matrix1D& operator*= (const T Val);
-	inline Matrix1D& operator/= (const T Val);
-	inline Matrix1D& operator+= (const T Val); 								///< Add the Val to each matrix element, stores result in the matrix it's applied to
-	inline Matrix1D& operator-= (const T Val); 								///< Substract the Val from each matrix element, stores result in the matrix it's applied to
+	//Matrix1D& operator*= (const Matrix1D<T> &M); 					// reserved for something good
+	//Matrix1D& operator/= (const Matrix1D<T> &M); 					// reserved for something good
+	Matrix1D& operator+= (const Matrix1D<T> &M);
+	Matrix1D& operator-= (const Matrix1D<T> &M);
+	Matrix1D& operator*= (const T Val);
+	Matrix1D& operator/= (const T Val);
+	Matrix1D& operator+= (const T Val); 								///< Add the Val to each matrix element, stores result in the matrix it's applied to
+	Matrix1D& operator-= (const T Val); 								///< Substract the Val from each matrix element, stores result in the matrix it's applied to
 
-	//inline Matrix1D& times_equal (const Matrix1D<T> &M); 					///< Arraywise multiplication (A.*B), stores result in the matrix it's applied to
-	//inline Matrix1D& divide_equal (const Matrix1D<T> &M); 					///< Arraywise division (A./B), stores result in the matrix it's applied to
+	//Matrix1D& times_equal (const Matrix1D<T> &M); 					///< Arraywise multiplication (A.*B), stores result in the matrix it's applied to
+	//Matrix1D& divide_equal (const Matrix1D<T> &M); 					///< Arraywise division (A./B), stores result in the matrix it's applied to
 
 	// The following operators save the result to a new matrix
-	//inline Matrix1D operator* (const Matrix1D<T> &M) const; 				// reserved for something good
-	//inline Matrix1D operator/ (const Matrix1D<T> &M) const;  				// reserved for something good
-	//inline Matrix1D operator+ (const Matrix1D<T> &M) const;
-	//inline Matrix1D operator- (const Matrix1D<T> &M) const;
-	inline Matrix1D operator* (const T Val) const;
-	inline Matrix1D operator/ (const T Val) const;
-	//inline Matrix1D operator+ (const T Val) const; 							///< Add the Val to each matrix element, stores result in a new matrix
-	//inline Matrix1D operator- (const T Val) const; 							///< Substract the Val from each matrix element, stores result in a new matrix
+	//Matrix1D operator* (const Matrix1D<T> &M) const; 				// reserved for something good
+	//Matrix1D operator/ (const Matrix1D<T> &M) const;  				// reserved for something good
+	//Matrix1D operator+ (const Matrix1D<T> &M) const;
+	//Matrix1D operator- (const Matrix1D<T> &M) const;
+	Matrix1D operator* (const T Val) const;
+	Matrix1D operator/ (const T Val) const;
+	//Matrix1D operator+ (const T Val) const; 							///< Add the Val to each matrix element, stores result in a new matrix
+	//Matrix1D operator- (const T Val) const; 							///< Substract the Val from each matrix element, stores result in a new matrix
 
-	inline Matrix1D times (const Matrix1D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
-	inline Matrix1D divide (const Matrix1D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
+	Matrix1D times (const Matrix1D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
+	Matrix1D divide (const Matrix1D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
 
-	inline T dot (const Matrix1D<T> &M) const; 					///< Dot product
-	inline T norm () const; 					///< Norm
+	T dot (const Matrix1D<T> &M) const; 					///< Dot product
+	T norm () const; 					///< Norm
 
 	//T max();
 	//T maxabs();
@@ -100,6 +117,10 @@ public:
 	virtual void writeToFile(string filename, Matrix1D<T> &grid_q1);
 	virtual void readFromFile(string filename);
 	virtual void readFromFile(string filename, const Matrix1D<T> grid_q1);
+
+	//ADDED
+	virtual void readFromMatlabFile(string filename, int columnNumber = 1);
+	virtual void readFromMatlabFile(string filename, const Matrix1D<T> grid_q1);
 
 	T min();
 	T max();
@@ -112,17 +133,20 @@ public:
  * Matrix 2D class
  *
  * Matrixes and operations.
+ *
+ * @brief A matrix of 2 dimensions that is immutable
  */
 template <typename T> class Matrix2D {
 private:
-	/// Matrix array (array of links to other arrays). Final likns pointed to the memory addresses of the plane array. Matrix[x][y] can be used.
-	/// Also, all rows saved in the memory one after anouther as a big array. So Matrix[x+x_size*y] can be also used.
+	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y] can be used.
+	/// Also, all rows saved in the memory one after another as a big array. So Matrix[x+x_size*y] can be also used.
 	T **matrix_array;
 public:
-	const static int N_of_dimentions2 = 2;
+	// const static int N_of_dimentions2 = 2;									///< Not used anywhere
 
 	bool initialized;														///< Flag, equal true if initialized
-	int size_q1, size_q2;														///< size x, size_y
+	int size_q1;															///< size x
+	int size_q2;															 ///< size_y
 	string name;															///< name of the Matrix
 
 	// Constructors and destructors
@@ -135,47 +159,47 @@ public:
 
 	// Operators
 
-	inline T* operator[](int i) { return matrix_array[i]; }						///< Return the i-th pointer to 1d-array. Next [j] can be applied, so we have regular [i][j].
-	inline T* operator[](int i) const { return matrix_array[i]; }
-	inline T& operator()(int q1, int q2) { return matrix_array[0][q1*size_q2 + q2]; }	///< Return the (x,y)-th value of matrix
-	inline T& Value (int q1, int q2) { return operator()(q1, q2); }				///< Return the (x,y) value of matrix
-	inline Matrix2D<T>& MatrixArray () { return *this; }					///< Return pointer to the instance of the class.
+	T* operator[](int i) { return matrix_array[i]; }						///< Return the i-th pointer to 1d-array. Next [j] can be applied, so we have regular [i][j].
+	T* operator[](int i) const { return matrix_array[i]; }				///< const function to return the i-th pointer to 1d-array. Next [j] can be applied, so we have regular [i][j].
+	T& operator()(int q1, int q2) { return matrix_array[0][q1*size_q2 + q2]; }	///< Return the (x,y)-th value of matrix
+	T& Value (int q1, int q2) { return operator()(q1, q2); }				///< Return the (x,y) value of matrix
+	Matrix2D<T>& MatrixArray () { return *this; }					///< Return pointer to the instance of the class.
 
 	// unary
-	inline const Matrix2D& operator+() const { return *this; }
-	inline const Matrix2D operator-() const { return ((*this)*(-1)); }
+	const Matrix2D& operator+() const { return *this; } ///< unary : return the matrix
+	const Matrix2D operator-() const { return ((*this)*(-1)); } ///< unary : return the matrix with all values multiplied by -1
 
 	// The following operators modify the matrix they applied to
-	inline Matrix2D& operator= (const Matrix2D<T> &M);
-	inline Matrix2D& operator= (const T val);
+	Matrix2D& operator= (const Matrix2D<T> &M);
+	Matrix2D& operator= (const T val);
 
-	//inline Matrix2D& operator*= (const Matrix2D<T> &M); 					// reserved for something good
-	//inline Matrix2D& operator/= (const Matrix2D<T> &M); 					// reserved for something good
-	inline Matrix2D& operator+= (const Matrix2D<T> &M);
-	inline Matrix2D& operator-= (const Matrix2D<T> &M);
-	inline Matrix2D& operator*= (const T Val);
-	//inline Matrix2D& operator/= (const T Val);
-	//inline Matrix2D& operator+= (const T Val); 								///< Add the Val to each matrix element, stores result in the matrix it's applied to
-	//inline Matrix2D& operator-= (const T Val); 								///< Substract the Val from each matrix element, stores result in the matrix it's applied to
+	//Matrix2D& operator*= (const Matrix2D<T> &M); 					// reserved for something good
+	//Matrix2D& operator/= (const Matrix2D<T> &M); 					// reserved for something good
+	Matrix2D& operator+= (const Matrix2D<T> &M);
+	Matrix2D& operator-= (const Matrix2D<T> &M);
+	Matrix2D& operator*= (const T Val);
+	//Matrix2D& operator/= (const T Val);
+	//Matrix2D& operator+= (const T Val); 								///< Add the Val to each matrix element, stores result in the matrix it's applied to
+	//Matrix2D& operator-= (const T Val); 								///< Substract the Val from each matrix element, stores result in the matrix it's applied to
 
-	//inline Matrix2D& times_equal (const Matrix2D<T> &M); 					///< Arraywise multiplication (A.*B), stores result in the matrix it's applied to
-	//inline Matrix2D& divide_equal (const Matrix2D<T> &M); 					///< Arraywise division (A./B), stores result in the matrix it's applied to
+	//Matrix2D& times_equal (const Matrix2D<T> &M); 					///< Arraywise multiplication (A.*B), stores result in the matrix it's applied to
+	//Matrix2D& divide_equal (const Matrix2D<T> &M); 					///< Arraywise division (A./B), stores result in the matrix it's applied to
 
 	// The following operators save the result to a new matrix
-	//inline Matrix2D operator* (const Matrix2D<T> &M) const; 				// Matrix multiplication
-	//inline Matrix2D operator/ (const Matrix2D<T> &M) const;  				// reserved for something good
-	//inline Matrix2D operator+ (const Matrix2D<T> &M) const;
-	//inline Matrix2D operator- (const Matrix2D<T> &M) const;
-	inline Matrix2D operator* (const T Val) const;
-	inline Matrix2D operator/ (const T Val) const;
-	//inline Matrix2D operator+ (const T Val) const; 							///< Add the Val to each matrix element, stores result in a new matrix
-	//inline Matrix2D operator- (const T Val) const; 							///< Substract the Val from each matrix element, stores result in a new matrix
+	//Matrix2D operator* (const Matrix2D<T> &M) const; 				// Matrix multiplication
+	//Matrix2D operator/ (const Matrix2D<T> &M) const;  				// reserved for something good
+	//Matrix2D operator+ (const Matrix2D<T> &M) const;
+	//Matrix2D operator- (const Matrix2D<T> &M) const;
+	Matrix2D operator* (const T Val) const;
+	Matrix2D operator/ (const T Val) const;
+	//Matrix2D operator+ (const T Val) const; 							///< Add the Val to each matrix element, stores result in a new matrix
+	//Matrix2D operator- (const T Val) const; 							///< Substract the Val from each matrix element, stores result in a new matrix
 
-	inline Matrix2D times (const Matrix2D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
-	inline Matrix2D divide (const Matrix2D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
+	Matrix2D times (const Matrix2D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
+	Matrix2D divide (const Matrix2D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
 
 	// Return corresponding index of 1d array
-	inline int index1d(int q1, int q2) const;
+	int index1d(int q1, int q2) const;
 
 	T max();
 	T maxabs();
@@ -190,6 +214,10 @@ public:
 	virtual void readFromFile(string filename, int column = 1);
 	virtual void readFromFile(string filename, const Matrix2D<T> grid_q1, const Matrix2D<T> grid_q2);
 
+	//ADDED
+	virtual void readFromMatlabFile(string filename, int column = 1);
+	virtual void readFromMatlabFile(string filename, const Matrix2D<T> grid_q1, const Matrix2D<T> grid_q2);
+
 	// slices - get 1D slice from 2D array
 	Matrix1D<T> xSlice(int p_q1) const;
 	Matrix1D<T> ySlice(int p_q2) const;
@@ -200,17 +228,21 @@ public:
  * Matrix 3D class
  *
  * Matrixes and operations.
+ *
+ * @brief A matrix of 3 dimensions that is immutable
  */
 template <typename T>
 class Matrix3D {
 private:
 	/// Plane array of values. All rows saved in the memory one after anouther as a big array.
 	T *plane_array;
-	/// Matrix array (array of links to other arrays). Final likns pointed to the memory addresses of the plane array. Matrix[x][y] can be used.
+	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y][z] can be used.
 	T ***matrix_array;
 public:
 	bool initialized;														///< Flag, equal true if initialized
-	int size_q1, size_q2, size_q3;												///< size x, size y, size z
+	int size_q1;															///< size x
+	int size_q2;															///< size y
+	int size_q3;															///< size z
 	string name;															///< name of the Matrix
 
 	// constructors and destructors
@@ -223,45 +255,46 @@ public:
 	virtual void AllocateMemory(int size_q1, int size_q2, int size_q3);
 
 	// Operators
-	inline T** operator[] (int i); 											///< Return the i-th pointer to 2d-array. Next [j][k] can be applied, so we have regular [i][j][k].
-	inline T** operator[] (int i) const { return matrix_array[i]; }
-	inline T& operator() (int q1, int q2, int q3); 							///< Return the (x,y,z) value of matrix
-	inline T& Value (int q1, int q2, int q3) { return operator()(q1, q2, q3); }	///< Return the (x,y,z) value of matrix
-	inline Matrix3D<T>& MatrixArray () { return *this; }					///< Return pointer to the instance of the class.
+	T** operator[] (int i); 											///< Return the i-th pointer to 2d-array. Next [j][k] can be applied, so we have regular [i][j][k].
+	T** operator[] (int i) const { return matrix_array[i]; }			///< const function to return the i-th pointer to 2d-array. Next [j][k] can be applied, so we have regular [i][j][k].
+	T& operator() (int q1, int q2, int q3); 							///< Return the (x,y,z) value of matrix
+	T& Value (int q1, int q2, int q3) { return operator()(q1, q2, q3); }	///< Return the (x,y,z) value of matrix
+	Matrix3D<T>& MatrixArray () { return *this; }					///< Return pointer to the instance of the class.
 
 	// The following operators modify the matrix they applied to
-	inline Matrix3D& operator= (const Matrix3D<T> &M);
-//	inline Matrix3D& operator= (const Matrix2D<T> &M); 						// confusing function
-	inline Matrix3D& operator= (const T Val);
+	Matrix3D& operator= (const Matrix3D<T> &M);
+//	Matrix3D& operator= (const Matrix2D<T> &M); 						// confusing function
+	Matrix3D& operator= (const T Val);
 
 	// unary
-	inline const Matrix3D& operator+() const { return *this; }
-	inline const Matrix3D operator-() const { return ((*this)*(-1)); }
+	const Matrix3D& operator+() const { return *this; } ///< unary : return the matrix
+	const Matrix3D operator-() const { return ((*this)*(-1)); } ///< unary : return the matrix with all values multiplied by -1
 
-	//inline Matrix3D& operator*= (const Matrix3D<T> &M); 					// reserved for something good
-	//inline Matrix3D& operator/= (const Matrix3D<T> &M); 					// reserved for something good
-	inline Matrix3D& operator+= (const Matrix3D<T> &M);
-	inline Matrix3D& operator-= (const Matrix3D<T> &M);
-	inline Matrix3D& operator*= (const T Val);
-	inline Matrix3D& operator/= (const T Val);
-	inline Matrix3D& operator+= (const T Val); 								///< Add the Val to each matrix element, stores result in the matrix it's applied to
-	inline Matrix3D& operator-= (const T Val); 								///< Substract the Val from each matrix element, stores result in the matrix it's applied to
 
-	inline Matrix3D& times_equal (const Matrix3D<T> &M); 					///< Arraywise multiplication (A.*B), stores result in the matrix it's applied to
-	inline Matrix3D& divide_equal (const Matrix3D<T> &M); 					///< Arraywise division (A./B), stores result in the matrix it's applied to
+	//Matrix3D& operator*= (const Matrix3D<T> &M); 					// reserved for something good
+	//Matrix3D& operator/= (const Matrix3D<T> &M); 					// reserved for something good
+	Matrix3D& operator+= (const Matrix3D<T> &M);
+	Matrix3D& operator-= (const Matrix3D<T> &M);
+	Matrix3D& operator*= (const T Val);
+	Matrix3D& operator/= (const T Val);
+	Matrix3D& operator+= (const T Val); 								///< Add the Val to each matrix element, stores result in the matrix it's applied to
+	Matrix3D& operator-= (const T Val); 								///< Substract the Val from each matrix element, stores result in the matrix it's applied to
+
+	Matrix3D& times_equal (const Matrix3D<T> &M); 					///< Arraywise multiplication (A.*B), stores result in the matrix it's applied to
+	Matrix3D& divide_equal (const Matrix3D<T> &M); 					///< Arraywise division (A./B), stores result in the matrix it's applied to
 
 	// The following operators save the result to a new matrix
-	//inline Matrix3D operator* (const Matrix3D<T> &M) const; 				// reserved for something good
-	//inline Matrix3D operator/ (const Matrix3D<T> &M) const;  				// reserved for something good
-	inline Matrix3D operator+ (const Matrix3D<T> &M) const;
-	inline Matrix3D operator- (const Matrix3D<T> &M) const;
-	inline Matrix3D operator* (const T Val) const;
-	inline Matrix3D operator/ (const T Val) const;
-	//inline Matrix3D operator+ (const T Val) const; 							///< Add the Val to each matrix element, stores result in a new matrix
-	//inline Matrix3D operator- (const T Val) const; 							///< Substract the Val from each matrix element, stores result in a new matrix
+	//Matrix3D operator* (const Matrix3D<T> &M) const; 				// reserved for something good
+	//Matrix3D operator/ (const Matrix3D<T> &M) const;  				// reserved for something good
+	Matrix3D operator+ (const Matrix3D<T> &M) const;
+	Matrix3D operator- (const Matrix3D<T> &M) const;
+	Matrix3D operator* (const T Val) const;
+	Matrix3D operator/ (const T Val) const;
+	//Matrix3D operator+ (const T Val) const; 							///< Add the Val to each matrix element, stores result in a new matrix
+	//Matrix3D operator- (const T Val) const; 							///< Substract the Val from each matrix element, stores result in a new matrix
 
-	inline Matrix3D times (const Matrix3D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
-	inline Matrix3D divide (const Matrix3D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
+	Matrix3D times (const Matrix3D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
+	Matrix3D divide (const Matrix3D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
 
 	// Saving (loading) of a matrix into (from) file
 	virtual void writeToFile(string filename, string info = ""); 										///< Save matrix to a file
@@ -269,10 +302,14 @@ public:
 	virtual void readFromFile(string filename, int column = 1);  									///< Load matrix from a file
 	virtual void readFromFile(string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3); ///< Load matrix to a file
 
+	// ADDED
+	virtual void readFromMatlabFile(string filename, int column = 1);
+	virtual void readFromMatlabFile(string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3);
+
 	// Some other stuff
 	string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
 
-	inline int index1d(int q1, int q2, int q3);								///< Returns index of the element (x,y,z) in 1d array
+	int index1d(int q1, int q2, int q3);								///< Returns index of the element (x,y,z) in 1d array
 
 	T min();
 	T max();
@@ -294,19 +331,24 @@ public:
 
 
 /**
- * Matrix 3D class
+ * Matrix 4D class
  *
  * Matrixes and operations.
+ *
+ * @brief A matrix of 4 dimensions that is immutable
  */
 template <typename T> class Matrix4D {
 private:
 	/// Plane array of values. All rows saved in the memory one after anouther as a big array.
 	T *plane_array;
-	/// Matrix array (array of links to other arrays). Final likns pointed to the memory addresses of the plane array. Matrix[x][y] can be used.
+	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[w][x][y][z] can be used.
 	T ****matrix_array;
 public:
 	bool initialized;														///< Flag, equal true if initialized
-	int size_w, size_x, size_y, size_z;												///< size x, size y, size z
+	int size_w;																///< size w
+	int size_x;																///< size x
+	int size_y; 															///< size y
+	int size_z;																///< size z
 	string name;															///< name of the Matrix
 
 	// constructors and destructors
@@ -319,44 +361,44 @@ public:
 	virtual void AllocateMemory(int size_w, int size_x, int size_y, int size_z);
 
 	// Operators
-	inline T*** operator[] (int i); 											///< Return the i-th pointer to 2d-array. Next [j][k] can be applied, so we have regular [i][j][k].
-	inline T*** operator[] (int i) const { return matrix_array[i]; }
-	inline T& operator() (int w, int x, int y, int z); 							///< Return the (x,y,z) value of matrix
-	inline T& Value (int w, int x, int y, int z) { return operator()(w, x, y, z); }	///< Return the (x,y,z) value of matrix
-	inline Matrix4D<T>& MatrixArray () { return *this; }					///< Return pointer to the instance of the class.
+	T*** operator[] (int i); 											///< Return the i-th pointer to 3d-array. Next [j][k][l] can be applied, so we have regular [i][j][k][l].
+	T*** operator[] (int i) const { return matrix_array[i]; }            ///< const function to return the i-th pointer to 3d-array. Next [j][k][l] can be applied, so we have regular [i][j][k][l].
+	T& operator() (int w, int x, int y, int z); 							///< Return the (w,x,y,z) value of matrix
+	T& Value (int w, int x, int y, int z) { return operator()(w, x, y, z); }	///< Return the (w,x,y,z) value of matrix
+	Matrix4D<T>& MatrixArray () { return *this; }					///< Return pointer to the instance of the class.
 
 	// The following operators modify the matrix they applied to
-	inline Matrix4D& operator= (const Matrix4D<T> &M);
-	inline Matrix4D& operator= (const T Val);
+	Matrix4D& operator= (const Matrix4D<T> &M);
+	Matrix4D& operator= (const T Val);
 
 	// unary
-	inline const Matrix4D& operator+() const { return *this; }
-	inline const Matrix4D operator-() const { return ((*this)*(-1)); }
+	const Matrix4D& operator+() const { return *this;}  ///< unary : return the matrix
+	const Matrix4D operator-() const { return ((*this)*(-1)); } ///< unary : return the matrix with all values multiplied by -1
 
-	//inline Matrix4D& operator*= (const Matrix4D<T> &M); 					// reserved for something good
-	//inline Matrix4D& operator/= (const Matrix4D<T> &M); 					// reserved for something good
-	inline Matrix4D& operator+= (const Matrix4D<T> &M);
-	inline Matrix4D& operator-= (const Matrix4D<T> &M);
-	inline Matrix4D& operator*= (const T Val);
-	inline Matrix4D& operator/= (const T Val);
-	inline Matrix4D& operator+= (const T Val); 								///< Add the Val to each matrix element, stores result in the matrix it's applied to
-	inline Matrix4D& operator-= (const T Val); 								///< Substract the Val from each matrix element, stores result in the matrix it's applied to
+	//Matrix4D& operator*= (const Matrix4D<T> &M); 					// reserved for something good
+	//Matrix4D& operator/= (const Matrix4D<T> &M); 					// reserved for something good
+	Matrix4D& operator+= (const Matrix4D<T> &M);
+	Matrix4D& operator-= (const Matrix4D<T> &M);
+	Matrix4D& operator*= (const T Val);
+	Matrix4D& operator/= (const T Val);
+	Matrix4D& operator+= (const T Val); 								///< Add Val to each matrix element, stores result in the matrix it's applied to
+	Matrix4D& operator-= (const T Val); 								///< Substract Val from each element in this matrix, stores result in the matrix it's applied to
 
-	inline Matrix4D& times_equal (const Matrix4D<T> &M); 					///< Arraywise multiplication (A.*B), stores result in the matrix it's applied to
-	inline Matrix4D& divide_equal (const Matrix4D<T> &M); 					///< Arraywise division (A./B), stores result in the matrix it's applied to
+	Matrix4D& times_equal (const Matrix4D<T> &M); 					///< Arraywise multiplication (A.*B), stores result in the matrix it's applied to
+	Matrix4D& divide_equal (const Matrix4D<T> &M); 					///< Arraywise division (A./B), stores result in the matrix it's applied to
 
 	// The following operators save the result to a new matrix
-	//inline Matrix4D operator* (const Matrix4D<T> &M) const; 				// reserved for something good
-	//inline Matrix4D operator/ (const Matrix4D<T> &M) const;  				// reserved for something good
-	inline Matrix4D operator+ (const Matrix4D<T> &M) const;
-	inline Matrix4D operator- (const Matrix4D<T> &M) const;
-	inline Matrix4D operator* (const T Val) const;
-	inline Matrix4D operator/ (const T Val) const;
-	//inline Matrix4D operator+ (const T Val) const; 							///< Add the Val to each matrix element, stores result in a new matrix
-	//inline Matrix4D operator- (const T Val) const; 							///< Substract the Val from each matrix element, stores result in a new matrix
+	//Matrix4D operator* (const Matrix4D<T> &M) const; 				// reserved for something good
+	//Matrix4D operator/ (const Matrix4D<T> &M) const;  				// reserved for something good
+	Matrix4D operator+ (const Matrix4D<T> &M) const;
+	Matrix4D operator- (const Matrix4D<T> &M) const;
+	Matrix4D operator* (const T Val) const;
+	Matrix4D operator/ (const T Val) const;
+	//Matrix4D operator+ (const T Val) const; 							///< Add the Val to each matrix element, stores result in a new matrix
+	//Matrix4D operator- (const T Val) const; 							///< Substract the Val from each matrix element, stores result in a new matrix
 
-	inline Matrix4D times (const Matrix4D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
-	inline Matrix4D divide (const Matrix4D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
+	Matrix4D times (const Matrix4D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
+	Matrix4D divide (const Matrix4D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
 
 	// Saving (loading) of a matrix into (from) file
 	virtual void writeToFile(string filename, string info = ""); 										///< Save matrix to a file
@@ -364,10 +406,20 @@ public:
 	virtual void readFromFile(string filename, int column = 1);  									///< Load matrix from a file
 	virtual void readFromFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z); ///< Load matrix to a file
 
+	// ADDED
+#if (MATLAB_CAPABLE)
+	virtual mxArray* createStructMatrix(string filename, string info = ""); ///< Package matrix into matlab variable
+#endif
+
+	virtual void writeToMatlabFile(string filename, string info = ""); 										///< Save matrix to a file
+	virtual void writeToMatlabFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z);
+	virtual void readFromMatlabFile(string file, int column = 1);
+	virtual void readFromMatlabFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z);
+
 	// Some other stuff
 	string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
 
-	inline int index1d(int w, int x, int y, int z);								///< Returns index of the element (x,y,z) in 1d array
+	int index1d(int w, int x, int y, int z);								///< Returns index of the element (x,y,z) in 1d array
 
 	T min();
 	T max();
@@ -396,21 +448,34 @@ public:
 };
 
 
-/** Diagonal matrix.
+/** @class DiagMatrix
  * This method of storage for matrices is convenient for diagonal (spread) matrices.
  * Stored as map (diagonal number, 1d diagonal array)
  * The USED diagonals of the matrix are stored in 1d arrays.
+ * CalculationMatrix inherits from this
+ * @brief Diagonals of matrix stored as map (diagonal number, 1d diagonal array)
+ *
+ * @typedef DiagMatrix
+ * This method of storage for matrices is convenient for diagonal (spread) matrices.
+ * Stored as map (diagonal number, 1d diagonal array)
+ * The USED diagonals of the matrix are stored in 1d arrays.
+ * This typedef is used in CalculationMatrix
+ * @brief Diagonals of matrix stored as map (diagonal number, 1d diagonal array)
  */
 typedef map <int , Matrix1D<double> > DiagMatrix;
 
 /** Model matrix (or related matrices)
- * It is based on Diagonal matrix and have methods for conversion from 3D or 2D PSD (and related) arrays into 1d array of unknown elements
+ * It is based on DiagMatrix and have methods for conversion from 3D or 2D PSD (and related) arrays into 1d array of unknown elements
+ *
+ * @brief A matrix used primarily for diagonalized calculations
  */
 class CalculationMatrix : public DiagMatrix {
 public:
 
-	bool initialized;
-	int x_size, y_size, total_size;
+	bool initialized; ///< Variables used for denoting whether it is initialized or not
+	int x_size; ///< size in x direction of matrix
+	int y_size; ///< size in y direction of matrix
+	int total_size; ///< total size of matrix
 	// flag, if needs to be recalculated
 	string change_ind;						///< Variables useful for changes tracking (store here time when changed)
 
@@ -430,10 +495,12 @@ public:
 	void writeToFile(string filename);
 
 	// Operators
+	/// FUNCTION NOT IMPLEMENTED
 	Matrix1D<double> operator* (Matrix1D<double> &V) const;
 
 };
 
+/// FUNCTION NOT IMPLEMENTED
 int index1d2(int x, int y = 0, int z = 0);
 
 #endif

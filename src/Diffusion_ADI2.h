@@ -1,5 +1,7 @@
-/*
- * Diffusion.h
+/**
+ * \file Diffusion_ADI2.h
+ *
+ * \brief Calculating the diffusion in 2D using multidimensional diffusion process - Xiao, F., Z. Su, H. Zheng, and S. Wang (2009)
  *
  *  Created on: May 28, 2011
  *      Author: dimath

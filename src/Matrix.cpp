@@ -1,12 +1,24 @@
-/**
-* \file Matrix.cpp
-*
-* \author Developed under supervision of the PI Yuri Shprits
-*/
+/** Matrix 1D, 2D, 3D and 4D and operations with them
+ *
+ * \file Matrix.cpp
+ *
+ * File has 1D-class, 2D-class 3D-class and 4D-class of matrixes and various functions to work with them.
+ *
+ * \author Developed under supervision of the PI Yuri Shprits
+ *
+ * \brief Matrix 1D, 2D, 3D and 4D and operations with them
+ *
+ */
 #ifndef matrix_array_MATRIX_CPP
 #define matrix_array_MATRIX_CPP
+	
 
+	
+	
+	
 #include "Matrix.h"
+#include "Logger.h"
+
 
 using namespace std;
 
@@ -15,12 +27,15 @@ using namespace std;
 	#define strcasecmp _stricmp
 #endif
 
+
+
+const double err = 1e-6;
+
 // #define DEBUG_MODE
 
 // Memory related functions
 
 /// Allocating memory for 1D matrix
-/// \todo Move to Matrix.cpp
 template<class T>inline T* matrix(long Rows)
 {
 	T *m=new T[Rows];
@@ -33,7 +48,6 @@ template<class T>inline T* matrix(long Rows)
 }
 
 /// Initilizing memory for 2D matrix
-/// \todo Move to Matrix.cpp
 template<class T>inline T** matrix(long Rows, long Columns)
 {
 	// allocating memory for array of pinters
@@ -56,7 +70,6 @@ template<class T>inline T** matrix(long Rows, long Columns)
 }
 
 /// Initializing memory for 3D matrix
-/// \todo Move to Matrix.cpp
 template<class T>inline T*** matrix(int size_x, int size_y, int size_z)
 {
 	// allocating memory for array of pointers to pointers
@@ -92,7 +105,7 @@ template<class T>inline T*** matrix(int size_x, int size_y, int size_z)
 	return m;
 }
 
-/// Initializing memory for 3D matrix
+/// Initializing memory for 4D matrix
 template<class T>inline T**** matrix(int size_w, int size_x, int size_y, int size_z)
 {
 	// allocating memory for array of pointers to pointers
@@ -145,20 +158,17 @@ template<class T>inline T**** matrix(int size_w, int size_x, int size_y, int siz
 
 
 /// Freeing memory for 1D matrix
-/// \todo Move to Matrix.cpp
 template<class T>inline void free_matrix(T* m) {
 	delete m;
 }
 
 /// Freeing memory for 2D matrix
-/// \todo Move to Matrix.cpp
 template<class T>inline void free_matrix(T** m) {
 	delete[](m[0]);
 	delete[](m);
 }
 
 /// Freeing memory for 3D matrix
-/// \todo Move to Matrix.cpp
 template<class T>inline void free_matrix(T*** m, int size_x, int size_y) {
 	delete[](m[0][0]);
 	for (int x = 0; x < size_x; x++) {
@@ -169,7 +179,6 @@ template<class T>inline void free_matrix(T*** m, int size_x, int size_y) {
 
 
 /// Freeing memory for 4D matrix
-/// \todo Move to Matrix.cpp
 template<class T>inline void free_matrix(T**** m, int size_w, int size_x, int size_y) {
 	delete[](m[0][0][0]);
 	for (int w = 0; w < size_w; w++) {
@@ -261,7 +270,7 @@ inline T& Matrix1D<T>::operator[](int i1) {
 
 /**
 * Operator [i], returns value of element i, version returns 'const' value, can not be later modified.
-* If  DEBUG_MODE defined, check if matrix has been initialized.
+* If  DEBUG_MODE defined, check if matrix has been initialized. 
 *
 * \param i - number of element to return
 */
@@ -461,7 +470,7 @@ inline T Matrix1D<T>::norm() const {
 	return sqrt(res);
 }
 
-/**
+/*
 * Dot product
 */
 template<class T>
@@ -556,15 +565,337 @@ void Matrix1D<T>::readFromFile(string filename) {
 	}
 }
 
+
+
 /**
-* Read matrix data from file and check 'grid'
+* Function for reading from matlab file in 1-dimension
+* Will check the variables, order them in (P, R/L, V, K, Val) format and then set matrix_array to be the variable with the corresponding column number 
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
+template<class T>
+void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
+{
+#if (MATLAB_CAPABLE) 
+	
+	Logger::message << "Reading " << file << ": " << endl;	
+	
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrReturn; /* pointer to data */
+	double *PtrL; /* pointer to data */		
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;		/* for getting variable names */
+	bool wReached = false;			
+	bool xReached = false;			
+	bool yReached = false;	
+	bool zReached = false;									
+	bool defaultReached = false;													
+			
+	mfPtr = matOpen(file.c_str(), "r");
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file.c_str());
+	}
+	
+	for (int i= 0; i < 3; i++)
+	{
+		
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		if (temp.length() == 1)
+		    {
+		        nameTemp = (temp.substr(0,1)).c_str();
+		    }
+		    else
+		    {
+		        if (temp.substr(1,1) == "_")
+				{
+					nameTemp = (temp.substr(0,1)).c_str();
+				}
+				else if ((temp.substr(0,2) == "pc"))
+				{
+					nameTemp = "V";
+				}
+				else if ((temp.substr(0,2) == "al"))
+				{
+					nameTemp = "K";
+				}
+				else
+				{
+					nameTemp = "!";	
+				}
+		    }
+		switch (*nameTemp)
+		{
+			case 'P':
+				wReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								PtrW = mxGetPr(fPtrW);
+								//printf("%e \n", PtrW[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								PtrL = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				yReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+								//printf("%e \n", PtrY[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				zReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+								//printf("%e \n", PtrZ[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+								//printf("%e \n", PtrFinal[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+		
+	
+	// To get the column number of the return
+	if (wReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrW;
+		}	
+	}
+	if (xReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrX;
+		}	
+	}
+	if (yReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrY;
+		}	
+	}
+	if (zReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrZ;
+		}	
+	}
+	if (defaultReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrFinal;
+		}	
+	}
+	if (columnNumber > 0)
+	{
+		printf("column number too high \n");
+		EXIT_FAILURE;
+	}
+	
+	
+	//sets the matrix array to be equal to an array of doubles
+	for (x = 0; x < size_q1; x++) {
+		matrix_array[x] = PtrReturn[x];
+	}
+	
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file.c_str());
+    }
+	
+	mxDestroyArray(aPtr);
+	
+#endif
+
+}
+
+
+
+
+
+/**
+* Read matrix data from file with grid, 
+* Checks if the matrix data in the file is the same as the grids that were sent in with error < 1e-8,
+* if not within error range will signal error and exit
+* 
+* Overloaded readFromFile function
+* \param filename - file to read grids from
+* \param grid_q1 - checks grid data against the file data
 */
 template<class T>
 void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
 	int i1;
 	string inBuf;
 	double loaded_q1;
-	double err = 1e-8;
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
 		exit(EXIT_FAILURE);
@@ -584,7 +915,7 @@ void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
 			for (i1 = 0; i1 < size_q1; i1++) {
 				input >> loaded_q1;
 				// check if grid is the same
-				if (fabs(loaded_q1 - grid_q1[i1]) > err) {
+				if (fabs(log10(loaded_q1) - log10(grid_q1[i1])) > err) {
 					printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch.\nLoaded: %e\nGrid: %e\n", filename.c_str(), loaded_q1, grid_q1[i1]);
 					exit(EXIT_FAILURE);
 				} else {
@@ -601,8 +932,361 @@ void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
 
 
 
+
+
+
+
+
 /**
-* Return minimum value of the matrix.
+* Function for reading from matlab file in 1-dimension
+* Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard
+* The variables will be checked against the input grid parameters in order to make sure the right variables/values are being loaded
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
+template<class T>
+void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
+{
+	
+#if (MATLAB_CAPABLE)	
+
+	Logger::message << "Reading " << file << ": " << endl;	
+	
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrL; /* pointer to data */		
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;		/* for getting variable names */
+	bool wReached = false;			
+	bool xReached = false;			
+	bool yReached = false;	
+	bool zReached = false;									
+	bool defaultReached = false;													
+			
+	mfPtr = matOpen(file.c_str(), "r");
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file.c_str());
+	}
+	
+	for (int i= 0; i < 3; i++)
+	{
+		
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		if (temp.length() == 1)
+		    {
+		        nameTemp = (temp.substr(0,1)).c_str();
+		    }
+		    else
+		    {
+		        if (temp.substr(1,1) == "_")
+				{
+					nameTemp = (temp.substr(0,1)).c_str();
+				}
+				else if ((temp.substr(0,2) == "pc"))
+				{
+					nameTemp = "V";
+				}
+				else if ((temp.substr(0,2) == "al"))
+				{
+					nameTemp = "K";
+				}
+				else
+				{
+					nameTemp = "!";	
+				}
+		    }
+		switch (*nameTemp)
+		{
+			case 'P':
+				wReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								PtrW = mxGetPr(fPtrW);
+								//printf("%e \n", PtrW[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								PtrL = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				yReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+								//printf("%e \n", PtrY[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				zReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+								//printf("%e \n", PtrZ[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+								//printf("%e \n", PtrFinal[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+	
+	if (wReached)
+	{
+		PtrX = PtrW;
+	}
+	if (yReached)
+	{
+		PtrX = PtrY;
+	}
+	if (zReached)
+	{
+		PtrX = PtrZ;
+	}
+	
+	
+	
+	
+	
+	//sets the matrix array to be equal to an array of doubles
+	for (x = 0; x < size_q1; x++) {
+		if (fabs(log10(PtrX[x]) - log10(grid_x[x])) > err ) {
+		 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d].\nLoaded: %e\nGrid: %e\n", file.c_str(), x, PtrX[x], grid_x[x]);
+					//printf("grid error \n");
+					exit(EXIT_FAILURE);
+		}
+		matrix_array[x] = PtrFinal[x];
+	}
+	
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file.c_str());
+    }
+	
+	mxDestroyArray(aPtr);
+	
+#endif
+}
+
+
+
+
+
+
+// // ADDED
+// /* Analyze field FNAME in struct array SPTR. */
+// static void
+// analyzestructarray(const mxArray *sPtr, const char *fName)
+// {
+//     mwSize nElements;       /* number of elements in array */
+//     mwIndex eIdx;           /* element index */
+//     mwIndex fPTRIdx;           /* fptr index */
+//     const mxArray *fPtr;    /* field pointer */
+//     double *realPtr;        /* pointer to data */
+//     mwSize nElementsInRealData; /* number of elements in array */
+    
+	
+// 	// Goes through all of the structs
+// 	// I think all of them only have one struct consisting of a couple fields (one or more of which is the double array which we want)
+//     nElements = (mwSize)mxGetNumberOfElements(sPtr);
+//     for (eIdx = 0; eIdx < nElements; eIdx++) {
+//         fPtr = mxGetField(sPtr, eIdx, fName);
+//         nElementsInRealData = (mwSize)mxGetNumberOfElements(fPtr);
+//         printf("number of elements in %s: %.2d\n", fName, nElementsInRealData);
+//         if ((fPtr != NULL)
+//             && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) 
+//             && (!mxIsComplex(fPtr))) 
+//         {
+//             realPtr = mxGetPr(fPtr);
+//             for (fPTRIdx = 0; fPTRIdx < nElementsInRealData; fPTRIdx++)
+//             {
+//                 printf("%.2f \n", realPtr[fPTRIdx]);
+//             }
+//         }
+//     }
+// }
+
+// /* Find struct array ARR in MAT-file FILE.
+//  * Pass field name FIELD to analyzestructarray function. */
+// /*int findstructure(
+//         const char *file,
+//         const char *arr,
+//         const char *field) {
+    
+   
+    
+// }*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+* Return minimum value of the 1d matrix.
+* Default value set to 1e99
 */
 template<class T>
 T Matrix1D<T>::min() {
@@ -615,7 +1299,8 @@ T Matrix1D<T>::min() {
 }
 
 /**
-* Return maximum value of the matrix.
+* Return maximum value of the 1d matrix.
+* Default value seet to 0
 */
 template<class T>
 T Matrix1D<T>::max() {
@@ -628,7 +1313,8 @@ T Matrix1D<T>::max() {
 }
 
 /**
-* Return absolute maximum value of the matrix.
+* Return absolute maximum value of the 1d matrix.
+* Default value set to 0
 */
 template<class T>
 T Matrix1D<T>::maxabs() {
@@ -641,7 +1327,8 @@ T Matrix1D<T>::maxabs() {
 }
 
 /**
-* Return absolute value of the matrix.
+* Return absolute value of the 1d matrix.
+* Changes every element to a positive value with the same magnitude
 */
 template<class T>
 Matrix1D<T> Matrix1D<T>::abs() {
@@ -663,8 +1350,8 @@ Matrix1D<T> Matrix1D<T>::abs() {
 * Constructor.
 * Allocate memory.
 *
-* \param size_q1 - q1 size
-* \param size_q1 - q1 size
+* \param size_q1 - x size
+* \param size_q2 - y size
 */
 template<class T>
 Matrix2D<T>::Matrix2D( int size_q1, int size_q2 ) {
@@ -862,7 +1549,8 @@ inline Matrix2D<T> Matrix2D<T>::times (const Matrix2D<T> &M) const {
 
 
 /**
-* Return maximum value of the matrix.
+* Return maximum value of the 2d matrix.
+* Default value seet to 0
 */
 template<class T>
 T Matrix2D<T>::max() {
@@ -877,7 +1565,8 @@ T Matrix2D<T>::max() {
 }
 
 /**
-* Return absolute maximum value of the matrix.
+* Return absolute maximum value of the 2d matrix.
+* Default value set to 0
 */
 template<class T>
 T Matrix2D<T>::maxabs() {
@@ -893,7 +1582,8 @@ T Matrix2D<T>::maxabs() {
 
 
 /**
-* Return minimum value of the matrix.
+* Return minimum value of the 2d matrix.
+* Default value set to 1e99
 */
 template<class T>
 T Matrix2D<T>::min() {
@@ -908,7 +1598,8 @@ T Matrix2D<T>::min() {
 }
 
 /**
-* Return absolute value of the matrix.
+* Return absolute value of the 2d matrix.
+* Changes every element to a positive value with the same magnitude
 */
 template<class T>
 Matrix2D<T> Matrix2D<T>::abs() {
@@ -939,7 +1630,8 @@ Matrix2D<T> Matrix2D<T>::max_of(T val) {
 }
 
 /**
-* Returns corresponding index of 1d array
+* Returns corresponding index of 2d matrix if represented as a 1d array
+* \param x,y - index of element in every dimension for the 2d matrix
 */
 template<class T>
 inline int Matrix2D<T>::index1d(int x, int y) const {
@@ -996,7 +1688,11 @@ void Matrix2D<T>::writeToFile(string filename, Matrix2D<T> &grid_x, Matrix2D<T> 
 
 
 /**
-* Read matrix data from file.
+* Read matrix data from file with grid, by column
+* 
+* Overloaded readFromFile function
+* \param filename - file to read grids from
+* \param read_column - read up to this column from file
 */
 template<class T>
 void Matrix2D<T>::readFromFile(string filename, int read_column) {
@@ -1032,14 +1728,339 @@ void Matrix2D<T>::readFromFile(string filename, int read_column) {
 	}
 }
 
+
+
 /**
-* Read matrix data from file and check grid
+* Function for reading from matlab file in 2-dimensions
+* Will check the variables, order them in (P, R/L, V, K, Val) format and then set matrix_array to be the variable with the corresponding column number 
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
+template<class T>
+void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
+{
+
+#if (MATLAB_CAPABLE)
+	
+	Logger::message << "Reading " << file << ": " << endl;	
+	
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrReturn; /* pointer to data */
+	double *PtrL; /* pointer to data */		
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;		/* for getting variable names */
+	bool wReached = false;			
+	bool xReached = false;			
+	bool yReached = false;	
+	bool zReached = false;									
+	bool defaultReached = false;													
+			
+	mfPtr = matOpen(file.c_str(), "r");
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file.c_str());
+	}
+	
+	for (int i= 0; i < 3; i++)
+	{
+		
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		if (temp.length() == 1)
+		    {
+		        nameTemp = (temp.substr(0,1)).c_str();
+		    }
+		    else
+		    {
+		        if (temp.substr(1,1) == "_")
+				{
+					nameTemp = (temp.substr(0,1)).c_str();
+				}
+				else if ((temp.substr(0,2) == "pc"))
+				{
+					nameTemp = "V";
+				}
+				else if ((temp.substr(0,2) == "al"))
+				{
+					nameTemp = "K";
+				}
+				else
+				{
+					nameTemp = "!";	
+				}
+		    }
+		switch (*nameTemp)
+		{
+			case 'P':
+				wReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								PtrW = mxGetPr(fPtrW);
+								//printf("%e \n", PtrW[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								PtrL = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				yReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+								//printf("%e \n", PtrY[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				zReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+								//printf("%e \n", PtrZ[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+								//printf("%e \n", PtrFinal[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+	
+	// To get the column number of the return
+	if (wReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrW;
+		}	
+	}
+	if (xReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrX;
+		}	
+	}
+	if (yReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrY;
+		}	
+	}
+	if (zReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrZ;
+		}	
+	}
+	if (defaultReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrFinal;
+		}	
+	}
+	if (columnNumber > 0)
+	{
+		printf("column number too high \n");
+		EXIT_FAILURE;
+	}
+	
+	//sets the matrix array to be equal to an array of doubles
+	for (x = 0; x < size_q1; x++) {
+		for (y = 0; y < size_q2; y++) {
+			matrix_array[x][y] = PtrReturn[ y*(size_q1) +  x];
+		}
+	}
+	
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file.c_str());
+    }
+	
+	mxDestroyArray(aPtr);
+
+#endif		
+
+}
+
+
+
+
+
+
+
+/**
+* Read matrix data from file with grid, 
+* Checks if the matrix data in the file is the same as the grids that were sent in with error < 1e-8,
+* if not within error range will signal error and exit
+* 
+* Overloaded readFromFile function
+* \param filename - file to read grids from
+* \param grids x,y - checks grids data against the file data
 */
 template<class T>
 void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const Matrix2D<T> grid_y) {
 	int i1, i2;
 	string inBuf;
-	double err = 1e-6;
 	double loaded_x, loaded_y;
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using un-itialized matrix");
@@ -1061,7 +2082,7 @@ void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const 
 				for (i2 = 0; i2 < size_q2; i2++) {
 					input >> loaded_x >> loaded_y;
 					// check if grid is the same
-					if (fabs(loaded_x - grid_x[i1][i2]) > err || fabs(loaded_y - grid_y[i1][i2]) > err) {
+					if (fabs(log10(loaded_x) - log10(grid_x[i1][i2])) > err || fabs(log10(loaded_y) - log10(grid_y[i1][i2])) > err) {
 						printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch.\nLoaded: %e, %e\nGrid: %e, %e\n", filename.c_str(), loaded_x, loaded_y, grid_x[i1][i2], grid_y[i1][i2]);
 						exit(EXIT_FAILURE);
 					} else {
@@ -1078,6 +2099,314 @@ void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const 
 		input.close();
 	}
 }
+
+
+
+
+/**
+* Function for reading from matlab file in 2-dimensions
+* Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard
+* The variables will be checked against the input grid parameters in order to make sure the right variables/values are being loaded
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
+template<class T>
+void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, const Matrix2D<T> grid_y)
+{
+
+#if (MATLAB_CAPABLE)
+	
+	Logger::message << "Reading " << file << ": " << endl;	
+	
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrL; /* pointer to data */		
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;		/* for getting variable names */
+	bool wReached = false;			
+	bool xReached = false;			
+	bool yReached = false;	
+	bool zReached = false;									
+	bool defaultReached = false;													
+			
+	mfPtr = matOpen(file.c_str(), "r");
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file.c_str());
+	}
+	
+	for (int i= 0; i < 3; i++)
+	{
+		
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		if (temp.length() == 1)
+		    {
+		        nameTemp = (temp.substr(0,1)).c_str();
+		    }
+		    else
+		    {
+		        if (temp.substr(1,1) == "_")
+				{
+					nameTemp = (temp.substr(0,1)).c_str();
+				}
+				else if ((temp.substr(0,2) == "pc"))
+				{
+					nameTemp = "V";
+				}
+				else if ((temp.substr(0,2) == "al"))
+				{
+					nameTemp = "K";
+				}
+				else
+				{
+					nameTemp = "!";	
+				}
+		    }
+		switch (*nameTemp)
+		{
+			case 'P':
+				wReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								PtrW = mxGetPr(fPtrW);
+								//printf("%e \n", PtrW[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								PtrL = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				yReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+								//printf("%e \n", PtrY[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				zReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+								//printf("%e \n", PtrZ[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+								//printf("%e \n", PtrFinal[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+	
+	if (!wReached)
+	{
+		if (!xReached)
+		{
+			PtrX = PtrY;
+			PtrY = PtrZ;
+		}	
+		if (!yReached)
+		{
+			PtrY = PtrZ;
+		}
+	}
+	else if (!xReached)
+	{
+		if (!yReached)
+		{
+			PtrX = PtrW;
+			PtrY = PtrZ;
+		}	
+		if (!zReached)
+		{
+			PtrX = PtrW;
+		}
+	}
+	else
+	{
+		PtrY = PtrX;
+		PtrX = PtrW;
+	}
+	
+	
+	
+	
+	//sets the matrix array to be equal to an array of doubles
+	for (x = 0; x < size_q1; x++) {
+		for (y = 0; y < size_q2; y++) {
+			if (fabs(log10(PtrX[y*(size_q1) +  x]) - log10(grid_x[x][y])) > err || fabs(log10(PtrY[ y*(size_q1) +  x]) - log10(grid_y[x][y])) > err) {
+			 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d, %d].\nLoaded: %e, %e\nGrid: %e, %e\n", file.c_str(), x, y, PtrX[y*(size_q1) +  x],PtrY[ y*(size_q1) +  x], grid_x[x][y], grid_y[x][y]);
+						//printf("grid error \n");
+						exit(EXIT_FAILURE);
+			}
+			matrix_array[x][y] = PtrFinal[ y*(size_q1) +  x];
+		}
+	}
+	
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file.c_str());
+    }
+	
+	mxDestroyArray(aPtr);
+		
+#endif
+}
+
+
+
 
 
 /**
@@ -1530,7 +2859,11 @@ void Matrix3D<T>::writeToFile(string filename, Matrix3D<T> &grid_x, Matrix3D<T> 
 }
 
 /**
-* Read matrix data from file.
+* Read matrix data from file with grid, by column
+* 
+* Overloaded readFromFile function
+* \param filename - file to read grids from
+* \param read_column - read up to this column from file
 */
 template<class T>
 void Matrix3D<T>::readFromFile(string filename, int read_column) {
@@ -1576,15 +2909,342 @@ void Matrix3D<T>::readFromFile(string filename, int read_column) {
 	}
 }
 
+
+
 /**
-* Read matrix data from file with grid
+* Function for reading from matlab file in 3-dimensions
+* Will check the variables, order them in (P, R/L, V, K, Val) format and then set matrix_array to be the variable with the corresponding column number 
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
+template<class T>
+void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
+{
+	
+#if (MATLAB_CAPABLE)
+	
+	Logger::message << "Reading " << file << ": " << endl;	
+	
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrReturn; /* pointer to data */
+	double *PtrL; /* pointer to data */		
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;		/* for getting variable names */
+	bool wReached = false;			
+	bool xReached = false;			
+	bool yReached = false;	
+	bool zReached = false;									
+	bool defaultReached = false;													
+			
+	mfPtr = matOpen(file.c_str(), "r");
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file.c_str());
+	}
+	
+	for (int i= 0; i < 4; i++)
+	{
+		
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		if (temp.length() == 1)
+		    {
+		        nameTemp = (temp.substr(0,1)).c_str();
+		    }
+		    else
+		    {
+		        if (temp.substr(1,1) == "_")
+				{
+					nameTemp = (temp.substr(0,1)).c_str();
+				}
+				else if ((temp.substr(0,2) == "pc"))
+				{
+					nameTemp = "V";
+				}
+				else if ((temp.substr(0,2) == "al"))
+				{
+					nameTemp = "K";
+				}
+				else
+				{
+					nameTemp = "!";	
+				}
+		    }
+		switch (*nameTemp)
+		{
+			case 'P':
+				wReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								PtrW = mxGetPr(fPtrW);
+								//printf("%e \n", PtrW[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								PtrL = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				yReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+								//printf("%e \n", PtrY[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				zReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+								//printf("%e \n", PtrZ[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+								//printf("%e \n", PtrFinal[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+	
+	
+	// To get the column number of the return
+	if (wReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrW;
+		}	
+	}
+	if (xReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrX;
+		}	
+	}
+	if (yReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrY;
+		}	
+	}
+	if (zReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrZ;
+		}	
+	}
+	if (defaultReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrFinal;
+		}	
+	}
+	if (columnNumber > 0)
+	{
+		printf("column number too high \n");
+		EXIT_FAILURE;
+	}
+	
+	
+	
+	
+	//sets the matrix array to be equal to an array of doubles
+	for (x = 0; x < size_q1; x++) {
+		for (y = 0; y < size_q2; y++) {
+			for (z = 0; z < size_q3; z++) {
+				matrix_array[x][y][z] = PtrReturn[z*(size_q1 * size_q2) + y*(size_q1) +  x];
+			}
+		}
+	}
+	
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file.c_str());
+    }
+	
+	mxDestroyArray(aPtr);
+	
+#endif	
+}
+
+
+
+
+/**
+* Read matrix data from file with grid, 
+* Checks if the matrix data in the file is the same as the grids that were sent in with error < 1e-8,
+* if not within error range will signal error and exit
+* 
+* Overloaded readFromFile function
+* \param filename - file to read grids from
+* \param grids x,y,z - checks grids data against the file data
 */
 template<class T>
 void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const Matrix3D<T> grid_y, const Matrix3D<T> grid_z) {
 	int i1, i2, i3;
 	string inBuf;
 	double loaded_x, loaded_y, loaded_z;
-	double err = 1e-8;
 
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
@@ -1612,7 +3272,7 @@ void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const 
 
 						 input >> loaded_x >> loaded_y >> loaded_z;
 						 // check if grid is the same
-						 if (fabs(loaded_x - grid_x[i1][i2][i3]) > err || fabs(loaded_y - grid_y[i1][i2][i3]) > err || fabs(loaded_z - grid_z[i1][i2][i3]) > err) {
+						 if (fabs(log10(loaded_x) - log10(grid_x[i1][i2][i3])) > err || fabs(log10(loaded_y) - log10(grid_y[i1][i2][i3])) > err || fabs(log10(loaded_z) - log10(grid_z[i1][i2][i3])) > err) {
 							printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d, %d, %d].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", filename.c_str(), i1, i2, i3, loaded_x, loaded_y, loaded_z, grid_x[i1][i2][i3], grid_y[i1][i2][i3], grid_z[i1][i2][i3]);
 							exit(EXIT_FAILURE);
 						} else {
@@ -1632,8 +3292,307 @@ void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const 
 }
 
 
+
+
+
+
+
 /**
-* Returns corresponding index of 1d array
+* Function for reading from matlab file in 3-dimensions
+* Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard
+* The variables will be checked against the input grid parameters in order to make sure the right variables/values are being loaded
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
+template<class T>
+void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, const Matrix3D<T> grid_y, const Matrix3D<T> grid_z)
+{
+
+#if (MATLAB_CAPABLE)
+	
+	Logger::message << "Reading " << file << ": " << endl;	
+	
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrL; /* pointer to data */		
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;		/* for getting variable names */
+	bool wReached = false;			
+	bool xReached = false;			
+	bool yReached = false;	
+	bool zReached = false;									
+	bool defaultReached = false;													
+			
+	mfPtr = matOpen(file.c_str(), "r");
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file.c_str());
+	}
+	
+	for (int i= 0; i < 4; i++)
+	{
+		
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		if (temp.length() == 1)
+		    {
+		        nameTemp = (temp.substr(0,1)).c_str();
+		    }
+		    else
+		    {
+		        if (temp.substr(1,1) == "_")
+				{
+					nameTemp = (temp.substr(0,1)).c_str();
+				}
+				else if ((temp.substr(0,2) == "pc"))
+				{
+					nameTemp = "V";
+				}
+				else if ((temp.substr(0,2) == "al"))
+				{
+					nameTemp = "K";
+				}				
+				else
+				{
+					nameTemp = "!";	
+				}
+		    }
+		switch (*nameTemp)
+		{
+			case 'P':
+				wReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								PtrW = mxGetPr(fPtrW);
+								//printf("%e \n", PtrW[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								PtrL = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				yReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+								//printf("%e \n", PtrY[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				zReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+								//printf("%e \n", PtrZ[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+								//printf("%e \n", PtrFinal[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+	
+	if (!xReached)
+	{
+		PtrX = PtrW;
+	}
+	if (!yReached)
+	{
+		PtrY = PtrX;
+		PtrX = PtrW;
+	}
+	if (!zReached)
+	{
+		PtrZ = PtrY;
+		PtrY = PtrX;
+		PtrX = PtrW;
+	}
+	
+	
+	//sets the matrix array to be equal to an array of doubles
+	for (x = 0; x < size_q1; x++) {
+		for (y = 0; y < size_q2; y++) {
+			for (z = 0; z < size_q3; z++) {
+				if (fabs(log10(PtrX[z*(size_q1 * size_q2) + y*(size_q1) +  x]) - log10(grid_x[x][y][z])) > err || fabs(log10(PtrY[z*(size_q1 * size_q2) + y*(size_q1) +  x]) - log10(grid_y[x][y][z])) > err || fabs(log10(PtrZ[z*(size_q1 * size_q2) + y*(size_q1) +  x]) - log10(grid_z[x][y][z])) > err) {
+				 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d, %d, %d].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", file.c_str(), x, y, z, PtrX[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrY[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrZ[z*(size_q1 * size_q2) + y*(size_q1) +  x], grid_x[x][y][z], grid_y[x][y][z], grid_z[x][y][z]);
+							//printf("grid error \n");
+							exit(EXIT_FAILURE);
+				}
+				matrix_array[x][y][z] = PtrFinal[z*(size_q1 * size_q2) + y*(size_q1) +  x];
+			}
+		}
+	}
+	
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file.c_str());
+    }
+	
+	mxDestroyArray(aPtr);
+	
+#endif
+
+}
+
+
+
+
+
+/**
+* Returns corresponding index of 3d matrix if represented as a 1d array
+* \param x,y,z - index of element in every dimension for the 3d matrix
 */
 template<class T>
 inline int Matrix3D<T>::index1d(int x, int y, int z) {
@@ -1641,7 +3600,8 @@ inline int Matrix3D<T>::index1d(int x, int y, int z) {
 }
 
 /**
-* Return minimum value of the matrix.
+* Return minimum value of the 3d matrix.
+* Default value set to 1e99
 */
 template<class T>
 T Matrix3D<T>::min() {
@@ -1658,7 +3618,8 @@ T Matrix3D<T>::min() {
 }
 
 /**
-* Return maximum value of the matrix.
+* Return maximum value of the 3d matrix.
+* Default value seet to 0
 */
 template<class T>
 T Matrix3D<T>::max() {
@@ -1675,7 +3636,8 @@ T Matrix3D<T>::max() {
 }
 
 /**
-* Return absolute maximum value of the matrix.
+* Return absolute maximum value of the 3d matrix.
+* Default value set to 0
 */
 template<class T>
 T Matrix3D<T>::maxabs() {
@@ -1692,7 +3654,8 @@ T Matrix3D<T>::maxabs() {
 }
 
 /**
-* Return absolute value of the matrix.
+* Return absolute value of the 3d matrix.
+* Changes every element to a positive value with the same magnitude
 */
 template<class T>
 Matrix3D<T> Matrix3D<T>::abs() {
@@ -1710,7 +3673,8 @@ Matrix3D<T> Matrix3D<T>::abs() {
 
 
 /**
-* Make x-slice of 3d matrix - 2d matrix.
+* Take x-slice of 3d matrix turning it into a 2d matrix.
+* \param p_x - index at which to slice x dimension
 */
 template<class T>
 Matrix2D<T> Matrix3D<T>::xSlice(int p_x) const {
@@ -1726,7 +3690,8 @@ Matrix2D<T> Matrix3D<T>::xSlice(int p_x) const {
 }
 
 /**
-* Make y-slice of 3d matrix - 2d matrix.
+* Take y-slice of 3d matrix turning it into a 2d matrix.
+* \param p_y - index at which to slice y dimension
 */
 template<class T>
 Matrix2D<T> Matrix3D<T>::ySlice(int p_y) const {
@@ -1742,7 +3707,8 @@ Matrix2D<T> Matrix3D<T>::ySlice(int p_y) const {
 }
 
 /**
-* Make z-slice of 3d matrix - 2d matrix.
+* Take z-slice of 3d matrix turning it into a 2d matrix.
+* \param p_z - index at which to slice z dimension
 */
 template<class T>
 Matrix2D<T> Matrix3D<T>::zSlice(int p_z) const {
@@ -1757,6 +3723,11 @@ Matrix2D<T> Matrix3D<T>::zSlice(int p_z) const {
 	return tmp;
 }
 
+/**
+* Take xy-slice of 3d matrix turning it into a 1d matrix.
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+*/
 template<class T>
 Matrix1D<T> Matrix3D<T>::xySlice(int p_x, int p_y) const {
 	int i3;
@@ -1768,6 +3739,11 @@ Matrix1D<T> Matrix3D<T>::xySlice(int p_x, int p_y) const {
 	return tmp;
 }
 
+/**
+* Take yz-slice of 3d matrix turning it into a 1d matrix.
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix1D<T> Matrix3D<T>::yzSlice(int p_y, int p_z) const {
 	int i1;
@@ -1779,6 +3755,11 @@ Matrix1D<T> Matrix3D<T>::yzSlice(int p_y, int p_z) const {
 	return tmp;
 }
 
+/**
+* Take xz-slice of 3d matrix turning it into a 1d matrix.
+* \param p_x - index at which to slice x dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix1D<T> Matrix3D<T>::xzSlice(int p_x, int p_z) const {
 	int i2;
@@ -1852,7 +3833,7 @@ void Matrix4D<T>::AllocateMemory( int w_size, int x_size, int y_size, int z_size
 }
 
 /**
-* Operator [i], returns pointer to 2D array. Next [j][k] can be applied to return value.
+* Operator [i], returns pointer to 3D array. Next [j][k][l] can be applied to return value.
 * If  DEBUG_MODE defined, check if matrix has been initialized.
 *
 * \param i - number of element to return
@@ -1870,7 +3851,7 @@ inline T*** Matrix4D<T>::operator[] (int i) {
 }
 
 /**
-* Operator (x, y, z), returns value of element [x][y][z].
+* Operator (w, x, y, z), returns value of element [w][x][y][z].
 * If  DEBUG_MODE defined, check if matrix has been initialized.
 *
 */
@@ -1886,12 +3867,12 @@ inline T& Matrix4D<T>::operator() (int w, int x, int y, int z) {
 		exit(EXIT_FAILURE);
 	}
 #endif
-	// return (x,y,z) value
+	// return (w,x,y,z) value
 	return plane_array[((w*size_x + x)*size_y + y)*size_z];
 }
 
 /**
-* Makes matrix equal to Matrix M.
+* Makes current matrix equal to Matrix M and returns the current matrix
 *
 * \param &M - Matrix M.
 */
@@ -1928,7 +3909,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator= (const Matrix4D<T> &M) {
 }
 
 /**
-* Makes Matrix equal to value Val.
+* Makes every element in Matrix equal to Val and returns this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator= (const T Val) {
@@ -1943,7 +3924,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator= (const T Val) {
 
 
 /**
-* Matrix summation, result is stored into applied matrix (left hand side matrix)
+* Add each element of the current matrix by the corresponding element in M and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator+= (const Matrix4D<T> &M) {
@@ -1957,7 +3938,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator+= (const Matrix4D<T> &M) {
 }
 
 /**
-* Matrix subtraction, result is stored into applied matrix (left hand side matrix)
+* Subtract each element of the current matrix by the corresponding element in M and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator-= (const Matrix4D<T> &M) {
@@ -1971,7 +3952,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator-= (const Matrix4D<T> &M) {
 }
 
 /**
-* Multiplication to a value. Result is stored into applied matrix (left hand side matrix)
+* Multiply each element of the current matrix by Val and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator*= (const T Val) {
@@ -1985,7 +3966,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator*= (const T Val) {
 }
 
 /**
-* Division by a value. Result is stored into applied matrix (left hand side matrix)
+* Divide each element of the current matrix by Val and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator/= (const T Val) {
@@ -1999,7 +3980,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator/= (const T Val) {
 }
 
 /**
-* Summation with a value. Result is stored into applied matrix (left hand side matrix)
+* Add each element of the current matrix by Val and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator+= (const T Val) {
@@ -2013,7 +3994,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator+= (const T Val) {
 }
 
 /**
-* Subtraction of a value. Result is stored into applied matrix (left hand side matrix)
+* Subtract each element of the current matrix by Val and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator-= (const T Val) {
@@ -2027,7 +4008,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator-= (const T Val) {
 }
 
 /**
-* Multiplication between each element of the matrices (not a matrix multiplication). Result is stored into applied matrix (left hand side matrix)
+* Multiply each element of the current matrix by the corresponding element of matrix M and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::times_equal (const Matrix4D<T> &M) {
@@ -2041,7 +4022,7 @@ inline Matrix4D<T>& Matrix4D<T>::times_equal (const Matrix4D<T> &M) {
 }
 
 /**
-* Division of each element of one matrices to the element of another. Result is stored into applied matrix (left hand side matrix)
+* Divide each element of the current matrix by the corresponding element of matrix M and return this matrix
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::divide_equal (const Matrix4D<T> &M) {
@@ -2055,7 +4036,7 @@ inline Matrix4D<T>& Matrix4D<T>::divide_equal (const Matrix4D<T> &M) {
 }
 
 /**
-* Add each element of the matrix to corresponds element of matrix M.
+* Add each element of the matrix by the corresponding element of matrix M and return new matrix
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator+ (const Matrix4D<T> &M) const {
@@ -2070,7 +4051,7 @@ inline Matrix4D<T> Matrix4D<T>::operator+ (const Matrix4D<T> &M) const {
 }
 
 /**
-* Substract each element of the matrix to corresponds element of matrix M.
+* Substract each element of the matrix by the corresponding element of matrix M and return new matrix
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator- (const Matrix4D<T> &M) const {
@@ -2086,7 +4067,7 @@ inline Matrix4D<T> Matrix4D<T>::operator- (const Matrix4D<T> &M) const {
 
 
 /**
-* Multiply each element of the matrix to Val, save result to a new matrix.
+* Multiply each element of the matrix by Val, save result to a new matrix.
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator* (const T Val) const {
@@ -2102,7 +4083,7 @@ inline Matrix4D<T> Matrix4D<T>::operator* (const T Val) const {
 
 
 /**
-* Divide each element of the matrix to Val, save result to a new matrix.
+* Divide each element of the matrix by Val, save result to a new matrix.
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator/ (const T Val) const {
@@ -2117,7 +4098,7 @@ inline Matrix4D<T> Matrix4D<T>::operator/ (const T Val) const {
 }
 
 /**
-* Multiply each element of the matrix to corresponds element of matrix M.
+* Multiply each element of the matrix by the corresponding element of matrix M and return new matrix
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::times (const Matrix4D<T> &M) const {
@@ -2132,7 +4113,7 @@ inline Matrix4D<T> Matrix4D<T>::times (const Matrix4D<T> &M) const {
 }
 
 /**
-* Divide each element of the matrix to corresponds element of matrix M.
+* Divide each element of the current matrix by the corresponding element of matrix M and return new matrix
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::divide (const Matrix4D<T> &M) const {
@@ -2167,8 +4148,267 @@ void Matrix4D<T>::writeToFile(string filename, string info) {
 }
 
 
+
+
+
+
+
+
+#if (MATLAB_CAPABLE)
+	
+	
+	
 /**
-* Write matrix to file, using 3 other matrixes as a grid (simply - write all 4 matrixes to the file).
+* Packaging function that turns a Matrix4D into a variable that can be stored into a .mat file.
+* Used in conjunction with writeToMatlabFile() to save the 4 grid variables and val into a single .mat file
+*/	
+template<class T>
+mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
+{
+		
+	int w,x,y,z;
+	int status;
+    // create a struct array with 7 fields
+    const char *fieldnames[7] = {"arr", "time", "size", "size1", "size2" , "size3" , "size4"};
+	// create a 1x1 struct that will hold the array of values and the time info, as well as the size of the dimensions
+	mxArray *s = mxCreateStructMatrix(1, 1, 7, fieldnames);
+	mwSize size_W = size_w;
+	mwSize size_X = size_x;
+	mwSize size_Y = size_y;
+	mwSize size_Z = size_z;
+	
+
+
+    // fill struct fields
+    for (mwIndex i=0; i<7; i++) {
+        
+		// For the arr variable in the 1x1 struct
+		// Holds the contents of matrix_array
+		if (i== 0)
+		{
+			// create array of doubles and give it the data in matrix_array
+			const int ndim = 4;
+			mwSize dims[ndim] = {size_W , size_X, size_Y, size_Z};
+			mxArray *aPtr = mxCreateNumericArray(ndim,dims,mxDOUBLE_CLASS,mxREAL);
+			if (aPtr == NULL) {
+    			printf("Unable to create double mxArray.\n");
+    			exit(EXIT_FAILURE);
+  			}
+			double *data = mxGetPr(aPtr);
+			for (w = 0; w < size_w; w++) {
+				for (x = 0; x < size_x; x++) {
+					for (y = 0; y < size_y; y++) {
+						for (z = 0; z < size_z; z++) {
+							data[z*(size_w * size_x * size_y) + y*(size_w * size_x) +  x*(size_w) + w] = matrix_array[w][x][y][z];
+						}
+					}
+				}
+			}
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}
+		
+		// For the time variable in the 1x1 struct
+		if ( i == 1 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			double temp = 0.0;
+			stringstream ss;
+			ss << info;
+			ss >> temp;
+			data[0] = temp;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		
+		// For the size variable in the 1x1 struct
+		if ( i == 2 )
+		{
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = 1;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}
+			
+		// size of dimension 1 or w	
+		if ( i == 3 )
+		{
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_w;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		
+		// size of dimension 2 or x
+		if ( i == 4 )
+		{
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_x;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		
+		// size of dimension 3 or y			
+		if ( i == 5 )
+		{
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_y;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		
+		// size of dimension 4 or z		
+		if ( i == 6 )
+		{
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_z;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+    }
+	return s;
+
+}
+
+#endif
+
+/**
+* Write matrix to .mat file.
+* Creates a struct for the matrix.
+* Struct has 7 fields in including - arr time size, size1, size2, size3, size4
+*/ 
+template<class T>
+void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
+	
+#if (MATLAB_CAPABLE)
+		
+	
+	Logger::message << "writing " << filename << ": " << endl;	
+	
+	// Open file for writing
+	MATFile *pmat = matOpen( filename.c_str(), "w");
+	if (pmat == NULL) {
+   		printf("Error creating file %s\n", filename.c_str());
+    	exit(EXIT_FAILURE);
+  	}
+	
+	
+	
+	mwSize size_W = size_w;
+	mwSize size_X = size_x;
+	mwSize size_Y = size_y;
+	mwSize size_Z = size_z;
+	int w,x,y,z;
+	int status;
+    // create a struct array with two fields
+    const char *fieldnames[7] = {"arr", "time", "size", "size1", "size2" , "size3" , "size4"};
+	// create a 1x1 struct that will hold the array of values and the time info
+	mxArray *s = mxCreateStructMatrix(1, 1, 7, fieldnames);
+
+    // fill struct fields
+    for (mwIndex i=0; i<7; i++) {
+        // For the arr variable in the 1x1 struct
+		if (i== 0)
+		{
+			// create array of doubles and give it the data in matrix_array
+			const int ndim = 4;
+			mwSize dims[ndim] = {size_W , size_X, size_Y, size_Z};
+			mxArray *aPtr = mxCreateNumericArray(ndim,dims,mxDOUBLE_CLASS,mxREAL);
+			if (aPtr == NULL) {
+    			printf("Unable to create double mxArray.\n");
+    			exit(EXIT_FAILURE);
+  			}
+			double *data = mxGetPr(aPtr);
+			//int bytes_to_copy = size_w * size_x * size_y * size_z * mxGetElementSize(aPtr);
+			for (w = 0; w < size_w; w++) {
+				for (x = 0; x < size_x; x++) {
+					for (y = 0; y < size_y; y++) {
+						for (z = 0; z < size_z; z++) {
+							data[z*(size_w * size_x * size_y) + y*(size_w * size_x) +  x*(size_w) + w] = matrix_array[w][x][y][z];
+						}
+					}
+				}
+			}
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}
+		// For the time variable in the 1x1 struct
+		if ( i == 1 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			double temp = 0.0;
+			stringstream ss;
+			ss << info;
+			ss >> temp;
+			data[0] = temp;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		// For the size variable in the 1x1 struct
+		if ( i == 2 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = 1;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		if ( i == 3 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_w;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		if ( i == 4 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_x;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		if ( i == 5 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_y;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+		if ( i == 6 )
+		{
+			// Create a string that has the inputted time
+			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
+			double *data = mxGetPr(aPtr);
+			data[0] = size_z;
+			mxSetField(s, 0, fieldnames[i], aPtr);
+		}	
+    }
+	// Save the struct into the .mat file
+	// hardcoded to get rid of the "./output_folder/" and only get PSD_XXXXX
+    int str_idx = filename.rfind("PSD_");
+    status = matPutVariable(pmat, filename.substr(str_idx,9).c_str(), s);
+    if (status != 0) {
+    	printf("error matputvariable");
+    	exit(EXIT_FAILURE);
+ 	}
+	
+	
+	// cleanup
+    mxDestroyArray(s);
+    matClose(pmat);
+
+#endif
+
+}
+
+
+
+
+/**
+* Write matrix to file, using 4 other matrixes as a grid (simply - write all 5 matrixes to the file).
 * File has two header lines.
 */
 template<class T>
@@ -2181,13 +4421,13 @@ void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> 
 		exit(EXIT_FAILURE);
 	}
 	output << "VARIABLES = \"" << ((grid_w.name!="")?grid_w.name:"w") << "\", \"" << ((grid_x.name!="")?grid_x.name:"x") << "\", \"" << ((grid_y.name!="")?grid_y.name:"y") << "\", \"" << ((grid_z.name!="")?grid_z.name:"z") << "\", \"" << ((this->name!="")?this->name:"f") << "\" "<< endl;
-	output << "ZONE T=\"" << filename << "\", W=" << size_w << ", I=" << size_z << ", J=" << size_y << ", K=" << size_x << endl;
+	output << "ZONE T=\"" << filename << "\", I=" << size_z << ", J=" << size_y << ", K=" << size_x << ", L=" << size_w << endl;
 	output.setf(ios_base::scientific, ios_base::floatfield);
 	for (w = 0; w < size_w; w++) {
 		for (x = 0; x < size_x; x++) {
 			for (y = 0; y < size_y; y++) {
 				for (z = 0; z < size_z; z++) {
-					output << "\t" << grid_x[w][x][y][z] << "\t" << grid_y[w][x][y][z] << "\t" << grid_z[w][x][y][z] << "\t" << matrix_array[w][x][y][z] << endl;
+					output << "\t" << grid_w[w][x][y][z] << "\t" << grid_x[w][x][y][z] << "\t" << grid_y[w][x][y][z] << "\t" << grid_z[w][x][y][z] << "\t" << matrix_array[w][x][y][z] << endl;
 				}
 			}
 		}
@@ -2195,8 +4435,55 @@ void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> 
 	output.close();
 }
 
+
+
 /**
-* Read matrix data from file.
+* Write matrix to file, using 4 other matrixes as a grid (simply - write all 5 matrixes to the file).
+* Uses the createStructMatrix() function to pack all the grid dimensions into seperate variables and then combines these variables into a single matlab structure to save in .mat
+*/ 
+template<class T>
+void Matrix4D<T>::writeToMatlabFile(string file, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) {
+
+#if (MATLAB_CAPABLE)	
+	
+	
+	Logger::message << "writing " << file << ": " << endl;	
+	MATFile *pmat = matOpen( file.c_str(), "w");
+
+   
+	mxArray* current = createStructMatrix(file);
+	mxArray* w = grid_w.createStructMatrix(file);
+	mxArray* x = grid_x.createStructMatrix(file);
+	mxArray* y = grid_y.createStructMatrix(file);
+	mxArray* z = grid_z.createStructMatrix(file);
+	
+	// Save the struct into the .mat file
+    matPutVariable(pmat, this->name.c_str(), current);
+	matPutVariable(pmat, "grid_w", w);
+	matPutVariable(pmat, "grid_x", x);
+	matPutVariable(pmat, "grid_y", y);
+	matPutVariable(pmat, "grid_z", z);
+    mxDestroyArray(current);
+	mxDestroyArray(w);
+	mxDestroyArray(x);
+	mxDestroyArray(y);
+	mxDestroyArray(z);
+    matClose(pmat);
+	
+#endif
+
+}
+
+
+
+
+
+/**
+* Read matrix data from file with grid, by column
+* 
+* Overloaded readFromFile function
+* \param filename - file to read grids from
+* \param read_column - read up to this column from file
 */
 template<class T>
 void Matrix4D<T>::readFromFile(string filename, int read_column) {
@@ -2261,18 +4548,391 @@ void Matrix4D<T>::readFromFile(string filename, int read_column) {
 	}
 }
 
+
 /**
-* Read matrix data from file with grid
+* Function for reading from matlab file in 4-dimensions
+* Will check the variables, order them in (P, R/L, V, K, Val) format and then set matrix_array to be the variable with the corresponding column number 
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
+template<class T>
+void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
+{
+	
+#if (MATLAB_CAPABLE)
+	
+	Logger::message << "Reading " << file << ": " << endl;	
+	
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrReturn; /* pointer to data */
+	double *PtrL; /* pointer to data */		
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrL;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;	/* for getting variable names */
+	bool wReached = false;	/* for checking which variables go to which coordinates */
+	bool xReached = false;	/* for checking which variables go to which coordinates */		
+	bool yReached = false;	/* for checking which variables go to which coordinates */
+	bool zReached = false;	/* for checking which variables go to which coordinates */								
+	bool defaultReached = false;	/* for checking which variables go to which coordinates */
+	bool rReached = false;	/* for checking which variables go to which coordinates */					
+						
+	// open matlab file
+	mfPtr = matOpen(file.c_str(), "r");
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file.c_str());
+	}
+	
+	// for each of the 5 columns
+	for (int i= 0; i < 5; i++)
+	{
+		// get variable name
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		// If the name is one char long - match on that char
+		if (temp.length() == 1)
+	    {
+	        nameTemp = (temp.substr(0,1)).c_str();
+	    }
+	    else
+	    {
+	        // if the second char is underscore '_' then match on first char example V_BC
+			if (temp.substr(1,1) == "_")
+			{
+				nameTemp = (temp.substr(0,1)).c_str();
+			}
+			else if ((temp.substr(0,2) == "pc"))
+			{
+				nameTemp = "V";
+			}
+			else if ((temp.substr(0,2) == "al"))
+			{
+				nameTemp = "K";
+			}
+			// If length is more than 1 and second char is not underscore will go to default
+			else
+			{
+				nameTemp = "!";	
+			}
+	    }
+		
+		// switch on name to get P R(or L) V K Value in that order
+		// The code is nearly the same for all switch statements - comments are found only for case 'P'
+		switch (*nameTemp)
+		{
+			// If variable is the array for 'P'
+			case 'P':
+				// coordinate w has been recorded
+				wReached = true;
+				// get variable
+				aPtr = matGetVariable(mfPtr, name);
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				// if variable is matlab struct
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					// make sure it has a "arr" field
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						// get the number of elements in struct
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						// for each element in struct
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							// try to get the field "arr"
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+							// if successfully got the field "arr" and it is an array of doubles
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								// get the data from "arr" (array of doubles)
+								PtrW = mxGetPr(fPtrW);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				rReached = true;
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				xReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrL = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrL != NULL) && (mxGetClassID(fPtrL) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrL))) 
+       		 				{
+								PtrL = mxGetPr(fPtrL);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				yReached = true;	
+				aPtr = matGetVariable(mfPtr, name);
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				zReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+	
+	
+	
+	// if no R but there is L
+	if (!rReached)
+	{
+		if (xReached)
+		{
+			PtrX = PtrL;
+		}
+	}
+	// if no default - must have been L star (5th parameter = L which should be Val in "P R V K Val")
+	else if (!defaultReached)
+	{
+		PtrFinal = PtrL;
+	}
+	
+	
+	
+	// To get the column number of the return
+	// since it is assumed the variables are in P - R/L - V - K - Val form iterate through until we reach the correct column
+	// Not necesarily required for the 4D case where all 5 variables will be present - however in 3D and below might be missing arbitrary V or P etc.
+	if (wReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrW;
+		}	
+	}
+	if (xReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrX;
+		}	
+	}
+	if (yReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrY;
+		}	
+	}
+	if (zReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrZ;
+		}	
+	}
+	if (defaultReached)
+	{
+		columnNumber--;
+		if (columnNumber == 0)
+		{
+			PtrReturn = PtrFinal;
+		}	
+	}
+	if (columnNumber > 0)
+	{
+		printf("column number too high \n");
+		EXIT_FAILURE;
+	}
+	
+		
+	// sets the matrix array to be equal to an array of doubles
+	for (w = 0; w < size_w; w++) {
+		for (x = 0; x < size_x; x++) {
+			for (y = 0; y < size_y; y++) {
+				for (z = 0; z < size_z; z++) {
+					// Saving variable from matlab requires reversing indeces because matlab is stored in column major order while c++ is row major order
+					matrix_array[w][x][y][z] = PtrReturn[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w];
+				}
+			}
+		}
+	}
+	
+	// close file
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file.c_str());
+    }
+	
+	// free allocated memory
+	mxDestroyArray(aPtr);
+		
+#endif
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+* Read matrix data from file with grid, 
+* Checks if the matrix data in the file is the same as the grids that were sent in with error < 1e-8,
+* if not within error range will signal error and exit
+* 
+* Overloaded readFromFile function
+* \param filename - file to read grids from
+* \param grids w,x,y,z - checks grids data against the file data
 */
 template<class T>
 void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z) {
 	int w, x, y, z;
 	string inBuf;
 	double loaded_w, loaded_x, loaded_y, loaded_z;
-	double err = 1e-8;
 
 	if (!initialized) {
-		printf("MATRIX_ERROR: Using unitialized matrix");
+		printf("MATRIX_ERROR: Using uninitialized matrix");
 		exit(EXIT_FAILURE);
 	} else {
 		this->name = filename;
@@ -2315,11 +4975,14 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 
 							 input >> loaded_w >> loaded_x >> loaded_y >> loaded_z;
 							 // check if grid is the same
-							 if (fabs(loaded_w - grid_w[w][x][y][z]) > err || fabs(loaded_x - grid_x[w][x][y][z]) > err || fabs(loaded_y - grid_y[w][x][y][z]) > err || fabs(loaded_z - grid_z[w][x][y][z]) > err) {
+							 if (fabs(log10(loaded_w) - log10(grid_w[w][x][y][z])) > err || fabs(log10(loaded_x) - log10(grid_x[w][x][y][z])) > err || fabs(log10(loaded_y) - log10(grid_y[w][x][y][z])) > err || fabs(log10(loaded_z) - log10(grid_z[w][x][y][z])) > err) {
 								printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d, %d, %d, %d].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", filename.c_str(), w, x, y, z, loaded_w, loaded_x, loaded_y, loaded_z, grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
 								exit(EXIT_FAILURE);
 							} else {
 								input >> matrix_array[w][x][y][z];
+								//ADDED
+								//printf( "%e \n",  matrix_array[w][x][y][z]);
+								//std::cout <<  input.rdbuf();
 								// skip till to the end of the line
 								input.ignore(9999, '\n');
 							}
@@ -2336,8 +4999,298 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 }
 
 
+
+
 /**
-* Returns corresponding index of 1d array
+* Function for reading from matlab file in 4-dimensions
+* Will check the variables in the order they are saved in matlab, thus (P R V K Var) should be the standard
+* The variables will be checked against the input grid parameters in order to make sure the right variables/values are being loaded
+* This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
+*/
+template<class T>
+void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z)
+{
+	
+#if (MATLAB_CAPABLE)		
+	
+	Logger::message << "Reading " << file << ": " << endl;	
+	
+	MATFile *mfPtr; /* MAT-file pointer */
+    mxArray *aPtr;  /* mxArray pointer */
+    double *realPtr; /* pointer to data */
+	double *PtrW; /* pointer to data */
+	double *PtrX; /* pointer to data */
+    double *PtrY; /* pointer to data */	
+    double *PtrZ; /* pointer to data */
+	double *PtrFinal; /* pointer to data */
+	double *PtrL; /* pointer to data */		
+	string arr; /*name of variable*/
+	string field = "arr"; // name of field
+	mwSize nElements;       /* number of elements in array */
+    mwIndex eIdx;           /* element index */
+    const mxArray *fPtr;    /* field pointer */
+	const mxArray *fPtrW;    /* field pointer */
+	const mxArray *fPtrL;    /* field pointer */
+	const mxArray *fPtrX;    /* field pointer */
+	const mxArray *fPtrY;    /* field pointer */
+	const mxArray *fPtrZ;    /* field pointer */
+    int w,x,y,z; 			/* for index*/
+	const char* name;		/* for getting variable names */
+	const char* nameTemp;	/* for getting variable names */
+	bool defaultReached = false;
+	bool rReached = false;
+	bool lReached = false;												
+						
+			
+	mfPtr = matOpen(file.c_str(), "r");
+   	if (mfPtr == NULL) {
+       	printf("Error opening file %s\n", file.c_str());
+	}
+	
+	for (int i= 0; i < 5; i++)
+	{
+		aPtr = matGetNextVariableInfo(mfPtr, &name);
+		string temp = name;
+		if (temp.length() == 1)
+	    {
+	        nameTemp = (temp.substr(0,1)).c_str();
+	    }
+	    else
+	    {
+	        if (temp.substr(1,1) == "_")
+			{
+				nameTemp = (temp.substr(0,1)).c_str();
+			}
+			else if ((temp.substr(0,2) == "pc"))
+			{
+				nameTemp = "V";
+			}
+			else if ((temp.substr(0,2) == "al"))
+			{
+				nameTemp = "K";
+			}
+			else
+			{
+				nameTemp = "!";	
+			}
+	    }
+		switch (*nameTemp)
+		{
+			case 'P':
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrW = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrW != NULL) && (mxGetClassID(fPtrW) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrW))) 
+       		 				{
+								PtrW = mxGetPr(fPtrW);
+								//printf("%e \n", PtrW[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'R':
+				rReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrX = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrX != NULL) && (mxGetClassID(fPtrX) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrX))) 
+       		 				{
+								PtrX = mxGetPr(fPtrX);
+								//printf("%e \n", PtrX[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'L':
+				lReached = true;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrL = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrL != NULL) && (mxGetClassID(fPtrL) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrL))) 
+       		 				{
+								PtrL = mxGetPr(fPtrL);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'V':
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrY = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrY != NULL) && (mxGetClassID(fPtrY) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrY))) 
+       		 				{
+								PtrY = mxGetPr(fPtrY);
+								//printf("%e \n", PtrY[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			case 'K':
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtrZ = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtrZ != NULL) && (mxGetClassID(fPtrZ) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtrZ))) 
+       		 				{
+								PtrZ = mxGetPr(fPtrZ);
+								//printf("%e \n", PtrZ[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+			default:
+				defaultReached = true;
+				this->name = name;
+				aPtr = matGetVariable(mfPtr, name);
+				//printf("%s \n" , name );
+				if (aPtr == NULL) {
+  					printf("mxArray not found: %s\n", name);
+				} 
+				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
+					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
+   						printf("Field not found: %s\n", field.c_str());
+	 				}
+					else {
+						nElements = (mwSize)mxGetNumberOfElements(aPtr);
+						for (eIdx = 0; eIdx < nElements; eIdx++) {
+							fPtr = mxGetField(aPtr, eIdx, field.c_str());
+       		 				if ((fPtr != NULL) && (mxGetClassID(fPtr) == mxDOUBLE_CLASS) && (!mxIsComplex(fPtr))) 
+       		 				{
+								PtrFinal = mxGetPr(fPtr);
+								//printf("%e \n", PtrFinal[0]);
+							}
+						}
+					}
+				}
+				else 
+				{
+					printf("%s is of unknown type\n", name);
+			    }
+				break;
+		}
+	}	
+	
+	if (!rReached && lReached)
+	{
+		PtrX = PtrL;
+	}
+	else if (!defaultReached && lReached)
+	{
+		PtrFinal = PtrL;
+	}
+	
+	// sets the matrix array to be equal to an array of doubles
+	for (w = 0; w < size_w; w++) {
+		for (x = 0; x < size_x; x++) {
+			for (y = 0; y < size_y; y++) {
+				for (z = 0; z < size_z; z++) {
+					
+					
+					if (fabs(log10(PtrW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_w[w][x][y][z])) > err || fabs(log10(PtrX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_x[w][x][y][z])) > err || fabs(log10(PtrY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_y[w][x][y][z])) > err || fabs(log10(PtrZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_z[w][x][y][z])) > err) {
+					 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%d, %d, %d, %d].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", file.c_str(), w, x, y, z, PtrW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], PtrX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
+								exit(EXIT_FAILURE);
+					}
+					matrix_array[w][x][y][z] = PtrFinal[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w];
+				}
+			}
+		}
+	}
+	
+    if (matClose(mfPtr) != 0) {
+        printf("Error closing file %s\n", file.c_str());
+    }
+	
+	mxDestroyArray(aPtr);
+	
+#endif
+	
+}
+
+
+
+
+
+
+
+
+
+/**
+* Returns corresponding index of 4d matrix if represented as a 1d array
+* \param w,x,y,z - index of element in every dimension for the 4d matrix
 */
 template<class T>
 inline int Matrix4D<T>::index1d(int w, int x, int y, int z) {
@@ -2347,7 +5300,8 @@ inline int Matrix4D<T>::index1d(int w, int x, int y, int z) {
 
 
 /**
-* Return minimum value of the matrix.
+* Return minimum value of the 4d matrix.
+* Default value set to 1e99
 */
 template<class T>
 T Matrix4D<T>::min() {
@@ -2366,7 +5320,8 @@ T Matrix4D<T>::min() {
 }
 
 /**
-* Return maximum value of the matrix.
+* Return maximum value of the 4d matrix.
+* Default value set to 0
 */
 template<class T>
 T Matrix4D<T>::max() {
@@ -2385,7 +5340,8 @@ T Matrix4D<T>::max() {
 }
 
 /**
-* Return absolute maximum value of the matrix.
+* Return absolute maximum value of the 4d matrix.
+* Default value set to 0
 */
 template<class T>
 T Matrix4D<T>::maxabs() {
@@ -2404,7 +5360,8 @@ T Matrix4D<T>::maxabs() {
 }
 
 /**
-* Return absolute value of the matrix.
+* Return absolute value of the 4d matrix.
+* Changes every element to a positive value with the same magnitude
 */
 template<class T>
 Matrix4D<T> Matrix4D<T>::abs() {
@@ -2423,7 +5380,9 @@ Matrix4D<T> Matrix4D<T>::abs() {
 }
 
 /**
-* Make w-slice of 4d matrix - 3d matrix.
+* Take w-slice of 4d matrix turning it into 3d matrix.
+* squeeze matrix to 3d getting all the data when the w dimension is at index p_w
+* \param p_w - index at which to slice w dimension
 */
 template<class T>
 Matrix3D<T> Matrix4D<T>::wSlice(int p_w) const {
@@ -2441,7 +5400,9 @@ Matrix3D<T> Matrix4D<T>::wSlice(int p_w) const {
 }
 
 /**
-* Make x-slice of 4d matrix - 3d matrix.
+* Take x-slice of 4d matrix turining it into 3d matrix.
+* squeeze matrix to 3d getting all the data when the x dimension is at index p_x
+* \param p_x - index at which to slice x dimension
 */
 template<class T>
 Matrix3D<T> Matrix4D<T>::xSlice(int p_x) const {
@@ -2459,7 +5420,9 @@ Matrix3D<T> Matrix4D<T>::xSlice(int p_x) const {
 }
 
 /**
-* Make y-slice of 4d matrix - 3d matrix.
+* Take y-slice of 4d matrix turning it into 3d matrix.
+* squeeze matrix to 3d getting all the data when the y dimension is at index p_y
+* \param p_y - index at which to slice y dimension
 */
 template<class T>
 Matrix3D<T> Matrix4D<T>::ySlice(int p_y) const {
@@ -2477,7 +5440,9 @@ Matrix3D<T> Matrix4D<T>::ySlice(int p_y) const {
 }
 
 /**
-* Make z-slice of 4d matrix - 3d matrix.
+* Take z-slice of 4d matrix turning it into 3d matrix.
+* squeeze matrix to 3d getting all the data when the z dimension is at index p_z
+* \param p_z - index at which to slice z dimension
 */
 template<class T>
 Matrix3D<T> Matrix4D<T>::zSlice(int p_z) const {
@@ -2494,6 +5459,11 @@ Matrix3D<T> Matrix4D<T>::zSlice(int p_z) const {
 	return tmp;
 }
 
+/**
+* Take wx-slice of 4d matrix turning it into a 2d matrix.
+* \param p_w - index at which to slice w dimension
+* \param p_x - index at which to slice x dimension
+*/
 template<class T>
 Matrix2D<T> Matrix4D<T>::wxSlice(int p_w, int p_x) const {
 	int y, z;
@@ -2507,6 +5477,11 @@ Matrix2D<T> Matrix4D<T>::wxSlice(int p_w, int p_x) const {
 	return tmp;
 }
 
+/**
+* Take wy-slice of 4d matrix turning it into a 2d matrix.
+* \param p_w - index at which to slice w dimension
+* \param p_y - index at which to slice y dimension
+*/
 template<class T>
 Matrix2D<T> Matrix4D<T>::wySlice(int p_w, int p_y) const {
 	int x, z;
@@ -2520,6 +5495,11 @@ Matrix2D<T> Matrix4D<T>::wySlice(int p_w, int p_y) const {
 	return tmp;
 }
 
+/**
+* Take wz-slice of 4d matrix turning it into a 2d matrix.
+* \param p_w - index at which to slice w dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix2D<T> Matrix4D<T>::wzSlice(int p_w, int p_z) const {
 	int x, y;
@@ -2533,6 +5513,11 @@ Matrix2D<T> Matrix4D<T>::wzSlice(int p_w, int p_z) const {
 	return tmp;
 }
 
+/**
+* Take xy-slice of 4d matrix turning it into a 2d matrix.
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+*/
 template<class T>
 Matrix2D<T> Matrix4D<T>::xySlice(int p_x, int p_y) const {
 	int w, z;
@@ -2546,6 +5531,11 @@ Matrix2D<T> Matrix4D<T>::xySlice(int p_x, int p_y) const {
 	return tmp;
 }
 
+/**
+* Take xz-slice of 4d matrix turning it into a 2d matrix.
+* \param p_x - index at which to slice x dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix2D<T> Matrix4D<T>::xzSlice(int p_x, int p_z) const {
 	int w, y;
@@ -2559,6 +5549,11 @@ Matrix2D<T> Matrix4D<T>::xzSlice(int p_x, int p_z) const {
 	return tmp;
 }
 
+/**
+* Take yz-slice of 4d matrix turning it into a 2d matrix.
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix2D<T> Matrix4D<T>::yzSlice(int p_y, int p_z) const {
 	int w, x;
@@ -2572,7 +5567,12 @@ Matrix2D<T> Matrix4D<T>::yzSlice(int p_y, int p_z) const {
 	return tmp;
 }
 
-
+/**
+* Take wxy-slice of 4d matrix turning it into a 1d matrix.
+* \param p_w - index at which to slice w dimension
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+*/
 template<class T>
 Matrix1D<T> Matrix4D<T>::wxySlice(int p_w, int p_x, int p_y) const {
 	int z;
@@ -2584,6 +5584,12 @@ Matrix1D<T> Matrix4D<T>::wxySlice(int p_w, int p_x, int p_y) const {
 	return tmp;
 }
 
+/**
+* Take wxz-slice of 4d matrix turning it into a 1d matrix.
+* \param p_w - index at which to slice w dimension
+* \param p_x - index at which to slice x dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix1D<T> Matrix4D<T>::wxzSlice(int p_w, int p_x, int p_z) const {
 	int y;
@@ -2595,6 +5601,12 @@ Matrix1D<T> Matrix4D<T>::wxzSlice(int p_w, int p_x, int p_z) const {
 	return tmp;
 }
 
+/**
+* Take wyz-slice of 4d matrix turning it into a 1d matrix.
+* \param p_w - index at which to slice w dimension
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix1D<T> Matrix4D<T>::wyzSlice(int p_w, int p_y, int p_z) const {
 	int x;
@@ -2606,6 +5618,12 @@ Matrix1D<T> Matrix4D<T>::wyzSlice(int p_w, int p_y, int p_z) const {
 	return tmp;
 }
 
+/**
+* Take xyz-slice of 4d matrix turning it into a 1d matrix.
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
 template<class T>
 Matrix1D<T> Matrix4D<T>::xyzSlice(int p_x, int p_y, int p_z) const {
 	int w;
@@ -2631,7 +5649,8 @@ CalculationMatrix::CalculationMatrix(int x_size, int y_size, int z_size, int n_o
 }
 
 /**
-* Allocating memory for CalculationMatrix
+* Allocating memory for CalculationMatrix,
+* Setting the diagonals to be 0
 */
 void CalculationMatrix::Initialize(int x_size, int y_size, int z_size, int n_of_diags) {
 	this->initialized = false;
@@ -2695,6 +5714,7 @@ int CalculationMatrix::index1d(int x, int y, int z) {
 
 /**
 * Save matrix to file.
+* Includes varaible names and sizes
 */
 void CalculationMatrix::writeToFile(string filename) {
 	int in;
@@ -2726,9 +5746,14 @@ void CalculationMatrix::writeToFile(string filename) {
 // Implementations
 //////////////////////////////////////////
 
+
+
+
+
 template class Matrix1D<double>;
 template class Matrix2D<double>;
 template class Matrix3D<double>;
 template class Matrix4D<double>;
 
 #endif
+

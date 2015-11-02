@@ -26,29 +26,33 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+
+/** 
+* @namespace Opm   
+* @brief Namespace included for using the monotone cubic interpolator
+*/
 namespace Opm
 {
 
 /**
+   @file MonotCubicInterpolator.hpp
    Class to represent a one-dimensional function f with single-valued
    argument x. The function is represented by a table of function
    values. Interpolation between table values is cubic and monotonicity
    preserving if input values are monotonous.
 
-   Outside x_min and x_max, the class will extrapolate using the
-   constant f(x_min) or f(x_max).
+   Outside \f$ x_{min} \f$ and \f$ x_{max} \f$, the class will extrapolate using the
+   constant \f$f(x_{min})\f$ or \f$f(x_{max})\f$.
 
    Extra functionality:
-    - Can return (x_1+x_2)/2 where x_1 and x_2 are such that
-      abs(f(x_1) - f(x_2)) is maximized. This is used to determine where
+    - Can return \f$ (x_1+x_2)/2 \f$ where \f$ x_1 \f$ and \f$ x_2 \f$ are such that
+      \f$ abs(f(x_1) - f(x_2)) \f$ is maximized. This is used to determine where
       one should calculate a new value for increased accuracy in the
       current function
 
    Monotonicity preserving cubic interpolation algorithm is taken
    from Fritsch and Carlson, "Monotone piecewise cubic interpolation",
    SIAM J. Numer. Anal. 17, 238--246, no. 2,
-
-   $Id$
 
    Algorithm also described here:
    http://en.wikipedia.org/wiki/Monotone_cubic_interpolation
@@ -58,7 +62,10 @@ namespace Opm
    @brief Represents one dimensional function f with single valued argument x that can be interpolated using monotone cubic interpolation
 
 */
-
+   
+ /**
+ *  @brief Represents one dimensional function f with single valued argument x that can be interpolated using monotone cubic interpolation
+ */
 class MonotCubicInterpolator {
  public:
 
@@ -91,7 +98,6 @@ class MonotCubicInterpolator {
       All commas in the file will be treated as spaces when parsing.
 
    */
-
  MonotCubicInterpolator(const char* datafilename) throw (const char*)
   {
     if (!read(std::string(datafilename))) {
@@ -454,7 +460,7 @@ class MonotCubicInterpolator {
          will become
             (2,3), (3,4), (4,5)
 
-       Assumes at least 3 datapoints. If less than three, this function is a noop.
+       Assumes at least 3 datapoints. If less than three, this function is a loop.
     */
     void chopFlatEndpoints(const double);
 
@@ -494,29 +500,30 @@ class MonotCubicInterpolator {
 
 private:
 
-   // Data structure to store x- and f-values
+   
+  
+   /// Data structure to store x- and f-values
    std::map<double, double> data;
 
-   // Data structure to store x- and d-values
+   /// Data structure to store x- and d-values
    mutable std::map<double, double> ddata;
 
 
    // Storage containers for precomputed interpolation data
    //   std::vector<double> dvalues; // derivatives in Hermite interpolation.
+   
+   mutable bool strictlyMonotoneCached; ///< Flag to determine whether the boolean strictlyMonotone can be trusted.
+   mutable bool monotoneCached; ///< Flag to determine whether the boolean Monotone can be trusted. 
 
-   // Flag to determine whether the boolean strictlyMonotone can be
-   // trusted.
-   mutable bool strictlyMonotoneCached;
-   mutable bool monotoneCached; /* only monotone, not stricly montone */
-
-   mutable bool strictlyMonotone;
-   mutable bool monotone;
+   mutable bool strictlyMonotone; ///< strictly monotone function
+   mutable bool monotone; ///< monotone function, not strictly monotone
 
    // if strictlyMonotone is true (and can be trusted), the two next are meaningful
-   mutable bool strictlyDecreasing;
-   mutable bool strictlyIncreasing;
-   mutable bool decreasing;
-   mutable bool increasing;
+   
+   mutable bool strictlyDecreasing; ///< if strictlyMonotone is true, tells whether function is strictly decreasing
+   mutable bool strictlyIncreasing; ///< if strictlyMonotone is true, tells whether function is strictly increasing
+   mutable bool decreasing; ///< tells whether function is decreasing
+   mutable bool increasing; ///< tells whether function is increasing
 
 
    /* Hermite basis functions, t \in [0,1] ,
@@ -524,20 +531,35 @@ private:
       http://en.wikipedia.org/w/index.php?title=Cubic_Hermite_spline&oldid=84495502
    */
 
+   
+   /// Hermite Basis function - H00
    double H00(double t) const {
        return 2*t*t*t - 3*t*t + 1;
    }
+   /// Hermite Basis function - H10
    double H10(double t) const {
        return t*t*t - 2*t*t + t;
    }
+   /// Hermite Basis function - H01
    double H01(double t) const {
        return -2*t*t*t + 3*t*t;
    }
+   /// Hermite Basis function - H11
    double H11(double t) const {
        return t*t*t - t*t;
    }
 
 
+   /**
+   *  Sets the following information (booleans) about the function to true or false, default is true for all
+   *
+   *  strictlyMonotone,
+   *  monotone,
+   *  strictlyDecreasing,
+   *  decreasing,
+   *  strictlyIncreasing,
+   *  increasing
+   */
    void computeInternalFunctionData() const ;
 
    /**

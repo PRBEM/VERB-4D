@@ -1,5 +1,7 @@
-/*
- * Diffusion.cpp
+/**
+ * \file Diffusion_ADI3.cpp
+ *
+ * \brief Calculating the diffusion in 2D using method from Jihye Shin and Sungsoo Kim (2008)
  *
  *  Created on: May 28, 2011
  *      Author: dimath
@@ -12,9 +14,49 @@
 #include <time.h>
 
 
-/** Create model matrices and solve the system
+/** Create model matrices and solve the system,
  * The method is from
  * Jihye Shin and Sungsoo Kim (2008), ALTERNATING DIRECTION IMPLICIT METHOD FOR	TWO-DIMENSIONAL FOKKER-PLANCK EQUATION OF DENSE SPHERICAL STELLAR SYSTEMS
+ *
+ * http://arxiv.org/pdf/0805.0054v1.pdf
+ *
+ * \todo Fix this function - currently results in negative PSD values - using Lapack instead
+ *
+ * Method:
+ *
+ * For the x direction and then for the y direction
+ *
+ * 1. Add boundary conditions AddBoundary()
+ *
+ * 2. Add sources and Losses (only for the y direction)
+ *
+ * 3. get the seond derivative approximation with diffusion coeficient SecondDerivativeApproximation_2D()
+ *
+ * 4. Multiply matrix B by f (PSD_1D_x) and add matrix C - this will be the RHS for tridag()
+ *
+ * 5. solve matrix with tridag()
+ *
+ * @param psd - phase space density
+ * @param x - one dimensional slice
+ * @param y - one dimensional slice 
+ * @param x_size - size of x slice
+ * @param y_size - size of y slice
+ * @param x_LBC - lower boundary condition for param x
+ * @param x_UBC - upper boundary condition for param x
+ * @param y_LBC - lower boundary condition for param y
+ * @param y_UBC - upper boundary condition for param y
+ * @param x_LBC_type - type of lower boundary condition for param x
+ * @param x_UBC_type - type of upper boundary condition for param x
+ * @param y_LBC_type - type of lower boundary condition for param y
+ * @param y_UBC_type - type of upper boundary condition for param y
+ * @param Dxx - 2D Diffusion matrix
+ * @param Dyy - 2D Diffusion matrix
+ * @param Dxy - 2D Diffusion matrix
+ * @param Dyx - 2D Diffusion matrix
+ * @param G - 2D used for Jacobian to normalize matrix
+ * @param Sources - matrix used for Sources
+ * @param Losses - Matrix used for Losses (loss cone)
+ * @param dt - change in time of single time step
  */
 bool Diffusion_2D_ADI3(
 				  Matrix2D<double> &psd,
@@ -32,9 +74,9 @@ bool Diffusion_2D_ADI3(
 	int ix, iy, in, id;
 	DiagMatrix::iterator it;
 	Matrix2D<double> psd_prev(x_size, y_size);
-	Matrix1D<double> psd_1d_x(x_size * y_size); ///< Rearranged PSD into one vector of unknown variables
-	Matrix1D<double> psd_1d_y(x_size * y_size); ///< Rearranged PSD into one vector of unknown variables
-	Matrix1D<double> psd_1d_prev(x_size * y_size); ///< Rearranged PSD into one vector of unknown variables
+	Matrix1D<double> psd_1d_x(x_size * y_size); // Rearranged PSD into one vector of unknown variables
+	Matrix1D<double> psd_1d_y(x_size * y_size); // Rearranged PSD into one vector of unknown variables
+	Matrix1D<double> psd_1d_prev(x_size * y_size); // Rearranged PSD into one vector of unknown variables
 	double dh;
 
 	CalculationMatrix
@@ -75,7 +117,7 @@ bool Diffusion_2D_ADI3(
 			// calculating current line number (in)
 			in = matr_A_x.index1d(ix, iy);
 
-			// Bboundary conditions
+			// Boundary conditions
 			if (ix == 0 && x_size >= 3) {
 
 				matr_C_x[0][in] = x_LBC[iy];
@@ -342,7 +384,7 @@ bool Diffusion_2D_ADI3(
 				// multiplication B * f
 				if (in + it_B->first >= 0 && in + it_B->first < matr_B_y.total_size) {
 					//cout << "RHS["<< in <<"] = " << RHS[in] << " + " << it_B->second[in] << " * " << psd_1d[in + it_B->first] << " (" << it_B->first << ")";
-					/// !!!!!!!!! Multiplying to previous PSD
+					// !!!!!!!!! Multiplying to previous PSD
 					RHS[in] += it_B->second[in] * psd_1d_prev[in + it_B->first];
 					//cout << " = " << RHS[in] << endl;
 				}

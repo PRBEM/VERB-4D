@@ -18,7 +18,7 @@
 */
 
 /**
-   @file MonotCubicInterpolator.C
+   @file MonotCubicInterpolator.cpp
    @brief Represents one dimensional function f with single valued argument x
 
    Class to represent a one-dimensional function with single-valued
@@ -511,7 +511,7 @@ computeInternalFunctionData() const {
 //         will become
 //            (2,3), (3,4), (4,5)
 //
-//       Assumes at least 3 datapoints. If less than three, this function is a noop.
+//       Assumes at least 3 datapoints. If less than three, this function is a loop.
 void
 MonotCubicInterpolator::
 chopFlatEndpoints(const double epsilon) {
