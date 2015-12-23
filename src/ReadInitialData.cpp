@@ -33,7 +33,7 @@ void AllocateMemory(Matrix4D<double> &PSD,
 		Matrix3D<double> &P_LBC, Matrix3D<double> &P_UBC, Matrix3D<double> &R_LBC, Matrix3D<double> &R_UBC, Matrix3D<double> &V_LBC, Matrix3D<double> &V_UBC, Matrix3D<double> &K_LBC, Matrix3D<double> &K_UBC, Matrix3D<double> &L_LBC, Matrix3D<double> &L_UBC,
 		Matrix4D<double> &DLL, Matrix4D<double> &DVV, Matrix4D<double> &DVK, Matrix4D<double> &DKK,
 		Matrix4D<double> &VP, Matrix4D<double> &VL,
-		Matrix4D<double> &G_local, Matrix4D<double> &G_radial, Matrix4D<double> &Sources, Matrix4D<double> &Losses) {
+		Matrix4D<double> &G_local, Matrix4D<double> &G_radial, Matrix4D<double> &Sources, Matrix4D<double> &Losses, Matrix4D<double> &Losses_conv) {
 
 
 	// Arrays initialization (memory)
@@ -55,6 +55,8 @@ void AllocateMemory(Matrix4D<double> &PSD,
 
 	Sources.AllocateMemory(P_size, R_size, V_size, K_size);
 	Losses.AllocateMemory(P_size, R_size, V_size, K_size);
+    Losses_conv.AllocateMemory(P_size, R_size, V_size, K_size);
+
 
 	//G_local.AllocateMemory(I_size, K_size); // I,K grid is always the same, so Jacobian is the same
 	G_local.AllocateMemory(P_size, R_size, V_size, K_size);
@@ -352,7 +354,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			PSD_l_P, PSD_u_P, PSD_l_R, PSD_u_R, PSD_l_V, PSD_u_V, PSD_l_K, PSD_u_K, PSD_l_L, PSD_u_L,
 			DLL, DVV, DVK, DKK,
 			VP, VL,
-			G_local, G_radial, Sources, Losses);
+			G_local, G_radial, Sources, Losses, Losses_conv);
 
 	// ADDED
 	if (use_matlab == "false")
