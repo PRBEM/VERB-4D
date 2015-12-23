@@ -523,7 +523,7 @@ int main(int argc, char* argv[]) {
                         Pu_BC.yzSlice(iV, iK), // R, I, K
                         Rl_BC.yzSlice(iV, iK), Ru_BC.yzSlice(iV,  iK), // P, I, K
                         Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, VP.yzSlice(iV, iK), VR.yzSlice(iV, iK),
-                        Sources.yzSlice(iV, iK) * 0, Losses.yzSlice(iV,  iK) * 0, dt, min_PSD, min_V);
+                        Sources.yzSlice(iV, iK) * 0, Losses_conv.yzSlice(iV,  iK), dt, min_PSD, min_V);
 
                 // copy results back into PSD adding the 2d list PSD_PR for all values of iV,iK
                 for (iP = 0; iP < P_size; iP++) {
