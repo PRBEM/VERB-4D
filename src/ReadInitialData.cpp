@@ -138,7 +138,7 @@ void ReadBoundaryCondition(
 */
 bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* argv[],
 		double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
-		string &inversion_method, string &use_matlab, string &include_boundary, string &update_Vl_BC,
+		string &inversion_method, string &use_matlab, string &include_boundary, string &Vl_BC_from_convection,
 		Matrix4D<double> &PSD,
 		Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V, Matrix4D<double> &K, UpdatableMatrix < Matrix4D<double> > &L,
 		int &P_size, int &R_size, int &V_size, int &K_size, int &L_size,
@@ -164,7 +164,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	// ADDED
 	parameters.getParameter("use_matlab", use_matlab);
 	parameters.getParameter("include_boundary", include_boundary);
-	parameters.getParameter("update_Vl_BC", update_Vl_BC);
+	parameters.getParameter("Vl_BC_from_convection", Vl_BC_from_convection);
 	// END ADDED
 
 

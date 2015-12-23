@@ -219,14 +219,14 @@ int main(int argc, char* argv[]) {
     string inversion_method = "Lapack";
     string use_matlab       = "false";
     string include_boundary = "true";
-    string update_Vl_BC = "true";
+    string Vl_BC_from_convection = "true";
 
     bool initialLoad = false; // Check the load of the initial files
 
     // Read all the inputs - store them into variables
     // These inputs come from the matlab files that are generated when running Conv_Dif.m examples
     initialLoad = ReadInitialData(inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
-            inversion_method, use_matlab, include_boundary,  update_Vl_BC, PSD,
+            inversion_method, use_matlab, include_boundary,  Vl_BC_from_convection, PSD,
             P, R, V, K, L,
             P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
             Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
@@ -542,7 +542,7 @@ int main(int argc, char* argv[]) {
             cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
 #pragma omp master
             {
-            if(update_Vl_BC == "true" && (Vl_BC_type == "BCT_CONSTANT_VALUE")){ //rewrite boundary conditions at lower V
+            if(Vl_BC_from_convection == "true" && (Vl_BC_type == "BCT_CONSTANT_VALUE")){ //rewrite boundary conditions at lower V
                 Vl_BC = PSD.ySlice(0);
             }
             }
