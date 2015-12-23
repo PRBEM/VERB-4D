@@ -6,7 +6,7 @@
  * All equations and formulas for these calculations can be found at http://www.hadian.ir/teaching/CompHydr/3.pdf .
  * Mostly coming from 3.5 Simplified Ultimate Quickest strategy from B.P Leonard the Ultimate conservative difference scheme.
  * In the source code mathematical equations are numbered corresponding to the numbering of equations found in the paper
- * 
+ *
  * \brief Calculates the convection in 2D given a 2D matrix of Phase Space Densities, P, R, boundary conditions, diffusion, sources and losses
  */
 
@@ -20,7 +20,7 @@ using namespace std;
  * Calculation of 2D convection
  *
  * Uses Convection_1D_Ultimate_QUICKEST6.h for calculating P and R if either are of size > 3.
- * 
+ *
  * All equations and formulas for these calculations can be found at http://www.hadian.ir/teaching/CompHydr/3.pdf .
  * Mostly coming from 3.5 Simplified Ultimate Quickest strategy from B.P Leonard the Ultimate conservative difference scheme.
  * In the source code mathematical equations are numbered corresponding to the numbering of equations found in the paper.
@@ -45,7 +45,7 @@ using namespace std;
  * @param Losses - Losses matrix (loss cone)
  * @param dt_total - total time change
  * @param min_PSD - minimum value from the PSD matrix
- * @param min_V - minimum value for V from the 
+ * @param min_V - minimum value for V from the
  */
 bool Convection_2D( Matrix2D < double > &PSD_PR,
 			Matrix2D < double > P, Matrix2D < double > R,
@@ -149,6 +149,11 @@ bool Convection_2D( Matrix2D < double > &PSD_PR,
 
 			}
 		}
+		for (iP = 0; iP < P_size; iP++){
+            for(iR = 0; iR < R_size - 1; iR++){
+            PSD_PR[iP][iR] = PSD_PR[iP][iR] * exp(Losses[iP][iR] * dt);
+            }
+        }
 	}
 
 
