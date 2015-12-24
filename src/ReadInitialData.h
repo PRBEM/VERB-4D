@@ -46,7 +46,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		UpdatableListMatrix < Matrix4D<double> > &DLL, UpdatableListMatrix < Matrix4D<double> > &DVV, UpdatableListMatrix < Matrix4D<double> > &DKK, UpdatableListMatrix < Matrix4D<double> > &DVK,
 		UpdatableMatrix < Matrix4D<double> > &VP, UpdatableMatrix < Matrix4D<double> > &VL,
 		UpdatableMatrix < Matrix4D<double> > &G_local, UpdatableMatrix < Matrix4D<double> >  &G_radial,
-		UpdatableListMatrix < Matrix4D<double> > &Sources, UpdatableListMatrix < Matrix4D<double> > &Losses);
+		UpdatableListMatrix < Matrix4D<double> > &Sources, UpdatableListMatrix < Matrix4D<double> > &Losses, UpdatableListMatrix < Matrix4D<double> > &Losses_conv);
 
 
 // Implemented function but not ever used

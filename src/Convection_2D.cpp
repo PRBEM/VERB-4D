@@ -149,6 +149,11 @@ bool Convection_2D( Matrix2D < double > &PSD_PR,
 
 			}
 		}
+		for (iP = 0; iP < P_size; iP++){
+            for(iR = 0; iR < R_size - 1; iR++){
+            PSD_PR[iP][iR] = PSD_PR[iP][iR] * exp(Losses[iP][iR] * dt);
+            }
+        }
 	}
 
 
