@@ -410,6 +410,7 @@ int main(int argc, char* argv[]) {
         // Sources and losses
         Sources.update(time, P, R, V, K);
         Losses.update(time, P, R, V, K);
+        Losses_conv.update(time, P, R, V, K);
 
         // Boundary conditions
         // By default - it's constant PSD
