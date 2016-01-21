@@ -268,7 +268,7 @@ int main(int argc, char* argv[]) {
     time_string.precision(5);
     time_string.setf(ios::fixed);
 
-    PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << ".mat";
+    PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << file_ext;
     Logger::message << "Writing results: " << PSD_filename.str() << endl;
     time_string.str("");
     time_string << time_first;
