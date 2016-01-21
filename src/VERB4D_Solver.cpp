@@ -219,7 +219,7 @@ int main(int argc, char* argv[]) {
     string inversion_method = "Lapack";
     string use_matlab       = "false";
     string include_boundary = "true";
-    string Vl_BC_from_convection = "true";
+    string Vl_BC_from_convection = "false";
 
     bool initialLoad = false; // Check the load of the initial files
 
