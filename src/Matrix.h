@@ -416,6 +416,9 @@ public:
 	virtual void readFromMatlabFile(string file, int column = 1);
 	virtual void readFromMatlabFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z);
 
+      virtual void readFromBinaryFile(string filename);
+      virtual void writeToBinaryFile(string filename);
+
 	// Some other stuff
 	string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
 
