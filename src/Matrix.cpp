@@ -3673,11 +3673,11 @@ void Matrix3D<T>::readFromBinaryFile(string filename) {
 * WARNING: writing to 3D matlab array is not available at the moment
 */
 template<class T>
-void Matrix3D<T>::writeToAnyFile(string filename, string io_method) {
+void Matrix3D<T>::writeToAnyFile(string filename, string io_method, string info) {
     string ext;
     if (io_method.compare("ascii") == 0){
         ext = ".plt";
-        writeToFile(filename + ext);
+        writeToFile(filename + ext, info);
     } else if (io_method.compare("binary") == 0) {
         ext = ".pltb";
         writeToBinaryFile(filename + ext);
@@ -5469,20 +5469,20 @@ void Matrix4D<T>::writeToBinaryFile(string filename) {
 }
 
 /**
-* Write 4D data to .plt, .pltb or .mat files
+* Write 4D data to .plt, .pltb or .mat files. No info is written for .pltb file
 */
 template<class T>
-void Matrix4D<T>::writeToAnyFile(string filename, string io_method) {
+void Matrix4D<T>::writeToAnyFile(string filename, string io_method, string info) {
     string ext;
     if (io_method.compare("ascii") == 0){
         ext = ".plt";
-        writeToFile(filename + ext);
+        writeToFile(filename + ext, info);
     } else if (io_method.compare("binary") == 0) {
         ext = ".pltb";
         writeToBinaryFile(filename + ext);
     } else if (io_method.compare("matlab") == 0) {
         ext = ".mat";
-        writeToMatlabFile(filename + ext);
+        writeToMatlabFile(filename + ext, info);
     } else {
         printf("IO error: unknown io_method");
         exit(EXIT_FAILURE);

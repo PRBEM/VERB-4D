@@ -260,7 +260,7 @@ int main(int argc, char* argv[]) {
     Logger::message << "Writing results: " << PSD_filename.str() << endl;
     time_string.str("");
     time_string << time_first;
-    PSD.writeToAnyFile(PSD_filename.str(), io_method);
+    PSD.writeToAnyFile(PSD_filename.str(), io_method, time_string.str());
 
     // When to apply loss term:
     // It's better to apply it during pitch-angle diffusion, unless we don't have any pitch-angle diffusion
@@ -793,7 +793,7 @@ int main(int argc, char* argv[]) {
             PSD_filename.str("");
             PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step);
             Logger::message << endl << "Writing results: " << PSD_filename.str() << endl;
-            PSD.writeToAnyFile(PSD_filename.str(), io_method);
+            PSD.writeToAnyFile(PSD_filename.str(), io_method, time_string.str());
         }
     }
 

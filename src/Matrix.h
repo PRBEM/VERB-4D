@@ -310,7 +310,7 @@ public:
     virtual void writeToBinaryFile(string filename);
     virtual void readFromBinaryFile(string filename);
 
-    virtual void writeToAnyFile(string filename, string io_method);
+    virtual void writeToAnyFile(string filename, string io_method, string info);
     virtual void readFromAnyFile(string filename, string io_method);
     virtual void readFromAnyFile(string filename, string io_method, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3);
 
@@ -427,7 +427,7 @@ public:
     virtual void writeToBinaryFile(string filename);
     virtual void readFromBinaryFile(string filename);
 
-    virtual void writeToAnyFile(string filename, string io_method);
+    virtual void writeToAnyFile(string filename, string io_method, string info);
     virtual void readFromAnyFile(string filename, string io_method);
     virtual void readFromAnyFile(string filename, string io_method, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z);
 
