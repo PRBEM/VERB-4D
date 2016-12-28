@@ -48,18 +48,14 @@
  * The parameters.ini file created in matlab will specify the inversion method.
  * If "Lapack" is specified then Diffusion_2D() will be used.
  * Otherwise 1 of the 3 ADI methods will be used to inversion.
- * All 3 ADI methods can use multiple threads while Lapack can only use 1.
- * The current chosen method of inversion is Diffusion_ADI3() if "ADI" is specified. It can be changed in VERB4D_SOLVER.cpp
+ * The current chosen method of inversion is Diffusion_2D() if "Lapack" is specified. It can be changed in VERB4D_SOLVER.cpp
  *
  * From current testing all of the ADI methods produce bad results - namely negative PSD values.
  * All examples should thus be run with Lapack until the ADI methods are fixed.
- * Unfortunately Lapack is not compatable with multiple threads so running the examples with Lapack will be much slower than ADI and not scalable.
- * Newer versions of Lapack may allow multithreading however.
+ * While using Lapack, be sure that you use the thread-safe version of the Lapack library.
  *
  * The main solver function can be found in VERB4D_Solver.cpp
  * It consists of a series of PSD calculations done for every time step that is specified.
- *
- * This will be used in order to take the input data from matlab store them into Matrix1D, Matrix2D, Matrix3D, and Matrix4D using ReadInitialData.h
  *
  * The matrix classes listed above are used to store the data in 1,2,3 or 4 dimension. One example is a 4D matrix containing P,R,V,K
  *
@@ -69,11 +65,9 @@
  * These calculation matrices are made up of DiagMatrix which is a mapping of an int (which diagonal number) to a 1d matrix of values (for that diagonal).
  *
  * There is also a Parameters class which holds paramters and their value as defined in the file they came from.
-* These parameters get the values specified in the parameters.ini text file and set variables to determine inversion method, number of threads, using .mat files, etc.
-*
-* This code was built with MATLAB capabilities including reading and writing .mat files.
-* In order to switch all files to .mat for increased speed and percision change the use_matlab variable in the MATLAB Conv_Dif.m file for whichever example you are running to true.
-* If the machine that this code is being run on does not have matlab installed change the MATLAB_CAPABLE variable in Matrix.h to false
+ * These parameters get the values specified in the parameters.ini text file and set variables to determine inversion method, number of threads, using .mat files, etc.
+ *
+ * There are three options for reading input and writing output: ascii (.plt), binary (.plt) or matlab (.mat) files.
 *
 */
 
@@ -156,7 +150,7 @@ int main(int argc, char* argv[]) {
     // Grid, 4D:
     // P - local time
     // R - radial distance
-    // V - invariant = mu / (K + const) ^ 2, where mu is the first adiabatic invariant
+    // V - invariant = mu * (K + const) ^ 2, where mu is the first adiabatic invariant
     // K - invariant
     Matrix4D<double> R, P, V, K;
 
@@ -217,16 +211,16 @@ int main(int argc, char* argv[]) {
     string inputFolder      = "./VERB4D_input/";
     string outputFolder     = "./VERB4D_output/";
     string inversion_method = "Lapack";
-    string use_matlab       = "false";
     string include_boundary = "true";
     string Vl_BC_from_convection = "false";
+    string io_method        = "ascii";
 
     bool initialLoad = false; // Check the load of the initial files
 
     // Read all the inputs - store them into variables
     // These inputs come from the matlab files that are generated when running Conv_Dif.m examples
     initialLoad = ReadInitialData(inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
-            inversion_method, use_matlab, include_boundary,  Vl_BC_from_convection, PSD,
+            inversion_method, include_boundary,  Vl_BC_from_convection, io_method, PSD,
             P, R, V, K, L,
             P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
             Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
@@ -254,29 +248,19 @@ int main(int argc, char* argv[]) {
     Logger::message << "Total time " << time_total << ". Time step " << dt << " (" << it_total << " steps)." << endl;
     Logger::message << "Output each " << output_step << " step. " << endl;
 
-    // Save initial conditions
-    if (use_matlab == "false") {
-        PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
-    } else {
-        PSD.writeToMatlabFile(outputFolder + "PSD0.mat", P, R, V, K);
-    }
+    PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
 
     // Output zero step - writing PSD_0 file
     ostringstream PSD_filename, time_string;
-    string file_ext = use_matlab == "true" ? ".mat" : ".plt";
 
     time_string.precision(5);
     time_string.setf(ios::fixed);
 
-    PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << file_ext;
+    PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0;
     Logger::message << "Writing results: " << PSD_filename.str() << endl;
     time_string.str("");
     time_string << time_first;
-    if (use_matlab == "true") {
-        PSD.writeToMatlabFile(PSD_filename.str(), time_string.str());
-    } else {
-        PSD.writeToFile(PSD_filename.str(), time_string.str());
-    }
+    PSD.writeToAnyFile(PSD_filename.str(), io_method);
 
     // When to apply loss term:
     // It's better to apply it during pitch-angle diffusion, unless we don't have any pitch-angle diffusion
@@ -807,14 +791,9 @@ int main(int argc, char* argv[]) {
             time_string << time;
 
             PSD_filename.str("");
-            PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step) << file_ext;
+            PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step);
             Logger::message << endl << "Writing results: " << PSD_filename.str() << endl;
-            if (use_matlab == "true") {
-                PSD.writeToMatlabFile(PSD_filename.str(), time_string.str());
-            }
-            else {
-                PSD.writeToFile(PSD_filename.str(), time_string.str());
-            }
+            PSD.writeToAnyFile(PSD_filename.str(), io_method);
         }
     }
 

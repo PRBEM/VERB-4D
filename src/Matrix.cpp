@@ -3587,7 +3587,152 @@ void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, con
 }
 
 
+/**
+* Write matrix data to binary file
 
+* \param filename - file to read grids from
+*/
+template<class T>
+void Matrix3D<T>::writeToBinaryFile(string filename) {
+    FILE *outputFile = fopen(filename.c_str(), "wb");
+    if (outputFile != NULL) {
+        int bytes2write = sizeof(double);
+        double *buffer;
+        buffer = (double*) malloc(bytes2write);
+        int status;
+        for (int i1 = 0; i1 < size_q1; i1++) {
+              for (int i2 = 0; i2 < size_q2; i2++) {
+                    for (int i3 = 0; i3 < size_q3; i3++) {
+                        *buffer = matrix_array[i1][i2][i3];
+                        status = fwrite(buffer, bytes2write, 1, outputFile);
+                        if (status!=1){
+                              printf("Writing error");
+                              exit(EXIT_FAILURE);
+                        }
+                    }
+              }
+        }
+        free(buffer);
+    } else {
+        printf("MATRIX_WRITE_ERROR: Error writing file %s.\n", filename.c_str());
+        exit(EXIT_FAILURE);
+    }
+    fclose(outputFile);
+}
+
+
+
+
+/**
+* Read matrix data from binary file
+*
+* \param filename - file to read grids from
+*/
+template<class T>
+void Matrix3D<T>::readFromBinaryFile(string filename) {
+	if (!initialized) {
+		printf("MATRIX_ERROR: Using un-itialized matrix");
+		exit(EXIT_FAILURE);
+	} else {
+		this->name = filename;
+		FILE *inputFile = fopen(filename.c_str(), "rb");
+		if (inputFile != NULL) {
+            int bytes2read = sizeof(double);
+            char *buffer;
+            buffer = (char*) malloc(bytes2read);
+            if (buffer == NULL) {
+                  printf("Memory error");
+                  exit(EXIT_FAILURE);
+            }
+            int status;
+			for (int i1 = 0; i1 < size_q1; i1++) {
+				for (int i2 = 0; i2 < size_q2; i2++) {
+					for (int i3 = 0; i3 < size_q3; i3++) {
+                        status = fread(buffer, bytes2read, 1, inputFile);
+                        if (status!=1){
+                            printf("Reading error");
+                            exit(EXIT_FAILURE);
+                        } else {
+                            matrix_array[i1][i2][i3] = *((double*) buffer);
+                        }
+					}
+				}
+			}
+			free(buffer);
+		} else {
+			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
+			exit(EXIT_FAILURE);
+		}
+		fclose(inputFile);
+	}
+}
+
+
+/**
+* Write 3D data to .plt, .pltb or .mat files
+* WARNING: writing to 3D matlab array is not available at the moment
+*/
+template<class T>
+void Matrix3D<T>::writeToAnyFile(string filename, string io_method) {
+    string ext;
+    if (io_method.compare("ascii") == 0){
+        ext = ".plt";
+        writeToFile(filename + ext);
+    } else if (io_method.compare("binary") == 0) {
+        ext = ".pltb";
+        writeToBinaryFile(filename + ext);
+    } else if (io_method.compare("matlab") == 0) {
+        printf("Writing to 3D arrays to MATLAB filse is not available in the moment");
+        //ext = ".mat";
+        //writeToMatlabFile(filename + ext);
+    } else {
+        printf("IO error: unknown io_method");
+        exit(EXIT_FAILURE);
+    }
+}
+
+/**
+* Read 3D data from .plt, .pltb or .mat files containing only one column
+*/
+template<class T>
+void Matrix3D<T>::readFromAnyFile(string filename, string io_method) {
+    string ext;
+    if (io_method.compare("ascii") == 0){
+        ext = ".plt";
+        readFromFile(filename + ext, 1);
+    } else if (io_method.compare("binary") == 0){
+        ext = ".pltb";
+        readFromBinaryFile(filename + ext);
+    } else if (io_method.compare("matlab") == 0){
+        ext = ".mat";
+        readFromMatlabFile(filename + ext, 1);
+    } else {
+        printf("IO error: unknown io_method");
+        exit(EXIT_FAILURE);
+    }
+}
+
+/**
+* Read 3D data from .plt, .pltb or .mat files with grids
+* WARNING: if io_method == "binary", .pltb file does not contain grid. In this case the function works the same as Matrix3D<T>::readFromAnyFile(string, string, int)
+*/
+template<class T>
+void Matrix3D<T>::readFromAnyFile(string filename, string io_method, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3){
+    string ext;
+    if (io_method.compare("ascii") == 0){
+        ext = ".plt";
+        readFromFile(filename + ext, grid_q1, grid_q2, grid_q3);
+    } else if (io_method.compare("binary") == 0) {
+        ext = ".pltb";
+        readFromBinaryFile(filename + ext);
+    } else if (io_method.compare("matlab") == 0) {
+        ext = ".mat";
+        readFromMatlabFile(filename + ext, grid_q1, grid_q2, grid_q3);
+    } else {
+        printf("IO error: unknown io_method");
+        exit(EXIT_FAILURE);
+    }
+}
 
 
 /**
@@ -5281,6 +5426,70 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 }
 
 
+
+
+/**
+* Write matrix data to binary file
+
+* \param filename - file to read grids from
+*/
+template<class T>
+void Matrix4D<T>::writeToBinaryFile(string filename) {
+    int w, x, y, z;
+    FILE *outputFile = fopen(filename.c_str(), "wb");
+    if (outputFile != NULL) {
+        double *buffer;
+        int bytes2write = sizeof(double);
+        buffer = (double*) malloc(bytes2write);
+        if (buffer == NULL) {
+                  printf("Memory error");
+                  exit(EXIT_FAILURE);
+        }
+        int status;
+        for (w = 0; w < size_w; w++) {
+              for (x = 0; x < size_x; x++) {
+                    for (y = 0; y < size_y; y++) {
+                          for (z = 0; z < size_z; z++) {
+                                *buffer = matrix_array[w][x][y][z];
+                                status = fwrite(buffer, bytes2write, 1, outputFile);
+                                if (status!=1){
+                                      printf("Writing error");
+                                      exit(EXIT_FAILURE);
+                                }
+                          }
+                    }
+              }
+        }
+        free(buffer);
+    } else {
+        printf("MATRIX_WRITE_ERROR: Error writing file %s.\n", filename.c_str());
+        exit(EXIT_FAILURE);
+    }
+    fclose(outputFile);
+}
+
+/**
+* Write 4D data to .plt, .pltb or .mat files
+*/
+template<class T>
+void Matrix4D<T>::writeToAnyFile(string filename, string io_method) {
+    string ext;
+    if (io_method.compare("ascii") == 0){
+        ext = ".plt";
+        writeToFile(filename + ext);
+    } else if (io_method.compare("binary") == 0) {
+        ext = ".pltb";
+        writeToBinaryFile(filename + ext);
+    } else if (io_method.compare("matlab") == 0) {
+        ext = ".mat";
+        writeToMatlabFile(filename + ext);
+    } else {
+        printf("IO error: unknown io_method");
+        exit(EXIT_FAILURE);
+    }
+}
+
+
 /**
 * Read matrix data from binary file
 *
@@ -5295,30 +5504,31 @@ void Matrix4D<T>::readFromBinaryFile(string filename) {
 	} else {
 		this->name = filename;
 		FILE *inputFile = fopen(filename.c_str(), "rb");
-		int bytes2read = sizeof(double);
-		char *buffer;
-		buffer = (char*) malloc(bytes2read);
-		if (buffer == NULL) {
+		if (inputFile != NULL) {
+            int bytes2read = sizeof(double);
+            char *buffer;
+            buffer = (char*) malloc(bytes2read);
+            if (buffer == NULL) {
                   printf("Memory error");
                   exit(EXIT_FAILURE);
             }
-		if (inputFile != NULL) {
-                  int status;
+            int status;
 			for (w = 0; w < size_w; w++) {
 				for (x = 0; x < size_x; x++) {
 					for (y = 0; y < size_y; y++) {
 						for (z = 0; z < size_z; z++) {
-                                          status = fread(buffer, bytes2read, 1, inputFile);
-                                          if (status!=1){
-                                                printf("Reading error");
-                                                exit(EXIT_FAILURE);
-                                          } else {
-                                                matrix_array[w][x][y][z] = *((double*) buffer);
-                                          }
+                              status = fread(buffer, bytes2read, 1, inputFile);
+                              if (status!=1){
+                                    printf("Reading error");
+                                    exit(EXIT_FAILURE);
+                              } else {
+                                    matrix_array[w][x][y][z] = *((double*) buffer);
+                              }
 						}
 					}
 				}
 			}
+			free(buffer);
 		} else {
 			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
 			exit(EXIT_FAILURE);
@@ -5329,41 +5539,47 @@ void Matrix4D<T>::readFromBinaryFile(string filename) {
 
 
 /**
-* Write matrix data to binary file
-
-* \param filename - file to read grids from
+* Read 4D data from .plt, .pltb or .mat files containing only one column
 */
 template<class T>
-void Matrix4D<T>::writeToBinaryFile(string filename) {
-	int w, x, y, z;
-      FILE *outputFile = fopen(filename.c_str(), "wb");
-      int bytes2write = sizeof(double);
-      double *buffer;
-      buffer = (double*) malloc(bytes2write);
-      if (outputFile != NULL) {
-            int status;
-            for (w = 0; w < size_w; w++) {
-                  for (x = 0; x < size_x; x++) {
-                        for (y = 0; y < size_y; y++) {
-                              for (z = 0; z < size_z; z++) {
-                                    *buffer = matrix_array[w][x][y][z];
-                                    status = fwrite(buffer, bytes2write, 1, outputFile);
-                                    if (status!=1){
-                                          printf("Writing error");
-                                          exit(EXIT_FAILURE);
-                                    }
-                              }
-                        }
-                  }
-            }
-      } else {
-            printf("MATRIX_WRITE_ERROR: Error writing file %s.\n", filename.c_str());
-            exit(EXIT_FAILURE);
-      }
-      fclose(outputFile);
+void Matrix4D<T>::readFromAnyFile(string filename, string io_method) {
+    string ext;
+    if (io_method.compare("ascii") == 0){
+        ext = ".plt";
+        readFromFile(filename + ext, 1);
+    } else if (io_method.compare("binary") == 0){
+        ext = ".pltb";
+        readFromBinaryFile(filename + ext);
+    } else if (io_method.compare("matlab") == 0){
+        ext = ".mat";
+        readFromMatlabFile(filename + ext, 1);
+    } else {
+        printf("IO error: unknown io_method");
+        exit(EXIT_FAILURE);
+    }
 }
 
-
+/**
+* Read 4D data from .plt, .pltb or .mat files with grids
+* WARNING: if io_method == "binary", .pltb file does not contain grid. In this case the function works the same as Matrix4D<T>::readFromAnyFile(string, string, int)
+*/
+template<class T>
+void Matrix4D<T>::readFromAnyFile(string filename, string io_method, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z){
+    string ext;
+    if (io_method.compare("ascii") == 0){
+        ext = ".plt";
+        readFromFile(filename + ext, grid_w, grid_x, grid_y, grid_z);
+    } else if (io_method.compare("binary") == 0) {
+        ext = ".pltb";
+        readFromBinaryFile(filename + ext);
+    } else if (io_method.compare("matlab") == 0) {
+        ext = ".mat";
+        readFromMatlabFile(filename + ext, grid_w, grid_x, grid_y, grid_z);
+    } else {
+        printf("IO error: unknown io_method");
+        exit(EXIT_FAILURE);
+    }
+}
 
 
 /**
@@ -5818,7 +6034,6 @@ void CalculationMatrix::writeToFile(string filename) {
 	}
 	output.close();
 }
-
 
 //////////////////////////////////////////
 // Implementations
