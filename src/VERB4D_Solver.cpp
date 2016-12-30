@@ -68,6 +68,7 @@
  * These parameters get the values specified in the parameters.ini text file and set variables to determine inversion method, number of threads, using .mat files, etc.
  *
  * There are three options for reading input and writing output: ascii (.plt), binary (.plt) or matlab (.mat) files.
+ * To guarantee backward compatibility of the code, parameter use_matlab is left in the code. If use_matlab == "true", io_method will be overwritten with "matlab".
 *
 */
 
