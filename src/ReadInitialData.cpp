@@ -192,7 +192,8 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 #if !(MATLAB_CAPABLE)
 {
 	if (io_method.compare("matlab") == 0){
-        io_method = "binary";
+        printf("Error! Trying to use matlab files but the executable was compiled without matlab capabilities.");
+        exit(EXIT_FAILURE);
 	}
 }
 #endif
