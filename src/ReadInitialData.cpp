@@ -261,7 +261,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	L.update(time_first, P, R, V, K); // Load L-star so it'll be available
 
-    PSD.readFromAnyFile(InputFolder + initial_PSD, io_method);
+    PSD.readFromAnyFile(InputFolder + initial_PSD, "ascii");
 
 	// For all of the following load the .tab file if it exists, if not load the corresponding data file
 
