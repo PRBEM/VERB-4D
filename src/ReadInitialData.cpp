@@ -179,7 +179,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 
     string initial_PSD = "PSD0";
-//    parameters.findParameter("initial_PSD", "PSD0") >> initial_PSD;
+    parameters.findParameter("initial_PSD", "PSD0") >> initial_PSD;
 
     // NOTE: this option is left only for backward compatibility of the code and is excessive
     string use_matlab = "false";
