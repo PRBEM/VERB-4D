@@ -573,11 +573,8 @@ int main(int argc, char* argv[]) {
                         // 1d slice
                         PSD_L = PSD.wyzSlice(iP, iV, iK);
 
-                        // EXPERIMENTAL: bc changes according to convection losses
-                        double Lu_BC_cur = Lu_BC[iP][iV][iK] * exp(Losses_conv[iP][R_size-1][iV][iK] * dt);
-
                         // 1d diffusion
-                        Diffusion_1D(PSD_L, L.wyzSlice(iP, iV, iK), L_size, Ll_BC[iP][iV][iK], Lu_BC_cur,
+                        Diffusion_1D(PSD_L, L.wyzSlice(iP, iV, iK), L_size, Ll_BC[iP][iV][iK], Lu_BC[iP][iV][iK],
                                 Ll_BC_type, Lu_BC_type, DLL.wyzSlice(iP, iV, iK), G_radial.wyzSlice(iP, iV, iK),
                                 Sources.wyzSlice(iP, iV, iK) * radial_losses,
                                 Losses.wyzSlice(iP, iV, iK) * radial_losses, dt);
