@@ -33,7 +33,7 @@ endif(MATLAB_FOUND)
 if(WIN32)
     # The libraries for lapack and BLAS for windows are in the lib folder
     set(LAPACK_LIBRARIES ${CMAKE_SOURCE_DIR}/lib/clapack.lib)
-    set(BLAS_LIBRARIES   ${CMAKE_SOURCE_DIR}/lib/BLAS.lib)
+    set(BLAS_LIBRARIES   ${CMAKE_SOURCE_DIR}/lib/blas.lib)
     set(F2C_LIBRARIES    ${CMAKE_SOURCE_DIR}/lib/libf2c.lib)
 else(WIN32)
     # Installed by distribution's package manager
