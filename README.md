@@ -25,7 +25,10 @@ The following instructions will work for both linux and OSX; cmake will
 generate a makefile that can be used in the terminal. Create a build folder at
 the root directory and change directories:
 
-`$ mkdir build $ cd build`
+```
+$ mkdir build
+$ cd build
+```
 
 Run cmake, but pass in the proper version of gcc and g++ that supports OpenMP:
 
@@ -44,7 +47,22 @@ generator name to "Visual Studio 12" for a Visual Studio 2013 *.sln project.
 
 On the command line, you can run:
 
-`cmake .. -G "Visual Studio 12"`
+```
+$ mkdir build
+$ cd build
+$ cmake .. -G "Visual Studio 14"
+```
+
+Replace `Visual Studio 14` with the version of your choice. For example,
+`Visual Studio 14` corresponds to VS 2015.
+
+Note that the solution includes three projects.
+
+ZERO_CHECK will rerun cmake. You can/should execute this after changing
+something on your CMake files.
+
+ALL_BUILD is simply a target which builds all and everything project in the
+active solution, one can compare it to "make all".
 
 ## Old Notes (Possibly outdated)
 ReadMe - COMPILING ON MAC

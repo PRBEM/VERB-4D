@@ -177,7 +177,7 @@ int main(int argc, char* argv[]) {
     UpdatableMatrix<Matrix4D<double> > VR, VP;
 
     // Additional sources and losses
-    UpdatableListMatrix<Matrix4D<double> > Sources, Losses;
+    UpdatableListMatrix<Matrix4D<double> > Sources, Losses, Losses_conv;
 
     // Jacobians, 4D, everything is 4D, it makes matrix operators convenient
     UpdatableMatrix < Matrix4D<double> >  G_local;
@@ -219,18 +219,19 @@ int main(int argc, char* argv[]) {
     string inversion_method = "Lapack";
     string use_matlab       = "false";
     string include_boundary = "true";
+    string Vl_BC_from_convection = "false";
 
     bool initialLoad = false; // Check the load of the initial files
 
     // Read all the inputs - store them into variables
     // These inputs come from the matlab files that are generated when running Conv_Dif.m examples
     initialLoad = ReadInitialData(inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
-            inversion_method, use_matlab, include_boundary,  PSD,
+            inversion_method, use_matlab, include_boundary,  Vl_BC_from_convection, PSD,
             P, R, V, K, L,
             P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
             Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
             Vu_BC_type, Kl_BC_type, Ku_BC_type, Ll_BC_type, Lu_BC_type, DLL, DVV, DKK, DVK, VP, VR, G_local, G_radial,
-            Sources, Losses);
+            Sources, Losses, Losses_conv);
 
     // Check that all nesesarry files were loaded
     if (!initialLoad) {
@@ -267,7 +268,7 @@ int main(int argc, char* argv[]) {
     time_string.precision(5);
     time_string.setf(ios::fixed);
 
-    PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << ".mat";
+    PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << file_ext;
     Logger::message << "Writing results: " << PSD_filename.str() << endl;
     time_string.str("");
     time_string << time_first;
@@ -410,6 +411,7 @@ int main(int argc, char* argv[]) {
         // Sources and losses
         Sources.update(time, P, R, V, K);
         Losses.update(time, P, R, V, K);
+        Losses_conv.update(time, P, R, V, K);
 
         // Boundary conditions
         // By default - it's constant PSD
@@ -484,7 +486,7 @@ int main(int argc, char* argv[]) {
                             Pu_BC.yzSlice(iV, iK), // R, I, K
                             Rl_BC.yzSlice(iV, iK), Ru_BC.yzSlice(iV, iK), // P, I, K
                             Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, VP.yzSlice(iV, iK), VR.yzSlice(iV, iK),
-                            Sources.yzSlice(iV, iK) * 0, Losses.yzSlice(iV, iK) * 0, dt, min_PSD, min_V);
+                            Sources.yzSlice(iV, iK) * 0, Losses_conv.yzSlice(iV, iK), dt, min_PSD, min_V);
 
                     // copy results back into PSD adding the 2d list PSD_PR for all values of iV,iK
                     for (iP = 0; iP < P_size; iP++) {
@@ -523,7 +525,7 @@ int main(int argc, char* argv[]) {
                         Pu_BC.yzSlice(iV, iK), // R, I, K
                         Rl_BC.yzSlice(iV, iK), Ru_BC.yzSlice(iV,  iK), // P, I, K
                         Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, VP.yzSlice(iV, iK), VR.yzSlice(iV, iK),
-                        Sources.yzSlice(iV, iK) * 0, Losses.yzSlice(iV,  iK) * 0, dt, min_PSD, min_V);
+                        Sources.yzSlice(iV, iK) * 0, Losses_conv.yzSlice(iV,  iK), dt, min_PSD, min_V);
 
                 // copy results back into PSD adding the 2d list PSD_PR for all values of iV,iK
                 for (iP = 0; iP < P_size; iP++) {
@@ -539,6 +541,12 @@ int main(int argc, char* argv[]) {
 #endif
             // Output final progress (it should be 100%)
             cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
+#pragma omp master
+            {
+            if(Vl_BC_from_convection == "true" && (Vl_BC_type == "BCT_CONSTANT_VALUE")){ //rewrite boundary conditions at lower V
+                Vl_BC = PSD.ySlice(0);
+            }
+            }
         }
 
         // RADIAL DIFFUSION STEP
