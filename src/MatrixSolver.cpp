@@ -1086,10 +1086,10 @@ void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
 		max = (max > fabs(B_res(i))) ? max : B_res(i);
 	}
 
-	if(max>1) {
+/*	if(max>1) {
 		printf(" Max error: %e.\n", max);
 		exit(EXIT_FAILURE);
-	}
+	}*/
 
 	delete IPIV;
 	delete Array;
@@ -1100,13 +1100,13 @@ void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
 * numerical derivative approximation of a matrix in 1D
 *
 *  \f$ Coef1 \frac{d}{dx} \f$
-* which is approximatied using the method: 
+* which is approximatied using the method:
 *
 * \f$ \frac{m G(x) D(x)}{[f(x) - f'(x)]G(x)[(f(x) - f''(x))]} \f$
 *
 * Done for a couple locations near x[ix] each location has a slightly modified equation
 */
-void SecondDerivativeApproximation_1D(CalculationMatrix &matr_A, 
+void SecondDerivativeApproximation_1D(CalculationMatrix &matr_A,
 		int ix, ///< index for current location
 		string FirstDerivative, ///< determines whether first derivative approx. is with the point to the right or left of ix
 		string SecondDerivative, ///< determines whether second derivative approx. is with the point to the right or left of ix
@@ -1183,7 +1183,7 @@ void GetDerivativeVector_2D(string derivativeType, int &dx, int &dy) {
 
 /**
  * Second derivative approximation, returns coefficients to be put into the model matrix.
- *  
+ *
  *  \f$ Coef1 \frac{d}{dx} * Coef2 \frac{df}{dy}  \f$
  *
  * The approximation is done in a similar fashion to SecondDerivativeApproximation_1D
@@ -1252,7 +1252,7 @@ void SecondDerivativeApproximation_2D(CalculationMatrix &matr_A,
 
 /**
  * Second derivative approximation in the y direction first, returns coefficients to be put into the model matrix.
- *  
+ *
 *  \f$ Coef1 \frac{d}{dx} * Coef2 \frac{df}{dy}  \f$
  *
  * The approximation is done in a similar fashion to SecondDerivativeApproximation_1D
@@ -1434,7 +1434,7 @@ void AnySecondDerivativeApproximation_2D_y(CalculationMatrix &matr_A,
 * Solver for a system of equations with 3-diagonal matrix.
 *
 * Au = r Where A = diag(a, b, c),
-* 
+*
 * \param a[]	- array, diagonal '-1' of the matrix
 * \param b[]	- array, diagonal '0' of the matrix
 * \param c[]	- array, diagonal '+1' of the matrix
