@@ -219,6 +219,7 @@ int main(int argc, char* argv[]) {
     string run_convection = "true";
     string run_radial_diffusion = "true";
     string run_local_diffusion = "true";
+    string positive_PSD = "false";
 
     bool initialLoad = false; // Check the load of the initial files
 
@@ -226,7 +227,7 @@ int main(int argc, char* argv[]) {
     // These inputs come from the matlab files that are generated when running Conv_Dif.m examples
     initialLoad = ReadInitialData(inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
             inversion_method, include_boundary,  Vl_BC_from_convection, io_method, run_remapping, run_convection,
-            run_radial_diffusion, run_local_diffusion,
+            run_radial_diffusion, run_local_diffusion, positive_PSD,
             PSD,P, R, V, K, L,
             P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
             Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
@@ -380,6 +381,18 @@ int main(int argc, char* argv[]) {
 
                 // Copy the new L into L_copy for future interpolations
                 L_copy = L;
+            }
+        }
+
+        if (positive_PSD == "true") {
+            for (iP = 0; iP < P_size; iP++) {
+                for (iR = 0; iR < R_size; iR++) {
+                    for (iV = 0; iV < V_size; iV++) {
+                        for (iK = 0; iK < K_size; iK++) {
+                            if (PSD[iP][iR][iV][iK] < 1e-21) PSD[iP][iR][iV][iK] = 1e-21;
+                        }
+                    }
+                }
             }
         }
 
@@ -539,11 +552,24 @@ int main(int argc, char* argv[]) {
 #endif
             // Output final progress (it should be 100%)
             cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
-#pragma omp master
-            {
-            if(Vl_BC_from_convection == "true" && (Vl_BC_type == "BCT_CONSTANT_VALUE")){ //rewrite boundary conditions at lower V
-                Vl_BC = PSD.ySlice(0);
-            }
+//#pragma omp master
+//            {
+//            if(Vl_BC_from_convection == "true" && (Vl_BC_type == "BCT_CONSTANT_VALUE")){ //rewrite boundary conditions at lower V
+//                Vl_BC = PSD.ySlice(0);
+//                cout << "Vl_BC from convection are used: max(Vl_BC) = " << Vl_BC.max() << endl;
+//            }
+//            }
+        }
+
+        if (positive_PSD == "true") {
+            for (iP = 0; iP < P_size; iP++) {
+                for (iR = 0; iR < R_size; iR++) {
+                    for (iV = 0; iV < V_size; iV++) {
+                        for (iK = 0; iK < K_size; iK++) {
+                            if (PSD[iP][iR][iV][iK] < 1e-21) PSD[iP][iR][iV][iK] = 1e-21;
+                        }
+                    }
+                }
             }
         }
 
@@ -625,6 +651,26 @@ int main(int argc, char* argv[]) {
             }
 #endif
             cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
+#pragma omp master
+            {
+            if((Vl_BC_from_convection == "true") && (Vl_BC_type == "BCT_CONSTANT_VALUE")) { //rewrite boundary conditions at lower V
+                Vl_BC = PSD.ySlice(0);
+                //cout << "Vl_BC after radial diffusion are used: max(Vl_BC) = " << Vl_BC.max() << endl;
+                Logger::message << "Vl_BC after radial diffusion are used: max(Vl_BC) = " << Vl_BC.max() << endl;
+            }
+            }
+        }
+
+        if (positive_PSD == "true") {
+            for (iP = 0; iP < P_size; iP++) {
+                for (iR = 0; iR < R_size; iR++) {
+                    for (iV = 0; iV < V_size; iV++) {
+                        for (iK = 0; iK < K_size; iK++){
+                            if (PSD[iP][iR][iV][iK] < 1e-21) PSD[iP][iR][iV][iK] = 1e-21;
+                        }
+                    }
+                }
+            }
         }
 
         // ADDED FOR TESTING
@@ -799,6 +845,31 @@ int main(int argc, char* argv[]) {
             cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
             cout << "Number of skipped points: " << (int) ((double) number_of_skipped_points/progress_total * 100) << "\%" << endl;
         }
+
+        if (positive_PSD == "true") {
+            for (iP = 0; iP < P_size; iP++) {
+                for (iR = 0; iR < R_size; iR++) {
+                    for (iV = 0; iV < V_size; iV++) {
+                        for (iK = 0; iK < K_size; iK++) {
+                            if (PSD[iP][iR][iV][iK] < 1e-21) PSD[iP][iR][iV][iK] = 1e-21;
+                        }
+                    }
+                }
+            }
+        }
+
+        int number_of_negative_points = 0;
+        for (iP = 0; iP < P_size; iP++) {
+            for (iR = 0; iR < R_size; iR++) {
+                for (iV = 0; iV < V_size; iV++) {
+                    for (iK = 0; iK < K_size; iK++) {
+                        if (PSD[iP][iR][iV][iK] < 0) number_of_negative_points++;
+                    }
+                }
+            }
+        }
+        //cout << "Number of negative points: " << number_of_negative_points << endl;
+        Logger::message << endl << "Number of negative points: " << number_of_negative_points << " of " << P_size*R_size*V_size*K_size << endl;
 
         // Output the PSD data for each timestep into the output folder
         if ((it % output_step) == 0) {

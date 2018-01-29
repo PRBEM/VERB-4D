@@ -141,7 +141,7 @@ void ReadBoundaryCondition(
 bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* argv[],
 		double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
 		string &inversion_method, string &include_boundary, string &Vl_BC_from_convection, string &io_method,
-		string &run_remapping, string &run_convection, string &run_radial_diffusion, string &run_local_diffusion,
+		string &run_remapping, string &run_convection, string &run_radial_diffusion, string &run_local_diffusion, string &positive_PSD,
 		Matrix4D<double> &PSD,
 		Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V, Matrix4D<double> &K, UpdatableMatrix < Matrix4D<double> > &L,
 		int &P_size, int &R_size, int &V_size, int &K_size, int &L_size,
@@ -176,7 +176,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	parameters.getParameter("run_convection", run_convection);
 	parameters.getParameter("run_radial_diffusion", run_radial_diffusion);
 	parameters.getParameter("run_local_diffusion", run_local_diffusion);
-
+    parameters.getParameter("positive_PSD", positive_PSD);
 
     string initial_PSD = "PSD0";
     parameters.findParameter("initial_PSD", "PSD0") >> initial_PSD;
