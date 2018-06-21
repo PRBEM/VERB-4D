@@ -343,6 +343,9 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 		if (x_LBC_type == "BCT_PERIODIC") { // special case
 			PSD[x_size-1] = PSD[0]; // need to update ix == x_size-1 point for periodic;
 		}
+		if (x_UBC_type == "BCT_CONSTANT_VALUE") {
+            PSD[x_size-1] = x_UBC;
+		}
 
 	}
 
