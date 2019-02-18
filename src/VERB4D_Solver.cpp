@@ -54,6 +54,9 @@
  * All examples should thus be run with Lapack until the ADI methods are fixed.
  * While using Lapack, be sure that you use the thread-safe version of the Lapack library.
  *
+ * Four options were introduced to run enable/disable particular split-operator steps: run_remapping, run_convection, run_radial_diffusion, run_local_diffusion.
+ * The values can be specified in the paramters.ini file. They are "true" by default.
+ *
  * The main solver function can be found in VERB4D_Solver.cpp
  * It consists of a series of PSD calculations done for every time step that is specified.
  *
@@ -214,6 +217,7 @@ int main(int argc, char* argv[]) {
     string inversion_method = "Lapack";
     string include_boundary = "true";
     string Vl_BC_from_convection = "false";
+    string Vu_BC_from_convection = "false";
     string io_method        = "ascii";
     string run_remapping = "true";
     string run_convection = "true";
@@ -226,7 +230,7 @@ int main(int argc, char* argv[]) {
     // Read all the inputs - store them into variables
     // These inputs come from the matlab files that are generated when running Conv_Dif.m examples
     initialLoad = ReadInitialData(inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
-            inversion_method, include_boundary,  Vl_BC_from_convection, io_method, run_remapping, run_convection,
+            inversion_method, include_boundary,  Vl_BC_from_convection, Vu_BC_from_convection, io_method, run_remapping, run_convection,
             run_radial_diffusion, run_local_diffusion, positive_PSD,
             PSD,P, R, V, K, L,
             P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
@@ -552,13 +556,17 @@ int main(int argc, char* argv[]) {
 #endif
             // Output final progress (it should be 100%)
             cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
-//#pragma omp master
-//            {
-//            if(Vl_BC_from_convection == "true" && (Vl_BC_type == "BCT_CONSTANT_VALUE")){ //rewrite boundary conditions at lower V
-//                Vl_BC = PSD.ySlice(0);
-//                cout << "Vl_BC from convection are used: max(Vl_BC) = " << Vl_BC.max() << endl;
-//            }
-//            }
+#pragma omp master
+            {
+            if(Vl_BC_from_convection == "true" && (Vl_BC_type == "BCT_CONSTANT_VALUE")){ //rewrite boundary conditions at lower V
+                Vl_BC = PSD.ySlice(0);
+                cout << "Vl_BC from convection are used: max(Vl_BC) = " << Vl_BC.max() << endl;
+            }
+            if(Vu_BC_from_convection == "true" && (Vu_BC_type == "BCT_CONSTANT_VALUE")){ //rewrite boundary conditions at lower V
+                Vu_BC = PSD.ySlice(V_size-1);
+                cout << "Vu_BC from convection are used: max(Vu_BC) = " << Vu_BC.max() << endl;
+            }
+            }
         }
 
         if (positive_PSD == "true") {
@@ -651,14 +659,15 @@ int main(int argc, char* argv[]) {
             }
 #endif
             cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
-#pragma omp master
-            {
-            if((Vl_BC_from_convection == "true") && (Vl_BC_type == "BCT_CONSTANT_VALUE")) { //rewrite boundary conditions at lower V
-                Vl_BC = PSD.ySlice(0);
-                //cout << "Vl_BC after radial diffusion are used: max(Vl_BC) = " << Vl_BC.max() << endl;
-                Logger::message << "Vl_BC after radial diffusion are used: max(Vl_BC) = " << Vl_BC.max() << endl;
-            }
-            }
+//#pragma omp master
+//            {
+//            if((Vl_BC_from_convection == "true") && (Vl_BC_type == "BCT_CONSTANT_VALUE")) { //rewrite boundary conditions at lower V
+//                Vl_BC = PSD.ySlice(1); // NOTE: low-V boundary conditions are taken from the next-to-lower-V slice after radial diffusion.
+//                                       // This eliminates unrealistic gradient there, but it is probably NOT A CORRECT IMPLEMENTATION.
+//                //cout << "Vl_BC after radial diffusion are used: max(Vl_BC) = " << Vl_BC.max() << endl;
+//                Logger::message << "Vl_BC after radial diffusion are used: max(Vl_BC) = " << Vl_BC.max() << endl;
+//            }
+//            }
         }
 
         if (positive_PSD == "true") {
