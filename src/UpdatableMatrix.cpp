@@ -1,6 +1,6 @@
 /**
  *  \file UpdatableMatrix.cpp
- *	
+ *
  *  These can act just like matrices, but have the ability to be updated from ini-files at any point in time.
  *
  *  Templetes are used so we don't repeat exactly the same code 4 times - for 1D, 2D, 3D, and 4D matrices
@@ -64,7 +64,7 @@ void MatrixAllocateMemory(Matrix4D<double> &M, int size_Q1, int size_Q2, int siz
 
 // Reading from a file
 
-/**  
+/**
 * Reading from a file using Matrix1D::readFromFile(string filename, const Matrix1D< T > grid_x)
 *
 * Only using Q1
@@ -91,19 +91,31 @@ void MatrixReadFromFile(Matrix2D<double> &M, string data_filename, const Matrix2
 */
 void MatrixReadFromFile(Matrix3D<double> &M, string data_filename, const Matrix3D<double> Q1, const Matrix3D<double> Q2, const Matrix3D<double> Q3, const Matrix3D<double> Q4) {
 	if (data_filename.substr(data_filename.length() - 4 ,4) == ".mat")
-		M.Matrix3D<double>::readFromMatlabFile(data_filename, Q1,Q2,Q3);
-	else
+		M.Matrix3D<double>::readFromMatlabFile(data_filename, Q1, Q2, Q3);
+	else if (data_filename.substr(data_filename.length() - 4 ,4) == ".plt")
 		M.Matrix3D<double>::readFromFile(data_filename, Q1, Q2, Q3);
+    else if (data_filename.substr(data_filename.length() - 5 ,5) == ".pltb")
+        M.Matrix3D<double>::readFromBinaryFile(data_filename);
+    else {
+        printf("Unknown data format");
+        exit(EXIT_FAILURE);
+    }
 }
-/**  Reading from a file using Matrix4D::readFromFile(string filename, const Matrix4D< T > grid_w, const Matrix4D< T > grid_x,const Matrix4D< T > grid_y, const Matrix4D< T > grid_z) 
+/**  Reading from a file using Matrix4D::readFromFile(string filename, const Matrix4D< T > grid_w, const Matrix4D< T > grid_x,const Matrix4D< T > grid_y, const Matrix4D< T > grid_z)
 *
 * Using Q1, Q2, Q3, Q4
 */
 void MatrixReadFromFile(Matrix4D<double> &M, string data_filename, const Matrix4D<double> Q1, const Matrix4D<double> Q2, const Matrix4D<double> Q3, const Matrix4D<double> Q4) {
 	if (data_filename.substr(data_filename.length() - 4 ,4) == ".mat")
 		M.Matrix4D<double>::readFromMatlabFile(data_filename, Q1, Q2, Q3, Q4);
-	else
+	else if (data_filename.substr(data_filename.length() - 4 ,4) == ".plt")
 		M.Matrix4D<double>::readFromFile(data_filename, Q1, Q2, Q3, Q4);
+    else if (data_filename.substr(data_filename.length() - 5 ,5) == ".pltb")
+        M.Matrix4D<double>::readFromBinaryFile(data_filename);
+    else {
+        printf("Unknown data format");
+        exit(EXIT_FAILURE);
+    }
 }
 
 /**
@@ -328,9 +340,9 @@ bool UpdatableMatrix<MatrixND>::readFromIniFile(string ini_filename, MatrixND q1
 /**
  * Read UpdateMatrix parameters from a string
  *
- * Will traverse the string and get the entire lines values - 
+ * Will traverse the string and get the entire lines values -
  * starting with parameter q1 and getting values until reaching q4 or running out of values for the line
- * 
+ *
  * If a data file (such as .plt) is selected then the contents will be stored into the matrix.
  * If a update-file (such as .lst) is selected then no matrix values will be saved, however the update_filename field will be saved.
  * Upon every timestep the main file will call update() on this matrix, and inside update will look for the update_filename field. If present it will update the matrix to the corresponding timestep
@@ -525,11 +537,11 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 				this->last_update_time = current_time;
 				// this->last_data_filename = data_filename;
 				updated = true;
-				
-				
+
+
 				// // ADDED FOR TESTING
 				// original_arr.writeToFile(to_string(current_time) + "LUBC_Update.plt" );
-				
+
 			}
 		}
 	}
@@ -540,7 +552,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 	// MatrixND::operator = (original_arr);
 	*this = original_arr;
 
-	
+
 	// ////////////////////////////////////////////
 	// Scaling
 
@@ -948,7 +960,7 @@ inline MatrixND& UpdatableListMatrix<MatrixND>::operator= (const double Val) {
 }
 
 // ///////////////////////////////////////////////////////////
-// Implementations - Enumerates all possibilities for MatrixND 
+// Implementations - Enumerates all possibilities for MatrixND
 // ///////////////////////////////////////////////////////////
 
 

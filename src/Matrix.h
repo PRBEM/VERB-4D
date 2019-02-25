@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <sstream>
+#include <assert.h>
 
 // Matlab library which will have to be linked at compile time
 // Usually found in matlabroot/extern/include where matlabroot is the result of typing the matlabroot command into matlab
@@ -306,6 +307,13 @@ public:
 	virtual void readFromMatlabFile(string filename, int column = 1);
 	virtual void readFromMatlabFile(string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3);
 
+    virtual void writeToBinaryFile(string filename);
+    virtual void readFromBinaryFile(string filename);
+
+    virtual void writeToAnyFile(string filename, string io_method, string info);
+    virtual void readFromAnyFile(string filename, string io_method);
+    virtual void readFromAnyFile(string filename, string io_method, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3);
+
 	// Some other stuff
 	string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
 
@@ -415,6 +423,13 @@ public:
 	virtual void writeToMatlabFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z);
 	virtual void readFromMatlabFile(string file, int column = 1);
 	virtual void readFromMatlabFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z);
+
+    virtual void writeToBinaryFile(string filename);
+    virtual void readFromBinaryFile(string filename);
+
+    virtual void writeToAnyFile(string filename, string io_method, string info);
+    virtual void readFromAnyFile(string filename, string io_method);
+    virtual void readFromAnyFile(string filename, string io_method, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z);
 
 	// Some other stuff
 	string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)

@@ -48,18 +48,17 @@
  * The parameters.ini file created in matlab will specify the inversion method.
  * If "Lapack" is specified then Diffusion_2D() will be used.
  * Otherwise 1 of the 3 ADI methods will be used to inversion.
- * All 3 ADI methods can use multiple threads while Lapack can only use 1.
- * The current chosen method of inversion is Diffusion_ADI3() if "ADI" is specified. It can be changed in VERB4D_SOLVER.cpp
+ * The current chosen method of inversion is Diffusion_2D() if "Lapack" is specified. It can be changed in VERB4D_SOLVER.cpp
  *
  * From current testing all of the ADI methods produce bad results - namely negative PSD values.
  * All examples should thus be run with Lapack until the ADI methods are fixed.
- * Unfortunately Lapack is not compatable with multiple threads so running the examples with Lapack will be much slower than ADI and not scalable.
- * Newer versions of Lapack may allow multithreading however.
+ * While using Lapack, be sure that you use the thread-safe version of the Lapack library.
+ *
+ * Four options were introduced to run enable/disable particular split-operator steps: run_remapping, run_convection, run_radial_diffusion, run_local_diffusion.
+ * The values can be specified in the paramters.ini file. They are "true" by default.
  *
  * The main solver function can be found in VERB4D_Solver.cpp
  * It consists of a series of PSD calculations done for every time step that is specified.
- *
- * This will be used in order to take the input data from matlab store them into Matrix1D, Matrix2D, Matrix3D, and Matrix4D using ReadInitialData.h
  *
  * The matrix classes listed above are used to store the data in 1,2,3 or 4 dimension. One example is a 4D matrix containing P,R,V,K
  *
@@ -69,11 +68,10 @@
  * These calculation matrices are made up of DiagMatrix which is a mapping of an int (which diagonal number) to a 1d matrix of values (for that diagonal).
  *
  * There is also a Parameters class which holds paramters and their value as defined in the file they came from.
-* These parameters get the values specified in the parameters.ini text file and set variables to determine inversion method, number of threads, using .mat files, etc.
-*
-* This code was built with MATLAB capabilities including reading and writing .mat files.
-* In order to switch all files to .mat for increased speed and percision change the use_matlab variable in the MATLAB Conv_Dif.m file for whichever example you are running to true.
-* If the machine that this code is being run on does not have matlab installed change the MATLAB_CAPABLE variable in Matrix.h to false
+ * These parameters get the values specified in the parameters.ini text file and set variables to determine inversion method, number of threads, using .mat files, etc.
+ *
+ * There are three options for reading input and writing output: ascii (.plt), binary (.plt) or matlab (.mat) files.
+ * To guarantee backward compatibility of the code, parameter use_matlab is left in the code. If use_matlab == "true", io_method will be overwritten with "matlab".
 *
 */
 
@@ -156,7 +154,7 @@ int main(int argc, char* argv[]) {
     // Grid, 4D:
     // P - local time
     // R - radial distance
-    // V - invariant = mu / (K + const) ^ 2, where mu is the first adiabatic invariant
+    // V - invariant = mu * (K + const) ^ 2, where mu is the first adiabatic invariant
     // K - invariant
     Matrix4D<double> R, P, V, K;
 
@@ -217,17 +215,24 @@ int main(int argc, char* argv[]) {
     string inputFolder      = "./VERB4D_input/";
     string outputFolder     = "./VERB4D_output/";
     string inversion_method = "Lapack";
-    string use_matlab       = "false";
     string include_boundary = "true";
     string Vl_BC_from_convection = "false";
+    string Vu_BC_from_convection = "false";
+    string io_method        = "ascii";
+    string run_remapping = "true";
+    string run_convection = "true";
+    string run_radial_diffusion = "true";
+    string run_local_diffusion = "true";
+    string positive_PSD = "false";
 
     bool initialLoad = false; // Check the load of the initial files
 
     // Read all the inputs - store them into variables
     // These inputs come from the matlab files that are generated when running Conv_Dif.m examples
     initialLoad = ReadInitialData(inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
-            inversion_method, use_matlab, include_boundary,  Vl_BC_from_convection, PSD,
-            P, R, V, K, L,
+            inversion_method, include_boundary,  Vl_BC_from_convection, Vu_BC_from_convection, io_method, run_remapping, run_convection,
+            run_radial_diffusion, run_local_diffusion, positive_PSD,
+            PSD,P, R, V, K, L,
             P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
             Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
             Vu_BC_type, Kl_BC_type, Ku_BC_type, Ll_BC_type, Lu_BC_type, DLL, DVV, DKK, DVK, VP, VR, G_local, G_radial,
@@ -254,29 +259,19 @@ int main(int argc, char* argv[]) {
     Logger::message << "Total time " << time_total << ". Time step " << dt << " (" << it_total << " steps)." << endl;
     Logger::message << "Output each " << output_step << " step. " << endl;
 
-    // Save initial conditions
-    if (use_matlab == "false") {
-        PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
-    } else {
-        PSD.writeToMatlabFile(outputFolder + "PSD0.mat", P, R, V, K);
-    }
+    PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
 
     // Output zero step - writing PSD_0 file
     ostringstream PSD_filename, time_string;
-    string file_ext = use_matlab == "true" ? ".mat" : ".plt";
 
     time_string.precision(5);
     time_string.setf(ios::fixed);
 
-    PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0 << file_ext;
+    PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0;
     Logger::message << "Writing results: " << PSD_filename.str() << endl;
     time_string.str("");
     time_string << time_first;
-    if (use_matlab == "true") {
-        PSD.writeToMatlabFile(PSD_filename.str(), time_string.str());
-    } else {
-        PSD.writeToFile(PSD_filename.str(), time_string.str());
-    }
+    PSD.writeToAnyFile(PSD_filename.str(), io_method, time_string.str());
 
     // When to apply loss term:
     // It's better to apply it during pitch-angle diffusion, unless we don't have any pitch-angle diffusion
@@ -288,6 +283,12 @@ int main(int argc, char* argv[]) {
     } else {
         radial_losses = 1;
         local_losses = 0;
+    }
+
+    // If local diffusion is not run, local losses should be applied at the radial diffusion step
+    if (run_local_diffusion == "false"){
+        local_losses = 0;
+        radial_losses = 1;
     }
 
     // For recording length of time for all calculations to complete
@@ -334,59 +335,73 @@ int main(int argc, char* argv[]) {
         // Update boundary conditions and diffusion coefficients
 
         // Update magnetic field (update R)
-        if (L.update(time, P, R, V, K)) {
-            // If we've updated L, we most likely need to update Jacobians
-            // XXX: Do we need to update Jacobians if we didn't update L?
-            G_local.update(time, P, R, V, K);
-            G_radial.update(time, P, R, V, K);
+        if (run_remapping == "true") {
+            if (L.update(time, P, R, V, K)) {
+                // If we've updated L, we most likely need to update Jacobians
+                // XXX: Do we need to update Jacobians if we didn't update L?
+                G_local.update(time, P, R, V, K);
+                G_radial.update(time, P, R, V, K);
 
-            // If L was updated - interpolate PSD to new L
-            progress_count = 0;
-            progress_total = P_size * V_size * K_size; // total size of solution matrix
-            Logger::message << "Interpolation to new L (adiabatic transport): ";
-            cout << "           ";
+                // If L was updated - interpolate PSD to new L
+                progress_count = 0;
+                progress_total = P_size * V_size * K_size; // total size of solution matrix
+                Logger::message << "Interpolation to new L (adiabatic transport): ";
+                cout << "           ";
 
-            Matrix1D<double> old_L_1d(L_size), PSD_L(L_size), new_L_1d(L_size);
-            // Aparently it's not thread-safe
-            //#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
+                Matrix1D<double> old_L_1d(L_size), PSD_L(L_size), new_L_1d(L_size);
+                // Aparently it's not thread-safe
+                //#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
+                for (iP = 0; iP < P_size; iP++) {
+                    for (iV = 0; iV < V_size; iV++) {
+                        for (iK = 0; iK < K_size; iK++) {
+                            // show progress % if 0 threads
+                            if (omp_get_thread_num() == 0) {
+                                cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
+                                    << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+                            } else {
+                                cout << "thread" << omp_get_thread_num();
+                            }
+
+                            // 1d slice to get L from matrix4d (P,L,V,K)
+                            new_L_1d = L.wyzSlice(iP, iV, iK);
+                            old_L_1d = L_copy.wyzSlice(iP, iV, iK);
+                            PSD_L    = PSD.wyzSlice(iP, iV, iK);
+
+                            // 1d interpolationCubic1D
+                            PSD_L = Cubic1D(old_L_1d, PSD_L, new_L_1d);
+
+                            // copy results back into PSD adding the 1d list PSD_L for all values of iP,iV,iK
+                            for (iL = 0; iL < L_size; iL++) {
+                                PSD[iP][iL][iV][iK] = PSD_L[iL];
+                            }
+
+                            // Progress output - will update P_size * V_size * K_size times
+                            //#pragma omp critical
+                            progress_count += 1;
+                        }
+                    }
+                }
+                cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
+
+                // Copy the new L into L_copy for future interpolations
+                L_copy = L;
+            }
+        }
+
+        if (positive_PSD == "true") {
             for (iP = 0; iP < P_size; iP++) {
-                for (iV = 0; iV < V_size; iV++) {
-                    for (iK = 0; iK < K_size; iK++) {
-                        // show progress % if 0 threads
-                        if (omp_get_thread_num() == 0) {
-                            cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
-                                << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
-                        } else {
-                            cout << "thread" << omp_get_thread_num();
+                for (iR = 0; iR < R_size; iR++) {
+                    for (iV = 0; iV < V_size; iV++) {
+                        for (iK = 0; iK < K_size; iK++) {
+                            if (PSD[iP][iR][iV][iK] < 1e-21) PSD[iP][iR][iV][iK] = 1e-21;
                         }
-
-                        // 1d slice to get L from matrix4d (P,L,V,K)
-                        new_L_1d = L.wyzSlice(iP, iV, iK);
-                        old_L_1d = L_copy.wyzSlice(iP, iV, iK);
-                        PSD_L    = PSD.wyzSlice(iP, iV, iK);
-
-                        // 1d interpolationCubic1D
-                        PSD_L = Cubic1D(old_L_1d, PSD_L, new_L_1d);
-
-                        // copy results back into PSD adding the 1d list PSD_L for all values of iP,iV,iK
-                        for (iL = 0; iL < L_size; iL++) {
-                            PSD[iP][iL][iV][iK] = PSD_L[iL];
-                        }
-
-                        // Progress output - will update P_size * V_size * K_size times
-                        //#pragma omp critical
-                        progress_count += 1;
                     }
                 }
             }
-            cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
-
-            // Copy the new L into L_copy for future interpolations
-            L_copy = L;
         }
 
         // Update convection velocities VP and VR and log the maximum absolute values
-        if (3 < P_size || 3 < R_size) {
+        if ((3 < P_size || 3 < R_size) && (run_convection == "true")) {
             VP.update(time, P, R, V, K);
             Logger::message << "max(VP) = " << VP.maxabs() << endl;
             VR.update(time, P, R, V, K);
@@ -394,12 +409,12 @@ int main(int argc, char* argv[]) {
         }
 
         // Diffusion coefficients
-        if (3 < L_size) {
+        if ((3 < L_size) && (run_radial_diffusion == "true")) {
             DLL.update(time, P, L, V, K);
             Logger::message << "max(DLL) = " << DLL.maxabs() << endl;
         }
 
-        if (3 < V_size && 3 < K_size) {
+        if ((3 < V_size && 3 < K_size) && (run_local_diffusion == "true")) {
             DVV.update(time, P, R, V, K);
             Logger::message << "max(DVV) = " << DVV.maxabs() << endl;
             DVK.update(time, P, R, V, K);
@@ -456,7 +471,7 @@ int main(int argc, char* argv[]) {
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Convection, for each V and K (therefore for each mu and J)
-        if (3 < P_size && 3 < R_size) {
+        if ((3 < P_size && 3 < R_size) && (run_convection == "true")){
             progress_count = 0;
             progress_total = V_size * K_size;
             Logger::message << "Convection:" << endl;;
@@ -545,7 +560,24 @@ int main(int argc, char* argv[]) {
             {
             if(Vl_BC_from_convection == "true" && (Vl_BC_type == "BCT_CONSTANT_VALUE")){ //rewrite boundary conditions at lower V
                 Vl_BC = PSD.ySlice(0);
+                cout << "Vl_BC from convection are used: max(Vl_BC) = " << Vl_BC.max() << endl;
             }
+            if(Vu_BC_from_convection == "true" && (Vu_BC_type == "BCT_CONSTANT_VALUE")){ //rewrite boundary conditions at lower V
+                Vu_BC = PSD.ySlice(V_size-1);
+                cout << "Vu_BC from convection are used: max(Vu_BC) = " << Vu_BC.max() << endl;
+            }
+            }
+        }
+
+        if (positive_PSD == "true") {
+            for (iP = 0; iP < P_size; iP++) {
+                for (iR = 0; iR < R_size; iR++) {
+                    for (iV = 0; iV < V_size; iV++) {
+                        for (iK = 0; iK < K_size; iK++) {
+                            if (PSD[iP][iR][iV][iK] < 1e-21) PSD[iP][iR][iV][iK] = 1e-21;
+                        }
+                    }
+                }
             }
         }
 
@@ -554,7 +586,7 @@ int main(int argc, char* argv[]) {
         // ADDED FOR TESTING
         //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_before_radial.plt");
 
-        if (L_size >= 3) {
+        if ((L_size >= 3) && (run_radial_diffusion == "true")) {
             progress_count = 0;
             progress_total = P_size * V_size * K_size; // total size of solution matrix
             Logger::message << "Radial diffusion:" << endl;;
@@ -580,6 +612,7 @@ int main(int argc, char* argv[]) {
                                 Ll_BC_type, Lu_BC_type, DLL.wyzSlice(iP, iV, iK), G_radial.wyzSlice(iP, iV, iK),
                                 Sources.wyzSlice(iP, iV, iK) * radial_losses,
                                 Losses.wyzSlice(iP, iV, iK) * radial_losses, dt);
+
 
                         // copy results back
                         for (iL = 0; iL < L_size; iL++) {
@@ -626,13 +659,34 @@ int main(int argc, char* argv[]) {
             }
 #endif
             cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
+//#pragma omp master
+//            {
+//            if((Vl_BC_from_convection == "true") && (Vl_BC_type == "BCT_CONSTANT_VALUE")) { //rewrite boundary conditions at lower V
+//                Vl_BC = PSD.ySlice(1); // NOTE: low-V boundary conditions are taken from the next-to-lower-V slice after radial diffusion.
+//                                       // This eliminates unrealistic gradient there, but it is probably NOT A CORRECT IMPLEMENTATION.
+//                //cout << "Vl_BC after radial diffusion are used: max(Vl_BC) = " << Vl_BC.max() << endl;
+//                Logger::message << "Vl_BC after radial diffusion are used: max(Vl_BC) = " << Vl_BC.max() << endl;
+//            }
+//            }
+        }
+
+        if (positive_PSD == "true") {
+            for (iP = 0; iP < P_size; iP++) {
+                for (iR = 0; iR < R_size; iR++) {
+                    for (iV = 0; iV < V_size; iV++) {
+                        for (iK = 0; iK < K_size; iK++){
+                            if (PSD[iP][iR][iV][iK] < 1e-21) PSD[iP][iR][iV][iK] = 1e-21;
+                        }
+                    }
+                }
+            }
         }
 
         // ADDED FOR TESTING
         //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_after_radial.plt");
 
         // LOCAL DIFFUSION
-        if (V_size >= 3 && K_size >= 3) {
+        if ((V_size >= 3 && K_size >= 3) && (run_local_diffusion == "true")){
             int number_of_skipped_points = 0;
             progress_count = 0;
             progress_total = P_size * R_size;
@@ -801,20 +855,40 @@ int main(int argc, char* argv[]) {
             cout << "Number of skipped points: " << (int) ((double) number_of_skipped_points/progress_total * 100) << "\%" << endl;
         }
 
+        if (positive_PSD == "true") {
+            for (iP = 0; iP < P_size; iP++) {
+                for (iR = 0; iR < R_size; iR++) {
+                    for (iV = 0; iV < V_size; iV++) {
+                        for (iK = 0; iK < K_size; iK++) {
+                            if (PSD[iP][iR][iV][iK] < 1e-21) PSD[iP][iR][iV][iK] = 1e-21;
+                        }
+                    }
+                }
+            }
+        }
+
+        int number_of_negative_points = 0;
+        for (iP = 0; iP < P_size; iP++) {
+            for (iR = 0; iR < R_size; iR++) {
+                for (iV = 0; iV < V_size; iV++) {
+                    for (iK = 0; iK < K_size; iK++) {
+                        if (PSD[iP][iR][iV][iK] < 0) number_of_negative_points++;
+                    }
+                }
+            }
+        }
+        //cout << "Number of negative points: " << number_of_negative_points << endl;
+        Logger::message << endl << "Number of negative points: " << number_of_negative_points << " of " << P_size*R_size*V_size*K_size << endl;
+
         // Output the PSD data for each timestep into the output folder
         if ((it % output_step) == 0) {
             time_string.str("");
             time_string << time;
 
             PSD_filename.str("");
-            PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step) << file_ext;
+            PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step);
             Logger::message << endl << "Writing results: " << PSD_filename.str() << endl;
-            if (use_matlab == "true") {
-                PSD.writeToMatlabFile(PSD_filename.str(), time_string.str());
-            }
-            else {
-                PSD.writeToFile(PSD_filename.str(), time_string.str());
-            }
+            PSD.writeToAnyFile(PSD_filename.str(), io_method, time_string.str());
         }
     }
 

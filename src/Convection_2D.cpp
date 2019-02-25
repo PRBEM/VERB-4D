@@ -64,7 +64,7 @@ bool Convection_2D( Matrix2D < double > &PSD_PR,
 	double dP, dR, num_steps_P, num_steps_R, num_steps, dt;
 
 	// Maximum Courant number. Can't be > 1, but can be smaller (0.25 is fairly common value)
-	double maxCourNum = 1;
+	double maxCourNum = 0.25;
 
 	// Find number of sub-time steps required to satisfy the Courant condition for both directions: P and R
 	if (P_size >= 3) {
@@ -88,7 +88,7 @@ bool Convection_2D( Matrix2D < double > &PSD_PR,
 	// Either use the smallest time step for both, or specify the maximum time step here and then different time steps will be used
 	// (the Courant condition will be checked inside of Convection_1D one more time)
 	// ">" is more accurate, but "<" is much-much faster and (hopefully?) still more accurate than completely unrelated time steps
-	num_steps = (num_steps_P < num_steps_R) ? num_steps_P : num_steps_R;
+	num_steps = (num_steps_P > num_steps_R) ? num_steps_P : num_steps_R;
 
 	dt = dt_total / num_steps;
 
