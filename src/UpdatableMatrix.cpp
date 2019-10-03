@@ -410,6 +410,8 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 		// If there is nothing - no scaling
 		this->scale_string  = "";
 	}
+	// define scale_pos at the beginig of the file
+	this->scale_pos = 0; 
 
 	// Check for the end of line
 	if (!file_line_stream.eof()) {
@@ -523,7 +525,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 
 		// Search for current time step line (or closest to it) in the update-file,
 		// The second column will be data-filename
-		data_filename = GetCurrentTimeValue(this->update_filename, current_time, update_time);
+		data_filename = GetCurrentTimeValue(this->update_filename, this->update_pos, current_time, update_time);
 
 		// Check if data-filename is not an empty-file-marker
 		if (!data_filename.empty()
@@ -565,7 +567,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 
 		// this->scale_string contains either filename or a coefficient itself
 		// 'GetCurrentTimeValue' will check it and return the coefficient in both cases
-		scale_coefficient_string = GetCurrentTimeValue(this->scale_string, current_time, update_time);
+		scale_coefficient_string = GetCurrentTimeValue(this->scale_string, this->scale_pos, current_time, update_time);
 
 		// convert from string value into double value
 		stringstream(scale_coefficient_string) >> scale_coefficient;
@@ -602,7 +604,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 
 	// check, if limiting rule is empty
 	if (!Q1_from_string.empty() && Q1_from_string != empty_marker) {
-		limit_coefficient_string = GetCurrentTimeValue(this->Q1_from_string, current_time, update_time);
+		limit_coefficient_string = GetCurrentTimeValue(this->Q1_from_string, this->Q1_from_pos, current_time, update_time);
 
 		// convert the limiting value from string to double
 		stringstream(limit_coefficient_string) >> Q1_from;
@@ -612,7 +614,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 	// Exactly the same, as for limiting-from: this is limiting-to
 	if (!Q1_to_string.empty() && Q1_to_string != empty_marker) {
 		// else - get the limiting value
-		limit_coefficient_string = GetCurrentTimeValue(this->Q1_to_string, current_time, update_time);
+		limit_coefficient_string = GetCurrentTimeValue(this->Q1_to_string, this->Q1_to_pos, current_time, update_time);
 
 		// convert the limiting value from string to double
 		stringstream(limit_coefficient_string) >> Q1_to;
@@ -622,7 +624,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 
 	// check, if limiting rule is empty
 	if (!Q2_from_string.empty() && Q2_from_string != empty_marker) {
-		limit_coefficient_string = GetCurrentTimeValue(this->Q2_from_string, current_time, update_time);
+		limit_coefficient_string = GetCurrentTimeValue(this->Q2_from_string, this->Q2_from_pos, current_time, update_time);
 
 		// convert the limiting value from string to double
 		stringstream(limit_coefficient_string) >> Q2_from;
@@ -632,7 +634,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 	// Exactly the same, as for limiting-from: this is limiting-to
 	if (!Q2_to_string.empty() && Q2_to_string != empty_marker) {
 		// else - get the limiting value
-		limit_coefficient_string = GetCurrentTimeValue(this->Q2_to_string, current_time, update_time);
+		limit_coefficient_string = GetCurrentTimeValue(this->Q2_to_string, this->Q2_to_pos, current_time, update_time);
 
 		// convert the limiting value from string to double
 		stringstream(limit_coefficient_string) >> Q2_to;
@@ -642,7 +644,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 
 	// check, if limiting rule is empty
 	if (!Q3_from_string.empty() && Q3_from_string != empty_marker) {
-		limit_coefficient_string = GetCurrentTimeValue(this->Q3_from_string, current_time, update_time);
+		limit_coefficient_string = GetCurrentTimeValue(this->Q3_from_string, this->Q3_from_pos, current_time, update_time);
 
 		// convert the limiting value from string to double
 		stringstream(limit_coefficient_string) >> Q3_from;
@@ -652,7 +654,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 	// Exactly the same, as for limiting-from: this is limiting-to
 	if (!Q3_to_string.empty() && Q3_to_string != empty_marker) {
 		// else - get the limiting value
-		limit_coefficient_string = GetCurrentTimeValue(this->Q3_to_string, current_time, update_time);
+		limit_coefficient_string = GetCurrentTimeValue(this->Q3_to_string, this->Q3_to_pos, current_time, update_time);
 
 		// convert the limiting value from string to double
 		stringstream(limit_coefficient_string) >> Q3_to;
@@ -662,7 +664,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 
 	// check, if limiting rule is empty
 	if (!Q4_from_string.empty() && Q4_from_string != empty_marker) {
-		limit_coefficient_string = GetCurrentTimeValue(this->Q4_from_string, current_time, update_time);
+		limit_coefficient_string = GetCurrentTimeValue(this->Q4_from_string, this->Q4_from_pos, current_time, update_time);
 
 		// convert the limiting value from string to double
 		stringstream(limit_coefficient_string) >> Q4_from;
@@ -672,7 +674,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
 	// Exactly the same, as for limiting-from: this is limiting-to
 	if (!Q4_to_string.empty() && Q4_to_string != empty_marker) {
 		// else - get the limiting value
-		limit_coefficient_string = GetCurrentTimeValue(this->Q4_to_string, current_time, update_time);
+		limit_coefficient_string = GetCurrentTimeValue(this->Q4_to_string, this->Q4_to_pos, current_time, update_time);
 
 		// convert the limiting value from string to double
 		stringstream(limit_coefficient_string) >> Q4_to;
@@ -833,7 +835,7 @@ void UpdatableListMatrix<MatrixND>::update(double current_time, MatrixND Q1, Mat
  * @param update_time - this is a return value! It is the time we've found!
  * @return
  */
-string GetCurrentTimeValue(string filename, double current_time, double &update_time) {
+string GetCurrentTimeValue(const string &filename, long &pos, const double &current_time, double &update_time) {
 
 	// check - if the input is not a filename, but just a number - in that case just return it
 	if (is_number(filename)) {
@@ -844,6 +846,7 @@ string GetCurrentTimeValue(string filename, double current_time, double &update_
 
 	ifstream input;
 	string return_value = "";
+	long current_line = 0; // current line of the file
 
 	// open the file
 	input.open(filename.c_str(), ifstream::in);
@@ -859,6 +862,18 @@ string GetCurrentTimeValue(string filename, double current_time, double &update_
 	string string_tmp;
 	double time_tmp;
 	double last_time = -1;
+
+	// check if we position is > 0. Then we need to skip lines
+	if (pos > 0)
+	{
+		while (!input.eof() & current_line < pos)
+		{
+			input.ignore(999, '\n'); // This is fastest way to skip lines that I found
+			current_line++;
+		}
+
+	}
+
 	while (!input.eof()) {
 		// read time
 		input >> string_tmp;
@@ -875,6 +890,9 @@ string GetCurrentTimeValue(string filename, double current_time, double &update_
 				last_time = time_tmp;
 				// save current value for later use, in case this will be the last value we read
 				input >> return_value;
+
+				current_line++;
+				pos = current_line; // save the last line position
 			} else {
 				// We've just passed current_time
 				// Whatever we've saved before - is what we need, just exit
@@ -894,10 +912,19 @@ string GetCurrentTimeValue(string filename, double current_time, double &update_
 
 	// Use the last time we've read as update_time
 	update_time = last_time;
+	// save the position for the future search
 	input.close();
 
 	return return_value;
 
+}
+
+/*
+* Overloaded GetCurrentTimeValue to maintain possible compatability
+*/
+string GetCurrentTimeValue(const string &filename, const double &current_time, double &update_time) {
+	long pos = 0;
+	return GetCurrentTimeValue(filename, pos, current_time, update_time);
 }
 
 /**

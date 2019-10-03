@@ -55,6 +55,9 @@ private:
 
 	double last_update_time; /// Indicates when the Matrix was updated last time
 
+	/// Last line position in the matrix scaling and limiting file
+	long scale_pos, update_pos, Q1_from_pos, Q1_to_pos, Q2_from_pos, Q2_to_pos, Q3_from_pos, Q3_to_pos, Q4_from_pos, Q4_to_pos; 
+
 public:
 	// original matrix
 	MatrixND original_arr;
@@ -117,7 +120,8 @@ public:
 };
 
 // couple of helpful functions
-string GetCurrentTimeValue(string filename, double current_time, double &update_time);
+string GetCurrentTimeValue(const string &filename, const double &current_time, double &update_time);
+string GetCurrentTimeValue(const string &filename, long &pos, const double &current_time, double &update_time);
 bool is_number(const std::string& s);
 /// FUNCTION NOT IMPLEMENTED
 double stringToValue(string string_value, double current_time);
