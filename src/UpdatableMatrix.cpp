@@ -410,8 +410,6 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 		// If there is nothing - no scaling
 		this->scale_string  = "";
 	}
-	// define scale_pos at the beginig of the file
-	this->scale_pos = 0; 
 
 	// Check for the end of line
 	if (!file_line_stream.eof()) {

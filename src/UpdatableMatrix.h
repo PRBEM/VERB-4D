@@ -56,7 +56,7 @@ private:
 	double last_update_time; /// Indicates when the Matrix was updated last time
 
 	/// Last line position in the matrix scaling and limiting file
-	long scale_pos, update_pos, Q1_from_pos, Q1_to_pos, Q2_from_pos, Q2_to_pos, Q3_from_pos, Q3_to_pos, Q4_from_pos, Q4_to_pos; 
+	long scale_pos=0, update_pos=0, Q1_from_pos=0, Q1_to_pos=0, Q2_from_pos=0, Q2_to_pos=0, Q3_from_pos=0, Q3_to_pos=0, Q4_from_pos=0, Q4_to_pos=0; 
 
 public:
 	// original matrix
