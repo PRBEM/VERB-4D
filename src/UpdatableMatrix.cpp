@@ -375,6 +375,7 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 			// This update-file will tell us when and how to update the array
 			this->update_filename = data_filename;
 			Logger::message << "	Update from: " << this->update_filename << endl;
+			this->update_pos = 0;
 
 		} else {
 			// If it's not an update-file, no updates
@@ -406,6 +407,7 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 		// If not the end - read the next parameter, which is scaling coefficient
 		file_line_stream >> this->scale_string;
 		Logger::message << "	Scale: " << this->scale_string << endl;
+		this->scale_pos = 0;
 	} else {
 		// If there is nothing - no scaling
 		this->scale_string  = "";
@@ -418,6 +420,8 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 		file_line_stream >> this->Q1_from_string;
 		file_line_stream >> this->Q1_to_string;
 		Logger::message << "	Limits: " << this->Q1_from_string << " to " << this->Q1_to_string << endl;
+		this->Q1_from_pos = 0;
+		this->Q1_to_pos = 0;
 	} else {
 		// If there is nothing - no limiting
 		this->Q1_from_string = "";
@@ -431,6 +435,8 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 		file_line_stream >> this->Q2_from_string;
 		file_line_stream >> this->Q2_to_string;
 		Logger::message << "	Limits: " << this->Q2_from_string << " to " << this->Q2_to_string << endl;
+		this->Q2_from_pos = 0;
+		this->Q2_to_pos = 0;
 	} else {
 		// If there is nothing - no limiting
 		this->Q2_from_string = "";
@@ -444,6 +450,8 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 		file_line_stream >> this->Q3_from_string;
 		file_line_stream >> this->Q3_to_string;
 		Logger::message << "	Limits: " << this->Q3_from_string << " to " << this->Q3_to_string << endl;
+		this->Q3_from_pos = 0;
+		this->Q3_to_pos = 0;
 	} else {
 		// If there is nothing - no limiting
 		this->Q3_from_string = "";
@@ -457,6 +465,8 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
 		file_line_stream >> this->Q4_from_string;
 		file_line_stream >> this->Q4_to_string;
 		Logger::message << "	Limits: " << this->Q4_from_string << " to " << this->Q4_to_string << endl;
+		this->Q4_from_pos = 0;
+		this->Q4_to_pos = 0;
 	} else {
 		// If there is nothing - no limiting
 		this->Q4_from_string = "";
