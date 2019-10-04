@@ -923,6 +923,11 @@ string GetCurrentTimeValue(const string &filename, long &pos, const double &curr
 	// save the position for the future search
 	input.close();
 
+	// Move position one line back in case we have to use the scaling again
+	pos--;
+	if (pos < 0)
+		pos = 0; // Make sure that pos is not negative
+
 	return return_value;
 
 }
