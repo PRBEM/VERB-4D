@@ -914,7 +914,7 @@ string GetCurrentTimeValue(const string &filename, long &pos, const double &curr
 	}
 
 	if (return_value == "") {
-		Logger::error << "ERROR: Scale factor for " << current_time << " wasn't found in " << filename << endl;
+		Logger::error << std::setprecision(15) << "ERROR: Scale factor for " << current_time << " wasn't found in " << filename << endl;
 		exit(EXIT_FAILURE);
 	}
 

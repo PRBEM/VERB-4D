@@ -84,6 +84,7 @@ void Logger::writeMessage(const std::string& message, MessageType type)
 	std::string text(message);
 			//std::replace(text.begin(), text.end(), '\n', ' '); // Fix it later
 	// Send message to standard console out
+	std:cout << std::setprecision(15);
 	cout << message;
 	// add message to end of file
 	appendToFile(text);

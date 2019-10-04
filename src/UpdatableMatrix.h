@@ -10,6 +10,7 @@
 #include <istream>
 #include <sstream>
 #include <vector>
+#include <iomanip>
 
 #include "Matrix.h"
 #include "Logger.h"
