@@ -7,7 +7,6 @@
 
 
 #include "Logger.h"
-#include <iomanip>      // std::setprecision
 
 /// creates logger that will write to log.txt
 void Logger::createInstance()
@@ -16,7 +15,6 @@ void Logger::createInstance()
 	sInstance = new Logger;
 	mDebugLevel = DEBUG_LEVEL_ERROR;
 	logFile.open("log.txt");
-	std:cout << std::setprecision(15);
 }
 
 /// deletes instance of logger and closes log file ('log.txt')
@@ -84,7 +82,6 @@ void Logger::writeMessage(const std::string& message, MessageType type)
 	std::string text(message);
 			//std::replace(text.begin(), text.end(), '\n', ' '); // Fix it later
 	// Send message to standard console out
-	std:cout << std::setprecision(15);
 	cout << message;
 	// add message to end of file
 	appendToFile(text);

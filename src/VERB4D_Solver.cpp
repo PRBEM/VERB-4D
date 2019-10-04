@@ -330,7 +330,7 @@ int main(int argc, char* argv[]) {
     for (long int it = it_first; it < it_total; it++) {
         // update time by dt every iteration
         time = time_first + it * dt;
-        Logger::message << endl << "Time[" << it << "/" << it_total << "]: " << time << " (days)" << endl;
+        Logger::message << endl << std::setprecision(15) << "Time[" << it << "/" << it_total << "]: " << time << " (days)" << endl;
 
         // Update boundary conditions and diffusion coefficients
 

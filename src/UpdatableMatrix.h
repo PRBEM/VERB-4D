@@ -10,7 +10,7 @@
 #include <istream>
 #include <sstream>
 #include <vector>
-#include <iomanip>
+#include <iomanip> // std::setprecision
 
 #include "Matrix.h"
 #include "Logger.h"
