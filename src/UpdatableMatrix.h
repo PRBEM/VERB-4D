@@ -10,6 +10,7 @@
 #include <istream>
 #include <sstream>
 #include <vector>
+#include <iomanip> // std::setprecision
 
 #include "Matrix.h"
 #include "Logger.h"
@@ -54,6 +55,9 @@ private:
 	string Q4_to_string; /// Filename for limiting Q4 (usually it's K, upper limit)
 
 	double last_update_time; /// Indicates when the Matrix was updated last time
+
+	/// Last line position in the matrix scaling and limiting file
+	long scale_pos=0, update_pos=0, Q1_from_pos=0, Q1_to_pos=0, Q2_from_pos=0, Q2_to_pos=0, Q3_from_pos=0, Q3_to_pos=0, Q4_from_pos=0, Q4_to_pos=0; 
 
 public:
 	// original matrix
@@ -117,7 +121,8 @@ public:
 };
 
 // couple of helpful functions
-string GetCurrentTimeValue(string filename, double current_time, double &update_time);
+string GetCurrentTimeValue(const string &filename, const double &current_time, double &update_time);
+string GetCurrentTimeValue(const string &filename, long &pos, const double &current_time, double &update_time);
 bool is_number(const std::string& s);
 /// FUNCTION NOT IMPLEMENTED
 double stringToValue(string string_value, double current_time);
