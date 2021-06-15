@@ -128,10 +128,17 @@
 #include "ReadInitialData.h"
 #include "UpdatableMatrix.h"
 #include "Interpolation.h"
-
 #include <omp.h>
 
+#ifdef DATA_ASSIMILATION
+#include "DataAssimilation.h"
+#endif 
+
 using namespace std;
+
+#ifdef DATA_ASSIMILATION
+namespace da = data_assimilation;
+#endif 
 
 //#define DEBUG_MODE
 
@@ -243,6 +250,12 @@ int main(int argc, char* argv[]) {
         Logger::error << "Error: ReadInitialData return false. Check the initial files." << endl;
         exit(EXIT_FAILURE);
     }
+
+    #ifdef DATA_ASSIMILATION
+    da::DataAssimilationManagerConvection daManagerConvection {
+        "parameters_da.ini", time_first, time_first + time_total, V.wxSlice(0,0), K.wxSlice(0,0), P_size, R_size
+    };
+    #endif
 
     // Copy L-star so we can later interpolate PSD to a new L-star,
     // to account for adiabatic transport if L-star changes
@@ -879,6 +892,21 @@ int main(int argc, char* argv[]) {
         }
         //cout << "Number of negative points: " << number_of_negative_points << endl;
         Logger::message << endl << "Number of negative points: " << number_of_negative_points << " of " << P_size*R_size*V_size*K_size << endl;
+
+#ifdef DATA_ASSIMILATION
+        daManagerConvection.assimilate(time, PSD, P, R, VP, VR, Losses_conv, dt);
+        if (positive_PSD == "true") {
+            for (iP = 0; iP < P_size; iP++) {
+                for (iR = 0; iR < R_size; iR++) {
+                    for (iV = 0; iV < V_size; iV++) {
+                        for (iK = 0; iK < K_size; iK++) {
+                            if (PSD[iP][iR][iV][iK] < 1e-21) PSD[iP][iR][iV][iK] = 1e-21;
+                        }
+                    }
+                }
+            }
+        }
+#endif
 
         // Output the PSD data for each timestep into the output folder
         if ((it % output_step) == 0) {

@@ -7,6 +7,13 @@ cmake_minimum_required(VERSION 2.8)
 project(VERB4D C CXX)
 add_definitions(-std=c++11)
 
+# Enable/disable tests
+include(CTest)
+set(ENABLE_TESTING ON)
+
+# Enable/disable data assimilation
+set(DATA_ASSIMILATION ON CACHE BOOL "Enable data assimilation")
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 # Find OpenMP
@@ -18,7 +25,12 @@ if(OPENMP_FOUND)
 endif(OPENMP_FOUND)
 
 # Find Matlab, Lapack, and BLAS
-find_package(MATLAB)
+if(DATA_ASSIMILATION)
+    find_package(MATLAB REQUIRED)
+else(DATA_ASSIMILATION)
+    find_package(MATLAB)
+endif(DATA_ASSIMILATION)
+
 if(MATLAB_FOUND)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MATLAB_CXXFLAGS}")
     include_directories(${MATLAB_INCLUDE_DIR})
@@ -60,6 +72,10 @@ file(GLOB_RECURSE VERB4D_HEADERS *.h)
 
 # Add new source files here and re-run cmake
 set(VERB4D_SOURCES
+    src/VERB4D_Solver.cpp)
+
+set(VERB4D_SOURCES
+    ${VERB4D_SOURCES}
     src/Convection_1D_ULTIMATE_QUICKEST6.cpp
     src/Convection_2D.cpp
     src/Diffusion_1D.cpp
@@ -74,9 +90,26 @@ set(VERB4D_SOURCES
     src/MonotCubicInterpolator.cpp
     src/Parameters.cpp
     src/ReadInitialData.cpp
-    src/UpdatableMatrix.cpp
-    src/VERB4D_Solver.cpp)
+    src/UpdatableMatrix.cpp)
 
-# Build and link
+# Add data assimilation source files and macros
+if(DATA_ASSIMILATION)
+    add_definitions(-DDATA_ASSIMILATION)
+
+    set(VERB4D_SOURCES 
+        ${VERB4D_SOURCES} 
+        src/MatrixOperations.cpp
+        src/PMF.cpp
+        src/CustomDate.cpp
+        src/DataAssimilationHelper.cpp
+        src/DataAssimilation.cpp)
+endif(DATA_ASSIMILATION)
+
+# Build and link 
 add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
 target_link_libraries(VERB4D_Solver ${DEPLIBS})
+
+# Add tests
+if(ENABLE_TESTING)
+    add_subdirectory(test)
+endif()

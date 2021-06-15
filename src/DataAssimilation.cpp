@@ -1,0 +1,227 @@
+#include "DataAssimilation.h"
+#include "DataAssimilationHelper.h"
+#include "MatrixOperations.h"
+// namespace da = data_assimilation;
+
+data_assimilation::DataAssimilationManagerConvection::DataAssimilationManagerConvection(
+    const std::string& parametersFile, 
+    double timeStart, double timeEnd, const Matrix2D<double>& V, 
+    const Matrix2D<double>& K, int P_size, int R_size
+) 
+:_timeStart(timeStart), _timeEnd(timeEnd), _V(V), _K(K), 
+    _analysisCovarianceConvection(P_size, R_size, V.size_q1, K.size_q2) 
+{
+    _assimilationParameters = readParameters(parametersFile);
+    _runDataAssimilation = _assimilationParameters.runDataAssimilation;
+
+    if (_runDataAssimilation) {
+        _dataParameters = pmf::readParameters("satellite_data.list");  
+
+        _timePrev = timeStart;
+        _timeNext = timeStart + _assimilationParameters.timeStep;
+    }
+    
+}
+
+void data_assimilation::DataAssimilationManagerConvection::assimilate(
+    double time, Matrix4D<double>& PSD, 
+    const Matrix4D<double>& P, const Matrix4D<double>& R,
+    const Matrix4D<double>& VP, const Matrix4D<double>& VR,
+    const Matrix4D<double>& Loss, 
+    double dt)
+{
+    if (_runDataAssimilation && time >= _timeNext) {
+        size_t P_size = PSD.size_w;
+        size_t R_size = PSD.size_x;
+
+        auto P2D = P.yzSlice(0,0);
+        auto R2D = R.yzSlice(0,0);
+
+        auto observations =  getObservations(_timePrev, _timeNext, _V, _K, 
+            _dataParameters);
+
+        std::cout << "Done Interpolatiing. Applying Kalman filter...\n";
+#pragma omp parallel for schedule(dynamic,1) collapse(2)
+        for (int iV = 0; iV < _V.size_q1; ++iV) {
+            for (int iK = 0; iK < _K.size_q2; ++iK) {
+                // int numnan = 0;
+                //set all observations to zero for testing
+                // for (int l = 0; l < observations[iV][iK].PSD.size_q1; l++)
+                //     if(isnan(observations[iV][iK].PSD[l])) numnan++;
+                    //observations[iV][iK].PSD[l] = 1e-31;
+                // if(numnan > 0) std::cout << numnan << " of " << observations[iV][iK].PSD.size_q1 << '\n';
+                Matrix2D<double> PSD_PR = PSD.yzSlice(iV,iK);
+                runKalmanFilterConvection2D(PSD_PR, 
+                    _analysisCovarianceConvection[iV][iK], 
+                    P2D, R2D,
+                    VP.yzSlice(iV, iK), VR.yzSlice(iV, iK),
+                    Loss.yzSlice(iV, iK), 
+                    observations[iV][iK], dt, _assimilationParameters);
+                    
+                for (auto iP = 0; iP < P_size; iP++) {
+                    for (auto iR = 0; iR < R_size; iR++) {
+                        PSD[iP][iR][iV][iK] = PSD_PR[iP][iR];
+                    }
+                }
+            }
+        }
+
+        _timePrev = _timeNext;
+        _timeNext += _assimilationParameters.timeStep;
+    }
+} 
+
+std::vector<std::vector<data_assimilation::Observations>> data_assimilation::getObservations_old(
+    double timeStart,
+    double timeEnd,
+    const Matrix2D<double>& V,
+    const Matrix2D<double>& K,
+    const std::vector<pmf::Parameters>& parameters) 
+{
+    vector<ProcessedMatFileData> pmfDataSplit;
+    for (auto par : parameters) {
+        pmfDataSplit.push_back(internal::readData(timeStart, timeEnd, par));
+    }
+
+    ProcessedMatFileData data = internal::cat(pmfDataSplit);   
+    std::cout << "Done reading Data. Interpolating...\n";
+    auto result = internal::interpolate_old(data, V, K);
+
+    return result;
+}
+
+std::vector<std::vector<data_assimilation::Observations>> data_assimilation::getObservations(
+    double timeStart,
+    double timeEnd,
+    const Matrix2D<double>& V,
+    const Matrix2D<double>& K,
+    const std::vector<pmf::Parameters>& parameters) 
+{
+    vector<ProcessedMatFileData> pmfDataSplit;
+    for (auto par : parameters) {
+        pmfDataSplit.push_back(internal::readData(timeStart, timeEnd, par));
+    }  
+    std::cout << "Done reading Data. Interpolating...\n";
+    auto result = internal::interpolate(pmfDataSplit, V, K);
+
+    return result;
+}
+
+void data_assimilation::runKalmanFilterConvection2D (
+    Matrix2D<double>& forecast,
+    Matrix2D<double>& analysisErrorCovariance,
+    const Matrix2D<double>& P,
+    const Matrix2D<double>& R,
+    const Matrix2D<double>& VP,
+    const Matrix2D<double>& VR,
+    const Matrix2D<double>& Loss,
+    const Observations& observations,
+    double timeStep,
+    const Parameters& parameters) 
+{
+    auto dP = P[1][0] - P[0][0];
+    auto dR = R[0][1] - R[0][0];
+
+    auto forecast1D = toMatrix1D(forecast);
+    auto modelMatrix = internal::getModelMatrixConvection2D(
+        VP, VR, Loss, timeStep, dP, dR);
+   
+    
+    auto observationsBinned = internal::bin(observations, P, R, "log10");
+    auto observationSpace = internal::convertToObservationSpace(observationsBinned);
+    
+    double modelError = parameters.modelError;
+    double observationError = parameters.observationError;
+    if (parameters.useLog) {
+        forecast1D = log10(forecast1D);
+        observationSpace.data = log10(observationSpace.data);
+        
+        modelError = log10(1.0 + modelError);
+        observationError = log10(1.0 + observationError);
+    }
+    Matrix1D<double> D = Matrix1D<double>{forecast1D.size_q1};
+    D = modelError;
+    auto Q = parameters.useLog ? diag(D) : diag(forecast1D * modelError); 
+
+    Matrix1D<double> E = Matrix1D<double>{observationSpace.data.size_q1};
+    E = observationError;
+    auto Robs = parameters.useLog ? diag(E) : diag(observationSpace.data * observationError); 
+
+    runKalmanFilter(forecast1D, analysisErrorCovariance, 
+        modelMatrix, Q, observationSpace.data, observationSpace.H, 
+        Robs);
+
+    if (parameters.useLog) {
+        forecast1D = pow(10., forecast1D);
+    }
+
+    forecast = toMatrix2D(forecast1D, P.size_q1, R.size_q2);
+}
+
+/* class Convection2DAnalysisCovariances {
+public:
+    Convection2DAnalysisCovariances(size_t V_size, size_t K_size);
+    const std::vector<Matrix2D<double>>& operator[](size_t iV) const;
+    std::vector<Matrix2D<double>>& operator[](size_t iV);
+private:
+    std::vector<std::vector<Matrix2D<double>>> _data;
+}; */
+
+data_assimilation::Convection2DAnalysisCovariances::Convection2DAnalysisCovariances(
+    size_t P_size, size_t R_size, size_t V_size, size_t K_size) 
+    : _data(V_size, std::vector<Matrix2D<double>>(K_size))
+{
+    for (auto i = 0; i < V_size; ++i) {
+        for (auto j = 0; j < K_size; ++j) {
+            _data[i][j].AllocateMemory(P_size * R_size, P_size * R_size);
+            _data[i][j] = 0.;
+        }
+    }
+}
+
+const std::vector<Matrix2D<double>>& data_assimilation::Convection2DAnalysisCovariances::operator[](size_t iV) const 
+{
+    return _data[iV];
+}
+
+std::vector<Matrix2D<double>>& data_assimilation::Convection2DAnalysisCovariances::operator[](size_t iV) 
+{
+    return _data[iV];
+}
+
+void data_assimilation::runKalmanFilter(
+    Matrix1D<double>& forecast,  
+    Matrix2D<double>& Pa,
+    const Matrix2D<double>& M, const Matrix2D<double>& Q, 
+    const Matrix1D<double>& obs, const Matrix2D<double>& H, 
+    const Matrix2D<double>& R) 
+{
+    //auto Pf = M * Pa * transpose(M) + Q;
+    
+    //forecast error covariance matrix [n x n]
+    auto Pf = abtrans(M * Pa, M) + Q;
+    // auto HT = transpose(H);    //transforms observations to model space [n x m]
+  
+    // auto Pf_times_HT = Pf * HT;
+    auto Pf_times_HT = abtrans(Pf, H);
+    
+    //Kalman matrix [n x m]
+    auto K = Pf_times_HT * inv(H * Pf_times_HT + R);
+
+    forecast += K * (obs - H * forecast);
+    Pa = Pf - K * H * Pf;
+}
+
+data_assimilation::Parameters data_assimilation::readParameters(const std::string& filename) {
+    data_assimilation::Parameters result;
+    ParametersIni parameters(filename);
+
+    internal::getParameterBool(parameters, "run_data_assimilation", 
+        result.runDataAssimilation, true);
+    internal::getParameterBool(parameters, "useLog", result.useLog, true);
+    parameters.getParameter("time_step", result.timeStep, true);
+    parameters.getParameter("model_error", result.modelError, true);
+    parameters.getParameter("observation_error", result.observationError, true);
+
+    return result;
+}
