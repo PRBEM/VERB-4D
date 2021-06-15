@@ -6098,5 +6098,8 @@ template class Matrix2D<double>;
 template class Matrix3D<double>;
 template class Matrix4D<double>;
 
+template class Matrix1D<bool>;
+template class Matrix2D<bool>;
+
 #endif
 
