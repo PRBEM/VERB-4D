@@ -3599,7 +3599,7 @@ void Matrix3D<T>::writeToBinaryFile(string filename) {
         int status;
 
 		int32_t size_array[3] =  { size_q1, size_q2, size_q3 };
-		status = fwrite(&buffer_int32, sizeof(int32_t), 3, outputFile);
+		status = fwrite(size_array, sizeof(int32_t), 3, outputFile);
 		if (status!=1){
 			printf("Writing error");
 			exit(EXIT_FAILURE);
@@ -5489,7 +5489,7 @@ void Matrix4D<T>::readFromBinaryFile(string filename) {
 		FILE *inputFile = fopen(filename.c_str(), "rb");
 		if (inputFile != NULL) {
             int status;
-			
+
 			int32_t buffer_int32[4];
 			status = fread(buffer_int32, sizeof(int32_t), 4, inputFile);
 			if (status!=1){
