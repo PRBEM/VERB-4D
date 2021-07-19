@@ -4042,7 +4042,7 @@ inline T& Matrix4D<T>::operator() (int w, int x, int y, int z) {
 	}
 #endif
 	// return (w,x,y,z) value
-	return plane_array[((w*size_x + x)*size_y + y)*size_z];
+	return plane_array[((w*size_x + x)*size_y + y)*size_z + z];
 }
 
 /**
