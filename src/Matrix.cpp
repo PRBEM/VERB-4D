@@ -3596,34 +3596,21 @@ template<class T>
 void Matrix3D<T>::writeToBinaryFile(string filename) {
     FILE *outputFile = fopen(filename.c_str(), "wb");
     if (outputFile != NULL) {
-        int size_of_int32 = sizeof(int32_t);
-        int32_t buffer_int32;
         int status;
 
-        int size_array[3] = {size_q1, size_q2, size_q3};
-        for (int i = 0; i<3; i++){
-            buffer_int32 = static_cast<int32_t>(size_array[i]);
-            status = fwrite(&buffer_int32, size_of_int32, 1, outputFile);
-            if (status!=1){
-                printf("Writing error");
-                exit(EXIT_FAILURE);
-            }
-        }
+		int32_t size_array[3] =  { size_q1, size_q2, size_q3 };
+		status = fwrite(size_array, sizeof(int32_t), 3, outputFile);
+		if (status!=1){
+			printf("Writing error");
+			exit(EXIT_FAILURE);
+		}
 
-        int size_of_double = sizeof(double);
-        double buffer_double;
-        for (int i1 = 0; i1 < size_q1; i1++) {
-              for (int i2 = 0; i2 < size_q2; i2++) {
-                    for (int i3 = 0; i3 < size_q3; i3++) {
-                        buffer_double = matrix_array[i1][i2][i3];
-                        status = fwrite(&buffer_double, size_of_double, 1, outputFile);
-                        if (status!=1){
-                              printf("Writing error");
-                              exit(EXIT_FAILURE);
-                        }
-                    }
-              }
-        }
+		int size_total = this->size_q1 * this->size_q2 * this->size_q3;
+		status = fwrite(this->plane_array, sizeof(T), size_total, outputFile);
+		if (status!=1){
+			printf("Writing error");
+			exit(EXIT_FAILURE);
+		}
     } else {
         printf("MATRIX_WRITE_ERROR: Error writing file %s.\n", filename.c_str());
         exit(EXIT_FAILURE);
@@ -3650,44 +3637,19 @@ void Matrix3D<T>::readFromBinaryFile(string filename) {
 		if (inputFile != NULL) {
             int status;
 
-            int size_of_int32 = sizeof(int32_t);
-            char *buffer_int32;
-            buffer_int32 = (char *) malloc(size_of_int32);
-            if (buffer_int32 == NULL){
-                printf("Memory error");
-                exit(EXIT_FAILURE);
-            }
-
-            for (int i = 0; i < 3; i++){
-                status = fread(buffer_int32, size_of_int32, 1, inputFile);
-                if (status!=1){
-                    printf("Reading error");
-                    exit(EXIT_FAILURE);
-                }
-            }
-
-            int size_of_double = sizeof(double);
-            char *buffer_double;
-            buffer_double = (char*) malloc(size_of_double);
-            if (buffer_double == NULL) {
-                  printf("Memory error");
-                  exit(EXIT_FAILURE);
-            }
-			for (int i1 = 0; i1 < size_q1; i1++) {
-				for (int i2 = 0; i2 < size_q2; i2++) {
-					for (int i3 = 0; i3 < size_q3; i3++) {
-                        status = fread(buffer_double, size_of_double, 1, inputFile);
-                        if (status!=1){
-                            printf("Reading error");
-                            exit(EXIT_FAILURE);
-                        } else {
-                            matrix_array[i1][i2][i3] = *((double*) buffer_double);
-                        }
-					}
-				}
+			int32_t buffer_int32[3];
+			status = fread(buffer_int32, sizeof(int32_t), 3, inputFile);
+			if (status!=1){
+				printf("Reading error");
+				exit(EXIT_FAILURE);
 			}
-			free(buffer_int32);
-			free(buffer_double);
+
+			int size_total = this->size_q1 * this->size_q2 * this->size_q3;
+			status = fread(this->plane_array, sizeof(T), size_total, inputFile);
+			if (status!=1){
+				printf("Reading error");
+				exit(EXIT_FAILURE);
+			}
 		} else {
 			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
 			exit(EXIT_FAILURE);
@@ -5467,32 +5429,21 @@ void Matrix4D<T>::writeToBinaryFile(string filename) {
     int w, x, y, z;
     FILE *outputFile = fopen(filename.c_str(), "wb");
     if (outputFile != NULL) {
-        int size_of_int32 = sizeof(int32_t);
-        int32_t buffer_int32;
         int status;
 
-        int size_array[4] = {size_w, size_x, size_y, size_z};
-        for (int i = 0; i < 4; i++){
-            buffer_int32 = static_cast<int32_t>(size_array[i]);
-            status = fwrite(&buffer_int32, size_of_int32, 1, outputFile);
-        }
+        int32_t size_array[4] = {size_w, size_x, size_y, size_z};
+		status = fwrite(size_array, sizeof(int32_t), 4, outputFile);
+		if (status!=1){
+			printf("Writing error");
+			exit(EXIT_FAILURE);
+		}
+		int size_total = this->size_w * this->size_x * this->size_y * this->size_z;
+		status = fwrite(this->plane_array, sizeof(T), size_total, outputFile);
+		if (status!=1){
+			printf("Writing error");
+			exit(EXIT_FAILURE);
+		}
 
-        double buffer_double;
-        int size_of_double = sizeof(double);
-        for (w = 0; w < size_w; w++) {
-              for (x = 0; x < size_x; x++) {
-                    for (y = 0; y < size_y; y++) {
-                          for (z = 0; z < size_z; z++) {
-                                buffer_double = matrix_array[w][x][y][z];
-                                status = fwrite(&buffer_double, size_of_double, 1, outputFile);
-                                if (status!=1){
-                                      printf("Writing error");
-                                      exit(EXIT_FAILURE);
-                                }
-                          }
-                    }
-              }
-        }
     } else {
         printf("MATRIX_WRITE_ERROR: Error writing file %s.\n", filename.c_str());
         exit(EXIT_FAILURE);
@@ -5539,46 +5490,19 @@ void Matrix4D<T>::readFromBinaryFile(string filename) {
 		if (inputFile != NULL) {
             int status;
 
-            int size_of_int32 = sizeof(int32_t);
-            char *buffer_int32;
-            buffer_int32 = (char *) malloc(size_of_int32);
-            if (buffer_int32 == NULL){
-                printf("Memory error");
-                exit(EXIT_FAILURE);
-            }
-
-            for (int i = 0; i < 4; i++){
-                status = fread(buffer_int32, size_of_int32, 1, inputFile);
-                if (status!=1){
-                    printf("Reading error");
-                    exit(EXIT_FAILURE);
-                }
-            }
-
-            int size_of_double = sizeof(double);
-            char *buffer_double;
-            buffer_double = (char*) malloc(size_of_double);
-            if (buffer_double == NULL) {
-                  printf("Memory error");
-                  exit(EXIT_FAILURE);
-            }
-			for (w = 0; w < size_w; w++) {
-				for (x = 0; x < size_x; x++) {
-					for (y = 0; y < size_y; y++) {
-						for (z = 0; z < size_z; z++) {
-                              status = fread(buffer_double, size_of_double, 1, inputFile);
-                              if (status!=1){
-                                    printf("Reading error");
-                                    exit(EXIT_FAILURE);
-                              } else {
-                                    matrix_array[w][x][y][z] = *((double*) buffer_double);
-                              }
-						}
-					}
-				}
+			int32_t buffer_int32[4];
+			status = fread(buffer_int32, sizeof(int32_t), 4, inputFile);
+			if (status!=1){
+				printf("Reading error");
+				exit(EXIT_FAILURE);
 			}
-			free(buffer_int32);
-			free(buffer_double);
+
+			int size_total = this->size_w * this->size_x * this->size_y * this->size_z;
+			status = fread(this->plane_array, sizeof(T), size_total, inputFile);
+			if (status!=1){
+				printf("Reading error");
+				exit(EXIT_FAILURE);
+			}
 		} else {
 			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
 			exit(EXIT_FAILURE);
