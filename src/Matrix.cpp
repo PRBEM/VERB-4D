@@ -3600,14 +3600,14 @@ void Matrix3D<T>::writeToBinaryFile(string filename) {
 
 		int32_t size_array[3] =  { size_q1, size_q2, size_q3 };
 		status = fwrite(size_array, sizeof(int32_t), 3, outputFile);
-		if (status!=1){
+		if (status!=3){
 			printf("Writing error");
 			exit(EXIT_FAILURE);
 		}
 
 		int size_total = this->size_q1 * this->size_q2 * this->size_q3;
 		status = fwrite(this->plane_array, sizeof(T), size_total, outputFile);
-		if (status!=1){
+		if (status!=size_total){
 			printf("Writing error");
 			exit(EXIT_FAILURE);
 		}
@@ -3639,14 +3639,14 @@ void Matrix3D<T>::readFromBinaryFile(string filename) {
 
 			int32_t buffer_int32[3];
 			status = fread(buffer_int32, sizeof(int32_t), 3, inputFile);
-			if (status!=1){
+			if (status!=3){
 				printf("Reading error");
 				exit(EXIT_FAILURE);
 			}
 
 			int size_total = this->size_q1 * this->size_q2 * this->size_q3;
 			status = fread(this->plane_array, sizeof(T), size_total, inputFile);
-			if (status!=1){
+			if (status!=size_total){
 				printf("Reading error");
 				exit(EXIT_FAILURE);
 			}
@@ -5433,13 +5433,13 @@ void Matrix4D<T>::writeToBinaryFile(string filename) {
 
         int32_t size_array[4] = {size_w, size_x, size_y, size_z};
 		status = fwrite(size_array, sizeof(int32_t), 4, outputFile);
-		if (status!=1){
+		if (status!=4){
 			printf("Writing error");
 			exit(EXIT_FAILURE);
 		}
 		int size_total = this->size_w * this->size_x * this->size_y * this->size_z;
 		status = fwrite(this->plane_array, sizeof(T), size_total, outputFile);
-		if (status!=1){
+		if (status!=size_total){
 			printf("Writing error");
 			exit(EXIT_FAILURE);
 		}
@@ -5492,14 +5492,14 @@ void Matrix4D<T>::readFromBinaryFile(string filename) {
 
 			int32_t buffer_int32[4];
 			status = fread(buffer_int32, sizeof(int32_t), 4, inputFile);
-			if (status!=1){
+			if (status!=4){
 				printf("Reading error");
 				exit(EXIT_FAILURE);
 			}
 
 			int size_total = this->size_w * this->size_x * this->size_y * this->size_z;
 			status = fread(this->plane_array, sizeof(T), size_total, inputFile);
-			if (status!=1){
+			if (status!=size_total){
 				printf("Reading error");
 				exit(EXIT_FAILURE);
 			}
