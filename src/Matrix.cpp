@@ -244,8 +244,10 @@ Matrix1D<T>::~Matrix1D() {
 template<class T>
 void Matrix1D<T>::AllocateMemory( int size_q1 ) {
 	this->size_q1 = size_q1;
+	num_elements = size_q1;
 	// using inline template for memory allocation
 	matrix_array = matrix<T>(size_q1);
+	plane_array = matrix_array;
 	initialized = true;
 }
 
@@ -1390,8 +1392,10 @@ template<class T>
 void Matrix2D<T>::AllocateMemory( int size_q1, int size_q2 ) {
 	this->size_q1 = size_q1;
 	this->size_q2 = size_q2;
+	num_elements = size_q1 * size_q2;
 	// using matrix inline template to allocate memory
 	matrix_array = matrix<T>(size_q1, size_q2);
+	plane_array = matrix_array[0];
 	initialized = true;
 }
 
@@ -2493,6 +2497,7 @@ void Matrix3D<T>::AllocateMemory( int size_q1, int size_q2, int size_q3) {
 	this->size_q1 = size_q1;
 	this->size_q2 = size_q2;
 	this->size_q3 = size_q3;
+	num_elements = size_q1 * size_q2 * size_q3;
 	matrix_array = matrix<T>(size_q1, size_q2, size_q3);
 	plane_array = matrix_array[0][0];
 	initialized = true;
@@ -3955,6 +3960,7 @@ void Matrix4D<T>::AllocateMemory( int w_size, int x_size, int y_size, int z_size
 	this->size_x = x_size;
 	this->size_y = y_size;
 	this->size_z = z_size;
+	num_elements = size_w * size_x * size_y * size_z;
 	matrix_array = matrix<T>(w_size, x_size, y_size, z_size);
 	plane_array = matrix_array[0][0][0];
 	initialized = true;

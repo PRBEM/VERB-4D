@@ -48,6 +48,9 @@ using namespace std;
  */
 template <typename T>
 class Matrix1D {
+private:
+	T *plane_array;
+	int32_t num_elements;
 public:
 
 	T *matrix_array;						///< Array to keep the values
@@ -142,6 +145,8 @@ private:
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y] can be used.
 	/// Also, all rows saved in the memory one after another as a big array. So Matrix[x+x_size*y] can be also used.
 	T **matrix_array;
+	T *plane_array;
+	int32_t num_elements;
 public:
 	// const static int N_of_dimentions2 = 2;									///< Not used anywhere
 
@@ -239,6 +244,7 @@ private:
 	T *plane_array;
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y][z] can be used.
 	T ***matrix_array;
+	int32_t num_elements;
 public:
 	bool initialized;														///< Flag, equal true if initialized
 	int size_q1;															///< size x
@@ -351,6 +357,7 @@ private:
 	T *plane_array;
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[w][x][y][z] can be used.
 	T ****matrix_array;
+	int32_t num_elements;
 public:
 	bool initialized;														///< Flag, equal true if initialized
 	int size_w;																///< size w
