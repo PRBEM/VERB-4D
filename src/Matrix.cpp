@@ -19,6 +19,7 @@
 #include "Matrix.h"
 #include "Logger.h"
 #include <inttypes.h>
+#include <limits>
 
 using namespace std;
 
@@ -439,7 +440,7 @@ inline Matrix1D<T> Matrix1D<T>::operator/ (const T Val) const {
 template<class T>
 inline Matrix1D<T> Matrix1D<T>::times (const Matrix1D<T> &M) const {
 	int i1;
-	Matrix1D<T> Tmp(*this);
+	Matrix1D<T> Tmp(size_q1);
 	for (i1 = 0; i1 < this->size_q1; i1++)
 		Tmp[i1] = matrix_array[i1] * M.matrix_array[i1];
 	return Tmp;
@@ -453,7 +454,7 @@ inline Matrix1D<T> Matrix1D<T>::times (const Matrix1D<T> &M) const {
 template<class T>
 inline Matrix1D<T> Matrix1D<T>::divide (const Matrix1D<T> &M) const {
 	int i1;
-	Matrix1D<T> Tmp(*this);
+	Matrix1D<T> Tmp(size_q1);
 	for (i1 = 0; i1 < this->size_q1; i1++)
 		Tmp[i1] = matrix_array[i1] / M.matrix_array[i1];
 	return Tmp;
@@ -1291,7 +1292,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 * Default value set to 1e99
 */
 template<class T>
-T Matrix1D<T>::min() {
+T Matrix1D<T>::min() const {
 	T tmp = 1e99;
 	int i1;
 	for (i1 = 0; i1 < size_q1; i1++) {
@@ -1305,7 +1306,7 @@ T Matrix1D<T>::min() {
 * Default value seet to 0
 */
 template<class T>
-T Matrix1D<T>::max() {
+T Matrix1D<T>::max() const {
 	T tmp = 0;
 	int i1;
 	for (i1 = 0; i1 < size_q1; i1++) {
@@ -1319,7 +1320,7 @@ T Matrix1D<T>::max() {
 * Default value set to 0
 */
 template<class T>
-T Matrix1D<T>::maxabs() {
+T Matrix1D<T>::maxabs() const {
 	T tmp = 0;
 	int i1;
 	for (i1 = 0; i1 < size_q1; i1++) {
@@ -1333,7 +1334,7 @@ T Matrix1D<T>::maxabs() {
 * Changes every element to a positive value with the same magnitude
 */
 template<class T>
-Matrix1D<T> Matrix1D<T>::abs() {
+Matrix1D<T> Matrix1D<T>::abs() const {
 	Matrix1D<T> tmp(this->size_q1);
 	int i1;
 	for (i1 = 0; i1 < size_q1; i1++) {
@@ -1441,9 +1442,10 @@ template<class T>
 inline Matrix2D<T>& Matrix2D<T>::operator= (const T val) {
 	int i1, i2;
 	if (initialized) {
-		for (i1 = 0; i1 < this->size_q1; i1++)
-			for (i2 = 0; i2 < this->size_q2; i2++)
-				matrix_array[i1][i2] = val;
+		for(int i = 0; i < num_elements; i++)
+		{
+			plane_array[i] = val;
+		}
 	} else {
 		printf("MATRIX_ERROR: Using un-itialized matrix");
 		exit(EXIT_FAILURE);
@@ -1458,10 +1460,10 @@ inline Matrix2D<T>& Matrix2D<T>::operator= (const T val) {
 */
 template<class T>
 inline Matrix2D<T>& Matrix2D<T>::operator+= (const Matrix2D<T> &M) {
-	int i1, i2;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i1 = 0; i2 < this->size_q2; i2++)
-				matrix_array[i1][i2] += M.matrix_array[i1][i2];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] += M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -1470,10 +1472,10 @@ inline Matrix2D<T>& Matrix2D<T>::operator+= (const Matrix2D<T> &M) {
 */
 template<class T>
 inline Matrix2D<T>& Matrix2D<T>::operator-= (const Matrix2D<T> &M) {
-	int i1, i2;
-	for (i1 = 0; i1 < this->size_q1; i2++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			matrix_array[i1][i2] -= M.matrix_array[i1][i2];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] -= M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -1483,10 +1485,10 @@ inline Matrix2D<T>& Matrix2D<T>::operator-= (const Matrix2D<T> &M) {
 */
 template<class T>
 inline Matrix2D<T>& Matrix2D<T>::operator*= (const T Val) {
-	int i1, i2;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i1 = 0; i1 < this->size_q2; i2++)
-				matrix_array[i1][i2] *= Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] *= Val;
+	}
 	return *this;
 }
 
@@ -1498,11 +1500,11 @@ inline Matrix2D<T>& Matrix2D<T>::operator*= (const T Val) {
 */
 template<class T>
 inline Matrix2D<T> Matrix2D<T>::operator* (const T Val) const {
-	int i1, i2;
-	Matrix2D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			Tmp[i1][i2] = matrix_array[i1][i2] * Val;
+	Matrix2D<T> Tmp(size_q1, size_q2);
+	for (int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] * Val;
+	}
 	return Tmp;
 }
 
@@ -1513,11 +1515,11 @@ inline Matrix2D<T> Matrix2D<T>::operator* (const T Val) const {
 */
 template<class T>
 inline Matrix2D<T> Matrix2D<T>::operator/(const T Val) const {
-	int i1, i2;
-	Matrix2D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			Tmp[i1][i2] = matrix_array[i1][i2] / Val;
+	Matrix2D<T> Tmp(size_q1, size_q2);
+	for (int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] / Val;
+	}
 	return Tmp;
 }
 
@@ -1528,11 +1530,11 @@ inline Matrix2D<T> Matrix2D<T>::operator/(const T Val) const {
 */
 template<class T>
 inline Matrix2D<T> Matrix2D<T>::divide (const Matrix2D<T> &M) const {
-	int i1, i2;
-	Matrix2D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			Tmp[i1][i2] = matrix_array[i1][i2] / M[i1][i2];
+	Matrix2D<T> Tmp(size_q1, size_q2);
+	for (int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] / M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -1543,11 +1545,11 @@ inline Matrix2D<T> Matrix2D<T>::divide (const Matrix2D<T> &M) const {
 */
 template<class T>
 inline Matrix2D<T> Matrix2D<T>::times (const Matrix2D<T> &M) const {
-	int i1, i2;
-	Matrix2D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			Tmp[i1][i2] = matrix_array[i1][i2] * M[i1][i2];
+	Matrix2D<T> Tmp(size_q1, size_q2);
+	for (int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] * M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -1557,13 +1559,11 @@ inline Matrix2D<T> Matrix2D<T>::times (const Matrix2D<T> &M) const {
 * Default value seet to 0
 */
 template<class T>
-T Matrix2D<T>::max() {
-	T tmp = 0;
-	int i1, i2;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			tmp = (tmp>matrix_array[i1][i2])?tmp:matrix_array[i1][i2];
-		}
+T Matrix2D<T>::max() const {
+	T tmp = -std::numeric_limits<T>::infinity();
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::max(tmp, plane_array[i]);
 	}
 	return tmp;
 }
@@ -1573,13 +1573,11 @@ T Matrix2D<T>::max() {
 * Default value set to 0
 */
 template<class T>
-T Matrix2D<T>::maxabs() {
+T Matrix2D<T>::maxabs() const {
 	T tmp = 0;
-	int i1, i2;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			tmp = (tmp>fabs((double)matrix_array[i1][i2]))?tmp:fabs((double)matrix_array[i1][i2]);
-		}
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::max(tmp, std::abs(plane_array[i]));
 	}
 	return tmp;
 }
@@ -1587,16 +1585,14 @@ T Matrix2D<T>::maxabs() {
 
 /**
 * Return minimum value of the 2d matrix.
-* Default value set to 1e99
+* Default value set to infinity
 */
 template<class T>
-T Matrix2D<T>::min() {
-	T tmp = 1e99;
-	int i1, i2;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			tmp = (tmp<matrix_array[i1][i2])?tmp:matrix_array[i1][i2];
-		}
+T Matrix2D<T>::min() const {
+	T tmp = std::numeric_limits<T>::infinity();
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::min(tmp, plane_array[i]);
 	}
 	return tmp;
 }
@@ -1606,13 +1602,11 @@ T Matrix2D<T>::min() {
 * Changes every element to a positive value with the same magnitude
 */
 template<class T>
-Matrix2D<T> Matrix2D<T>::abs() {
-	Matrix2D<T> tmp(this->size_q1, this->size_q2);
-	int i1, i2;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			tmp[i1][i2] = (matrix_array[i1][i2]>0)?matrix_array[i1][i2]:-matrix_array[i1][i2];
-		}
+Matrix2D<T> Matrix2D<T>::abs() const {
+	Matrix2D<T> tmp(size_q1, size_q2);
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp.plane_array[i] = std::abs(plane_array[i]);
 	}
 	return tmp;
 }
@@ -1624,13 +1618,12 @@ Matrix2D<T> Matrix2D<T>::abs() {
 * \param val - value to divide.
 */
 template<class T>
-Matrix2D<T> Matrix2D<T>::max_of(T val) {
-	int i1, i2;
-	Matrix2D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			Tmp[i1][i2] = (matrix_array[i1][i2]>val)?matrix_array[i1][i2]:val;
-	return Tmp;
+Matrix2D<T>& Matrix2D<T>::max_of(T val) {
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = std::max(plane_array[i], val);
+	}
+	return *this;
 }
 
 /**
@@ -2486,7 +2479,6 @@ Matrix3D<T>::Matrix3D( const Matrix3D<T> &M ) {
 template<class T>
 Matrix3D<T>::~Matrix3D() {
 	if (initialized) free_matrix<T>(matrix_array, size_q1, size_q2);
-	//		delete[] plane_array; - it's get deleted with matrix_array[0][0][0] or something?
 }
 
 /**
@@ -2615,12 +2607,10 @@ return *this;
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::operator= (const T Val) {
-	// std::fill_n(matrix_array[0][0][0], size_q1*size*y*size*z, Val); // might be faster
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				this->matrix_array[i1][i2][i3] = Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = Val;
+	}
 	return *this;
 }
 
@@ -2630,11 +2620,10 @@ inline Matrix3D<T>& Matrix3D<T>::operator= (const T Val) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::operator+= (const Matrix3D<T> &M) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] += M.matrix_array[i1][i2][i3];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] += M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -2643,11 +2632,10 @@ inline Matrix3D<T>& Matrix3D<T>::operator+= (const Matrix3D<T> &M) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::operator-= (const Matrix3D<T> &M) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] -= M.matrix_array[i1][i2][i3];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] -= M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -2656,11 +2644,10 @@ inline Matrix3D<T>& Matrix3D<T>::operator-= (const Matrix3D<T> &M) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::operator*= (const T Val) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] *= Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] *= Val;
+	}
 	return *this;
 }
 
@@ -2669,11 +2656,10 @@ inline Matrix3D<T>& Matrix3D<T>::operator*= (const T Val) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::operator/= (const T Val) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] /= Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] /= Val;
+	}
 	return *this;
 }
 
@@ -2682,11 +2668,10 @@ inline Matrix3D<T>& Matrix3D<T>::operator/= (const T Val) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::operator+= (const T Val) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] += Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] += Val;
+	}
 	return *this;
 }
 
@@ -2695,11 +2680,10 @@ inline Matrix3D<T>& Matrix3D<T>::operator+= (const T Val) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::operator-= (const T Val) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] -= Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] -= Val;
+	}
 	return *this;
 }
 
@@ -2708,11 +2692,10 @@ inline Matrix3D<T>& Matrix3D<T>::operator-= (const T Val) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::times_equal (const Matrix3D<T> &M) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] *= M.matrix_array[i1][i2][i3];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] *= M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -2721,11 +2704,10 @@ inline Matrix3D<T>& Matrix3D<T>::times_equal (const Matrix3D<T> &M) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::divide_equal (const Matrix3D<T> &M) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] /= M.matrix_array[i1][i2][i3];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] /= M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -2734,12 +2716,11 @@ inline Matrix3D<T>& Matrix3D<T>::divide_equal (const Matrix3D<T> &M) {
 */
 template<class T>
 inline Matrix3D<T> Matrix3D<T>::operator+ (const Matrix3D<T> &M) const {
-	int i1, i2, i3;
-	Matrix3D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				Tmp[i1][i2][i3] = matrix_array[i1][i2][i3] + M.matrix_array[i1][i2][i3];
+	Matrix3D<T> Tmp(size_q1, size_q2, size_q3);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] + M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -2748,12 +2729,11 @@ inline Matrix3D<T> Matrix3D<T>::operator+ (const Matrix3D<T> &M) const {
 */
 template<class T>
 inline Matrix3D<T> Matrix3D<T>::operator- (const Matrix3D<T> &M) const {
-	int i1, i2, i3;
-	Matrix3D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				Tmp[i1][i2][i3] = matrix_array[i1][i2][i3] - M.matrix_array[i1][i2][i3];
+	Matrix3D<T> Tmp(size_q1, size_q2, size_q3);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] - M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -2763,12 +2743,11 @@ inline Matrix3D<T> Matrix3D<T>::operator- (const Matrix3D<T> &M) const {
 */
 template<class T>
 inline Matrix3D<T> Matrix3D<T>::operator* (const T Val) const {
-	int i1, i2, i3;
-	Matrix3D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				Tmp[i1][i2][i3] = matrix_array[i1][i2][i3] * Val;
+	Matrix3D<T> Tmp(size_q1, size_q2, size_q3);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] * Val;
+	}
 	return Tmp;
 }
 
@@ -2778,12 +2757,11 @@ inline Matrix3D<T> Matrix3D<T>::operator* (const T Val) const {
 */
 template<class T>
 inline Matrix3D<T> Matrix3D<T>::operator/ (const T Val) const {
-	int i1, i2, i3;
-	Matrix3D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				Tmp[i1][i2][i3] = matrix_array[i1][i2][i3] / Val;
+	Matrix3D<T> Tmp(size_q1, size_q2, size_q3);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] / Val;
+	}
 	return Tmp;
 }
 
@@ -2792,12 +2770,11 @@ inline Matrix3D<T> Matrix3D<T>::operator/ (const T Val) const {
 */
 template<class T>
 inline Matrix3D<T> Matrix3D<T>::times (const Matrix3D<T> &M) const {
-	int i1, i2, i3;
-	Matrix3D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				Tmp[i1][i2][i3] = matrix_array[i1][i2][i3] * M.matrix_array[i1][i2][i3];
+	Matrix3D<T> Tmp(size_q1, size_q2, size_q3);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] * M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -2806,12 +2783,11 @@ inline Matrix3D<T> Matrix3D<T>::times (const Matrix3D<T> &M) const {
 */
 template<class T>
 inline Matrix3D<T> Matrix3D<T>::divide (const Matrix3D<T> &M) const {
-	int i1, i2, i3;
-	Matrix3D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				Tmp[i1][i2][i3] = matrix_array[i1][i2][i3] / M.matrix_array[i1][i2][i3];
+	Matrix3D<T> Tmp(size_q1, size_q2, size_q3);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] / M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -3745,15 +3721,11 @@ inline int Matrix3D<T>::index1d(int x, int y, int z) {
 * Default value set to 1e99
 */
 template<class T>
-T Matrix3D<T>::min() {
-	T tmp = 1e99;
-	int i1, i2, i3;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			for (i3 = 0; i3 < size_q3; i3++) {
-				tmp = (tmp<matrix_array[i1][i2][i3])?tmp:matrix_array[i1][i2][i3];
-			}
-		}
+T Matrix3D<T>::min() const {
+	T tmp = std::numeric_limits<T>::infinity();
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::min(tmp, plane_array[i]);
 	}
 	return tmp;
 }
@@ -3763,15 +3735,11 @@ T Matrix3D<T>::min() {
 * Default value seet to 0
 */
 template<class T>
-T Matrix3D<T>::max() {
-	T tmp = 0;
-	int i1, i2, i3;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			for (i3 = 0; i3 < size_q3; i3++) {
-				tmp = (tmp>matrix_array[i1][i2][i3])?tmp:matrix_array[i1][i2][i3];
-			}
-		}
+T Matrix3D<T>::max() const {
+	T tmp = -std::numeric_limits<T>::infinity();
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::max(tmp, plane_array[i]);
 	}
 	return tmp;
 }
@@ -3781,15 +3749,11 @@ T Matrix3D<T>::max() {
 * Default value set to 0
 */
 template<class T>
-T Matrix3D<T>::maxabs() {
+T Matrix3D<T>::maxabs() const {
 	T tmp = 0;
-	int i1, i2, i3;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			for (i3 = 0; i3 < size_q3; i3++) {
-				tmp = (tmp>fabs((double)matrix_array[i1][i2][i3]))?tmp:fabs((double)matrix_array[i1][i2][i3]);
-			}
-		}
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::max(tmp, std::abs(plane_array[i]));
 	}
 	return tmp;
 }
@@ -3799,15 +3763,11 @@ T Matrix3D<T>::maxabs() {
 * Changes every element to a positive value with the same magnitude
 */
 template<class T>
-Matrix3D<T> Matrix3D<T>::abs() {
-	Matrix3D<T> tmp(this->size_q1, this->size_q2, this->size_q3);
-	int i1, i2, i3;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			for (i3 = 0; i3 < size_q3; i3++) {
-				tmp[i1][i2][i3] = (matrix_array[i1][i2][i3]>0)?matrix_array[i1][i2][i3]:-matrix_array[i1][i2][i3];
-			}
-		}
+Matrix3D<T> Matrix3D<T>::abs() const {
+	Matrix3D<T> tmp(size_q1, size_q2, size_q3);
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp.plane_array[i] = std::abs(plane_array[i]);
 	}
 	return tmp;
 }
@@ -4055,12 +4015,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator= (const Matrix4D<T> &M) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator= (const T Val) {
-	// std::fill_n(matrix_array[0][0][0], size_x*size*y*size*z, Val); // might be faster
-	for (int w = 0; w < this->size_w; w++)
-		for (int x = 0; x < this->size_x; x++)
-			for (int y = 0; y < this->size_y; y++)
-				for (int z = 0; z < this->size_z; z++)
-					this->matrix_array[w][x][y][z] = Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = Val;
+	}
 	return *this;
 }
 
@@ -4070,12 +4028,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator= (const T Val) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator+= (const Matrix4D<T> &M) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] += M.matrix_array[w][x][y][z];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] += M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -4084,12 +4040,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator+= (const Matrix4D<T> &M) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator-= (const Matrix4D<T> &M) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] -= M.matrix_array[w][x][y][z];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] -= M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -4098,12 +4052,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator-= (const Matrix4D<T> &M) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator*= (const T Val) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] *= Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] *= Val;
+	}
 	return *this;
 }
 
@@ -4112,12 +4064,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator*= (const T Val) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator/= (const T Val) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] /= Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] /= Val;
+	}
 	return *this;
 }
 
@@ -4126,12 +4076,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator/= (const T Val) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator+= (const T Val) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] += Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] += Val;
+	}
 	return *this;
 }
 
@@ -4140,12 +4088,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator+= (const T Val) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator-= (const T Val) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] -= Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] -= Val;
+	}
 	return *this;
 }
 
@@ -4154,12 +4100,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator-= (const T Val) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::times_equal (const Matrix4D<T> &M) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] *= M.matrix_array[w][x][y][z];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] *= M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -4168,12 +4112,10 @@ inline Matrix4D<T>& Matrix4D<T>::times_equal (const Matrix4D<T> &M) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::divide_equal (const Matrix4D<T> &M) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] /= M.matrix_array[w][x][y][z];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] /= M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -4182,13 +4124,11 @@ inline Matrix4D<T>& Matrix4D<T>::divide_equal (const Matrix4D<T> &M) {
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator+ (const Matrix4D<T> &M) const {
-	int w, x, y, z;
-	Matrix4D<T> Tmp(*this);
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					Tmp[w][x][y][z] = matrix_array[w][x][y][z] + M.matrix_array[w][x][y][z];
+	Matrix4D<T> Tmp(size_w, size_x, size_y, size_z);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] + M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -4197,13 +4137,11 @@ inline Matrix4D<T> Matrix4D<T>::operator+ (const Matrix4D<T> &M) const {
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator- (const Matrix4D<T> &M) const {
-	int w, x, y, z;
-	Matrix4D<T> Tmp(*this);
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					Tmp[w][x][y][z] = matrix_array[w][x][y][z] - M.matrix_array[w][x][y][z];
+	Matrix4D<T> Tmp(size_w, size_x, size_y, size_z);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] - M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -4213,13 +4151,11 @@ inline Matrix4D<T> Matrix4D<T>::operator- (const Matrix4D<T> &M) const {
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator* (const T Val) const {
-	int w, x, y, z;
-	Matrix4D<T> Tmp(*this);
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					Tmp[w][x][y][z] = matrix_array[w][x][y][z] * Val;
+	Matrix4D<T> Tmp(size_w, size_x, size_y, size_z);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] * Val;
+	}
 	return Tmp;
 }
 
@@ -4229,13 +4165,11 @@ inline Matrix4D<T> Matrix4D<T>::operator* (const T Val) const {
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator/ (const T Val) const {
-	int w, x, y, z;
-	Matrix4D<T> Tmp(*this);
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					Tmp[w][x][y][z] = matrix_array[w][x][y][z] / Val;
+	Matrix4D<T> Tmp(size_w, size_x, size_y, size_z);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] / Val;
+	}
 	return Tmp;
 }
 
@@ -4244,13 +4178,11 @@ inline Matrix4D<T> Matrix4D<T>::operator/ (const T Val) const {
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::times (const Matrix4D<T> &M) const {
-	int w, x, y, z;
-	Matrix4D<T> Tmp(*this);
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					Tmp[w][x][y][z] = matrix_array[w][x][y][z] * M.matrix_array[w][x][y][z];
+	Matrix4D<T> Tmp(size_w, size_x, size_y, size_z);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] * M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -4259,13 +4191,11 @@ inline Matrix4D<T> Matrix4D<T>::times (const Matrix4D<T> &M) const {
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::divide (const Matrix4D<T> &M) const {
-	int w, x, y, z;
-	Matrix4D<T> Tmp(*this);
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					Tmp[w][x][y][z] = matrix_array[w][x][y][z] / M.matrix_array[w][x][y][z];
+	Matrix4D<T> Tmp(size_w, size_x, size_y, size_z);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] / M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -5578,17 +5508,11 @@ inline int Matrix4D<T>::index1d(int w, int x, int y, int z) {
 * Default value set to 1e99
 */
 template<class T>
-T Matrix4D<T>::min() {
-	T tmp = 1e99;
-	int w, x, y, z;
-	for (w = 0; w < size_w; w++) {
-		for (x = 0; x < size_x; x++) {
-			for (y = 0; y < size_y; y++) {
-				for (z = 0; z < size_z; z++) {
-					tmp = (tmp<matrix_array[w][x][y][z])?tmp:matrix_array[w][x][y][z];
-				}
-			}
-		}
+T Matrix4D<T>::min() const {
+	T tmp = std::numeric_limits<T>::infinity();
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::min(tmp, plane_array[i]);
 	}
 	return tmp;
 }
@@ -5598,17 +5522,11 @@ T Matrix4D<T>::min() {
 * Default value set to 0
 */
 template<class T>
-T Matrix4D<T>::max() {
-	T tmp = 0;
-	int w, x, y, z;
-	for (w = 0; w < size_w; w++) {
-		for (x = 0; x < size_x; x++) {
-			for (y = 0; y < size_y; y++) {
-				for (z = 0; z < size_z; z++) {
-					tmp = (tmp>matrix_array[w][x][y][z])?tmp:matrix_array[w][x][y][z];
-				}
-			}
-		}
+T Matrix4D<T>::max() const {
+	T tmp = -std::numeric_limits<T>::infinity();
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::max(tmp, plane_array[i]);
 	}
 	return tmp;
 }
@@ -5618,17 +5536,11 @@ T Matrix4D<T>::max() {
 * Default value set to 0
 */
 template<class T>
-T Matrix4D<T>::maxabs() {
+T Matrix4D<T>::maxabs() const {
 	T tmp = 0;
-	int w, x, y, z;
-	for (w = 0; w < size_w; w++) {
-		for (x = 0; x < size_x; x++) {
-			for (y = 0; y < size_y; y++) {
-				for (z = 0; z < size_z; z++) {
-					tmp = (tmp>fabs((double)matrix_array[w][x][y][z]))?tmp:fabs((double)matrix_array[w][x][y][z]);
-				}
-			}
-		}
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::max(tmp, std::abs(plane_array[i]));
 	}
 	return tmp;
 }
@@ -5638,17 +5550,11 @@ T Matrix4D<T>::maxabs() {
 * Changes every element to a positive value with the same magnitude
 */
 template<class T>
-Matrix4D<T> Matrix4D<T>::abs() {
-	Matrix4D<T> tmp(this->size_w, this->size_x, this->size_y, this->size_z);
-	int w, x, y, z;
-	for (w = 0; w < size_w; w++) {
-		for (x = 0; x < size_x; x++) {
-			for (y = 0; y < size_y; y++) {
-				for (z = 0; z < size_z; z++) {
-					tmp[w][x][y][z] = (matrix_array[w][x][y][z]>0)?matrix_array[w][x][y][z]:-matrix_array[w][x][y][z];
-				}
-			}
-		}
+Matrix4D<T> Matrix4D<T>::abs() const {
+	Matrix4D<T> tmp(size_w, size_x, size_y, size_z);
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp.plane_array[i] = std::abs(plane_array[i]);
 	}
 	return tmp;
 }
