@@ -199,62 +199,110 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 }
 #endif
 
-	FILE *file;
+	// If a binary grid file grid.pltb has been provided in the input folder,
+	// read the grid from this file, otherwise try to open the ascii file grid.plt
+    std::ifstream input {InputFolder + "grid.pltb", std::ios::binary};
+	if(input.is_open())
+	{
+		int32_t buffer_int32[4];
+		if(!input.read((char*)buffer_int32, sizeof(int32_t) * 4))
+		{
+			Logger::warning << "Cannot read grid dimensions from binary grid file." << endl;
+			return false;	
+		}
+		P_size = buffer_int32[0];
+		R_size = buffer_int32[1];
+		V_size = buffer_int32[2];
+		K_size = buffer_int32[3];
+		L_size = R_size;
+		int32_t total_elements = P_size * R_size * V_size * K_size;
 
-    // Opening up grid.plt in order to get P,R,V,K sizes which are stored in the header
-    ifstream input;
-    input.open((InputFolder + "grid.plt").c_str());
-            //if (input == NULL) {
-    // if the file is missing sends message to the logger
-    if (!input.is_open()) {
-        Logger::warning << "Grid file " << (InputFolder + "grid.plt") << " not found." << endl;
-        return false;
-    }
-
-    // "I"=K_size, "J"=V_size, "K"=R_size, "L"=P_size from grid.plt from create_grid.m generated in matlab
-    string inBuf;
-    input >> inBuf;
-    while (strcasecmp(inBuf.c_str(), "ZONE") != 0 && !input.eof() ) input >> inBuf;
-    while(inBuf.substr(inBuf.size() - 1).compare("I") && !input.eof()) getline(input, inBuf, '=');
-    input >> K_size;
-    while(inBuf.substr(inBuf.size() - 1).compare("J") && !input.eof()) getline(input, inBuf, '=');
-    input >> V_size;
-    while(inBuf.substr(inBuf.size() - 1).compare("K") && !input.eof()) getline(input, inBuf, '=');
-    input >> R_size;
-    while(inBuf.substr(inBuf.size() - 1).compare("L") && !input.eof()) getline(input, inBuf, '=');
-    input >> P_size;
-
-
-
-    // If the file doesn't have data send error message
-    if (input.eof()) {
-        Logger::warning << "Grid file error." << endl;
-        return false;
-    }
-    input.close();
-
-	// sets the size of L and R to be the same - both measure distance
-	L_size = R_size;
-	// records the sizes of P,R,V,K to the logger
-	Logger::message << "P_size = " << P_size << ", R_size = " << R_size << ", V_size = " << V_size << ", K_size = " << K_size << endl;
-
-
-	///////
-	// Allocate memory
-	//////
-	AllocateMemory(PSD,
-			P, R, V, K, L,
+		AllocateMemory(
+			PSD, P, R, V, K, L,
 			P_size, R_size, V_size, K_size,
 			PSD_l_P, PSD_u_P, PSD_l_R, PSD_u_R, PSD_l_V, PSD_u_V, PSD_l_K, PSD_u_K, PSD_l_L, PSD_u_L,
-			DLL, DVV, DVK, DKK,
-			VP, VL,
-			G_local, G_radial, Sources, Losses, Losses_conv);
+			DLL, DVV, DVK, DKK,	VP, VL,
+			G_local, G_radial, Sources, Losses, Losses_conv
+		);
+		Logger::message << "P_size = " << P_size << ", R_size = " << R_size << ", V_size = " << V_size << ", K_size = " << K_size << endl;
+		if(!input.read((char*)&P[0][0][0][0], sizeof(double) * total_elements))
+		{
+			Logger::warning << "Cannot read grid data P from binary grid file." << endl;
+			return false;	
+		}
+		if(!input.read((char*)&R[0][0][0][0], sizeof(double) * total_elements))
+		{
+			Logger::warning << "Cannot read grid data R from binary grid file." << endl;
+			return false;	
+		}
+		if(!input.read((char*)&V[0][0][0][0], sizeof(double) * total_elements))
+		{
+			Logger::warning << "Cannot read grid data V from binary grid file." << endl;
+			return false;	
+		}
+		if(!input.read((char*)&K[0][0][0][0], sizeof(double) * total_elements))
+		{
+			Logger::warning << "Cannot read grid data V from binary grid file." << endl;
+			return false;	
+		}
+		input.close();
+	}
+	else
+	{
+		// Opening up grid.plt in order to get P,R,V,K sizes which are stored in the header
+		input.open((InputFolder + "grid.plt").c_str());
+				//if (input == NULL) {
+		// if the file is missing sends message to the logger
+		if (!input.is_open()) {
+			Logger::warning << "Grid file " << (InputFolder + "grid.plt") << " not found." << endl;
+			return false;
+		}
 
-    // Read grid from .plt file only
-	P.readFromFile(InputFolder + "grid.plt",  1);
-	R.readFromFile(InputFolder + "grid.plt",  2);
-	V.readFromFile(InputFolder + "grid.plt",  3);
-	K.readFromFile(InputFolder + "grid.plt",  4);
+		// "I"=K_size, "J"=V_size, "K"=R_size, "L"=P_size from grid.plt from create_grid.m generated in matlab
+		string inBuf;
+		input >> inBuf;
+		while (strcasecmp(inBuf.c_str(), "ZONE") != 0 && !input.eof() ) input >> inBuf;
+		while(inBuf.substr(inBuf.size() - 1).compare("I") && !input.eof()) getline(input, inBuf, '=');
+		input >> K_size;
+		while(inBuf.substr(inBuf.size() - 1).compare("J") && !input.eof()) getline(input, inBuf, '=');
+		input >> V_size;
+		while(inBuf.substr(inBuf.size() - 1).compare("K") && !input.eof()) getline(input, inBuf, '=');
+		input >> R_size;
+		while(inBuf.substr(inBuf.size() - 1).compare("L") && !input.eof()) getline(input, inBuf, '=');
+		input >> P_size;
+
+
+
+		// If the file doesn't have data send error message
+		if (input.eof()) {
+			Logger::warning << "Grid file error." << endl;
+			return false;
+		}
+		input.close();
+
+		// sets the size of L and R to be the same - both measure distance
+		L_size = R_size;
+		// records the sizes of P,R,V,K to the logger
+		Logger::message << "P_size = " << P_size << ", R_size = " << R_size << ", V_size = " << V_size << ", K_size = " << K_size << endl;
+
+
+		///////
+		// Allocate memory
+		//////
+		AllocateMemory(PSD,
+				P, R, V, K, L,
+				P_size, R_size, V_size, K_size,
+				PSD_l_P, PSD_u_P, PSD_l_R, PSD_u_R, PSD_l_V, PSD_u_V, PSD_l_K, PSD_u_K, PSD_l_L, PSD_u_L,
+				DLL, DVV, DVK, DKK,
+				VP, VL,
+				G_local, G_radial, Sources, Losses, Losses_conv);
+
+		// Read grid from .plt file only
+		P.readFromFile(InputFolder + "grid.plt",  1);
+		R.readFromFile(InputFolder + "grid.plt",  2);
+		V.readFromFile(InputFolder + "grid.plt",  3);
+		K.readFromFile(InputFolder + "grid.plt",  4);
+	}
 
     // Read from Lstar file if Lstar.tab is not present
     if (!L.readFromIniFile(InputFolder + "Lstar.tab", P, R, V, K))
