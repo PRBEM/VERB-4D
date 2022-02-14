@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 2.8)
 project(VERB4D C CXX)
-add_definitions(-std=c++11)
+add_definitions(-std=c++17)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
