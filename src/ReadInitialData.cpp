@@ -7,6 +7,7 @@
  */
 
 #include "ReadInitialData.h"
+#include <filesystem>
 
 using namespace std;
 
@@ -261,8 +262,13 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
         L.readFromAnyFile(InputFolder + "Lstar", io_method, P, R, V, K);
 
 	L.update(time_first, P, R, V, K); // Load L-star so it'll be available
-
-    PSD.readFromAnyFile(InputFolder + initial_PSD, "ascii");
+	
+	std::string psd0_format = "ascii";
+    if(std::filesystem::exists(InputFolder + initial_PSD + ".pltb"))
+	{
+		psd0_format = "binary";
+	}
+    PSD.readFromAnyFile(InputFolder + initial_PSD, psd0_format);
 
 	// For all of the following load the .tab file if it exists, if not load the corresponding data file
 
