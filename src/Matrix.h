@@ -48,6 +48,9 @@ using namespace std;
  */
 template <typename T>
 class Matrix1D {
+private:
+	T *plane_array;
+	int32_t num_elements;
 public:
 
 	T *matrix_array;						///< Array to keep the values
@@ -123,10 +126,10 @@ public:
 	virtual void readFromMatlabFile(string filename, int columnNumber = 1);
 	virtual void readFromMatlabFile(string filename, const Matrix1D<T> grid_q1);
 
-	T min();
-	T max();
-	T maxabs();
-	Matrix1D<T> abs();
+	T min() const;
+	T max() const;
+	T maxabs() const;
+	Matrix1D<T> abs() const;
 
 };
 
@@ -142,6 +145,8 @@ private:
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y] can be used.
 	/// Also, all rows saved in the memory one after another as a big array. So Matrix[x+x_size*y] can be also used.
 	T **matrix_array;
+	T *plane_array;
+	int32_t num_elements;
 public:
 	// const static int N_of_dimentions2 = 2;									///< Not used anywhere
 
@@ -202,12 +207,12 @@ public:
 	// Return corresponding index of 1d array
 	int index1d(int q1, int q2) const;
 
-	T max();
-	T maxabs();
-	T min();
-	Matrix2D<T> abs();
+	T max() const;
+	T maxabs() const;
+	T min() const;
+	Matrix2D<T> abs() const;
 	// It returns maximum between values from class psd2DSlice and argument (VC::zero_f in that case)
-	Matrix2D max_of(T val);
+	Matrix2D& max_of(T val);
 
 	// writeToFileting
 	virtual void writeToFile(string filename);
@@ -239,6 +244,7 @@ private:
 	T *plane_array;
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y][z] can be used.
 	T ***matrix_array;
+	int32_t num_elements;
 public:
 	bool initialized;														///< Flag, equal true if initialized
 	int size_q1;															///< size x
@@ -319,10 +325,10 @@ public:
 
 	int index1d(int q1, int q2, int q3);								///< Returns index of the element (x,y,z) in 1d array
 
-	T min();
-	T max();
-	T maxabs();
-	Matrix3D<T> abs();
+	T min() const;
+	T max() const;
+	T maxabs() const;
+	Matrix3D<T> abs() const;
 
 	// slices - get 2D slice from 3D array
 	Matrix2D<T> xSlice(int p_q1) const;
@@ -351,6 +357,7 @@ private:
 	T *plane_array;
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[w][x][y][z] can be used.
 	T ****matrix_array;
+	int32_t num_elements;
 public:
 	bool initialized;														///< Flag, equal true if initialized
 	int size_w;																///< size w
@@ -436,10 +443,10 @@ public:
 
 	int index1d(int w, int x, int y, int z);								///< Returns index of the element (x,y,z) in 1d array
 
-	T min();
-	T max();
-	T maxabs();
-	Matrix4D<T> abs();
+	T min() const;
+	T max() const;
+	T maxabs() const;
+	Matrix4D<T> abs() const;
 
 	// slices - get 3D slice from 4D array
 	Matrix3D<T> wSlice(int p_w) const;
