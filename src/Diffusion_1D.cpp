@@ -35,13 +35,15 @@
  * @param Losses - Matrix used for Losses (loss cone)
  * @param dt - change in time of single time step
  */
-bool Diffusion_1D(	Matrix1D<double> &psd,
-					Matrix1D<double> x, int x_size,
-					double x_LBC, double x_UBC,
-					string x_LBC_type, string x_UBC_type,
-					Matrix1D<double> Dxx, Matrix1D<double> G,
-					Matrix1D<double> Sources, Matrix1D<double> Losses,
-					double dt) {
+using std::string;
+bool Diffusion_1D(
+		Matrix1D<double> &psd,
+		Matrix1D<double> x, int x_size,
+		double x_LBC, double x_UBC,
+		string x_LBC_type, string x_UBC_type,
+		Matrix1D<double> Dxx, Matrix1D<double> G,
+		Matrix1D<double> Sources, Matrix1D<double> Losses,
+		double dt) {
 
 	CalculationMatrix matr_A(x_size, 1, 1, 1), matr_B(x_size, 1, 1, 0), matr_C(x_size, 1, 1, 0);
 
@@ -145,12 +147,13 @@ bool Diffusion_1D(	Matrix1D<double> &psd,
 	//psd.writeToFile("./Debug_output/PSD.dat");
 
 	tridag(
-			&matr_A[-1][0], // just a way to get a pointer to first element of an array
-			&matr_A[0][0],
-			&matr_A[+1][0],
-			&RHS[0],
-			&psd[0],
-			x_size);
+		&matr_A[-1][0], // just a way to get a pointer to first element of an array
+		&matr_A[0][0],
+		&matr_A[+1][0],
+		&RHS[0],
+		&psd[0],
+		x_size
+	);
 
 	return true;
 }

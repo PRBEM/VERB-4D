@@ -11,7 +11,6 @@
 #include <sstream>
 #include <stdio.h> 
 #include <assert.h>
-using namespace std;
 
 /**
 * \brief Stores messages about statuses, warning, and errors when computing/solving the matrices
@@ -103,7 +102,7 @@ public:
 
 		static DebugLevel mDebugLevel;
 		static Logger* sInstance; // ??
-		static ofstream logFile;
+		static std::ofstream logFile;
 	};
 
 

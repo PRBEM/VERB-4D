@@ -352,17 +352,17 @@ bool UpdatableMatrix<MatrixND>::readFromIniFile(string ini_filename, MatrixND q1
  * @return True if success, False if failure
  */
 template <typename MatrixND>
-bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND &q1, MatrixND &q2, MatrixND &q3, MatrixND &q4) {
+bool UpdatableMatrix<MatrixND>::readFromString(std::string file_line_string, MatrixND &q1, MatrixND &q2, MatrixND &q3, MatrixND &q4) {
 	// This defines an "empty marker" - it indicates that we need to skip that parameter.
 	const string empty_marker = "-";
 
 	// Convert input string into input stream
 	// It's much easier to work with streams
-	stringstream file_line_stream;
+	std::stringstream file_line_stream;
 	file_line_stream << file_line_string;
 
 	// Read data filename from the stream (first parameter)
-	string data_filename;
+	std::string data_filename;
 	file_line_stream >> data_filename;
 	Logger::message << "	Data: " << data_filename << endl;
 
