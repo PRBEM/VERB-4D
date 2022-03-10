@@ -495,7 +495,7 @@ inline T Matrix1D<T>::dot( const Matrix1D<T> &W ) const {
 * Write matrix data to file.
 */
 template<class T>
-void Matrix1D<T>::writeToFile(string filename) {
+void Matrix1D<T>::writeToFile(string filename) const {
 	int i1;
 	ofstream output(filename.c_str());
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
@@ -516,7 +516,7 @@ void Matrix1D<T>::writeToFile(string filename) {
 * Write matrix data to file with grid.
 */
 template<class T>
-void Matrix1D<T>::writeToFile(string filename, Matrix1D<T> &grid_q1) {
+void Matrix1D<T>::writeToFile(string filename, Matrix1D<T> &grid_q1) const {
 	int i1;
 	ofstream output(filename.c_str());
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
@@ -1307,7 +1307,7 @@ T Matrix1D<T>::min() const {
 */
 template<class T>
 T Matrix1D<T>::max() const {
-	T tmp = 0;
+	T tmp = -std::numeric_limits<T>::infinity();
 	int i1;
 	for (i1 = 0; i1 < size_q1; i1++) {
 		tmp = (tmp>matrix_array[i1])?tmp:matrix_array[i1];
@@ -1644,7 +1644,7 @@ inline int Matrix2D<T>::index1d(int x, int y) const {
 * \param filename - file name
 */
 template<class T>
-void Matrix2D<T>::writeToFile(string filename) {
+void Matrix2D<T>::writeToFile(string filename) const {
 	int i1, i2;
 	ofstream output(filename.c_str());
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
@@ -1669,7 +1669,7 @@ void Matrix2D<T>::writeToFile(string filename) {
 * Simply that means - write all three matrixes to a file.
 */
 template<class T>
-void Matrix2D<T>::writeToFile(string filename, Matrix2D<T> &grid_x, Matrix2D<T> &grid_y) {
+void Matrix2D<T>::writeToFile(string filename, Matrix2D<T> &grid_x, Matrix2D<T> &grid_y) const {
 	int i1, i2;
 	ofstream output(filename.c_str());
 	output << "VARIABLES = \"" << ((grid_x.name!="")?grid_x.name:"x") << "\", \"" << ((grid_y.name!="")?grid_y.name:"y") << "\", \"" << ((this->name!="")?this->name:"f") << "\" "<< endl;
@@ -1683,6 +1683,31 @@ void Matrix2D<T>::writeToFile(string filename, Matrix2D<T> &grid_x, Matrix2D<T> 
 	output.close();
 }
 
+template<class T>
+void Matrix2D<T>::writeToBinaryFile(string filename) const {
+    FILE *outputFile = fopen(filename.c_str(), "wb");
+    if (outputFile != NULL) {
+        int status;
+
+		int32_t size_array[2] =  { size_q1, size_q2};
+		status = fwrite(size_array, sizeof(int32_t), 2, outputFile);
+		if (status!=2){
+			printf("Writing error");
+			exit(EXIT_FAILURE);
+		}
+
+		int size_total = this->size_q1 * this->size_q2;
+		status = fwrite(this->plane_array, sizeof(T), size_total, outputFile);
+		if (status!=size_total){
+			printf("Writing error");
+			exit(EXIT_FAILURE);
+		}
+    } else {
+        printf("MATRIX_WRITE_ERROR: Error writing file %s.\n", filename.c_str());
+        exit(EXIT_FAILURE);
+    }
+    fclose(outputFile);
+}
 
 /**
 * Read matrix data from file with grid, by column
@@ -2797,7 +2822,7 @@ inline Matrix3D<T> Matrix3D<T>::divide (const Matrix3D<T> &M) const {
 * File has two header lines.
 */
 template<class T>
-void Matrix3D<T>::writeToFile(string filename, string info) {
+void Matrix3D<T>::writeToFile(string filename, string info) const {
 	int i1, i2, i3;
 	ofstream output(filename.c_str());
 	output << "VARIABLES = \""<< ((this->name!="")?this->name:"f") <<"\" "<< endl;
@@ -2818,7 +2843,7 @@ void Matrix3D<T>::writeToFile(string filename, string info) {
 * File has two header lines.
 */
 template<class T>
-void Matrix3D<T>::writeToFile(string filename, Matrix3D<T> &grid_x, Matrix3D<T> &grid_y, Matrix3D<T> &grid_z) {
+void Matrix3D<T>::writeToFile(string filename, Matrix3D<T> &grid_x, Matrix3D<T> &grid_y, Matrix3D<T> &grid_z) const {
 	int i1, i2, i3;
 	ofstream output(filename.c_str());
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
@@ -3574,7 +3599,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, con
 * \param filename - file to read grids from
 */
 template<class T>
-void Matrix3D<T>::writeToBinaryFile(string filename) {
+void Matrix3D<T>::writeToBinaryFile(string filename) const {
     FILE *outputFile = fopen(filename.c_str(), "wb");
     if (outputFile != NULL) {
         int status;
@@ -3645,7 +3670,7 @@ void Matrix3D<T>::readFromBinaryFile(string filename) {
 * WARNING: writing to 3D matlab array is not available at the moment
 */
 template<class T>
-void Matrix3D<T>::writeToAnyFile(string filename, string io_method, string info) {
+void Matrix3D<T>::writeToAnyFile(string filename, string io_method, string info) const {
     string ext;
     if (io_method.compare("ascii") == 0){
         ext = ".plt";
@@ -4205,7 +4230,7 @@ inline Matrix4D<T> Matrix4D<T>::divide (const Matrix4D<T> &M) const {
 * File has two header lines.
 */
 template<class T>
-void Matrix4D<T>::writeToFile(string filename, string info) {
+void Matrix4D<T>::writeToFile(string filename, string info) const {
 	int w, x, y, z;
 	ofstream output(filename.c_str());
 	output << "VARIABLES = \""<< ((this->name!="")?this->name:"f") <<"\" "<< endl;
@@ -4235,7 +4260,7 @@ void Matrix4D<T>::writeToFile(string filename, string info) {
 * Used in conjunction with writeToMatlabFile() to save the 4 grid variables and val into a single .mat file
 */
 template<class T>
-mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
+mxArray* Matrix4D<T>::createStructMatrix(string filename, string info) const
 {
 
 	int w,x,y,z;
@@ -4350,7 +4375,7 @@ mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
 * Struct has 7 fields in including - arr time size, size1, size2, size3, size4
 */
 template<class T>
-void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
+void Matrix4D<T>::writeToMatlabFile(string filename, string info) const {
 
 #if (MATLAB_CAPABLE)
 
@@ -4484,7 +4509,7 @@ void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
 * File has two header lines.
 */
 template<class T>
-void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) {
+void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) const {
 	int w, x, y, z;
 	ofstream output(filename.c_str());
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
@@ -4514,7 +4539,7 @@ void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> 
 * Uses the createStructMatrix() function to pack all the grid dimensions into seperate variables and then combines these variables into a single matlab structure to save in .mat
 */
 template<class T>
-void Matrix4D<T>::writeToMatlabFile(string file, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) {
+void Matrix4D<T>::writeToMatlabFile(string file, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) const {
 
 #if (MATLAB_CAPABLE)
 
@@ -5361,7 +5386,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 * \param filename - file to read grids from
 */
 template<class T>
-void Matrix4D<T>::writeToBinaryFile(string filename) {
+void Matrix4D<T>::writeToBinaryFile(string filename) const {
     int w, x, y, z;
     FILE *outputFile = fopen(filename.c_str(), "wb");
     if (outputFile != NULL) {
@@ -5391,7 +5416,7 @@ void Matrix4D<T>::writeToBinaryFile(string filename) {
 * Write 4D data to .plt, .pltb or .mat files. No info is written for .pltb file
 */
 template<class T>
-void Matrix4D<T>::writeToAnyFile(string filename, string io_method, string info) {
+void Matrix4D<T>::writeToAnyFile(string filename, string io_method, string info) const {
     string ext;
     if (io_method.compare("ascii") == 0){
         ext = ".plt";
@@ -5896,7 +5921,7 @@ int CalculationMatrix::index1d(int x, int y, int z) {
 * Save matrix to file.
 * Includes varaible names and sizes
 */
-void CalculationMatrix::writeToFile(string filename) {
+void CalculationMatrix::writeToFile(string filename) const {
 	int in;
 
 	ofstream output(filename.c_str());
@@ -5906,15 +5931,15 @@ void CalculationMatrix::writeToFile(string filename) {
 		exit(EXIT_FAILURE);
 	}
 	output << "VARIABLES = \"";
-	for (DiagMatrix::iterator it = (*this).begin(); it != (*this).end(); it++) {
-		output << "\"" << it->first << "\", ";
+	for (const auto& element : *this) {
+		output << "\"" << element.first << "\", ";
 	}
 	output << endl;
 	output << "ZONE T=\"" << "\", I=" << total_size << endl;
 	output.setf(ios_base::scientific, ios_base::floatfield);
 	for (in = 0; in < this->total_size; in++) {
-		for (DiagMatrix::iterator it = (*this).begin(); it != (*this).end(); it++) {
-			output << "\t" << it->second[in];
+		for (const auto& element : *this) {
+			output << "\t" << element.second[in];
 		}
 		output << endl;
 	}

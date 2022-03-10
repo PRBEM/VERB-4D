@@ -117,8 +117,8 @@ public:
 	//T maxabs();
 
 	// writeToFileting
-	virtual void writeToFile(string filename);
-	virtual void writeToFile(string filename, Matrix1D<T> &grid_q1);
+	virtual void writeToFile(string filename) const;
+	virtual void writeToFile(string filename, Matrix1D<T> &grid_q1) const;
 	virtual void readFromFile(string filename);
 	virtual void readFromFile(string filename, const Matrix1D<T> grid_q1);
 
@@ -215,8 +215,9 @@ public:
 	Matrix2D& max_of(T val);
 
 	// writeToFileting
-	virtual void writeToFile(string filename);
-	virtual void writeToFile(string filename, Matrix2D<T> &grid_q1, Matrix2D<T> &grid_q2);
+	virtual void writeToFile(string filename) const;
+	virtual void writeToFile(string filename, Matrix2D<T> &grid_q1, Matrix2D<T> &grid_q2) const;
+	virtual void writeToBinaryFile(string filename) const;
 	virtual void readFromFile(string filename, int column = 1);
 	virtual void readFromFile(string filename, const Matrix2D<T> grid_q1, const Matrix2D<T> grid_q2);
 
@@ -304,8 +305,8 @@ public:
 	Matrix3D divide (const Matrix3D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
 
 	// Saving (loading) of a matrix into (from) file
-	virtual void writeToFile(string filename, string info = ""); 										///< Save matrix to a file
-	virtual void writeToFile(string filename, Matrix3D<T> &grid_q1, Matrix3D<T> &grid_q2, Matrix3D<T> &grid_q3); ///< Save matrix to a file, including grid
+	virtual void writeToFile(string filename, string info = "") const; 										///< Save matrix to a file
+	virtual void writeToFile(string filename, Matrix3D<T> &grid_q1, Matrix3D<T> &grid_q2, Matrix3D<T> &grid_q3) const; ///< Save matrix to a file, including grid
 	virtual void readFromFile(string filename, int column = 1);  									///< Load matrix from a file
 	virtual void readFromFile(string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3); ///< Load matrix to a file
 
@@ -313,10 +314,10 @@ public:
 	virtual void readFromMatlabFile(string filename, int column = 1);
 	virtual void readFromMatlabFile(string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3);
 
-    virtual void writeToBinaryFile(string filename);
+    virtual void writeToBinaryFile(string filename) const;
     virtual void readFromBinaryFile(string filename);
 
-    virtual void writeToAnyFile(string filename, string io_method, string info);
+    virtual void writeToAnyFile(string filename, string io_method, string info) const;
     virtual void readFromAnyFile(string filename, string io_method);
     virtual void readFromAnyFile(string filename, string io_method, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3);
 
@@ -416,25 +417,25 @@ public:
 	Matrix4D divide (const Matrix4D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
 
 	// Saving (loading) of a matrix into (from) file
-	virtual void writeToFile(string filename, string info = ""); 										///< Save matrix to a file
-	virtual void writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z); ///< Save matrix to a file, including grid
+	virtual void writeToFile(string filename, string info = "") const; 										///< Save matrix to a file
+	virtual void writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) const; ///< Save matrix to a file, including grid
 	virtual void readFromFile(string filename, int column = 1);  									///< Load matrix from a file
 	virtual void readFromFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z); ///< Load matrix to a file
 
 	// ADDED
 #if (MATLAB_CAPABLE)
-	virtual mxArray* createStructMatrix(string filename, string info = ""); ///< Package matrix into matlab variable
+	virtual mxArray* createStructMatrix(string filename, string info = "") const; ///< Package matrix into matlab variable
 #endif
 
-	virtual void writeToMatlabFile(string filename, string info = ""); 										///< Save matrix to a file
-	virtual void writeToMatlabFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z);
+	virtual void writeToMatlabFile(string filename, string info = "") const; 										///< Save matrix to a file
+	virtual void writeToMatlabFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) const;
 	virtual void readFromMatlabFile(string file, int column = 1);
 	virtual void readFromMatlabFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z);
 
-    virtual void writeToBinaryFile(string filename);
+    virtual void writeToBinaryFile(string filename) const;
     virtual void readFromBinaryFile(string filename);
 
-    virtual void writeToAnyFile(string filename, string io_method, string info);
+    virtual void writeToAnyFile(string filename, string io_method, string info) const;
     virtual void readFromAnyFile(string filename, string io_method);
     virtual void readFromAnyFile(string filename, string io_method, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z);
 
@@ -514,7 +515,7 @@ public:
 	int index1d(int x, int y = 0, int z = 0);
 
 	// Save to a file
-	void writeToFile(string filename);
+	void writeToFile(string filename) const;
 
 	// Operators
 	/// FUNCTION NOT IMPLEMENTED
