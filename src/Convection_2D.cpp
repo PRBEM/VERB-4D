@@ -94,28 +94,36 @@ bool Convection_2D( Matrix2D < double > &PSD_PR,
 
 	// 1d-slices of PSD to pass into Convection_1D
 	Matrix1D<double> PSD_P(P_size);
+	Matrix1D<double> P_P(P_size);
+	Matrix1D<double> VP_P(P_size);
+	Matrix1D<double> zero_p(P_size);
+	zero_p = 0;
+
 	Matrix1D<double> PSD_R(R_size);
+	Matrix1D<double> R_R(R_size);
+	Matrix1D<double> VR_R(R_size);
+	Matrix1D<double> zero_r(R_size);
+	zero_r = 0;
 
 	for (int it = 0; it < num_steps; it++) {
-
 		if (P_size >= 3) {
 			for (iR = 0; iR < R_size-1; iR++) {
 
-				// 2d slice
+				// 1d slice
 				PSD_P = PSD_PR.ySlice(iR);
-
+				P_P   = P.ySlice(iR);
+				VP_P  = VP.ySlice(iR);
 				// Speedup: if PSD~=0 or V~=0, skip the thing
 				if (PSD_P.max() < min_PSD || VP.ySlice(iR).maxabs() < min_V)
 					continue;
 
-				Convection_1D_ULTIMATE_QUICKEST6( PSD_P,
-							P.ySlice(iR),
-							P_size,
-							P_LBC[iR], P_UBC[iR],
-							P_LBC_type, P_UBC_type,
-							VP.ySlice(iR),
-							Sources.ySlice(iR) * 0, Losses.ySlice(iR) * 0,
-							dt);
+				Convection_1D_ULTIMATE_QUICKEST6( 
+					PSD_P, P_P,	P_size,
+					P_LBC[iR], P_UBC[iR],
+					P_LBC_type, P_UBC_type,
+					VP_P,
+					zero_p,  zero_p, dt
+				);
 
 				// copy results back
 				for (iP = 0; iP < P_size; iP++)
@@ -129,19 +137,20 @@ bool Convection_2D( Matrix2D < double > &PSD_PR,
 
 				// 2d slice
 				PSD_R = PSD_PR.xSlice(iP);
+				R_R   = R.xSlice(iP);
+				VR_R  = VP.xSlice(iP);
 
 				// Speedup: if PSD~=0 or V~=0, skip the thing
 				if (PSD_R.max() < min_PSD || VR.xSlice(iP).maxabs() < min_V) // XXX: 1e-21 should be a parameter, based on the minimum of the initial PSD or something
 					continue;
 
-				Convection_1D_ULTIMATE_QUICKEST6( PSD_R,
-							R.xSlice(iP),
-							R_size,
-							R_LBC[iP], R_UBC[iP], // P, I, K
-							R_LBC_type, R_UBC_type,
-							VR.xSlice(iP),
-							Sources.xSlice(iP) * 0, Losses.xSlice(iP) * 0,
-							dt);
+				Convection_1D_ULTIMATE_QUICKEST6( 
+					PSD_R,	R_R, R_size,
+					R_LBC[iP], R_UBC[iP], // P, I, K
+					R_LBC_type, R_UBC_type,
+					VR_R,
+					zero_r, zero_r, dt
+				);
 
 				// copy results back
 				for (iR = 0; iR < R_size; iR++)

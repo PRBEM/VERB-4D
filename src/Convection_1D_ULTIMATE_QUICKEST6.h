@@ -38,6 +38,7 @@
 * \param Sources - Sources matrix
 * \param Losses - Losses (loss cone)
 */
+<<<<<<< HEAD
 bool Convection_1D_ULTIMATE_QUICKEST6 ( 
 	Matrix1D < double > &PSD,
 	Matrix1D < double > x,
@@ -49,5 +50,17 @@ bool Convection_1D_ULTIMATE_QUICKEST6 (
 	double dt
 );
 
+=======
+bool Convection_1D_ULTIMATE_QUICKEST6 (
+	Matrix1D <double> &PSD,
+	const Matrix1D<double>& x,
+	int x_size,
+	double x_LBC, double x_UBC,
+	string x_LBC_type, string x_UBC_type,
+	const Matrix1D<double>& Ux,
+	const Matrix1D<double>& Sources, const Matrix1D<double>& Losses,
+	double dt
+);
+>>>>>>> master
 
 #endif
