@@ -24,16 +24,16 @@ using namespace std;
 #define uw_n 5
 #define dw_n 4
 
-bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
-		const Matrix1D < double >& x,
+bool Convection_1D_ULTIMATE_QUICKEST6( 
+		Matrix1D<double> &PSD, 
+		const Matrix1D<double>& x,
 		int x_size,
 		double x_LBC, double x_UBC,
 		string x_LBC_type, string x_UBC_type,
-		Matrix1D < double > Ux,
-		Matrix1D < double > Sources, Matrix1D < double > Losses,
-		double dt_total) {
-
-
+		const Matrix1D<double>& Ux,
+		const Matrix1D<double>& Sources, const Matrix1D<double>& Losses,
+		double dt_total) 
+{
 	int ix;
 
 	double DEL, CURV, ADEL, ACURV, PSD_REF, CURVAV, GRAD; // temporary variables
@@ -85,7 +85,6 @@ bool Convection_1D_ULTIMATE_QUICKEST6( Matrix1D < double > &PSD,
 
 	int ig; // ghost points iterator
 	for (int it = 0; it < num_steps; it++) {
-
 		// copying PSD into PSD_t offset by gst, with gst extra spots at the end
 		// the offset (gst) is used in order to wrap values around from the end to the beginning and vice versa for the periodic case
 		for (ix = 0; ix <= x_size-1; ix++)
