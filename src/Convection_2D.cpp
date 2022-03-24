@@ -138,7 +138,7 @@ bool Convection_2D( Matrix2D < double > &PSD_PR,
 				// 2d slice
 				PSD_R = PSD_PR.xSlice(iP);
 				R_R   = R.xSlice(iP);
-				VR_R  = VP.xSlice(iP);
+				VR_R  = VR.xSlice(iP);
 
 				// Speedup: if PSD~=0 or V~=0, skip the thing
 				if (PSD_R.max() < min_PSD || VR.xSlice(iP).maxabs() < min_V) // XXX: 1e-21 should be a parameter, based on the minimum of the initial PSD or something
