@@ -226,7 +226,10 @@ public:
 
 	// slices - get 1D slice from 2D array
 	Matrix1D<T> xSlice(int p_q1) const;
+	void xSlice(Matrix1D<T>& out, int p_q1) const;
+	
 	Matrix1D<T> ySlice(int p_q2) const;
+	void ySlice(Matrix1D<T>& out, int p_q2) const;
 
 };
 
@@ -332,13 +335,23 @@ public:
 
 	// slices - get 2D slice from 3D array
 	Matrix2D<T> xSlice(int p_q1) const;
+	void xSlice(Matrix2D<T>& out, int p_q1) const;
+
 	Matrix2D<T> ySlice(int p_q2) const;
+	void ySlice(Matrix2D<T>& out, int p_q2) const;
+
 	Matrix2D<T> zSlice(int p_q3) const;
+	void zSlice(Matrix2D<T>& out, int p_q3) const;
 
 	// slices - get 1D slice from 3D array
 	Matrix1D<T> xySlice(int p_i1, int p_i2) const;
+	void xySlice(Matrix1D<T>& out, int p_i1, int p_i2) const;
+
 	Matrix1D<T> yzSlice(int p_i2, int p_i3) const;
+	void yzSlice(Matrix1D<T>& out, int p_i2, int p_i3) const;
+
 	Matrix1D<T> xzSlice(int p_i1, int p_i3) const;
+	void xzSlice(Matrix1D<T>& out, int p_i1, int p_i3) const;
 
 
 };
@@ -450,23 +463,48 @@ public:
 
 	// slices - get 3D slice from 4D array
 	Matrix3D<T> wSlice(int p_w) const;
+	void wSlice(Matrix3D<T>& out, int p_w) const;
+
 	Matrix3D<T> xSlice(int p_x) const;
+	void xSlice(Matrix3D<T>& out, int p_x) const;
+
 	Matrix3D<T> ySlice(int p_y) const;
+	void ySlice(Matrix3D<T>& out, int p_y) const;
+
 	Matrix3D<T> zSlice(int p_z) const;
+	void zSlice(Matrix3D<T>& out, int p_z) const;
 
 	// slices - get 2D slice from 4D array
 	Matrix2D<T> wxSlice(int p_w, int p_x) const;
+	void wxSlice(Matrix2D<T>& out, int p_w, int p_y) const;
+
 	Matrix2D<T> wySlice(int p_w, int p_y) const;
+	void wySlice(Matrix2D<T>& out, int p_w, int p_y) const;
+
 	Matrix2D<T> wzSlice(int p_w, int p_z) const;
-	Matrix2D<T> xySlice(int p_x, int p_y) const;
+	void wzSlice(Matrix2D<T>& out, int p_w, int p_y) const;
+	
+	Matrix2D<T> xySlice(int p_w, int p_z) const;
+	void xySlice(Matrix2D<T>& out, int p_x, int p_y) const;
+
 	Matrix2D<T> xzSlice(int p_x, int p_z) const;
-	Matrix2D<T> yzSlice(int p_y, int p_z) const;
+	void xzSlice(Matrix2D<T>& out, int p_x, int p_y) const;
+	
+	Matrix2D<T> yzSlice(int p_x, int p_z) const;
+	void yzSlice(Matrix2D<T>& out, int p_y, int p_z) const;
 
 	// slices - get 1D slice from 4D array
 	Matrix1D<T> wxySlice(int p_w, int p_x, int p_y) const;
-	Matrix1D<T> wxzSlice(int p_w, int p_x, int p_z) const;
+	void wxySlice(Matrix1D<T>& out, int p_w, int p_x, int p_z) const;
+	
+	Matrix1D<T> wxzSlice(int p_w, int p_x, int p_y) const;
+	void wxzSlice(Matrix1D<T>& out, int p_w, int p_x, int p_z) const;
+
 	Matrix1D<T> wyzSlice(int p_w, int p_y, int p_z) const;
-	Matrix1D<T> xyzSlice(int p_x, int p_y, int p_z) const;
+	void wyzSlice(Matrix1D<T>& out, int p_w, int p_x, int p_z) const;
+
+	Matrix1D<T> xyzSlice(int p_w, int p_y, int p_z) const;
+	void xyzSlice(Matrix1D<T>& out, int p_x, int p_y, int p_z) const;
 };
 
 

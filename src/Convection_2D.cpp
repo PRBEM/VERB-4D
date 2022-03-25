@@ -47,17 +47,18 @@ using namespace std;
  * @param min_PSD - minimum value from the PSD matrix
  * @param min_V - minimum value for V from the
  */
-bool Convection_2D( Matrix2D < double > &PSD_PR,
-			Matrix2D < double > P, Matrix2D < double > R,
-			int P_size, int R_size,
-			Matrix1D < double > P_LBC, Matrix1D < double > P_UBC,
-			Matrix1D < double > R_LBC, Matrix1D < double > R_UBC,
-			string P_LBC_type, string P_UBC_type,
-			string R_LBC_type, string R_UBC_type,
-			Matrix2D < double > VP, Matrix2D < double > VR,
-			Matrix2D < double > Sources, Matrix2D < double > Losses,
-			double dt_total, double min_PSD, double min_V) {
-
+bool Convection_2D( 
+		Matrix2D<double>& PSD_PR,
+		const Matrix2D<double>& P, const Matrix2D<double>& R,
+		int P_size, int R_size,
+		const Matrix1D<double>& P_LBC, const Matrix1D<double>& P_UBC,
+		const Matrix1D<double>& R_LBC, const Matrix1D<double>& R_UBC,
+		string P_LBC_type, string P_UBC_type,
+		string R_LBC_type, string R_UBC_type,
+		const Matrix2D<double>& VP, const Matrix2D<double>& VR,
+		const Matrix2D<double>& Sources, const Matrix2D<double>& Losses,
+		double dt_total, double min_PSD, double min_V)
+{
 	// indexes
 	int iR, iP;
 

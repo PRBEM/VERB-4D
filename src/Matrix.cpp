@@ -2426,6 +2426,21 @@ Matrix1D<T> Matrix2D<T>::xSlice(int p_x) const {
 }
 
 /**
+* Take an x-slice of 2d matrix and write to out.
+*/
+template<class T>
+void Matrix2D<T>::xSlice(Matrix1D<T>& out, int p_x) const {
+	if (p_x > this->size_q1) {
+		printf("MATRIX_ERROR: xSlice outside or array boundary: %d > %d", p_x, this->size_q1);
+		exit(EXIT_FAILURE);
+	}
+
+	for (size_t i2 = 0; i2 < size_q2; i2++) {
+		out[i2] = matrix_array[p_x][i2];
+	}
+}
+
+/**
 * Make y-slice of 2d matrix = 1d matrix.
 */
 template<class T>
@@ -2444,6 +2459,20 @@ Matrix1D<T> Matrix2D<T>::ySlice(int p_y) const {
 	return tmp;
 }
 
+/**
+* Take a y-slice of 2d matrix and write to out.
+*/
+template<class T>
+void Matrix2D<T>::ySlice(Matrix1D<T>& out, int p_y) const {
+	if (p_y > this->size_q2) {
+		printf("MATRIX_ERROR: ySlice outside or array boundary: %d > %d", p_y, this->size_q2);
+		exit(EXIT_FAILURE);
+	}
+
+	for (size_t i1 = 0; i1 < size_q1; i1++) {
+		out[i1] = matrix_array[i1][p_y];
+	}
+}
 //////////////////////////////////////////////////
 //
 //	Matrix 3D
@@ -3791,6 +3820,19 @@ Matrix2D<T> Matrix3D<T>::xSlice(int p_x) const {
 }
 
 /**
+* Take an x-slice of 3d matrix and write it to out
+* \param p_x - index at which to slice x dimension
+*/
+template<class T>
+void Matrix3D<T>::xSlice(Matrix2D<T>& out, int p_x) const {
+	for (size_t i2 = 0; i2 < size_q2; i2++) {
+		for (size_t i3 = 0; i3 < size_q3; i3++) {
+			out[i2][i3] = matrix_array[p_x][i2][i3];
+		}
+	}
+}
+
+/**
 * Take y-slice of 3d matrix turning it into a 2d matrix.
 * \param p_y - index at which to slice y dimension
 */
@@ -3805,6 +3847,19 @@ Matrix2D<T> Matrix3D<T>::ySlice(int p_y) const {
 		}
 	}
 	return tmp;
+}
+
+/**
+* Take a y-slice of 3d matrix and write it to out
+* \param p_x - index at which to slice x dimension
+*/
+template<class T>
+void Matrix3D<T>::ySlice(Matrix2D<T>& out, int p_y) const {
+	for (size_t i1 = 0; i1 < size_q1; i1++) {
+		for (size_t i3 = 0; i3 < size_q3; i3++) {
+			out[i1][i3] = matrix_array[i1][p_y][i3];
+		}
+	}
 }
 
 /**
@@ -3825,6 +3880,19 @@ Matrix2D<T> Matrix3D<T>::zSlice(int p_z) const {
 }
 
 /**
+* Take a z-slice of 3d matrix and write it to out
+* \param p_x - index at which to slice x dimension
+*/
+template<class T>
+void Matrix3D<T>::zSlice(Matrix2D<T>& out, int p_z) const {
+	for (size_t i1 = 0; i1 < size_q1; i1++) {
+		for (size_t i2 = 0; i2 < size_q2; i2++) {
+			out[i1][i2] = matrix_array[i1][i2][p_z];
+		}
+	}
+}
+
+/**
 * Take xy-slice of 3d matrix turning it into a 1d matrix.
 * \param p_x - index at which to slice x dimension
 * \param p_y - index at which to slice y dimension
@@ -3838,6 +3906,18 @@ Matrix1D<T> Matrix3D<T>::xySlice(int p_x, int p_y) const {
 		tmp[i3] = matrix_array[p_x][p_y][i3];
 	}
 	return tmp;
+}
+
+/**
+* Take an xy-slice of 3d matrix and write it to out.
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+*/
+template<class T>
+void Matrix3D<T>::xySlice(Matrix1D<T>& out, int p_x, int p_y) const {
+	for (size_t i3 = 0; i3 < size_q3; i3++) {
+		out[i3] = matrix_array[p_x][p_y][i3];
+	}
 }
 
 /**
@@ -3857,6 +3937,18 @@ Matrix1D<T> Matrix3D<T>::yzSlice(int p_y, int p_z) const {
 }
 
 /**
+* Take a yz-slice of 3d matrix and write it to out.
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix3D<T>::yzSlice(Matrix1D<T>& out, int p_y, int p_z) const {
+	for (size_t i1 = 0; i1 < size_q1; i1++) {
+		out[i1] = matrix_array[i1][p_y][p_z];
+	}
+}
+
+/**
 * Take xz-slice of 3d matrix turning it into a 1d matrix.
 * \param p_x - index at which to slice x dimension
 * \param p_z - index at which to slice z dimension
@@ -3870,6 +3962,18 @@ Matrix1D<T> Matrix3D<T>::xzSlice(int p_x, int p_z) const {
 		tmp[i2] = matrix_array[p_x][i2][p_z];
 	}
 	return tmp;
+}
+
+/**
+* Take an xz-slice of 3d matrix and write it to out.
+* \param p_x - index at which to slice x dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix3D<T>::xzSlice(Matrix1D<T>& out, int p_x, int p_z) const {
+	for (size_t i2 = 0; i2 < size_q2; i2++) {
+		out[i2] = matrix_array[p_x][i2][p_z];
+	}
 }
 
 
@@ -5580,6 +5684,22 @@ Matrix3D<T> Matrix4D<T>::wSlice(int p_w) const {
 }
 
 /**
+* Take a w-slice of 4d matrix and write it to out.
+* squeeze matrix to 3d getting all the data when the w dimension is at index p_w
+* \param p_w - index at which to slice w dimension
+*/
+template<class T>
+void Matrix4D<T>::wSlice(Matrix3D<T>& out, int p_w) const {
+	for (size_t x = 0; x < size_x; x++) {
+		for (size_t y = 0; y < size_y; y++) {
+			for (size_t z = 0; z < size_z; z++) {
+				out[x][y][z] = matrix_array[p_w][x][y][z];
+			}
+		}
+	}
+}
+
+/**
 * Take x-slice of 4d matrix turining it into 3d matrix.
 * squeeze matrix to 3d getting all the data when the x dimension is at index p_x
 * \param p_x - index at which to slice x dimension
@@ -5597,6 +5717,22 @@ Matrix3D<T> Matrix4D<T>::xSlice(int p_x) const {
 		}
 	}
 	return tmp;
+}
+
+/**
+* Take an x-slice of 4d matrix and write it to out.
+* squeeze matrix to 3d getting all the data when the x dimension is at index p_x
+* \param p_x - index at which to slice x dimension
+*/
+template<class T>
+void Matrix4D<T>::xSlice(Matrix3D<T>& out, int p_x) const {
+	for (size_t w = 0; w < size_w; w++) {
+		for (size_t y = 0; y < size_y; y++) {
+			for (size_t z = 0; z < size_z; z++) {
+				out[w][y][z] = matrix_array[w][p_x][y][z];
+			}
+		}
+	}
 }
 
 /**
@@ -5620,6 +5756,22 @@ Matrix3D<T> Matrix4D<T>::ySlice(int p_y) const {
 }
 
 /**
+* Take a y-slice of 4d matrix and write it to out.
+* squeeze matrix to 3d getting all the data when the y dimension is at index p_y
+* \param p_y - index at which to slice y dimension
+*/
+template<class T>
+void Matrix4D<T>::ySlice(Matrix3D<T>& out, int p_y) const {
+	for (size_t w = 0; w < size_w; w++) {
+		for (size_t x = 0; x < size_x; x++) {
+			for (size_t z = 0; z < size_z; z++) {
+				out[w][x][z] = matrix_array[w][x][p_y][z];
+			}
+		}
+	}
+}
+
+/**
 * Take z-slice of 4d matrix turning it into 3d matrix.
 * squeeze matrix to 3d getting all the data when the z dimension is at index p_z
 * \param p_z - index at which to slice z dimension
@@ -5637,6 +5789,22 @@ Matrix3D<T> Matrix4D<T>::zSlice(int p_z) const {
 		}
 	}
 	return tmp;
+}
+
+/**
+* Take a z-slice of 4d matrix and write it to out.
+* squeeze matrix to 3d getting all the data when the z dimension is at index p_z
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix4D<T>::zSlice(Matrix3D<T>& out, int p_z) const {
+	for (size_t w = 0; w < size_w; w++) {
+		for (size_t x = 0; x < size_x; x++) {
+			for (size_t y = 0; y < size_y; y++) {
+				out[w][x][y] = matrix_array[w][x][y][p_z];
+			}
+		}
+	}
 }
 
 /**
@@ -5658,6 +5826,20 @@ Matrix2D<T> Matrix4D<T>::wxSlice(int p_w, int p_x) const {
 }
 
 /**
+* Take a wx-slice of 4d matrix and write it to out.
+* \param p_w - index at which to slice w dimension
+* \param p_x - index at which to slice x dimension
+*/
+template<class T>
+void Matrix4D<T>::wxSlice(Matrix2D<T>& out, int p_w, int p_x) const {
+	for (size_t y = 0; y < size_y; y++) {
+		for (size_t z = 0; z < size_z; z++) {
+			out[y][z] = matrix_array[p_w][p_x][y][z];
+		}
+	}
+}
+
+/**
 * Take wy-slice of 4d matrix turning it into a 2d matrix.
 * \param p_w - index at which to slice w dimension
 * \param p_y - index at which to slice y dimension
@@ -5673,6 +5855,20 @@ Matrix2D<T> Matrix4D<T>::wySlice(int p_w, int p_y) const {
 		}
 	}
 	return tmp;
+}
+
+/**
+* Take a wy-slice of 4d matrix and write it to out.
+* \param p_w - index at which to slice w dimension
+* \param p_y - index at which to slice y dimension
+*/
+template<class T>
+void Matrix4D<T>::wySlice(Matrix2D<T>& out, int p_w, int p_y) const {
+	for (size_t x = 0; x < size_x; x++) {
+		for (size_t z = 0; z < size_z; z++) {
+			out[x][z] = matrix_array[p_w][x][p_y][z];
+		}
+	}
 }
 
 /**
@@ -5694,6 +5890,20 @@ Matrix2D<T> Matrix4D<T>::wzSlice(int p_w, int p_z) const {
 }
 
 /**
+* Take  wz-slice of 4d matrix and write it to out.
+* \param p_w - index at which to slice w dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix4D<T>::wzSlice(Matrix2D<T>& out, int p_w, int p_z) const {
+	for (size_t x = 0; x < size_x; x++) {
+		for (size_t y = 0; y < size_y; y++) {
+			out[x][y] = matrix_array[p_w][x][y][p_z];
+		}
+	}
+}
+
+/**
 * Take xy-slice of 4d matrix turning it into a 2d matrix.
 * \param p_x - index at which to slice x dimension
 * \param p_y - index at which to slice y dimension
@@ -5709,6 +5919,20 @@ Matrix2D<T> Matrix4D<T>::xySlice(int p_x, int p_y) const {
 		}
 	}
 	return tmp;
+}
+
+/**
+* Take a xy-slice of 4d matrix and write it to out.
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+*/
+template<class T>
+void Matrix4D<T>::xySlice(Matrix2D<T>& out, int p_x, int p_y) const {
+	for (size_t w = 0; w < size_w; w++) {
+		for (size_t z = 0; z < size_z; z++) {
+			out[w][z] = matrix_array[w][p_x][p_y][z];
+		}
+	}
 }
 
 /**
@@ -5730,6 +5954,20 @@ Matrix2D<T> Matrix4D<T>::xzSlice(int p_x, int p_z) const {
 }
 
 /**
+* Take an xz-slice of 4d matrix and write it to out.
+* \param p_x - index at which to slice x dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix4D<T>::xzSlice(Matrix2D<T>& out, int p_x, int p_z) const {
+	for (size_t w = 0; w < size_w; w++) {
+		for (size_t y = 0; y < size_y; y++) {
+			out[w][y] = matrix_array[w][p_x][y][p_z];
+		}
+	}
+}
+
+/**
 * Take yz-slice of 4d matrix turning it into a 2d matrix.
 * \param p_y - index at which to slice y dimension
 * \param p_z - index at which to slice z dimension
@@ -5745,6 +5983,20 @@ Matrix2D<T> Matrix4D<T>::yzSlice(int p_y, int p_z) const {
 		}
 	}
 	return tmp;
+}
+
+/**
+* Take a yz-slice of 4d matrix and write it to out.
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix4D<T>::yzSlice(Matrix2D<T>& out, int p_y, int p_z) const {
+	for (size_t w = 0; w < size_w; w++) {
+		for (size_t x = 0; x < size_x; x++) {
+			out[w][x] = matrix_array[w][x][p_y][p_z];
+		}
+	}
 }
 
 /**
@@ -5765,6 +6017,19 @@ Matrix1D<T> Matrix4D<T>::wxySlice(int p_w, int p_x, int p_y) const {
 }
 
 /**
+* Take a wxy-slice of 4d matrix and write it to out.
+* \param p_w - index at which to slice w dimension
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+*/
+template<class T>
+void Matrix4D<T>::wxySlice(Matrix1D<T>& out, int p_w, int p_x, int p_y) const {
+	for (size_t z = 0; z < size_z; z++) {
+		out[z] = matrix_array[p_w][p_x][p_y][z];
+	}
+}
+
+/**
 * Take wxz-slice of 4d matrix turning it into a 1d matrix.
 * \param p_w - index at which to slice w dimension
 * \param p_x - index at which to slice x dimension
@@ -5779,6 +6044,19 @@ Matrix1D<T> Matrix4D<T>::wxzSlice(int p_w, int p_x, int p_z) const {
 		tmp[y] = matrix_array[p_w][p_x][y][p_z];
 	}
 	return tmp;
+}
+
+/**
+* Take a wxz-slice of 4d matrix and write it to out.
+* \param p_w - index at which to slice w dimension
+* \param p_x - index at which to slice x dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix4D<T>::wxzSlice(Matrix1D<T>& out, int p_w, int p_x, int p_z) const {
+	for (size_t y = 0; y < size_y; y++) {
+		out[y] = matrix_array[p_w][p_x][y][p_z];
+	}
 }
 
 /**
@@ -5799,6 +6077,19 @@ Matrix1D<T> Matrix4D<T>::wyzSlice(int p_w, int p_y, int p_z) const {
 }
 
 /**
+* Take a wyz-slice of 4d matrix and write it to out.
+* \param p_w - index at which to slice w dimension
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix4D<T>::wyzSlice(Matrix1D<T>& out, int p_w, int p_y, int p_z) const {
+	for (size_t x = 0; x < size_x; x++) {
+		out[x] = matrix_array[p_w][x][p_y][p_z];
+	}
+}
+
+/**
 * Take xyz-slice of 4d matrix turning it into a 1d matrix.
 * \param p_x - index at which to slice x dimension
 * \param p_y - index at which to slice y dimension
@@ -5815,6 +6106,18 @@ Matrix1D<T> Matrix4D<T>::xyzSlice(int p_x, int p_y, int p_z) const {
 	return tmp;
 }
 
+/**
+* Take an xyz-slice of 4d matrix and write it to out.
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix4D<T>::xyzSlice(Matrix1D<T>& out, int p_x, int p_y, int p_z) const {
+	for (size_t w = 0; w < size_w; w++) {
+		out[w] = matrix_array[w][p_x][p_y][p_z];
+	}
+}
 
 /**
 * Constructor for CalculationMatrix class.
