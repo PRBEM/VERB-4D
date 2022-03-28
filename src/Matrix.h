@@ -130,7 +130,7 @@ public:
 	T max() const;
 	T maxabs() const;
 	Matrix1D<T> abs() const;
-
+	Matrix1D<T>& max_of(T val);
 };
 
 /**
@@ -212,7 +212,7 @@ public:
 	T min() const;
 	Matrix2D<T> abs() const;
 	// It returns maximum between values from class psd2DSlice and argument (VC::zero_f in that case)
-	Matrix2D& max_of(T val);
+	Matrix2D<T>& max_of(T val);
 
 	// writeToFileting
 	virtual void writeToFile(string filename);
@@ -332,6 +332,7 @@ public:
 	T max() const;
 	T maxabs() const;
 	Matrix3D<T> abs() const;
+	Matrix3D<T>& max_of(T val);
 
 	// slices - get 2D slice from 3D array
 	Matrix2D<T> xSlice(int p_q1) const;
@@ -460,7 +461,7 @@ public:
 	T max() const;
 	T maxabs() const;
 	Matrix4D<T> abs() const;
-
+	Matrix4D<T>& max_of(T val);
 	// slices - get 3D slice from 4D array
 	Matrix3D<T> wSlice(int p_w) const;
 	void wSlice(Matrix3D<T>& out, int p_w) const;

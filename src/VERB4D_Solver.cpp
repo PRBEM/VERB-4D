@@ -319,7 +319,6 @@ int main(int argc, char* argv[]) {
     }
 
     // Indexers to keep track of P,R,V,K,L
-    int iP, iR, iV, iK, iL;
     double time;
 
     // variables to show the progress of calculation
@@ -351,9 +350,9 @@ int main(int argc, char* argv[]) {
                 Matrix1D<double> old_L_1d(L_size), PSD_L(L_size), new_L_1d(L_size);
                 // Aparently it's not thread-safe
                 //#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
-                for (iP = 0; iP < P_size; iP++) {
-                    for (iV = 0; iV < V_size; iV++) {
-                        for (iK = 0; iK < K_size; iK++) {
+                for (int iP = 0; iP < P_size; iP++) {
+                    for (int iV = 0; iV < V_size; iV++) {
+                        for (int iK = 0; iK < K_size; iK++) {
                             // show progress % if 0 threads
                             if (omp_get_thread_num() == 0) {
                                 cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
@@ -371,7 +370,7 @@ int main(int argc, char* argv[]) {
                             PSD_L = Cubic1D(old_L_1d, PSD_L, new_L_1d);
 
                             // copy results back into PSD adding the 1d list PSD_L for all values of iP,iV,iK
-                            for (iL = 0; iL < L_size; iL++) {
+                            for (int iL = 0; iL < L_size; iL++) {
                                 PSD[iP][iL][iV][iK] = PSD_L[iL];
                             }
 
@@ -389,15 +388,7 @@ int main(int argc, char* argv[]) {
         }
 
         if (positive_PSD == "true") {
-            for (iP = 0; iP < P_size; iP++) {
-                for (iR = 0; iR < R_size; iR++) {
-                    for (iV = 0; iV < V_size; iV++) {
-                        for (iK = 0; iK < K_size; iK++) {
-                            if (PSD[iP][iR][iV][iK] < 1e-21) PSD[iP][iR][iV][iK] = 1e-21;
-                        }
-                    }
-                }
-            }
+            PSD.max_of(1e-21);
         }
 
         // Update convection velocities VP and VR and log the maximum absolute values
@@ -479,7 +470,7 @@ int main(int argc, char* argv[]) {
 
             Matrix2D<double> PSD_PR(P_size, R_size);
 
-#pragma omp parallel private(iP, iR, iV, iK) shared(progress_total, progress_count)
+#pragma omp parallel shared(progress_total, progress_count)
 {
             // define the slices needed for convection
             Matrix2D<double> PSD_PR(P_size, R_size);
@@ -502,14 +493,14 @@ int main(int argc, char* argv[]) {
 // If you have OPENMP 3.0 with collapse functionality you can use this. (Visual Studios does not)
 #if defined _OPENMP && _OPENMP >= 200711
 #pragma omp for schedule(dynamic,1) collapse(2)
-            for (iV = V_size-1; iV >= 0; iV--) {
-                for (iK = 0; iK < K_size; iK++) {
+            for (int iV = V_size-1; iV >= 0; iV--) {
+                for (int iK = 0; iK < K_size; iK++) {
 #else
 #pragma omp for
-            for (size_t index = (V_size * K_size) - 1; index >= 0; index--) {{
+            for (long index = (V_size * K_size) - 1; index >= 0; index--) {{
                 // Manually collapsing into a single for loop in order to optimize
-                iV = index % V_size;
-                iK = (K_size - 1) - (index / V_size);
+                int iV = index % V_size;
+                int iK = (K_size - 1) - (index / V_size);
 #endif
                 // Output current progress percentage when number of threads = 0
                 if (omp_get_thread_num() == 0) {
@@ -541,8 +532,8 @@ int main(int argc, char* argv[]) {
                 );
 
                 // copy results back into PSD adding the 2d list PSD_PR for all values of iV,iK
-                for (iP = 0; iP < P_size; iP++) {
-                    for (iR = 0; iR < R_size; iR++) {
+                for (int iP = 0; iP < P_size; iP++) {
+                    for (int iR = 0; iR < R_size; iR++) {
                         PSD[iP][iR][iV][iK] = PSD_PR[iP][iR];
                     }
                 }
@@ -567,15 +558,7 @@ int main(int argc, char* argv[]) {
         }
 
         if (positive_PSD == "true") {
-            for (iP = 0; iP < P_size; iP++) {
-                for (iR = 0; iR < R_size; iR++) {
-                    for (iV = 0; iV < V_size; iV++) {
-                        for (iK = 0; iK < K_size; iK++) {
-                            if (PSD[iP][iR][iV][iK] < 1e-21) PSD[iP][iR][iV][iK] = 1e-21;
-                        }
-                    }
-                }
-            }
+            PSD.max_of(1e-21);
         }
 
         // RADIAL DIFFUSION STEP
@@ -592,16 +575,16 @@ int main(int argc, char* argv[]) {
             Matrix1D<double> PSD_L(L_size);
 
 #if defined _OPENMP && _OPENMP >= 200711
-#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
-            for (iP = 0; iP < P_size; iP++) {
-                for (iV = 0; iV < V_size; iV++) {
-                    for (iK = 0; iK < K_size; iK++) {
+#pragma omp parallel for private(PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
+            for (int iP = 0; iP < P_size; iP++) {
+                for (int iV = 0; iV < V_size; iV++) {
+                    for (int iK = 0; iK < K_size; iK++) {
 #else
 #pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total, progress_count)
             for (int index = 0; index < P_size * V_size * K_size; index++) {{{
-                iP = index / (V_size * K_size);
-                iV = (index / K_size) % V_size;
-                iK = index % K_size;
+                int iP = index / (V_size * K_size);
+                int iV = (index / K_size) % V_size;
+                int iK = index % K_size;
 #endif
                 // print percentage done
                 if (omp_get_thread_num() == 0){
@@ -619,7 +602,7 @@ int main(int argc, char* argv[]) {
 
 
                 // copy results back
-                for (iL = 0; iL < L_size; iL++) {
+                for (int iL = 0; iL < L_size; iL++) {
                     PSD[iP][iL][iV][iK] = PSD_L[iL];
                 }
 
@@ -643,15 +626,7 @@ int main(int argc, char* argv[]) {
         }
 
         if (positive_PSD == "true") {
-            for (iP = 0; iP < P_size; iP++) {
-                for (iR = 0; iR < R_size; iR++) {
-                    for (iV = 0; iV < V_size; iV++) {
-                        for (iK = 0; iK < K_size; iK++){
-                            if (PSD[iP][iR][iV][iK] < 1e-21) PSD[iP][iR][iV][iK] = 1e-21;
-                        }
-                    }
-                }
-            }
+            PSD.max_of(1e-21);
         }
 
         // ADDED FOR TESTING
@@ -668,14 +643,14 @@ int main(int argc, char* argv[]) {
             Matrix2D<double> PSD_IK(V_size, K_size);
 
 #if defined _OPENMP && _OPENMP >= 200711
-#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1) collapse(2)
-            for (iP = 0; iP < P_size; iP++) {
-                for (iR = 0; iR < R_size; iR++) {
+#pragma omp parallel for private(PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1) collapse(2)
+            for (int iP = 0; iP < P_size; iP++) {
+                for (int iR = 0; iR < R_size; iR++) {
 #else
-#pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1)
+#pragma omp parallel for private(PSD_IK) shared(progress_total, progress_count, number_of_skipped_points) schedule(dynamic,1)
             for (int index = 0; index < P_size * R_size; index++) {{
-                iP = index / R_size;
-                iR = index % R_size;
+                int iP = index / R_size;
+                int iR = index % R_size;
 #endif
                 // If we dont want to include the boundary in the L/R axis
                 // we can exclude those points by setting include_boundary
@@ -744,8 +719,8 @@ int main(int argc, char* argv[]) {
                 }
 
                 // copy results back
-                for (iV = 0; iV < V_size; iV++) {
-                    for (iK = 0; iK < K_size; iK++) {
+                for (int iV = 0; iV < V_size; iV++) {
+                    for (int iK = 0; iK < K_size; iK++) {
                         PSD[iP][iR][iV][iK] = PSD_IK[iV][iK];
                     }
                 }
@@ -755,24 +730,17 @@ int main(int argc, char* argv[]) {
             cout << "Number of skipped points: " << (int) ((double) number_of_skipped_points/progress_total * 100) << "\%" << endl;
         }
 
-        if (positive_PSD == "true") {
-            for (iP = 0; iP < P_size; iP++) {
-                for (iR = 0; iR < R_size; iR++) {
-                    for (iV = 0; iV < V_size; iV++) {
-                        for (iK = 0; iK < K_size; iK++) {
-                            if (PSD[iP][iR][iV][iK] < 1e-21) PSD[iP][iR][iV][iK] = 1e-21;
-                        }
-                    }
-                }
-            }
-        }
-
         int number_of_negative_points = 0;
-        for (iP = 0; iP < P_size; iP++) {
-            for (iR = 0; iR < R_size; iR++) {
-                for (iV = 0; iV < V_size; iV++) {
-                    for (iK = 0; iK < K_size; iK++) {
-                        if (PSD[iP][iR][iV][iK] < 0) number_of_negative_points++;
+        if (positive_PSD == "true") {
+            PSD.max_of(1e-21);
+        }
+        else {
+            for (int iP = 0; iP < P_size; iP++) {
+                for (int iR = 0; iR < R_size; iR++) {
+                    for (int iV = 0; iV < V_size; iV++) {
+                        for (int iK = 0; iK < K_size; iK++) {
+                            if (PSD[iP][iR][iV][iK] < 0) number_of_negative_points++;
+                        }
                     }
                 }
             }

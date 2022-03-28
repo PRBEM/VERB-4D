@@ -1343,6 +1343,20 @@ Matrix1D<T> Matrix1D<T>::abs() const {
 	return tmp;
 }
 
+/**
+* Replace all matrix malues smaller than val with vval.
+*
+* \param val - new minimal value.
+*/
+template<class T>
+Matrix1D<T>& Matrix1D<T>::max_of(T val) {
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = std::max(plane_array[i], val);
+	}
+	return *this;
+}
+
 //////////////////////////////////////////////////
 //
 //	Matrix 2D
@@ -1613,9 +1627,9 @@ Matrix2D<T> Matrix2D<T>::abs() const {
 
 
 /**
-* Divide all values of matrix to value Val.
+* Replace all matrix malues smaller than val with vval.
 *
-* \param val - value to divide.
+* \param val - new minimal value.
 */
 template<class T>
 Matrix2D<T>& Matrix2D<T>::max_of(T val) {
@@ -3801,6 +3815,19 @@ Matrix3D<T> Matrix3D<T>::abs() const {
 	return tmp;
 }
 
+/**
+* Replace all matrix malues smaller than val with vval.
+*
+* \param val - new minimal value.
+*/
+template<class T>
+Matrix3D<T>& Matrix3D<T>::max_of(T val) {
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = std::max(plane_array[i], val);
+	}
+	return *this;
+}
 
 /**
 * Take x-slice of 3d matrix turning it into a 2d matrix.
@@ -5661,6 +5688,20 @@ Matrix4D<T> Matrix4D<T>::abs() const {
 		tmp.plane_array[i] = std::abs(plane_array[i]);
 	}
 	return tmp;
+}
+
+/**
+* Replace all matrix malues smaller than val with vval.
+*
+* \param val - new minimal value.
+*/
+template<class T>
+Matrix4D<T>& Matrix4D<T>::max_of(T val) {
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = std::max(plane_array[i], val);
+	}
+	return *this;
 }
 
 /**
