@@ -21,8 +21,8 @@
 using namespace std;
 
 #define gst 5
-#define uw_n 5
-#define dw_n 4
+#define uw_n 4
+#define dw_n 5
 
 bool Convection_1D_ULTIMATE_QUICKEST6( 
 		Matrix1D<double> &PSD, 
