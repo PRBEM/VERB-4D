@@ -202,7 +202,9 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	// If a binary grid file grid.pltb has been provided in the input folder,
 	// read the grid from this file, otherwise try to open the ascii file grid.plt
-    std::ifstream input {InputFolder + "grid.pltb", std::ios::binary};
+    // Binary grid files start with the 4 grid sizes as 32 bit integers in order P, R, V, K
+	// followed by 4 * (P*R*V*K) doubles representing the P,R,V,K mesh grid
+	std::ifstream input {InputFolder + "grid.pltb", std::ios::binary};
 	if(input.is_open())
 	{
 		int32_t buffer_int32[4];
@@ -226,25 +228,15 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			G_local, G_radial, Sources, Losses, Losses_conv
 		);
 		Logger::message << "P_size = " << P_size << ", R_size = " << R_size << ", V_size = " << V_size << ", K_size = " << K_size << endl;
-		if(!input.read((char*)&P[0][0][0][0], sizeof(double) * total_elements))
+		double* grid_pointers[]{&P[0][0][0][0], &R[0][0][0][0], &V[0][0][0][0], &K[0][0][0][0]};
+		char grid_vars[]{'P', 'R', 'V', 'K'};
+		for(int j = 0; j < 4; j++)
 		{
-			Logger::warning << "Cannot read grid data P from binary grid file." << endl;
-			return false;	
-		}
-		if(!input.read((char*)&R[0][0][0][0], sizeof(double) * total_elements))
-		{
-			Logger::warning << "Cannot read grid data R from binary grid file." << endl;
-			return false;	
-		}
-		if(!input.read((char*)&V[0][0][0][0], sizeof(double) * total_elements))
-		{
-			Logger::warning << "Cannot read grid data V from binary grid file." << endl;
-			return false;	
-		}
-		if(!input.read((char*)&K[0][0][0][0], sizeof(double) * total_elements))
-		{
-			Logger::warning << "Cannot read grid data V from binary grid file." << endl;
-			return false;	
+			if(!input.read((char*)grid_pointers[j], sizeof(double) * total_elements))
+			{
+				Logger::warning << "Cannot read grid data "<< grid_vars[j] << " from binary grid file." << endl;
+				return false;	
+			}
 		}
 		input.close();
 	}
