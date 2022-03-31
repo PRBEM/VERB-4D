@@ -20,6 +20,7 @@
 #include "Logger.h"
 #include <inttypes.h>
 #include <limits>
+#include <algorithm>
 
 using namespace std;
 
@@ -1344,7 +1345,7 @@ Matrix1D<T> Matrix1D<T>::abs() const {
 }
 
 /**
-* Replace all matrix malues smaller than val with vval.
+* Replace all matrix malues smaller than val with val.
 *
 * \param val - new minimal value.
 */
@@ -1627,7 +1628,7 @@ Matrix2D<T> Matrix2D<T>::abs() const {
 
 
 /**
-* Replace all matrix malues smaller than val with vval.
+* Replace all matrix malues smaller than val with val.
 *
 * \param val - new minimal value.
 */
@@ -3816,7 +3817,7 @@ Matrix3D<T> Matrix3D<T>::abs() const {
 }
 
 /**
-* Replace all matrix malues smaller than val with vval.
+* Replace all matrix malues smaller than val with val.
 *
 * \param val - new minimal value.
 */
@@ -5691,7 +5692,7 @@ Matrix4D<T> Matrix4D<T>::abs() const {
 }
 
 /**
-* Replace all matrix malues smaller than val with vval.
+* Replace all matrix malues smaller than val with val.
 *
 * \param val - new minimal value.
 */

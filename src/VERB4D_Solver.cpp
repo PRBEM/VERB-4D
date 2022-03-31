@@ -580,8 +580,8 @@ int main(int argc, char* argv[]) {
                 for (int iV = 0; iV < V_size; iV++) {
                     for (int iK = 0; iK < K_size; iK++) {
 #else
-#pragma omp parallel for private(iP, iV, iK, iL, PSD_L) shared(progress_total, progress_count)
-            for (int index = 0; index < P_size * V_size * K_size; index++) {{{
+#pragma omp parallel for private(PSD_L) shared(progress_total, progress_count)
+            for (long index = 0; index < P_size * V_size * K_size; index++) {{{
                 int iP = index / (V_size * K_size);
                 int iV = (index / K_size) % V_size;
                 int iK = index % K_size;
