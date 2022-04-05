@@ -21,8 +21,8 @@
 using namespace std;
 
 #define gst 5
-#define uw_n 5
-#define dw_n 4
+#define uw_n 4
+#define dw_n 5
 
 bool Convection_1D_ULTIMATE_QUICKEST6( 
 		Matrix1D<double> &PSD, 
@@ -350,6 +350,15 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
 		}
 		if (x_UBC_type == "BCT_CONSTANT_VALUE") {
             PSD[x_size-1] = x_UBC;
+		}
+		if (x_LBC_type == "BCT_CONSTANT_VALUE") {
+            PSD[0] = x_LBC;
+		}
+		if (x_LBC_type == "BCT_CONSTANT_DERIVATIVE"){
+			PSD[0] = PSD[1];
+		}
+		if (x_UBC_type == "BCT_CONSTANT_DERIVATIVE"){
+			PSD[x_size-1] = PSD[x_size-2];
 		}
 
 	}
