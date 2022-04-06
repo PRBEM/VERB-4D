@@ -91,8 +91,8 @@ public:
 	Matrix1D& operator-= (const Matrix1D<T> &M);
 	Matrix1D& operator*= (const T Val);
 	Matrix1D& operator/= (const T Val);
-	Matrix1D& operator+= (const T Val); 								///< Add the Val to each matrix element, stores result in the matrix it's applied to
-	Matrix1D& operator-= (const T Val); 								///< Substract the Val from each matrix element, stores result in the matrix it's applied to
+	//Matrix1D& operator+= (const T Val); 								///< Add the Val to each matrix element, stores result in the matrix it's applied to
+	//Matrix1D& operator-= (const T Val); 								///< Substract the Val from each matrix element, stores result in the matrix it's applied to
 
 	//Matrix1D& times_equal (const Matrix1D<T> &M); 					///< Arraywise multiplication (A.*B), stores result in the matrix it's applied to
 	//Matrix1D& divide_equal (const Matrix1D<T> &M); 					///< Arraywise division (A./B), stores result in the matrix it's applied to
