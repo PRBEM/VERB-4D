@@ -485,7 +485,7 @@ int main(int argc, char* argv[]) {
             Matrix2D<double> lossconv_slice(P_size, R_size);
             
             // sources are set to zero and not updated during the loop
-            Matrix2D<double> source_slice = Sources.yzSlice(1, 1) * 0.0;
+            Matrix2D<double> source_slice = Sources.yzSlice(0, 0) * 0.0;
 
             // Looping it backward allows to speed-up the multithread simulation
             // due to the highest energies being the slowest to calculate - calculating highest energy first
