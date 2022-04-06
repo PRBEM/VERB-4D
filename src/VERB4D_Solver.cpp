@@ -497,7 +497,7 @@ int main(int argc, char* argv[]) {
                 for (int iK = 0; iK < K_size; iK++) {
 #else
 #pragma omp for
-            for (long index = (V_size * K_size) - 1; index >= 0; index--) {{
+            for (long index = (V_size * K_size) - 1; index >= 0; index--) {{ // Double brackes are needed for compatability with OPENMP 3.0 code.
                 // Manually collapsing into a single for loop in order to optimize
                 int iV = index % V_size;
                 int iK = (K_size - 1) - (index / V_size);

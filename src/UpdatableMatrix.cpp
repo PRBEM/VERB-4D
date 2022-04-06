@@ -874,7 +874,7 @@ string GetCurrentTimeValue(const string &filename, long &pos, const double &curr
 	// check if we position is > 0. Then we need to skip lines
 	if (pos > 0)
 	{
-		while (!input.eof() & current_line < pos)
+		while (!input.eof() && (current_line < pos))
 		{
 			input.ignore(999, '\n'); // This is fastest way to skip lines that I found
 			current_line++;
