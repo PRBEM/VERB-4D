@@ -777,8 +777,9 @@ bool MakeModelMatrix_2D_ADI3_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 	// (f^{t+1} - f^{t})/dt = L1(f^{t+1}) + L2(f^{t+1}) + L3(f^{t+1})[main equation, losses are calculated separately]
 	// L1, L2, L3 - diffusion operators
 	//  + need to add there the equations for boundary conditions also
-	double dh;
-	int ix, iy, in, id;
+	// double dh;
+	// int id;
+	int ix, iy, in;
 	for (ix = 0; ix < x_size; ix++) {
 		for (iy = 0; iy < y_size; iy++) {
 			// calculating current line number (in)
@@ -908,8 +909,9 @@ bool MakeModelMatrix_2D_ADI3_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 	// (f^{t+1} - f^{t})/dt = L1(f^{t+1}) + L2(f^{t+1}) + L3(f^{t+1})[main equation, losses are calculated separately]
 	// L1, L2, L3 - diffusion operators
 	//  + need to add there the equations for boundary conditions also
-	double dh;
-	int ix, iy, in, id;
+	// double dh;
+	// int id;
+	int ix, iy, in;
 	for (ix = 0; ix < x_size; ix++) {
 		for (iy = 0; iy < y_size; iy++) {
 			// calculating current line number (in)

@@ -36,7 +36,8 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
 {
 	int ix;
 
-	double DEL, CURV, ADEL, ACURV, PSD_REF, CURVAV, GRAD; // temporary variables
+	[[maybe_unused]] double CURVAV, GRAD;
+	double DEL, CURV, ADEL, ACURV, PSD_REF; // temporary variables
 	Matrix1D < double > PSD_f(x_size); // PSD on a 'face' (between nodes)
 
 	Matrix1D < double > CourNum(x_size); // Courant number
@@ -62,9 +63,10 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
 
 
 	double d1, d3, d5, d7, d9;
-	double D2, D4, D6, D8, D10;
-	double dif0, dif1, dif2, dif3, dif4, dif5, dif6; // Leonard and Niknfas, 1991
-	double THC1 = 1e6, THC2 = 1e12, THG = 1e6; // Leonard and Niknfas, 1991
+	double D2, D4, D6, D8;
+	//double dif0;
+	double dif1, dif2, dif3, dif4, dif5, dif6; // Leonard and Niknfas, 1991
+	//double THC1 = 1e6, THC2 = 1e12, THG = 1e6; // Leonard and Niknfas, 1991
 
 	// PSD down-wind, center, and up-wind
 	// double PSD_U[uw_n], PSD_D[dw_n], PSD_C;
@@ -76,9 +78,9 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
 	}
 
 	bool use_discreminator = true, use_limiting = true;
-	bool never_3rd_order = false, always_3rd_order = false;
-	bool never_5rd_order = false, always_5rd_order = false;
-	bool never_7rd_order = false, always_7rd_order = false;
+	[[maybe_unused]] bool never_3rd_order = false, always_3rd_order = false;
+	[[maybe_unused]] bool never_5rd_order = false, always_5rd_order = false;
+	[[maybe_unused]] bool never_7rd_order = false, always_7rd_order = false;
 
 	// Temporary PSD to use during calculations, includes ghost points
 	Matrix1D < double > PSD_t(x_size + gst + gst);

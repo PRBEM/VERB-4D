@@ -255,8 +255,9 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	K.readFromFile(InputFolder + "grid.plt",  4);
 
     // Read from Lstar file if Lstar.tab is not present
-    if (!L.readFromIniFile(InputFolder + "Lstar.tab", P, R, V, K))
+    if (!L.readFromIniFile(InputFolder + "Lstar.tab", P, R, V, K)){
         L.readFromAnyFile(InputFolder + "Lstar", io_method, P, R, V, K);
+	}
 
 	L.update(time_first, P, R, V, K); // Load L-star so it'll be available
 
@@ -264,38 +265,48 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	// For all of the following load the .tab file if it exists, if not load the corresponding data file
 
-    if (!DLL.readFromIniFile(InputFolder + "DLL.tab", P, L, V, K))
+    if (!DLL.readFromIniFile(InputFolder + "DLL.tab", P, L, V, K)){
         DLL.readFromAnyFile(InputFolder + "DLL", io_method, P, L, V, K);
+	}
 
-    if (!DVV.readFromIniFile(InputFolder + "DVV.tab", P, R, V, K))
+    if (!DVV.readFromIniFile(InputFolder + "DVV.tab", P, R, V, K)){
 		DVV.readFromAnyFile(InputFolder + "DVV", io_method, P, R, V, K);
+	}
 
-    if (!DKK.readFromIniFile(InputFolder + "DKK.tab", P, R, V, K))
+    if (!DKK.readFromIniFile(InputFolder + "DKK.tab", P, R, V, K)){
 		DKK.readFromAnyFile(InputFolder + "DKK", io_method, P, R, V, K);
+	}
 
-    if (!DVK.readFromIniFile(InputFolder + "DVK.tab", P, R, V, K))
+    if (!DVK.readFromIniFile(InputFolder + "DVK.tab", P, R, V, K)){
 		DVK.readFromAnyFile(InputFolder + "DVK", io_method, P, R, V, K);
+	}
 
-    if (!VP.readFromIniFile(InputFolder + "VP.tab", P, R, V, K))
+    if (!VP.readFromIniFile(InputFolder + "VP.tab", P, R, V, K)){
 		VP.readFromAnyFile(InputFolder + "VP", io_method, P, R, V, K);
+	}
 
-    if (!VL.readFromIniFile(InputFolder + "VR.tab", P, R, V, K))
+    if (!VL.readFromIniFile(InputFolder + "VR.tab", P, R, V, K)){
 		VL.readFromAnyFile(InputFolder + "VR", io_method, P, R, V, K);
+	}
 
-    if (!G_local.readFromIniFile(InputFolder + "G_local.tab", P, R, V, K))
+    if (!G_local.readFromIniFile(InputFolder + "G_local.tab", P, R, V, K)){
 		G_local.readFromAnyFile(InputFolder + "G_local", io_method, P, R, V, K);
+	}
 
-    if (!G_radial.readFromIniFile(InputFolder + "G_radial.tab", P, R, V, K))
+    if (!G_radial.readFromIniFile(InputFolder + "G_radial.tab", P, R, V, K)){
 		G_radial.readFromAnyFile(InputFolder + "G_radial", io_method, P, R, V, K);
+	}
 
 	G_local.update(time_first, P, R, V, K);
 	G_radial.update(time_first, P, R, V, K);
 
-    if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K))
+    if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K)){
 		Sources.readFromAnyFile(InputFolder + "Sources", io_method, P, R, V, K);
+	}
 
-    if (!Losses.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K))
+    if (!Losses.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K)){
         Losses.readFromAnyFile(InputFolder + "Losses_losscone", io_method, P, R, V, K);
+	}
 
     if (!Losses_conv.readFromIniFile(InputFolder + "Losses_conv.tab", P, R, V, K))
     {

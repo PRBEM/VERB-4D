@@ -50,22 +50,22 @@ template <typename T>
 class Matrix1D {
 private:
 	T *plane_array;
-	int32_t num_elements;
+	size_t num_elements;
 public:
 
 	T *matrix_array;						///< Array to keep the values
 
 	bool initialized;						///< Flag, equal true if initialized
-	int size_q1;								///< size x
+	size_t size_q1;								///< size x
 	string name;							///< name of the Matrix
 
 	// constructors and destructors
 	Matrix1D() { initialized = false; };
-	Matrix1D( int size_q1 , string name = "f");
+	Matrix1D( size_t size_q1 , string name = "f");
 	Matrix1D( const Matrix1D<T> &M );
 	~Matrix1D();
 
-	virtual void AllocateMemory( int size_q1 );
+	virtual void AllocateMemory( size_t size_q1 );
 
 	// Operators
 	T& operator[](int i);													///< Return the i-th value of matrix
@@ -146,22 +146,22 @@ private:
 	/// Also, all rows saved in the memory one after another as a big array. So Matrix[x+x_size*y] can be also used.
 	T **matrix_array;
 	T *plane_array;
-	int32_t num_elements;
+	size_t num_elements;
 public:
 	// const static int N_of_dimentions2 = 2;									///< Not used anywhere
 
 	bool initialized;														///< Flag, equal true if initialized
-	int size_q1;															///< size x
-	int size_q2;															 ///< size_y
+	size_t size_q1;															///< size x
+	size_t size_q2;															 ///< size_y
 	string name;															///< name of the Matrix
 
 	// Constructors and destructors
 	Matrix2D() { initialized = false; };
 	Matrix2D( const Matrix2D<T> &M );
-	Matrix2D( int size_q1, int size_q2 );
+	Matrix2D( size_t size_q1, size_t size_q2 );
 	~Matrix2D();
 
-	virtual void AllocateMemory(int size_q1, int size_q2);
+	virtual void AllocateMemory(size_t size_q1, size_t size_q2);
 
 	// Operators
 
@@ -225,11 +225,11 @@ public:
 	virtual void readFromMatlabFile(string filename, const Matrix2D<T> grid_q1, const Matrix2D<T> grid_q2);
 
 	// slices - get 1D slice from 2D array
-	Matrix1D<T> xSlice(int p_q1) const;
-	void xSlice(Matrix1D<T>& out, int p_q1) const;
+	Matrix1D<T> xSlice(size_t p_q1) const;
+	void xSlice(Matrix1D<T>& out, size_t p_q1) const;
 	
-	Matrix1D<T> ySlice(int p_q2) const;
-	void ySlice(Matrix1D<T>& out, int p_q2) const;
+	Matrix1D<T> ySlice(size_t p_q2) const;
+	void ySlice(Matrix1D<T>& out, size_t p_q2) const;
 
 };
 
@@ -247,22 +247,22 @@ private:
 	T *plane_array;
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y][z] can be used.
 	T ***matrix_array;
-	int32_t num_elements;
+	size_t num_elements;
 public:
 	bool initialized;														///< Flag, equal true if initialized
-	int size_q1;															///< size x
-	int size_q2;															///< size y
-	int size_q3;															///< size z
+	size_t size_q1;															///< size x
+	size_t size_q2;															///< size y
+	size_t size_q3;															///< size z
 	string name;															///< name of the Matrix
 
 	// constructors and destructors
 	/// Default constructor. Do nothing.
 	Matrix3D() { initialized = false; };
 	Matrix3D( const Matrix3D<T> &M );
-	Matrix3D( int size_q1, int size_q2, int size_q3 );
+	Matrix3D( size_t size_q1, size_t size_q2, size_t size_q3 );
 	~Matrix3D();
 
-	virtual void AllocateMemory(int size_q1, int size_q2, int size_q3);
+	virtual void AllocateMemory(size_t size_q1, size_t size_q2, size_t size_q3);
 
 	// Operators
 	T** operator[] (int i); 											///< Return the i-th pointer to 2d-array. Next [j][k] can be applied, so we have regular [i][j][k].
@@ -335,24 +335,24 @@ public:
 	Matrix3D<T>& max_of(T val);
 
 	// slices - get 2D slice from 3D array
-	Matrix2D<T> xSlice(int p_q1) const;
-	void xSlice(Matrix2D<T>& out, int p_q1) const;
+	Matrix2D<T> xSlice(size_t p_q1) const;
+	void xSlice(Matrix2D<T>& out, size_t p_q1) const;
 
-	Matrix2D<T> ySlice(int p_q2) const;
-	void ySlice(Matrix2D<T>& out, int p_q2) const;
+	Matrix2D<T> ySlice(size_t p_q2) const;
+	void ySlice(Matrix2D<T>& out, size_t p_q2) const;
 
-	Matrix2D<T> zSlice(int p_q3) const;
-	void zSlice(Matrix2D<T>& out, int p_q3) const;
+	Matrix2D<T> zSlice(size_t p_q3) const;
+	void zSlice(Matrix2D<T>& out, size_t p_q3) const;
 
 	// slices - get 1D slice from 3D array
-	Matrix1D<T> xySlice(int p_i1, int p_i2) const;
-	void xySlice(Matrix1D<T>& out, int p_i1, int p_i2) const;
+	Matrix1D<T> xySlice(size_t p_i1, size_t p_i2) const;
+	void xySlice(Matrix1D<T>& out, size_t p_i1, size_t p_i2) const;
 
-	Matrix1D<T> yzSlice(int p_i2, int p_i3) const;
-	void yzSlice(Matrix1D<T>& out, int p_i2, int p_i3) const;
+	Matrix1D<T> yzSlice(size_t p_i2, size_t p_i3) const;
+	void yzSlice(Matrix1D<T>& out, size_t p_i2, size_t p_i3) const;
 
-	Matrix1D<T> xzSlice(int p_i1, int p_i3) const;
-	void xzSlice(Matrix1D<T>& out, int p_i1, int p_i3) const;
+	Matrix1D<T> xzSlice(size_t p_i1, size_t p_i3) const;
+	void xzSlice(Matrix1D<T>& out, size_t p_i1, size_t p_i3) const;
 
 
 };
@@ -371,23 +371,23 @@ private:
 	T *plane_array;
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[w][x][y][z] can be used.
 	T ****matrix_array;
-	int32_t num_elements;
+	size_t num_elements;
 public:
 	bool initialized;														///< Flag, equal true if initialized
-	int size_w;																///< size w
-	int size_x;																///< size x
-	int size_y; 															///< size y
-	int size_z;																///< size z
+	size_t size_w;																///< size w
+	size_t size_x;																///< size x
+	size_t size_y; 															///< size y
+	size_t size_z;																///< size z
 	string name;															///< name of the Matrix
 
 	// constructors and destructors
 	/// Default constructor. Do nothing.
 	Matrix4D() { initialized = false; };
 	Matrix4D( const Matrix4D<T> &M );
-	Matrix4D( int size_w, int size_x, int size_y, int size_z );
+	Matrix4D( size_t size_w, size_t size_x, size_t size_y, size_t size_z );
 	~Matrix4D();
 
-	virtual void AllocateMemory(int size_w, int size_x, int size_y, int size_z);
+	virtual void AllocateMemory(size_t size_w, size_t size_x, size_t size_y, size_t size_z);
 
 	// Operators
 	T*** operator[] (int i); 											///< Return the i-th pointer to 3d-array. Next [j][k][l] can be applied, so we have regular [i][j][k][l].
@@ -463,49 +463,49 @@ public:
 	Matrix4D<T> abs() const;
 	Matrix4D<T>& max_of(T val);
 	// slices - get 3D slice from 4D array
-	Matrix3D<T> wSlice(int p_w) const;
-	void wSlice(Matrix3D<T>& out, int p_w) const;
+	Matrix3D<T> wSlice(size_t p_w) const;
+	void wSlice(Matrix3D<T>& out, size_t p_w) const;
 
-	Matrix3D<T> xSlice(int p_x) const;
-	void xSlice(Matrix3D<T>& out, int p_x) const;
+	Matrix3D<T> xSlice(size_t p_x) const;
+	void xSlice(Matrix3D<T>& out, size_t p_x) const;
 
-	Matrix3D<T> ySlice(int p_y) const;
-	void ySlice(Matrix3D<T>& out, int p_y) const;
+	Matrix3D<T> ySlice(size_t p_y) const;
+	void ySlice(Matrix3D<T>& out, size_t p_y) const;
 
-	Matrix3D<T> zSlice(int p_z) const;
-	void zSlice(Matrix3D<T>& out, int p_z) const;
+	Matrix3D<T> zSlice(size_t p_z) const;
+	void zSlice(Matrix3D<T>& out, size_t p_z) const;
 
 	// slices - get 2D slice from 4D array
-	Matrix2D<T> wxSlice(int p_w, int p_x) const;
-	void wxSlice(Matrix2D<T>& out, int p_w, int p_y) const;
+	Matrix2D<T> wxSlice(size_t p_w, size_t p_x) const;
+	void wxSlice(Matrix2D<T>& out, size_t p_w, size_t p_y) const;
 
-	Matrix2D<T> wySlice(int p_w, int p_y) const;
-	void wySlice(Matrix2D<T>& out, int p_w, int p_y) const;
+	Matrix2D<T> wySlice(size_t p_w, size_t p_y) const;
+	void wySlice(Matrix2D<T>& out, size_t p_w, size_t p_y) const;
 
-	Matrix2D<T> wzSlice(int p_w, int p_z) const;
-	void wzSlice(Matrix2D<T>& out, int p_w, int p_y) const;
+	Matrix2D<T> wzSlice(size_t p_w, size_t p_z) const;
+	void wzSlice(Matrix2D<T>& out, size_t p_w, size_t p_y) const;
 	
-	Matrix2D<T> xySlice(int p_w, int p_z) const;
-	void xySlice(Matrix2D<T>& out, int p_x, int p_y) const;
+	Matrix2D<T> xySlice(size_t p_w, size_t p_z) const;
+	void xySlice(Matrix2D<T>& out, size_t p_x, size_t p_y) const;
 
-	Matrix2D<T> xzSlice(int p_x, int p_z) const;
-	void xzSlice(Matrix2D<T>& out, int p_x, int p_y) const;
+	Matrix2D<T> xzSlice(size_t p_x, size_t p_z) const;
+	void xzSlice(Matrix2D<T>& out, size_t p_x, size_t p_y) const;
 	
-	Matrix2D<T> yzSlice(int p_x, int p_z) const;
-	void yzSlice(Matrix2D<T>& out, int p_y, int p_z) const;
+	Matrix2D<T> yzSlice(size_t p_x, size_t p_z) const;
+	void yzSlice(Matrix2D<T>& out, size_t p_y, size_t p_z) const;
 
 	// slices - get 1D slice from 4D array
-	Matrix1D<T> wxySlice(int p_w, int p_x, int p_y) const;
-	void wxySlice(Matrix1D<T>& out, int p_w, int p_x, int p_z) const;
+	Matrix1D<T> wxySlice(size_t p_w, size_t p_x, size_t p_y) const;
+	void wxySlice(Matrix1D<T>& out, size_t p_w, size_t p_x, size_t p_z) const;
 	
-	Matrix1D<T> wxzSlice(int p_w, int p_x, int p_y) const;
-	void wxzSlice(Matrix1D<T>& out, int p_w, int p_x, int p_z) const;
+	Matrix1D<T> wxzSlice(size_t p_w, size_t p_x, size_t p_y) const;
+	void wxzSlice(Matrix1D<T>& out, size_t p_w, size_t p_x, size_t p_z) const;
 
-	Matrix1D<T> wyzSlice(int p_w, int p_y, int p_z) const;
-	void wyzSlice(Matrix1D<T>& out, int p_w, int p_x, int p_z) const;
+	Matrix1D<T> wyzSlice(size_t p_w, size_t p_y, size_t p_z) const;
+	void wyzSlice(Matrix1D<T>& out, size_t p_w, size_t p_x, size_t p_z) const;
 
-	Matrix1D<T> xyzSlice(int p_w, int p_y, int p_z) const;
-	void xyzSlice(Matrix1D<T>& out, int p_x, int p_y, int p_z) const;
+	Matrix1D<T> xyzSlice(size_t p_w, size_t p_y, size_t p_z) const;
+	void xyzSlice(Matrix1D<T>& out, size_t p_x, size_t p_y, size_t p_z) const;
 };
 
 
