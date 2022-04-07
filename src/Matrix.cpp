@@ -3619,20 +3619,17 @@ void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, con
 */
 template<class T>
 void Matrix3D<T>::writeToBinaryFile(string filename) {
-    FILE *outputFile = fopen(filename.c_str(), "wb");
-    if (outputFile != NULL) {
-        int status;
-
+	std::ofstream outputFile(filename, std::ios::binary | std::ios::out);
+    if (outputFile.is_open()) {
 		int32_t size_array[3] =  { size_q1, size_q2, size_q3 };
-		status = fwrite(size_array, sizeof(int32_t), 3, outputFile);
-		if (status!=3){
+		outputFile.write((char*)size_array, 3 * sizeof(int32_t));
+		if (!outputFile.good()){
 			printf("Writing error");
 			exit(EXIT_FAILURE);
 		}
 
-		int size_total = this->size_q1 * this->size_q2 * this->size_q3;
-		status = fwrite(this->plane_array, sizeof(T), size_total, outputFile);
-		if (status!=size_total){
+		outputFile.write((char*)plane_array, num_elements * sizeof(T));
+		if (!outputFile.good()){
 			printf("Writing error");
 			exit(EXIT_FAILURE);
 		}
@@ -3640,7 +3637,7 @@ void Matrix3D<T>::writeToBinaryFile(string filename) {
         printf("MATRIX_WRITE_ERROR: Error writing file %s.\n", filename.c_str());
         exit(EXIT_FAILURE);
     }
-    fclose(outputFile);
+    outputFile.close();
 }
 
 
@@ -3658,20 +3655,17 @@ void Matrix3D<T>::readFromBinaryFile(string filename) {
 		exit(EXIT_FAILURE);
 	} else {
 		this->name = filename;
-		FILE *inputFile = fopen(filename.c_str(), "rb");
-		if (inputFile != NULL) {
-            int status;
-
+		std::ifstream inputFile(filename, std::ios::binary | std::ios::in);
+		if (inputFile.is_open()) {
 			int32_t buffer_int32[3];
-			status = fread(buffer_int32, sizeof(int32_t), 3, inputFile);
-			if (status!=3){
+			inputFile.read((char*)buffer_int32, 3 * sizeof(int32_t));
+			if (!inputFile.good()){
 				printf("Reading error");
 				exit(EXIT_FAILURE);
 			}
 
-			int size_total = this->size_q1 * this->size_q2 * this->size_q3;
-			status = fread(this->plane_array, sizeof(T), size_total, inputFile);
-			if (status!=size_total){
+			inputFile.read((char*)plane_array, num_elements * sizeof(T));
+			if (!inputFile.good()){
 				printf("Reading error");
 				exit(EXIT_FAILURE);
 			}
@@ -3679,7 +3673,7 @@ void Matrix3D<T>::readFromBinaryFile(string filename) {
 			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
 			exit(EXIT_FAILURE);
 		}
-		fclose(inputFile);
+		inputFile.close();
 	}
 }
 
@@ -5494,29 +5488,25 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 */
 template<class T>
 void Matrix4D<T>::writeToBinaryFile(string filename) {
-    int w, x, y, z;
-    FILE *outputFile = fopen(filename.c_str(), "wb");
-    if (outputFile != NULL) {
-        int status;
-
-        int32_t size_array[4] = {size_w, size_x, size_y, size_z};
-		status = fwrite(size_array, sizeof(int32_t), 4, outputFile);
-		if (status!=4){
-			printf("Writing error");
-			exit(EXIT_FAILURE);
-		}
-		int size_total = this->size_w * this->size_x * this->size_y * this->size_z;
-		status = fwrite(this->plane_array, sizeof(T), size_total, outputFile);
-		if (status!=size_total){
+	std::ofstream outputFile(filename, std::ios::binary | std::ios::out);
+    if (outputFile.is_open()) {
+		int32_t size_array[4] =  { size_w, size_x, size_y, size_z };
+		outputFile.write((char*)size_array, 4 * sizeof(int32_t));
+		if (!outputFile.good()){
 			printf("Writing error");
 			exit(EXIT_FAILURE);
 		}
 
+		outputFile.write((char*)plane_array, num_elements * sizeof(T));
+		if (!outputFile.good()){
+			printf("Writing error");
+			exit(EXIT_FAILURE);
+		}
     } else {
         printf("MATRIX_WRITE_ERROR: Error writing file %s.\n", filename.c_str());
         exit(EXIT_FAILURE);
     }
-    fclose(outputFile);
+    outputFile.close();
 }
 
 /**
@@ -5548,26 +5538,22 @@ void Matrix4D<T>::writeToAnyFile(string filename, string io_method, string info)
 */
 template<class T>
 void Matrix4D<T>::readFromBinaryFile(string filename) {
-	int w, x, y, z;
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using un-itialized matrix");
 		exit(EXIT_FAILURE);
 	} else {
 		this->name = filename;
-		FILE *inputFile = fopen(filename.c_str(), "rb");
-		if (inputFile != NULL) {
-            int status;
-
+		std::ifstream inputFile(filename, std::ios::binary | std::ios::in);
+		if (inputFile.is_open()) {
 			int32_t buffer_int32[4];
-			status = fread(buffer_int32, sizeof(int32_t), 4, inputFile);
-			if (status!=4){
+			inputFile.read((char*)buffer_int32, 4 * sizeof(int32_t));
+			if (!inputFile.good()){
 				printf("Reading error");
 				exit(EXIT_FAILURE);
 			}
 
-			int size_total = this->size_w * this->size_x * this->size_y * this->size_z;
-			status = fread(this->plane_array, sizeof(T), size_total, inputFile);
-			if (status!=size_total){
+			inputFile.read((char*)plane_array, num_elements * sizeof(T));
+			if (!inputFile.good()){
 				printf("Reading error");
 				exit(EXIT_FAILURE);
 			}
@@ -5575,7 +5561,7 @@ void Matrix4D<T>::readFromBinaryFile(string filename) {
 			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
 			exit(EXIT_FAILURE);
 		}
-		fclose(inputFile);
+		inputFile.close();
 	}
 }
 

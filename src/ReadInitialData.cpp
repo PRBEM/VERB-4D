@@ -199,8 +199,6 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 }
 #endif
 
-	FILE *file;
-
     // Opening up grid.plt in order to get P,R,V,K sizes which are stored in the header
     ifstream input;
     input.open((InputFolder + "grid.plt").c_str());

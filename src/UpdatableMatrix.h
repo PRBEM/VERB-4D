@@ -64,8 +64,8 @@ public:
 	MatrixND original_arr;
 
 	// to simplify things
-	inline MatrixND& operator= (const MatrixND &M);
-	inline MatrixND& operator= (const double Val);
+	MatrixND& operator= (const MatrixND &M);
+	MatrixND& operator= (const double Val);
 
 	void saveCurrent(); // Save current matrix as original to be scaled/limited later
 
@@ -112,8 +112,8 @@ private:
 public:
 
 	// to simplify things
-	inline MatrixND& operator= (const MatrixND &M);
-	inline MatrixND& operator= (const double Val);
+	MatrixND& operator= (const MatrixND &M);
+	MatrixND& operator= (const double Val);
 
 	bool readFromIniFile(string ini_filename, MatrixND &Q1, MatrixND &Q2, MatrixND &Q3, MatrixND &Q4);
 	void update(double time, MatrixND Q1, MatrixND Q2, MatrixND Q3, MatrixND Q4 = MatrixND());
