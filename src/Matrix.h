@@ -118,13 +118,13 @@ public:
 
 	// writeToFileting
 	virtual void writeToFile(string filename);
-	virtual void writeToFile(string filename, Matrix1D<T> &grid_q1);
+	virtual void writeToFile(string filename, const Matrix1D<T>& grid_q1);
 	virtual void readFromFile(string filename);
-	virtual void readFromFile(string filename, const Matrix1D<T> grid_q1);
+	virtual void readFromFile(string filename, const Matrix1D<T>& grid_q1);
 
 	//ADDED
 	virtual void readFromMatlabFile(string filename, int columnNumber = 1);
-	virtual void readFromMatlabFile(string filename, const Matrix1D<T> grid_q1);
+	virtual void readFromMatlabFile(string filename, const Matrix1D<T>& grid_q1);
 
 	T min() const;
 	T max() const;
@@ -216,13 +216,13 @@ public:
 
 	// writeToFileting
 	virtual void writeToFile(string filename);
-	virtual void writeToFile(string filename, Matrix2D<T> &grid_q1, Matrix2D<T> &grid_q2);
+	virtual void writeToFile(string filename, const Matrix2D<T>& grid_q1, const Matrix2D<T>& grid_q2);
 	virtual void readFromFile(string filename, int column = 1);
-	virtual void readFromFile(string filename, const Matrix2D<T> grid_q1, const Matrix2D<T> grid_q2);
+	virtual void readFromFile(string filename, const Matrix2D<T>& grid_q1, const Matrix2D<T>& grid_q2);
 
 	//ADDED
 	virtual void readFromMatlabFile(string filename, int column = 1);
-	virtual void readFromMatlabFile(string filename, const Matrix2D<T> grid_q1, const Matrix2D<T> grid_q2);
+	virtual void readFromMatlabFile(string filename, const Matrix2D<T>& grid_q1, const Matrix2D<T>& grid_q2);
 
 	// slices - get 1D slice from 2D array
 	Matrix1D<T> xSlice(int p_q1) const;
@@ -308,20 +308,20 @@ public:
 
 	// Saving (loading) of a matrix into (from) file
 	virtual void writeToFile(string filename, string info = ""); 										///< Save matrix to a file
-	virtual void writeToFile(string filename, Matrix3D<T> &grid_q1, Matrix3D<T> &grid_q2, Matrix3D<T> &grid_q3); ///< Save matrix to a file, including grid
+	virtual void writeToFile(string filename, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3); ///< Save matrix to a file, including grid
 	virtual void readFromFile(string filename, int column = 1);  									///< Load matrix from a file
-	virtual void readFromFile(string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3); ///< Load matrix to a file
+	virtual void readFromFile(string filename, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3); ///< Load matrix to a file
 
 	// ADDED
 	virtual void readFromMatlabFile(string filename, int column = 1);
-	virtual void readFromMatlabFile(string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3);
+	virtual void readFromMatlabFile(string filename, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3);
 
     virtual void writeToBinaryFile(string filename);
     virtual void readFromBinaryFile(string filename);
 
     virtual void writeToAnyFile(string filename, string io_method, string info);
     virtual void readFromAnyFile(string filename, string io_method);
-    virtual void readFromAnyFile(string filename, string io_method, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3);
+    virtual void readFromAnyFile(string filename, string io_method, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3);
 
 	// Some other stuff
 	string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
@@ -431,26 +431,26 @@ public:
 
 	// Saving (loading) of a matrix into (from) file
 	virtual void writeToFile(string filename, string info = ""); 										///< Save matrix to a file
-	virtual void writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z); ///< Save matrix to a file, including grid
+	virtual void writeToFile(string filename, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z); ///< Save matrix to a file, including grid
 	virtual void readFromFile(string filename, int column = 1);  									///< Load matrix from a file
-	virtual void readFromFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z); ///< Load matrix to a file
+	virtual void readFromFile(string filename, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z); ///< Load matrix to a file
 
 	// ADDED
 #if (MATLAB_CAPABLE)
-	virtual mxArray* createStructMatrix(string filename, string info = ""); ///< Package matrix into matlab variable
+	virtual mxArray* createStructMatrix(string filename, string info = "") const; ///< Package matrix into matlab variable
 #endif
 
 	virtual void writeToMatlabFile(string filename, string info = ""); 										///< Save matrix to a file
-	virtual void writeToMatlabFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z);
+	virtual void writeToMatlabFile(string filename, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z);
 	virtual void readFromMatlabFile(string file, int column = 1);
-	virtual void readFromMatlabFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z);
+	virtual void readFromMatlabFile(string filename, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z);
 
     virtual void writeToBinaryFile(string filename);
     virtual void readFromBinaryFile(string filename);
 
     virtual void writeToAnyFile(string filename, string io_method, string info);
     virtual void readFromAnyFile(string filename, string io_method);
-    virtual void readFromAnyFile(string filename, string io_method, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z);
+    virtual void readFromAnyFile(string filename, string io_method, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z);
 
 	// Some other stuff
 	string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)

@@ -79,9 +79,9 @@ public:
 	//void readFromFile(string filename, const MatrixND grid_w, const MatrixND grid_x, const MatrixND grid_y); ///< Load matrix to a file
 	//void readFromFile(string filename, const MatrixND grid_w, const MatrixND grid_x, const MatrixND grid_y, const MatrixND grid_z); ///< Load matrix to a file
 
-	bool readFromIniFile(string ini_filename, MatrixND Q1, MatrixND Q2, MatrixND Q3, MatrixND Q4 = MatrixND());
-	bool readFromString(string file_line_string, MatrixND &Q1, MatrixND &Q2, MatrixND &Q3, MatrixND &Q4);
-	bool update(double time, MatrixND Q1, MatrixND Q2, MatrixND Q3, MatrixND Q4 = MatrixND());
+	bool readFromIniFile(string ini_filename, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
+	bool readFromString(string file_line_string, const MatrixND &Q1, const MatrixND &Q2, const MatrixND &Q3, const MatrixND &Q4);
+	bool update(double time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
 
 };
 
@@ -115,8 +115,8 @@ public:
 	inline MatrixND& operator= (const MatrixND &M);
 	inline MatrixND& operator= (const double Val);
 
-	bool readFromIniFile(string ini_filename, MatrixND &Q1, MatrixND &Q2, MatrixND &Q3, MatrixND &Q4);
-	void update(double time, MatrixND Q1, MatrixND Q2, MatrixND Q3, MatrixND Q4 = MatrixND());
+	bool readFromIniFile(string ini_filename, const MatrixND &Q1, const MatrixND &Q2, const MatrixND &Q3, const MatrixND &Q4);
+	void update(double time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
 
 };
 
