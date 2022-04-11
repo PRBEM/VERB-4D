@@ -64,7 +64,7 @@ public:
 	Matrix1D( const Matrix1D<T> &M );
 	~Matrix1D();
 
-	virtual void AllocateMemory( int size_q1 );
+	void AllocateMemory( int size_q1 );
 
 	// Operators
 	T& operator[](int i);													///< Return the i-th value of matrix
@@ -116,14 +116,14 @@ public:
 	//T maxabs();
 
 	// writeToFileting
-	virtual void writeToFile(std::string filename) const;
-	virtual void writeToFile(std::string filename, Matrix1D<T> &grid_q1) const;
-	virtual void readFromFile(std::string filename);
-	virtual void readFromFile(std::string filename, const Matrix1D<T> grid_q1);
+	void writeToFile(std::string filename) const;
+	void writeToFile(std::string filename, const Matrix1D<T>& grid_q1) const;
+	void readFromFile(std::string filename);
+	void readFromFile(std::string filename, const Matrix1D<T>& grid_q1);
 
 	//ADDED
-	virtual void readFromMatlabFile(std::string filename, int columnNumber = 1);
-	virtual void readFromMatlabFile(std::string filename, const Matrix1D<T> grid_q1);
+	void readFromMatlabFile(std::string filename, int columnNumber = 1);
+	void readFromMatlabFile(std::string filename, const Matrix1D<T>& grid_q1);
 
 	T min() const;
 	T max() const;
@@ -160,7 +160,7 @@ public:
 	Matrix2D( int size_q1, int size_q2 );
 	~Matrix2D();
 
-	virtual void AllocateMemory(int size_q1, int size_q2);
+	void AllocateMemory(int size_q1, int size_q2);
 
 	// Operators
 
@@ -214,15 +214,16 @@ public:
 	Matrix2D<T>& max_of(T val);
 
 	// writeToFileting
-	virtual void writeToFile(std::string filename) const;
-	virtual void writeToFile(std::string filename, Matrix2D<T> &grid_q1, Matrix2D<T> &grid_q2) const;
-	virtual void writeToBinaryFile(std::string filename) const;
-	virtual void readFromFile(std::string filename, int column = 1);
-	virtual void readFromFile(std::string filename, const Matrix2D<T> grid_q1, const Matrix2D<T> grid_q2);
+	void writeToFile(std::string filename) const;
+	void writeToFile(std::string filename, const Matrix2D<T>& grid_q1, const Matrix2D<T>& grid_q2) const;
+	void readFromFile(std::string filename, int column = 1);
+	void readFromFile(std::string filename, const Matrix2D<T>& grid_q1, const Matrix2D<T>& grid_q2);
 
 	//ADDED
-	virtual void readFromMatlabFile(std::string filename, int column = 1);
-	virtual void readFromMatlabFile(std::string filename, const Matrix2D<T> grid_q1, const Matrix2D<T> grid_q2);
+	void readFromMatlabFile(std::string filename, int column = 1);
+	void readFromMatlabFile(std::string filename, const Matrix2D<T>& grid_q1, const Matrix2D<T>& grid_q2);
+
+	void writeToBinaryFile(std::string filename) const;
 
 	// slices - get 1D slice from 2D array
 	Matrix1D<T> xSlice(int p_q1) const;
@@ -262,7 +263,7 @@ public:
 	Matrix3D( int size_q1, int size_q2, int size_q3 );
 	~Matrix3D();
 
-	virtual void AllocateMemory(int size_q1, int size_q2, int size_q3);
+	void AllocateMemory(int size_q1, int size_q2, int size_q3);
 
 	// Operators
 	T** operator[] (int i); 											///< Return the i-th pointer to 2d-array. Next [j][k] can be applied, so we have regular [i][j][k].
@@ -307,21 +308,21 @@ public:
 	Matrix3D divide (const Matrix3D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
 
 	// Saving (loading) of a matrix into (from) file
-	virtual void writeToFile(std::string filename, std::string info = "") const; 										///< Save matrix to a file
-	virtual void writeToFile(std::string filename, Matrix3D<T> &grid_q1, Matrix3D<T> &grid_q2, Matrix3D<T> &grid_q3) const; ///< Save matrix to a file, including grid
-	virtual void readFromFile(std::string filename, int column = 1);  									///< Load matrix from a file
-	virtual void readFromFile(std::string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3); ///< Load matrix to a file
+	void writeToFile(std::string filename, std::string info = "") const; 										///< Save matrix to a file
+	void writeToFile(std::string filename, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3) const; ///< Save matrix to a file, including grid
+	void readFromFile(std::string filename, int column = 1);  									///< Load matrix from a file
+	void readFromFile(std::string filename, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3); ///< Load matrix to a file
 
 	// ADDED
-	virtual void readFromMatlabFile(std::string filename, int column = 1);
-	virtual void readFromMatlabFile(std::string filename, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3);
+	void readFromMatlabFile(std::string filename, int column = 1);
+	void readFromMatlabFile(std::string filename, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3);
 
-    virtual void writeToBinaryFile(std::string filename) const;
-    virtual void readFromBinaryFile(std::string filename);
+    void writeToBinaryFile(std::string filename) const;
+    void readFromBinaryFile(std::string filename);
 
-    virtual void writeToAnyFile(std::string filename, std::string io_method, std::string info) const;
-    virtual void readFromAnyFile(std::string filename, std::string io_method);
-    virtual void readFromAnyFile(std::string filename, std::string io_method, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3);
+    void writeToAnyFile(std::string filename, std::string io_method, std::string info) const;
+    void readFromAnyFile(std::string filename, std::string io_method);
+    void readFromAnyFile(std::string filename, std::string io_method, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3);
 
 	// Some other stuff
 	std::string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
@@ -387,7 +388,7 @@ public:
 	Matrix4D( int size_w, int size_x, int size_y, int size_z );
 	~Matrix4D();
 
-	virtual void AllocateMemory(int size_w, int size_x, int size_y, int size_z);
+	void AllocateMemory(int size_w, int size_x, int size_y, int size_z);
 
 	// Operators
 	T*** operator[] (int i); 											///< Return the i-th pointer to 3d-array. Next [j][k][l] can be applied, so we have regular [i][j][k][l].
@@ -430,27 +431,27 @@ public:
 	Matrix4D divide (const Matrix4D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
 
 	// Saving (loading) of a matrix into (from) file
-	virtual void writeToFile(std::string filename, std::string info = "") const; 										///< Save matrix to a file
-	virtual void writeToFile(std::string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) const; ///< Save matrix to a file, including grid
-	virtual void readFromFile(std::string filename, int column = 1);  									///< Load matrix from a file
-	virtual void readFromFile(std::string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z); ///< Load matrix to a file
+	void writeToFile(std::string filename, std::string info = "") const; 										///< Save matrix to a file
+	void writeToFile(std::string filename, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z); ///< Save matrix to a file, including grid
+	void readFromFile(std::string filename, int column = 1);  									///< Load matrix from a file
+	void readFromFile(std::string filename, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z); ///< Load matrix to a file
 
 	// ADDED
 #if (MATLAB_CAPABLE)
 	virtual mxArray* createStructMatrix(std::string filename, std::string info = "") const; ///< Package matrix into matlab variable
 #endif
 
-	virtual void writeToMatlabFile(std::string filename, std::string info = "") const; 										///< Save matrix to a file
-	virtual void writeToMatlabFile(std::string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) const;
-	virtual void readFromMatlabFile(std::string file, int column = 1);
-	virtual void readFromMatlabFile(std::string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z);
+	void writeToMatlabFile(std::string filename, std::string info = "") const; 										///< Save matrix to a file
+	void writeToMatlabFile(std::string filename, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z) const;
+	void readFromMatlabFile(std::string file, int column = 1);
+	void readFromMatlabFile(std::string filename, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z);
 
-    virtual void writeToBinaryFile(std::string filename) const;
-    virtual void readFromBinaryFile(std::string filename);
+    void writeToBinaryFile(std::string filename) const;
+    void readFromBinaryFile(std::string filename);
 
-    virtual void writeToAnyFile(std::string filename, std::string io_method, std::string info) const;
-    virtual void readFromAnyFile(std::string filename, std::string io_method);
-    virtual void readFromAnyFile(std::string filename, std::string io_method, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z);
+    void writeToAnyFile(std::string filename, std::string io_method, std::string info) const;
+    void readFromAnyFile(std::string filename, std::string io_method);
+    void readFromAnyFile(std::string filename, std::string io_method, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z);
 
 	// Some other stuff
 	std::string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)

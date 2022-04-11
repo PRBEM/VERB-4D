@@ -485,7 +485,7 @@ int main(int argc, char* argv[]) {
             Matrix2D<double> lossconv_slice(P_size, R_size);
             
             // sources are set to zero and not updated during the loop
-            Matrix2D<double> source_slice = Sources.yzSlice(1, 1) * 0.0;
+            Matrix2D<double> source_slice = Sources.yzSlice(0, 0) * 0.0;
 
             // Looping it backward allows to speed-up the multithread simulation
             // due to the highest energies being the slowest to calculate - calculating highest energy first
@@ -497,7 +497,7 @@ int main(int argc, char* argv[]) {
                 for (int iK = 0; iK < K_size; iK++) {
 #else
 #pragma omp for
-            for (long index = (V_size * K_size) - 1; index >= 0; index--) {{
+            for (long index = (V_size * K_size) - 1; index >= 0; index--) {{ // Double brackes are needed for compatability with OPENMP 3.0 code.
                 // Manually collapsing into a single for loop in order to optimize
                 int iV = index % V_size;
                 int iK = (K_size - 1) - (index / V_size);

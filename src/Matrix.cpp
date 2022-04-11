@@ -517,7 +517,7 @@ void Matrix1D<T>::writeToFile(string filename) const {
 * Write matrix data to file with grid.
 */
 template<class T>
-void Matrix1D<T>::writeToFile(string filename, Matrix1D<T> &grid_q1) const {
+void Matrix1D<T>::writeToFile(string filename, const Matrix1D<T> &grid_q1) const {
 	int i1;
 	ofstream output(filename.c_str());
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
@@ -896,7 +896,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
 * \param grid_q1 - checks grid data against the file data
 */
 template<class T>
-void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
+void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T>& grid_q1) {
 	int i1;
 	string inBuf;
 	double loaded_q1;
@@ -948,7 +948,7 @@ void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
+void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T>& grid_x)
 {
 
 #if (MATLAB_CAPABLE)
@@ -1684,7 +1684,7 @@ void Matrix2D<T>::writeToFile(string filename) const {
 * Simply that means - write all three matrixes to a file.
 */
 template<class T>
-void Matrix2D<T>::writeToFile(string filename, Matrix2D<T> &grid_x, Matrix2D<T> &grid_y) const {
+void Matrix2D<T>::writeToFile(string filename, const Matrix2D<T> &grid_x, const Matrix2D<T> &grid_y) const {
 	int i1, i2;
 	ofstream output(filename.c_str());
 	output << "VARIABLES = \"" << ((grid_x.name!="")?grid_x.name:"x") << "\", \"" << ((grid_y.name!="")?grid_y.name:"y") << "\", \"" << ((this->name!="")?this->name:"f") << "\" "<< endl;
@@ -2095,7 +2095,7 @@ void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
 * \param grids x,y - checks grids data against the file data
 */
 template<class T>
-void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const Matrix2D<T> grid_y) {
+void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T>& grid_x, const Matrix2D<T>& grid_y) {
 	int i1, i2;
 	string inBuf;
 	double loaded_x, loaded_y;
@@ -2147,7 +2147,7 @@ void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const 
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, const Matrix2D<T> grid_y)
+void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T>& grid_x, const Matrix2D<T>& grid_y)
 {
 
 #if (MATLAB_CAPABLE)
@@ -2887,7 +2887,7 @@ void Matrix3D<T>::writeToFile(string filename, string info) const {
 * File has two header lines.
 */
 template<class T>
-void Matrix3D<T>::writeToFile(string filename, Matrix3D<T> &grid_x, Matrix3D<T> &grid_y, Matrix3D<T> &grid_z) const {
+void Matrix3D<T>::writeToFile(string filename, const Matrix3D<T>& grid_x, const Matrix3D<T>& grid_y, const Matrix3D<T>& grid_z) const {
 	int i1, i2, i3;
 	ofstream output(filename.c_str());
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
@@ -3291,7 +3291,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
 * \param grids x,y,z - checks grids data against the file data
 */
 template<class T>
-void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const Matrix3D<T> grid_y, const Matrix3D<T> grid_z) {
+void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T>& grid_x, const Matrix3D<T>& grid_y, const Matrix3D<T>& grid_z) {
 	int i1, i2, i3;
 	string inBuf;
 	double loaded_x, loaded_y, loaded_z;
@@ -3354,7 +3354,7 @@ void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const 
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, const Matrix3D<T> grid_y, const Matrix3D<T> grid_z)
+void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T>& grid_x, const Matrix3D<T>& grid_y, const Matrix3D<T>& grid_z)
 {
 
 #if (MATLAB_CAPABLE)
@@ -3758,7 +3758,7 @@ void Matrix3D<T>::readFromAnyFile(string filename, string io_method) {
 * WARNING: if io_method == "binary", .pltb file does not contain grid. In this case the function works the same as Matrix3D<T>::readFromAnyFile(string, string, int)
 */
 template<class T>
-void Matrix3D<T>::readFromAnyFile(string filename, string io_method, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3){
+void Matrix3D<T>::readFromAnyFile(string filename, string io_method, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3){
     string ext;
     if (io_method.compare("ascii") == 0){
         ext = ".plt";
@@ -4641,7 +4641,7 @@ void Matrix4D<T>::writeToMatlabFile(string filename, string info) const {
 * File has two header lines.
 */
 template<class T>
-void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) const {
+void Matrix4D<T>::writeToFile(string filename, const Matrix4D<T> &grid_w, const Matrix4D<T> &grid_x, const Matrix4D<T> &grid_y, const Matrix4D<T> &grid_z) {
 	int w, x, y, z;
 	ofstream output(filename.c_str());
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
@@ -4671,7 +4671,7 @@ void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> 
 * Uses the createStructMatrix() function to pack all the grid dimensions into seperate variables and then combines these variables into a single matlab structure to save in .mat
 */
 template<class T>
-void Matrix4D<T>::writeToMatlabFile(string file, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) const {
+void Matrix4D<T>::writeToMatlabFile(string file, const Matrix4D<T> &grid_w, const Matrix4D<T> &grid_x, const Matrix4D<T> &grid_y, const Matrix4D<T> &grid_z) const {
 
 #if (MATLAB_CAPABLE)
 
@@ -5155,7 +5155,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 * \param grids w,x,y,z - checks grids data against the file data
 */
 template<class T>
-void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z) {
+void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z) {
 	int w, x, y, z;
 	string inBuf;
 	double loaded_w, loaded_x, loaded_y, loaded_z;
@@ -5237,7 +5237,7 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z)
+void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z)
 {
 
 #if (MATLAB_CAPABLE)
@@ -5631,7 +5631,7 @@ void Matrix4D<T>::readFromAnyFile(string filename, string io_method) {
 * WARNING: if io_method == "binary", .pltb file does not contain grid. In this case the function works the same as Matrix4D<T>::readFromAnyFile(string, string, int)
 */
 template<class T>
-void Matrix4D<T>::readFromAnyFile(string filename, string io_method, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z){
+void Matrix4D<T>::readFromAnyFile(string filename, string io_method, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z){
     string ext;
     if (io_method.compare("ascii") == 0){
         ext = ".plt";
