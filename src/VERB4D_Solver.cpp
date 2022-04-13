@@ -324,6 +324,26 @@ int main(int argc, char* argv[]) {
     // variables to show the progress of calculation
     int progress_count, progress_total;
 
+    Matrix3D<double> P_lowerR = P.xSlice(0);
+    Matrix3D<double> V_lowerR = V.xSlice(0);
+    Matrix3D<double> K_lowerR = K.xSlice(0);
+    Matrix3D<double> P_upperR = P.xSlice(R.size_x - 1);
+    Matrix3D<double> V_upperR = V.xSlice(R.size_x - 1);
+    Matrix3D<double> K_upperR = K.xSlice(R.size_x - 1);
+
+    Matrix3D<double> P_lowerV = P.ySlice(0);
+    Matrix3D<double> R_lowerV = R.ySlice(0);
+    Matrix3D<double> K_lowerV = K.ySlice(0);
+    Matrix3D<double> P_upperV = P.ySlice(V.size_y - 1);
+    Matrix3D<double> R_upperV = R.ySlice(V.size_y - 1);
+    Matrix3D<double> K_upperV = K.ySlice(V.size_y - 1);
+    
+    Matrix3D<double> P_lowerK = P.zSlice(0);
+    Matrix3D<double> R_lowerK = R.zSlice(0);
+    Matrix3D<double> V_lowerK = V.zSlice(0);
+    Matrix3D<double> P_upperK = P.zSlice(K.size_z - 1);
+    Matrix3D<double> R_upperK = R.zSlice(K.size_z - 1);
+    Matrix3D<double> V_upperK = V.zSlice(K.size_z - 1);
     // Main loop
     // Start time
     for (long int it = it_first; it < it_total; it++) {
@@ -345,7 +365,7 @@ int main(int argc, char* argv[]) {
                 progress_count = 0;
                 progress_total = P_size * V_size * K_size; // total size of solution matrix
                 Logger::message << "Interpolation to new L (adiabatic transport): ";
-                cout << "           ";
+                std::cout << "           ";
 
                 Matrix1D<double> old_L_1d(L_size), PSD_L(L_size), new_L_1d(L_size);
                 // Aparently it's not thread-safe
@@ -355,10 +375,10 @@ int main(int argc, char* argv[]) {
                         for (int iK = 0; iK < K_size; iK++) {
                             // show progress % if 0 threads
                             if (omp_get_thread_num() == 0) {
-                                cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
+                                std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
                                     << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
                             } else {
-                                cout << "thread" << omp_get_thread_num();
+                                std::cout << "thread" << omp_get_thread_num();
                             }
 
                             // 1d slice to get L from matrix4d (P,L,V,K)
@@ -380,7 +400,7 @@ int main(int argc, char* argv[]) {
                         }
                     }
                 }
-                cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
+                std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
 
                 // Copy the new L into L_copy for future interpolations
                 L_copy = L;
@@ -424,28 +444,28 @@ int main(int argc, char* argv[]) {
         if (R_size > 3) {
             // Put PSD-slice into the boundary condition. It will be updated from the ini-file, if there is something in the ini-file.
             //R_LBC.original_arr =(PSD.xSlice(0));
-            Rl_BC.update(time, P.xSlice(0), V.xSlice(0), K.xSlice(0));
+            Rl_BC.update(time, P_lowerR, V_lowerR, K_lowerR);
             //R_UBC.original_arr =(PSD.xSlice(PSD.size_x - 1));
-            Ru_BC.update(time, P.xSlice(R.size_x - 1), V.xSlice(R.size_x - 1), K.xSlice(R.size_x - 1));
+            Ru_BC.update(time, P_upperR, V_upperR, K_upperR);
         }
         if (L_size > 3) {
             //L_LBC.original_arr =(PSD.xSlice(0));
-            Ll_BC.update(time, P.xSlice(0), V.xSlice(0), K.xSlice(0));
+            Ll_BC.update(time, P_lowerR, V_lowerR, K_lowerR);
             //L_UBC.original_arr =(PSD.xSlice(PSD.size_x - 1));
-            Lu_BC.update(time, P.xSlice(R.size_x - 1), V.xSlice(R.size_x - 1), K.xSlice(R.size_x - 1));
+            Lu_BC.update(time, P_upperR, V_upperR, K_upperR);
 
         }
         if (V_size > 3) {
             //V_LBC.original_arr =(PSD.ySlice(0));
-            Vl_BC.update(time, P.ySlice(0), R.ySlice(0), K.ySlice(0));
+            Vl_BC.update(time, P_lowerV, R_lowerV, K_lowerV);
             //V_UBC.original_arr =(PSD.ySlice(PSD.size_y - 1));
-            Vu_BC.update(time, P.ySlice(V.size_y - 1), R.ySlice(V.size_y - 1), K.ySlice(V.size_y - 1));
+            Vu_BC.update(time, P_upperV, R_upperV, K_upperV);
         }
         if (K_size > 3) {
             //K_LBC.original_arr =(PSD.zSlice(0));
-            Kl_BC.update(time, P.zSlice(0), R.zSlice(0), V.ySlice(0));
+            Kl_BC.update(time, P_lowerK, R_lowerK, V_lowerK);
             //K_UBC.original_arr =(PSD.zSlice(PSD.size_z - 1));
-            Ku_BC.update(time, P.zSlice(K.size_z - 1), R.zSlice(K.size_z - 1), V.zSlice(K.size_z - 1));
+            Ku_BC.update(time, P_upperK, R_upperK, V_upperK);
         }
 
         // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -466,7 +486,7 @@ int main(int argc, char* argv[]) {
             progress_count = 0;
             progress_total = V_size * K_size;
             Logger::message << "Convection:" << endl;;
-            cout << "           ";
+            std::cout << "           ";
 
             Matrix2D<double> PSD_PR(P_size, R_size);
 
@@ -504,7 +524,7 @@ int main(int argc, char* argv[]) {
 #endif
                 // Output current progress percentage when number of threads = 0
                 if (omp_get_thread_num() == 0) {
-                    cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
+                    std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
                             << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
                 }
 
@@ -543,16 +563,16 @@ int main(int argc, char* argv[]) {
             }}
 }
             // Output final progress (it should be 100%)
-            cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
+            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
 #pragma omp master
             {
             if(Vl_BC_from_convection == "true" && (Vl_BC_type == "BCT_CONSTANT_VALUE")){ //rewrite boundary conditions at lower V
                 Vl_BC = PSD.ySlice(0);
-                cout << "Vl_BC from convection are used: max(Vl_BC) = " << Vl_BC.max() << endl;
+                std::cout << "Vl_BC from convection are used: max(Vl_BC) = " << Vl_BC.max() << endl;
             }
             if(Vu_BC_from_convection == "true" && (Vu_BC_type == "BCT_CONSTANT_VALUE")){ //rewrite boundary conditions at lower V
                 Vu_BC = PSD.ySlice(V_size-1);
-                cout << "Vu_BC from convection are used: max(Vu_BC) = " << Vu_BC.max() << endl;
+                std::cout << "Vu_BC from convection are used: max(Vu_BC) = " << Vu_BC.max() << endl;
             }
             }
         }
@@ -570,7 +590,7 @@ int main(int argc, char* argv[]) {
             progress_count = 0;
             progress_total = P_size * V_size * K_size; // total size of solution matrix
             Logger::message << "Radial diffusion:" << endl;;
-            cout<< "           ";
+            std::cout<< "           ";
 
             Matrix1D<double> PSD_L(L_size);
 
@@ -588,7 +608,7 @@ int main(int argc, char* argv[]) {
 #endif
                 // print percentage done
                 if (omp_get_thread_num() == 0){
-                    cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+                    std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
                 }
 
                 // 1d slice
@@ -613,13 +633,13 @@ int main(int argc, char* argv[]) {
             // ADDED FOR TESTING
             //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_after_radial.plt");
 
-            cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
+            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
 //#pragma omp master
 //            {
 //            if((Vl_BC_from_convection == "true") && (Vl_BC_type == "BCT_CONSTANT_VALUE")) { //rewrite boundary conditions at lower V
 //                Vl_BC = PSD.ySlice(1); // NOTE: low-V boundary conditions are taken from the next-to-lower-V slice after radial diffusion.
 //                                       // This eliminates unrealistic gradient there, but it is probably NOT A CORRECT IMPLEMENTATION.
-//                //cout << "Vl_BC after radial diffusion are used: max(Vl_BC) = " << Vl_BC.max() << endl;
+//                //std::cout << "Vl_BC after radial diffusion are used: max(Vl_BC) = " << Vl_BC.max() << endl;
 //                Logger::message << "Vl_BC after radial diffusion are used: max(Vl_BC) = " << Vl_BC.max() << endl;
 //            }
 //            }
@@ -638,7 +658,7 @@ int main(int argc, char* argv[]) {
             progress_count = 0;
             progress_total = P_size * R_size;
             Logger::message << "Local diffusion: " << endl;
-            cout << "           ";
+            std::cout << "           ";
 
             Matrix2D<double> PSD_IK(V_size, K_size);
 
@@ -660,7 +680,7 @@ int main(int argc, char* argv[]) {
                 }
 
                 if (omp_get_thread_num() == 0) {
-                    cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
+                    std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
                         << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
                 }
 
@@ -726,8 +746,8 @@ int main(int argc, char* argv[]) {
                 }
             }}
 
-            cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
-            cout << "Number of skipped points: " << (int) ((double) number_of_skipped_points/progress_total * 100) << "\%" << endl;
+            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
+            std::cout << "Number of skipped points: " << (int) ((double) number_of_skipped_points/progress_total * 100) << "\%" << endl;
         }
 
         int number_of_negative_points = 0;
@@ -745,7 +765,7 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-        //cout << "Number of negative points: " << number_of_negative_points << endl;
+        //std::cout << "Number of negative points: " << number_of_negative_points << endl;
         Logger::message << endl << "Number of negative points: " << number_of_negative_points << " of " << P_size*R_size*V_size*K_size << endl;
 
         // Output the PSD data for each timestep into the output folder
