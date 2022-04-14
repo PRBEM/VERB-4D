@@ -80,3 +80,7 @@ set(VERB4D_SOURCES
 # Build and link
 add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
 target_link_libraries(VERB4D_Solver ${DEPLIBS})
+
+if(FAST_CONVECTION)
+    add_definitions(-DFAST_CONVECTION)
+endif(FAST_CONVECTION)
