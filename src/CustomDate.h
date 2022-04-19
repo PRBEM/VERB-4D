@@ -13,6 +13,9 @@ public:
     CustomDate(const CustomDate& rhs);
     CustomDate& operator=(const CustomDate& rhs);
 
+    int get_second() const {return second;}
+    int get_minute() const {return minute;}
+    int get_hour() const {return hour;}
     int get_day() const {return day;}
     int get_month() const {return month;}
     int get_year() const {return year;}
@@ -26,6 +29,7 @@ private:
     int year;
     int month;
     int day;
+    int hour, minute, second;
 
     static const int max_days[12];
 

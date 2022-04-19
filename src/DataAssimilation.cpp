@@ -1,6 +1,8 @@
 #include "DataAssimilation.h"
 #include "DataAssimilationHelper.h"
 #include "MatrixOperations.h"
+#include <omp.h>
+
 // namespace da = data_assimilation;
 
 data_assimilation::DataAssimilationManagerConvection::DataAssimilationManagerConvection(
@@ -41,9 +43,15 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
             _dataParameters);
 
         std::cout << "Done Interpolatiing. Applying Kalman filter...\n";
-#pragma omp parallel for schedule(dynamic,1) collapse(2)
-        for (int iV = 0; iV < _V.size_q1; ++iV) {
+        int progress_count = 0;
+        int progress_total = _V.size_q1 * _K.size_q2;
+#pragma omp parallel for shared(progress_total, progress_count) schedule(dynamic,1) collapse(2)
+        for (int iV = _V.size_q1 - 1; iV >= 0; --iV) {
             for (int iK = 0; iK < _K.size_q2; ++iK) {
+                if (omp_get_thread_num() == 0) {
+                    std::cout << "\b\b\b\b\b\b\b\b\b" << '\t'
+                            << (int) ((double) progress_count / progress_total * 100) << "\%" << std::flush;
+                }
                 // int numnan = 0;
                 //set all observations to zero for testing
                 // for (int l = 0; l < observations[iV][iK].PSD.size_q1; l++)
@@ -63,9 +71,10 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
                         PSD[iP][iR][iV][iK] = PSD_PR[iP][iR];
                     }
                 }
+                progress_count++;
             }
         }
-
+        std::cout << '\n';
         _timePrev = _timeNext;
         _timeNext += _assimilationParameters.timeStep;
     }
@@ -129,7 +138,7 @@ void data_assimilation::runKalmanFilterConvection2D (
     
     auto observationsBinned = internal::bin(observations, P, R, "log10");
     auto observationSpace = internal::convertToObservationSpace(observationsBinned);
-    
+
     double modelError = parameters.modelError;
     double observationError = parameters.observationError;
     if (parameters.useLog) {
@@ -147,9 +156,15 @@ void data_assimilation::runKalmanFilterConvection2D (
     E = observationError;
     auto Robs = parameters.useLog ? diag(E) : diag(observationSpace.data * observationError); 
 
-    runKalmanFilter(forecast1D, analysisErrorCovariance, 
-        modelMatrix, Q, observationSpace.data, observationSpace.H, 
-        Robs);
+    runKalmanFilter(
+        forecast1D, 
+        analysisErrorCovariance, 
+        modelMatrix, 
+        Q, 
+        observationSpace.data, 
+        observationSpace.H, 
+        Robs
+    );
 
     if (parameters.useLog) {
         forecast1D = pow(10., forecast1D);

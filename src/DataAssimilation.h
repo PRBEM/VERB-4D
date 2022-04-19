@@ -50,12 +50,12 @@ namespace data_assimilation {
                 const Matrix4D<double>& Loss, 
                 double dt);
 
+            Convection2DAnalysisCovariances _analysisCovarianceConvection;
         private:
             double _timeStart;
             double _timeEnd;
             Matrix2D<double> _V;
             Matrix2D<double> _K;
-            Convection2DAnalysisCovariances _analysisCovarianceConvection;
 
             bool _runDataAssimilation;
             double _timePrev;

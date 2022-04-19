@@ -23,10 +23,16 @@ CustomDate::CustomDate(double matlabd)
     year = 1900 + tm_tmp->tm_year;
     month = 1 + tm_tmp->tm_mon;
     day = tm_tmp->tm_mday;
+    hour = tm_tmp->tm_hour;
+    minute = tm_tmp->tm_min;
+    second = tm_tmp->tm_sec;
 }
 
 CustomDate::CustomDate(const CustomDate& rhs)
 {
+    second = rhs.second;
+    minute = rhs.minute;
+    hour = rhs.hour;
     day = rhs.day;
     month = rhs.month;
     year = rhs.year;
@@ -34,6 +40,9 @@ CustomDate::CustomDate(const CustomDate& rhs)
 
 CustomDate& CustomDate::operator=(const CustomDate& rhs)
 {
+    second = rhs.second;
+    minute = rhs.minute;
+    hour = rhs.hour;
     day = rhs.day;
     month = rhs.month;
     year = rhs.year;
@@ -90,6 +99,9 @@ CustomDate CustomDate::to_bom() const
 {
     CustomDate date_tmp = *this;
     date_tmp.day = 1;
+    date_tmp.hour = 0;
+    date_tmp.minute = 0;
+    date_tmp.second = 0;
 
     return date_tmp;
 }
@@ -98,6 +110,9 @@ CustomDate CustomDate::to_eom() const
 {
     CustomDate date_tmp = *this;
     date_tmp.day = date_tmp.eom();
+    date_tmp.hour = 23;
+    date_tmp.minute = 59;
+    date_tmp.second = 59;
 
     return date_tmp;
 }
@@ -122,31 +137,31 @@ int CustomDate::eom() const
 template<typename Comparator>
 bool compare(const CustomDate& lhs, const CustomDate& rhs, Comparator comp) {
     const auto lhst = std::make_tuple(
-        lhs.get_year(), lhs.get_month(), lhs.get_day());
+        lhs.get_year(), lhs.get_month(), lhs.get_day(), lhs.get_hour(), lhs.get_minute(), lhs.get_second());
     const auto rhst = std::make_tuple(
-        rhs.get_year(), rhs.get_month(), rhs.get_day());
+        rhs.get_year(), rhs.get_month(), rhs.get_day(), lhs.get_hour(), lhs.get_minute(), lhs.get_second());
     return comp(lhst, rhst);
 }
 
 bool operator==(const CustomDate& lhs, const CustomDate& rhs) {
-    return compare(lhs, rhs, std::equal_to<std::tuple<int,int,int>>{});
+    return compare(lhs, rhs, std::equal_to<std::tuple<int,int,int,int,int,int>>{});
 }
 bool operator!=(const CustomDate& lhs, const CustomDate& rhs) {
-    return compare(lhs, rhs, std::not_equal_to<std::tuple<int,int,int>>{});
+    return compare(lhs, rhs, std::not_equal_to<std::tuple<int,int,int,int,int,int>>{});
 }
 
 bool operator< (const CustomDate& lhs, const CustomDate& rhs) {
-    return compare(lhs, rhs, std::less<std::tuple<int,int,int>>{});
+    return compare(lhs, rhs, std::less<std::tuple<int,int,int,int,int,int>>{});
 }
 
 bool operator<=(const CustomDate& lhs, const CustomDate& rhs) {
-    return compare(lhs, rhs, std::less_equal<std::tuple<int,int,int>>{});
+    return compare(lhs, rhs, std::less_equal<std::tuple<int,int,int,int,int,int>>{});
 }
 
 bool operator> (const CustomDate& lhs, const CustomDate& rhs) {
-    return compare(lhs, rhs, std::greater<std::tuple<int,int,int>>{});
+    return compare(lhs, rhs, std::greater<std::tuple<int,int,int,int,int,int>>{});
 }
 
 bool operator>=(const CustomDate& lhs, const CustomDate& rhs) {
-    return compare(lhs, rhs, std::greater_equal<std::tuple<int,int,int>>{});
+    return compare(lhs, rhs, std::greater_equal<std::tuple<int,int,int,int,int,int>>{});
 }

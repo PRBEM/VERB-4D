@@ -9,6 +9,7 @@
 #include <cmath>
 #include <vector>
 #include <utility>
+#include <limits>
 
 using std::string;
 
@@ -240,10 +241,14 @@ data_assimilation::ObservationSpace internal::convertToObservationSpace(
     }
 
     if (size == 0) {
-        return {
-            Matrix1D<double>{1} * 0.0,
-            Matrix2D<double>{1,data.size_q1 * data.size_q2} * 0.0
+        ObservationSpace result {
+            Matrix1D<double>{1}, 
+            Matrix2D<double>{1, data.size_q1 * data.size_q2}
         };
+        result.H = 0.0;
+        result.data = 0.0;
+
+        return result;
     }
 
     ObservationSpace result {
@@ -253,22 +258,22 @@ data_assimilation::ObservationSpace internal::convertToObservationSpace(
 
     result.H = 0.;
 
+
     int counter {0};
     for (auto iP = 0; iP < data.size_q1; ++iP) {
         for (auto iR = 0; iR < data.size_q2; ++iR) {
             int H_idx = iR + iP * data.size_q2;
             if (data[iP][iR] != FILLVAL && !std::isnan(data[iP][iR])) {
                 result.data[counter] = data[iP][iR]; 
-                result.H[counter][H_idx] = 1.;
+                result.H[counter][H_idx] = 1.0;
                 ++counter;
             }
         }
     }
-    
     return result;
 }
 
-bool internal::str2bool(const std::string& str)
+bool internal::str2bool(const string& str)
 {
     return (str == "true" || str == "True" || str == "TRUE");
 }
@@ -289,8 +294,11 @@ data_assimilation::ProcessedMatFileData internal::readData(
     double timeEnd,
     const pmf::Parameters& parameters)
 {
+    std::cout << "Reading data from " << parameters.satellite << " " << parameters.instrument << "...\n";
     ProcessedMatFileData result;
+    std::cout <<"\tMLT ";
     result.MLT = readProcessedMatFiles1D("MLT", timeStart, timeEnd, parameters);
+    std::cout <<"xGEO ";
     auto xGEO = readProcessedMatFiles2D("xGEO", timeStart, timeEnd, parameters);
     result.R.AllocateMemory(xGEO.size_q1);
     for (auto it = 0; it < xGEO.size_q1; ++it) {
@@ -299,8 +307,11 @@ data_assimilation::ProcessedMatFileData internal::readData(
             xGEO[it][1] * xGEO[it][1] + 
             xGEO[it][2] * xGEO[it][2]);
     }
+    std::cout <<"InvMu ";
     auto invMu = readProcessedMatFiles3D("InvMu", timeStart, timeEnd, parameters);
+    std::cout <<"InvK ";
     result.K = readProcessedMatFiles2D("InvK", timeStart, timeEnd, parameters);
+    std::cout <<"PSD\n";
     result.PSD = readProcessedMatFiles3D("PSD", timeStart, timeEnd, parameters);
     result.V.AllocateMemory(invMu.size_q1, invMu.size_q2, invMu.size_q3);
     
@@ -584,7 +595,284 @@ double internal::interp2d_linear_dependent(
 
     return result[0][0];
 }
+double internal::interp2d_four_corners(
+    const Matrix2D<double>& V_in, const Matrix2D<double>& K_in,
+    const Matrix2D<double>& PSD_in, double V_out, double K_out,
+    bool use_badval)
+{
+    /* 
+    We assume K_in to vary only in the the second dimension. Find the two K values in K_in that neighbour
+    the requested K_out value. For each of those two K values find the two V values that neighbour the
+    requested V_out value.
+    Perform linear interpolation of PSD wrt V for each of the two K values. 
+    Finally interpolate the V-interpolated PSD wrt K.
 
+    Return Nan if there are less than two non-nan K values, less than two non-nan V values for the 
+    two K neighbours or if either K_out or V_out is outside of K_in or V_in respectively
+    */
+
+    //linear interpolation as a lambda
+    //as we're interpolating log values we can sometimes expect -infinity  
+    auto interpolation_lambda = [](double x1, double y1, double x2, double y2, double x_out) {
+        if (y1 == -1.0 / 0.0 || y2 == -1.0 / 0.0 || x1 == x2) return y1;
+        return ((y2 - y1) * x_out + (y1 * x2 - y2 * x1)) / (x2 - x1);
+    };
+
+    double minK = K_in.min();
+    double maxK = K_in.max();
+    if(K_out < minK || K_out > maxK) return std::log(-1.0);
+
+    int nV = V_in.size_q1;
+    int nK = K_in.size_q2;
+    int non_nan_k = 0;
+
+    for (int iK = 0; iK < nK; iK++)
+        if(!std::isnan(K_in[0][iK])) {
+            non_nan_k++;
+        }
+    if(non_nan_k < 2){
+        return std::log(-1);
+    }
+    Matrix1D<double> K_arr(non_nan_k);
+    Matrix2D<double> V_arr(V_in.size_q1, non_nan_k);
+    Matrix2D<double> PSD_arr(PSD_in.size_q1, non_nan_k);
+
+    int counter = 0;
+    for (int iK = 0; iK < nK; iK++){
+        if(!std::isnan(K_in[0][iK])) {
+            K_arr[counter] = K_in[0][iK];
+            for(int iV = 0; iV < nV; iV++){
+                V_arr[iV][counter] = V_in[iV][counter];
+                PSD_arr[iV][counter] = PSD_in[iV][counter];
+            }
+            counter++;
+        }
+    }
+    // double k_max = K_arr.max();
+    // double k_min = K_arr.min();
+    // if (K_out < k_min || K_out > k_max) return std::log(-1);
+
+    // double dK = K_arr[1] - K_arr[0];
+    int lower_k_neighbour = -1;
+    int upper_k_neighbour = -1;
+    double k_lower = -std::numeric_limits<double>::infinity();
+    double k_upper = std::numeric_limits<double>::infinity();
+
+    for(int iK = 0; iK < non_nan_k; iK++)
+    {
+        if(K_arr[iK] <= K_out && K_arr[iK] > k_lower)
+        {
+            k_lower = K_arr[iK];
+            lower_k_neighbour = iK;
+        }
+        if(K_arr[iK] >= K_out && K_arr[iK] < k_upper)
+        {
+            k_upper = K_arr[iK];
+            upper_k_neighbour = iK;
+        }
+    }
+    if(lower_k_neighbour < 0 || upper_k_neighbour < 0) return std::log(-1);
+    // if(dK > 0){
+    //     for(int iK = 1; iK < non_nan_k; iK++){
+    //         // if(K_arr[iK + 1] <= K_arr[iK]){
+    //         //     exit(EXIT_FAILURE);
+    //         // }
+    //         if(K_arr[iK] >= K_out){
+    //             lower_k_neighbour = iK - 1;
+    //             upper_k_neighbour = iK;
+    //             break;
+    //         }
+    //     }    
+    // }
+    // else if(dK < 0){
+    //     for(int iK = 1; iK < non_nan_k; iK++){
+    //         // if(K_arr[iK + 1] >= K_arr[iK]){
+    //         //     std::cout << "K_in must be monotonic!\n";
+    //         //     for(int iK = 0; iK < nK - 1; iK++){
+    //         //         std::cout << K_arr[iK] << ' ';
+    //         //     }
+    //         //     std::cout << std::endl;
+    //         //     exit(EXIT_FAILURE);
+    //         // }
+    //         if(K_arr[iK] <= K_out){
+    //             upper_k_neighbour = iK - 1;
+    //             lower_k_neighbour = iK;
+    //             break;
+    //         }
+    //     }
+    // }
+    // else{
+    //     std::cout << "K_in must be monotonic!\n";
+    //     exit(EXIT_FAILURE);
+    // }
+
+    /*
+    Now we know the K-index of the lower and upper neighbour of the K_out grid point. For both indices
+    filter nan's from the corresponding V and PSD arrays.
+    */
+    int non_nan_v_for_lower_k = 0;
+    int non_nan_v_for_upper_k = 0;
+    for(int iV = 0; iV < nV; iV++){
+        if(!std::isnan(V_arr[iV][lower_k_neighbour]) && !std::isnan(PSD_arr[iV][lower_k_neighbour])) non_nan_v_for_lower_k++;
+        if(!std::isnan(V_arr[iV][upper_k_neighbour]) && !std::isnan(PSD_arr[iV][upper_k_neighbour])) non_nan_v_for_upper_k++;
+    }
+    if(non_nan_v_for_lower_k < 2 || non_nan_v_for_upper_k < 2) return std::log(-1);
+    
+    Matrix1D<double> V_for_lower_K(non_nan_v_for_lower_k);
+    Matrix1D<double> V_for_upper_K(non_nan_v_for_upper_k);
+    Matrix1D<double> PSD_for_lower_K(non_nan_v_for_lower_k);
+    Matrix1D<double> PSD_for_upper_K(non_nan_v_for_upper_k);
+
+    int counter_lower_k = 0;
+    int counter_upper_k = 0;
+    for(int iV = 0; iV < nV; iV++){
+        if(!std::isnan(V_arr[iV][lower_k_neighbour]) && !std::isnan(PSD_arr[iV][lower_k_neighbour])){
+            V_for_lower_K[counter_lower_k] = V_arr[iV][lower_k_neighbour];
+            PSD_for_lower_K[counter_lower_k] = PSD_arr[iV][lower_k_neighbour];
+            counter_lower_k++;
+        }
+        if(!std::isnan(V_arr[iV][upper_k_neighbour]) && !std::isnan(PSD_arr[iV][upper_k_neighbour])){
+            V_for_upper_K[counter_upper_k] = V_arr[iV][upper_k_neighbour];
+            PSD_for_upper_K[counter_upper_k] = PSD_arr[iV][upper_k_neighbour];
+            counter_upper_k++;
+        }
+    }
+
+    int lower_v_neighbour = -1;
+    int upper_v_neighbour = -1;
+    double v_lower = -std::numeric_limits<double>::infinity();
+    double v_upper = std::numeric_limits<double>::infinity();
+    // double dV_lower = V_for_lower_K[1] - V_for_lower_K[0];
+    // double dV_upper = V_for_upper_K[1] - V_for_upper_K[0];
+    
+    // double v_min = V_for_lower_K.min();
+    // double v_max = V_for_lower_K.max();
+    // if( V_out < v_min || V_out > v_max) return std::log(-1.0);
+    // if(dV_lower > 0){
+    //     for(int iV = 1; iV < non_nan_v_for_lower_k; iV++){
+    //         // if(V_for_lower_K[iV] < V_for_lower_K[iV-1]){
+    //         //     std::cout << "V_in must be monotonic!\n";
+    //         //     exit(EXIT_FAILURE);
+    //         // }
+    //         if(V_for_lower_K[iV] >= V_out){
+    //             lower_v_neighbour = iV - 1;
+    //             upper_v_neighbour = iV;
+    //             break;
+    //         }
+    //     }    
+    // }
+    // else if(dV_lower < 0){
+    //     for(int iV = 1; iV < non_nan_v_for_lower_k; iV++){
+    //         // if(V_for_lower_K[iV] > V_for_lower_K[iV-1]){
+    //         //     std::cout << "V_in must be monotonic!\n";
+    //         //     exit(EXIT_FAILURE);
+    //         // }
+    //         if(V_for_lower_K[iV] <= V_out){
+    //             upper_v_neighbour = iV - 1;
+    //             lower_v_neighbour = iV;
+    //             break;
+    //         }
+    //     }
+    // }
+    // else{
+    //     std::cout << "V_in must be monotonic!\n";
+    //     exit(EXIT_FAILURE);
+    // }
+
+    for(int iV = 0; iV < non_nan_v_for_lower_k; iV++)
+    {
+        if(V_for_lower_K[iV] <= V_out && V_for_lower_K[iV] > v_lower)
+        {
+            v_lower = V_for_lower_K[iV];
+            lower_v_neighbour = iV;
+        }
+        if(V_for_lower_K[iV] >= V_out && V_for_lower_K[iV] < v_upper)
+        {
+            v_upper = V_for_lower_K[iV];
+            upper_v_neighbour = iV;
+        }
+    }
+    if(lower_v_neighbour < 0 || upper_v_neighbour < 0) return std::log(-1);
+
+    // We know the V neighbours for the lower K value. Interpolate PSD for the lower K wrt V
+    double x1 = V_for_lower_K[lower_v_neighbour];
+    double x2 = V_for_lower_K[upper_v_neighbour];
+    
+    double y1 = PSD_for_lower_K[lower_v_neighbour];
+    double y2 = PSD_for_lower_K[upper_v_neighbour];
+
+    double PSD_lower  = interpolation_lambda(x1, y1, x2, y2, V_out);
+    // Now repeat for the upper K neighbour
+    // v_min = V_for_upper_K.min();
+    // v_max = V_for_upper_K.max();
+    // if( V_out < v_min || V_out > v_max) return std::log10(-1.0);
+    // if(dV_upper > 0){
+    //     for(int iV = 1; iV < non_nan_v_for_upper_k; iV++){
+    //         // if(V_for_upper_K[iV] <= V_for_upper_K[iV-1]){
+    //         //     std::cout << "V_in must be monotonic!\n";
+    //         //     exit(EXIT_FAILURE);
+    //         // }
+    //         if(V_for_upper_K[iV] >= V_out){
+    //             lower_v_neighbour = iV - 1;
+    //             upper_v_neighbour = iV;
+    //             break;
+    //         }
+    //     }    
+    // }
+    // else if(dV_upper < 0){
+    //     for(int iV = 1; iV < non_nan_v_for_upper_k; iV++){
+    //         // if(V_for_upper_K[iV] >= V_for_upper_K[iV-1]){
+    //         //     std::cout << "V_in must be monotonic!\n";
+    //         //     exit(EXIT_FAILURE);
+    //         // }
+    //         if(V_for_upper_K[iV] <= V_out){
+    //             upper_v_neighbour = iV;
+    //             lower_v_neighbour = iV-1;
+    //             break;
+    //         }
+    //     }
+    // }
+    // else{
+    //     std::cout << "V_in must be monotonic!\n";
+    //     exit(EXIT_FAILURE);
+    // }
+    v_lower = -std::numeric_limits<double>::infinity();
+    v_upper = std::numeric_limits<double>::infinity();
+    lower_v_neighbour = -1;
+    upper_v_neighbour = -1;
+
+    for(int iV = 0; iV < non_nan_v_for_upper_k; iV++)
+    {
+        if(V_for_upper_K[iV] <= V_out && V_for_upper_K[iV] > v_lower)
+        {
+            v_lower = V_for_upper_K[iV];
+            lower_v_neighbour = iV;
+        }
+        if(V_for_upper_K[iV] >= V_out && V_for_upper_K[iV] < v_upper)
+        {
+            v_upper = V_for_upper_K[iV];
+            upper_v_neighbour = iV;
+        }
+    }
+    if(lower_v_neighbour < 0 || upper_v_neighbour < 0) return std::log(-1);
+    
+    x1 = V_for_upper_K[lower_v_neighbour];
+    x2 = V_for_upper_K[upper_v_neighbour];
+    y1 = PSD_for_upper_K[lower_v_neighbour];
+    y2 = PSD_for_upper_K[upper_v_neighbour];
+
+    double PSD_upper  = interpolation_lambda(x1, y1, x2, y2, V_out);
+
+    // Knowing PSD at V_out for the lower and upper K neighbours, we can now do one final
+    // interpolation between them wrt K
+
+    x1 = K_arr[lower_k_neighbour];
+    x2 = K_arr[upper_k_neighbour];
+    y1 = PSD_lower;
+    y2 = PSD_upper;
+
+    return interpolation_lambda(x1, y1, x2, y2, K_out);
+}
 std::vector<std::vector<data_assimilation::Observations>> internal::interpolate_old(
     const ProcessedMatFileData& data,
     const Matrix2D<double>& V_grid,
@@ -687,7 +975,13 @@ std::vector<std::vector<data_assimilation::Observations>> internal::interpolate(
                 for (auto it = 0; it < instrumentData.MLT.size_q1; ++it) 
                 {
                     auto PSD_in = instrumentData.PSD.xSlice(it);
-                    obs.PSD[counter++] = pow(10., interp2d_linear_dependent(
+                    // obs.PSD[counter++] = pow(10., interp2d_linear_dependent(
+                    //     log10(instrumentData.V.xSlice(it)), 
+                    //     K_in[instrumentIndex].xSlice(it), 
+                    //     log10(PSD_in), 
+                    //     log10(V_grid[iV][iK]), 
+                    //     K_grid[iV][iK], true));
+                    obs.PSD[counter++] = pow(10., interp2d_four_corners(
                         log10(instrumentData.V.xSlice(it)), 
                         K_in[instrumentIndex].xSlice(it), 
                         log10(PSD_in), 
