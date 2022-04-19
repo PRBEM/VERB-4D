@@ -23,22 +23,22 @@ using namespace std;
 
 /**  Allocates memory using the allocate memory function for Matrix1D
 */
-void inline MatrixAllocateMemory(Matrix1D<double> &M, const Matrix1D<double> Q1, const Matrix1D<double> Q2, const Matrix1D<double> Q3, const Matrix1D<double> Q4) {
+void inline MatrixAllocateMemory(Matrix1D<double> &M, const Matrix1D<double>& Q1, const Matrix1D<double>& Q2, const Matrix1D<double>& Q3, const Matrix1D<double>& Q4) {
 	M.Matrix1D<double>::AllocateMemory(Q1.size_q1);
 }
 /**  Allocates memory using the allocate memory function for Matrix2D
 */
-void inline MatrixAllocateMemory(Matrix2D<double> &M, const Matrix2D<double> Q1, const Matrix2D<double> Q2, const Matrix2D<double> Q3, const Matrix2D<double> Q4) {
+void inline MatrixAllocateMemory(Matrix2D<double> &M, const Matrix2D<double>& Q1, const Matrix2D<double>& Q2, const Matrix2D<double>& Q3, const Matrix2D<double>& Q4) {
 	M.Matrix2D<double>::AllocateMemory(Q1.size_q1, Q2.size_q2);
 }
 /**  Allocates memory using the allocate memory function for Matrix3D
 */
-void inline MatrixAllocateMemory(Matrix3D<double> &M, const Matrix3D<double> Q1, const Matrix3D<double> Q2, const Matrix3D<double> Q3, const Matrix3D<double> Q4) {
+void inline MatrixAllocateMemory(Matrix3D<double> &M, const Matrix3D<double>& Q1, const Matrix3D<double>& Q2, const Matrix3D<double>& Q3, const Matrix3D<double>& Q4) {
 	M.Matrix3D<double>::AllocateMemory(Q1.size_q1, Q2.size_q2, Q3.size_q3);
 }
 /**  Allocates memory using the allocate memory function for Matrix4D
 */
-void inline MatrixAllocateMemory(Matrix4D<double> &M, const Matrix4D<double> Q1, const Matrix4D<double> Q2, const Matrix4D<double> Q3, const Matrix4D<double> Q4) {
+void inline MatrixAllocateMemory(Matrix4D<double> &M, const Matrix4D<double>& Q1, const Matrix4D<double>& Q2, const Matrix4D<double>& Q3, const Matrix4D<double>& Q4) {
 	M.Matrix4D<double>::AllocateMemory(Q1.size_w, Q2.size_x, Q3.size_y, Q4.size_z);
 }
 
@@ -69,7 +69,7 @@ void MatrixAllocateMemory(Matrix4D<double> &M, int size_Q1, int size_Q2, int siz
 *
 * Only using Q1
 */
-void MatrixReadFromFile(Matrix1D<double> &M, string data_filename, const Matrix1D<double> Q1, const Matrix1D<double> Q2, const Matrix1D<double> Q3, const Matrix1D<double> Q4) {
+void MatrixReadFromFile(Matrix1D<double> &M, string data_filename, const Matrix1D<double>& Q1, const Matrix1D<double>& Q2, const Matrix1D<double>& Q3, const Matrix1D<double>& Q4) {
 	if (data_filename.substr(data_filename.length() - 4 ,4) == ".mat")
 		M.Matrix1D<double>::readFromMatlabFile(data_filename, Q1);
 	else
@@ -79,7 +79,7 @@ void MatrixReadFromFile(Matrix1D<double> &M, string data_filename, const Matrix1
 *
 * Only using Q1, Q2
 */
-void MatrixReadFromFile(Matrix2D<double> &M, string data_filename, const Matrix2D<double> Q1, const Matrix2D<double> Q2, const Matrix2D<double> Q3, const Matrix2D<double> Q4) {
+void MatrixReadFromFile(Matrix2D<double> &M, string data_filename, const Matrix2D<double>& Q1, const Matrix2D<double>& Q2, const Matrix2D<double>& Q3, const Matrix2D<double>& Q4) {
 	if (data_filename.substr(data_filename.length() - 4 ,4) == ".mat")
 		M.Matrix2D<double>::readFromMatlabFile(data_filename, Q1,Q2);
 	else
@@ -89,7 +89,7 @@ void MatrixReadFromFile(Matrix2D<double> &M, string data_filename, const Matrix2
 *
 * Only using Q1, Q2, Q3
 */
-void MatrixReadFromFile(Matrix3D<double> &M, string data_filename, const Matrix3D<double> Q1, const Matrix3D<double> Q2, const Matrix3D<double> Q3, const Matrix3D<double> Q4) {
+void MatrixReadFromFile(Matrix3D<double> &M, string data_filename, const Matrix3D<double>& Q1, const Matrix3D<double>& Q2, const Matrix3D<double>& Q3, const Matrix3D<double>& Q4) {
 	if (data_filename.substr(data_filename.length() - 4 ,4) == ".mat")
 		M.Matrix3D<double>::readFromMatlabFile(data_filename, Q1, Q2, Q3);
 	else if (data_filename.substr(data_filename.length() - 4 ,4) == ".plt")
@@ -105,7 +105,7 @@ void MatrixReadFromFile(Matrix3D<double> &M, string data_filename, const Matrix3
 *
 * Using Q1, Q2, Q3, Q4
 */
-void MatrixReadFromFile(Matrix4D<double> &M, string data_filename, const Matrix4D<double> Q1, const Matrix4D<double> Q2, const Matrix4D<double> Q3, const Matrix4D<double> Q4) {
+void MatrixReadFromFile(Matrix4D<double> &M, string data_filename, const Matrix4D<double>& Q1, const Matrix4D<double>& Q2, const Matrix4D<double>& Q3, const Matrix4D<double>& Q4) {
 	if (data_filename.substr(data_filename.length() - 4 ,4) == ".mat")
 		M.Matrix4D<double>::readFromMatlabFile(data_filename, Q1, Q2, Q3, Q4);
 	else if (data_filename.substr(data_filename.length() - 4 ,4) == ".plt")
@@ -188,7 +188,7 @@ void UpdatableMatrix<MatrixND>::saveCurrent() {
  *
  * \param M - The matrix that will be updated(limited)
  */
-void MatrixLimit(UpdatableMatrix< Matrix1D<double> > &M, Matrix1D<double> &Q1, Matrix1D<double> &Q2, Matrix1D<double> &Q3, Matrix1D<double> &Q4,
+void MatrixLimit(UpdatableMatrix< Matrix1D<double> > &M, const Matrix1D<double> &Q1, const Matrix1D<double> &Q2, const Matrix1D<double> &Q3, const Matrix1D<double> &Q4,
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
 
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
@@ -211,7 +211,7 @@ void MatrixLimit(UpdatableMatrix< Matrix1D<double> > &M, Matrix1D<double> &Q1, M
  *
  * \param M - The matrix that will be updated(limited)
  */
-void MatrixLimit(UpdatableMatrix< Matrix2D<double> > &M, Matrix2D<double> &Q1, Matrix2D<double> &Q2, Matrix2D<double> &Q3, Matrix2D<double> &Q4,
+void MatrixLimit(UpdatableMatrix<Matrix2D<double>> &M, const Matrix2D<double> &Q1, const Matrix2D<double> &Q2, const Matrix2D<double> &Q3, const Matrix2D<double> &Q4,
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
 	if (Q1_from > Q1.min() || Q1_to < Q1.max() || Q2_from > Q2.min() || Q2_to < Q2.max()) {
@@ -236,7 +236,7 @@ void MatrixLimit(UpdatableMatrix< Matrix2D<double> > &M, Matrix2D<double> &Q1, M
  *
  * \param M - The matrix that will be updated(limited)
  */
-void MatrixLimit(UpdatableMatrix< Matrix3D<double> > &M, Matrix3D<double> &Q1, Matrix3D<double> &Q2, Matrix3D<double> &Q3, Matrix3D<double> &Q4,
+void MatrixLimit(UpdatableMatrix< Matrix3D<double> > &M, const Matrix3D<double> &Q1, const Matrix3D<double> &Q2, const Matrix3D<double> &Q3, const Matrix3D<double> &Q4,
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
 	if (Q1_from > Q1.min() || Q1_to < Q1.max() || Q2_from > Q2.min() || Q2_to < Q2.max() || Q3_from > Q3.min() || Q3_to < Q3.max()) {
@@ -264,7 +264,7 @@ void MatrixLimit(UpdatableMatrix< Matrix3D<double> > &M, Matrix3D<double> &Q1, M
  *
  * \param M - The matrix that will be updated(limited)
  */
-void MatrixLimit(UpdatableMatrix< Matrix4D<double> > &M, Matrix4D<double> &Q1, Matrix4D<double> &Q2, Matrix4D<double> &Q3, Matrix4D<double> &Q4,
+void MatrixLimit(UpdatableMatrix< Matrix4D<double> > &M, const Matrix4D<double> &Q1, const Matrix4D<double> &Q2, const Matrix4D<double> &Q3, const Matrix4D<double> &Q4,
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
 	if (Q1_from > Q1.min() || Q1_to < Q1.max() || Q2_from > Q2.min() || Q2_to < Q2.max() || Q3_from > Q3.min() || Q3_to < Q3.max() || Q4_from > Q4.min() || Q4_to < Q4.max()) {
@@ -298,7 +298,7 @@ void MatrixLimit(UpdatableMatrix< Matrix4D<double> > &M, Matrix4D<double> &Q1, M
  * @return True if success, False if failure
  */
 template <typename MatrixND>
-bool UpdatableMatrix<MatrixND>::readFromIniFile(string ini_filename, MatrixND q1, MatrixND q2, MatrixND q3, MatrixND q4) {
+bool UpdatableMatrix<MatrixND>::readFromIniFile(string ini_filename, const MatrixND& q1, const MatrixND& q2, const MatrixND& q3, const MatrixND& q4) {
 	fstream input;
 
 	// Open the ini-file for read
@@ -352,17 +352,17 @@ bool UpdatableMatrix<MatrixND>::readFromIniFile(string ini_filename, MatrixND q1
  * @return True if success, False if failure
  */
 template <typename MatrixND>
-bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND &q1, MatrixND &q2, MatrixND &q3, MatrixND &q4) {
+bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, const MatrixND &q1, const MatrixND &q2, const MatrixND &q3, const MatrixND &q4) {
 	// This defines an "empty marker" - it indicates that we need to skip that parameter.
 	const string empty_marker = "-";
 
 	// Convert input string into input stream
 	// It's much easier to work with streams
-	stringstream file_line_stream;
+	std::stringstream file_line_stream;
 	file_line_stream << file_line_string;
 
 	// Read data filename from the stream (first parameter)
-	string data_filename;
+	std::string data_filename;
 	file_line_stream >> data_filename;
 	Logger::message << "	Data: " << data_filename << endl;
 
@@ -494,7 +494,7 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, MatrixND
  * @return True if updated, False if not
  */
 template <typename MatrixND>
-bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixND q2, MatrixND q3, MatrixND q4) {
+bool UpdatableMatrix<MatrixND>::update(double current_time, const MatrixND& q1, const MatrixND& q2, const MatrixND& q3, const MatrixND& q4) {
 	// Indicator if updated
 	bool updated = false;
 
@@ -748,7 +748,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, MatrixND q1, MatrixN
  * @return True if success, False if failure
  */
 template <typename MatrixND>
-bool UpdatableListMatrix<MatrixND>::readFromIniFile(string ini_filename, MatrixND &Q1, MatrixND &Q2, MatrixND &Q3, MatrixND &Q4) {
+bool UpdatableListMatrix<MatrixND>::readFromIniFile(string ini_filename, const MatrixND &Q1, const MatrixND &Q2, const MatrixND &Q3, const MatrixND &Q4) {
 	fstream input;
 
 	// Open the ini-file for read
@@ -809,7 +809,7 @@ bool UpdatableListMatrix<MatrixND>::readFromIniFile(string ini_filename, MatrixN
  * @param Q4 - corresponding grid coordinate
  */
 template <typename MatrixND>
-void UpdatableListMatrix<MatrixND>::update(double current_time, MatrixND Q1, MatrixND Q2, MatrixND Q3, MatrixND Q4) {
+void UpdatableListMatrix<MatrixND>::update(double current_time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4) {
 	unsigned int d_it;
 
 	// check if there are any coefficients in the list at all
@@ -874,7 +874,7 @@ string GetCurrentTimeValue(const string &filename, long &pos, const double &curr
 	// check if we position is > 0. Then we need to skip lines
 	if (pos > 0)
 	{
-		while (!input.eof() & current_line < pos)
+		while (!input.eof() && (current_line < pos))
 		{
 			input.ignore(999, '\n'); // This is fastest way to skip lines that I found
 			current_line++;

@@ -24,17 +24,17 @@ struct Parameters {
 std::vector<Parameters> readParameters(const std::string& filename);
 
 Matrix1D<double> readProcessedMatFiles1D(
-    const string& name, 
+    const std::string& name, 
     CustomDate timeStart, CustomDate timeEnd, const pmf::Parameters& parameters
 ); 
 
 Matrix2D<double> readProcessedMatFiles2D(
-    const string& name, 
+    const std::string& name, 
     CustomDate timeStart, CustomDate timeEnd, const pmf::Parameters& parameters
 ); 
 
 Matrix3D<double> readProcessedMatFiles3D(
-    const string& name, 
+    const std::string& name, 
     CustomDate timeStart, CustomDate timeEnd, const pmf::Parameters& parameters
 ); 
 

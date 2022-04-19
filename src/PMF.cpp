@@ -434,10 +434,10 @@ pmf::Parameters readParameterOneSatellite(const string& filename) {
 
 }
 
-vector<pmf::Parameters> pmf::readParameters(const std::string& filename) {
-    fstream filestream(filename);    
-    vector<pmf::Parameters> result; 
-    for(string filename; getline(filestream, filename); ) {
+std::vector<pmf::Parameters> pmf::readParameters(const std::string& filename) {
+    std::fstream filestream(filename);    
+    std::vector<pmf::Parameters> result; 
+    for(std::string filename; std::getline(filestream, filename); ) {
         result.push_back(readParameterOneSatellite(filename));
     }
     return result;

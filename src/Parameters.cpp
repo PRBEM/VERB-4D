@@ -11,14 +11,14 @@
 * opens file and saves file to Parameters field 'parametersFile',
 * stores the char* arguments into a vector 'argv'
 */
-Parameters::Parameters(string filename, int argc, char* argv[]) {
+Parameters::Parameters(std::string filename, int argc, char* argv[]) {
 
 	// open the parameter file
 	this->parametersFile.open(filename.c_str());
 			//if (this->parametersFile == NULL) {
 	// if file not found - matrix is zero
 	if (!this->parametersFile.is_open()) {		
-		Logger::error << filename << " not found." << endl;
+		Logger::error << filename << " not found." << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -42,7 +42,7 @@ void Parameters::close() {
 * Finds the parameters with parameterName in parametersFile and saves it to argv
 * \param parameterName - name of parameter
 */
-Parameters& Parameters::findParameter(string parameterName, string defaultValue) {
+Parameters& Parameters::findParameter(std::string parameterName, std::string defaultValue) {
 
 	this->flush();
 	this->clear();
@@ -51,7 +51,7 @@ Parameters& Parameters::findParameter(string parameterName, string defaultValue)
 	parametersFile.clear( );
 	parametersFile.seekg( 0, std::ios::beg );
 
-	string line;
+	std::string line;
 
 	// Read from command line arguments
 	unsigned int i;
@@ -91,7 +91,7 @@ Parameters& Parameters::findParameter(string parameterName, string defaultValue)
 
 	// If no parameter value can be found log error and return
 	if (defaultValue == "") {
-		Logger::error << "Parameter " << parameterName << " not found." << endl;
+		Logger::error << "Parameter " << parameterName << " not found." << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	return *this;
@@ -106,7 +106,7 @@ Parameters& Parameters::findParameter(string parameterName, string defaultValue)
 * \param mustBeFound - if true and parameter not found, error is logged and function exited, default is false
 */
 template <typename T>
-void Parameters::getParameter(string parameterName, T &variable, bool mustBeFound) {
+void Parameters::getParameter(std::string parameterName, T &variable, bool mustBeFound) {
 
 	this->flush();
 	this->clear();
@@ -117,8 +117,8 @@ void Parameters::getParameter(string parameterName, T &variable, bool mustBeFoun
 	parametersFile.seekg( 0, std::ios::beg );
 
 	// variables to store each line and the value of the parameter
-	string line;
-	string parameterValue;
+	std::string line;
+	std::string parameterValue;
 
 	// Read from command line arguments
 	unsigned int i;
@@ -127,7 +127,7 @@ void Parameters::getParameter(string parameterName, T &variable, bool mustBeFoun
 
 		// if argument is empty or commented out, save the default value
 		if (line.size() == 0 || line[0] == '#') {
-			Logger::message << parameterName << " = " << variable << " (default value)" << endl;
+			Logger::message << parameterName << " = " << variable << " (default value)" << std::endl;
 			continue;
 		}
 
@@ -135,9 +135,9 @@ void Parameters::getParameter(string parameterName, T &variable, bool mustBeFoun
 		// log the value and store the value into variable
 		if (line.find(parameterName) != -1) {
 			parameterValue = line.substr(line.find("=") + 1);
-			Logger::message << parameterName << " = " << parameterValue << endl;
+			Logger::message << parameterName << " = " << parameterValue << std::endl;
 					// stringstream(parameterValue) >> variable;
-			stringstream tmp(parameterValue);
+			std::stringstream tmp(parameterValue);
 			tmp >> variable;
 			return;
 		}
@@ -155,9 +155,9 @@ void Parameters::getParameter(string parameterName, T &variable, bool mustBeFoun
 		// log the value and store the value into variable
 		if (line.find(parameterName) != -1) {
 			parameterValue = line.substr(line.find("=") + 1);
-			Logger::message << parameterName << " = " << parameterValue << endl;
+			Logger::message << parameterName << " = " << parameterValue << std::endl;
 			// stringstream(parameterValue) >> variable;
-			stringstream tmp(parameterValue);
+			std::stringstream tmp(parameterValue);
 			tmp >> variable;
 			return;
 		}
@@ -165,7 +165,7 @@ void Parameters::getParameter(string parameterName, T &variable, bool mustBeFoun
 
 	// all variables that arent found, that can't recieve a default value will log an error
 	if (mustBeFound) {
-		Logger::error << "Parameter " << parameterName << " not found." << endl;
+		Logger::error << "Parameter " << parameterName << " not found." << std::endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -178,8 +178,8 @@ void Parameters::getParameter(string parameterName, T &variable, bool mustBeFoun
 // Implementations
 //////////////////////////////////////////
 
-template void Parameters::getParameter(string, double&, bool);
-template void Parameters::getParameter(string, int&, bool);
-template void Parameters::getParameter(string, long&, bool);
+template void Parameters::getParameter(std::string, double&, bool);
+template void Parameters::getParameter(std::string, int&, bool);
+template void Parameters::getParameter(std::string, long&, bool);
 //template void Parameters::getParameter(string, bool&, bool);
-template void Parameters::getParameter(string, string&, bool);
+template void Parameters::getParameter(std::string, std::string&, bool);

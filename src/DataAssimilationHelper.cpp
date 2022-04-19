@@ -97,11 +97,11 @@ std::pair<int, double> internal::splitTimeStepCourantCondition(
     };
 
     double VP_amax = 
-            *max_element(VP[0], VP[0] + VP.size_q1 * VP.size_q2, compareAbs);
+            *std::max_element(VP[0], VP[0] + VP.size_q1 * VP.size_q2, compareAbs);
     double VR_amax = 
-            *max_element(VR[0], VR[0] + VR.size_q1 * VR.size_q2, compareAbs);
+            *std::max_element(VR[0], VR[0] + VR.size_q1 * VR.size_q2, compareAbs);
 
-    double cour_num = max(VP_amax * timeStep / dP, VR_amax * timeStep / dR);
+    double cour_num = std::max(VP_amax * timeStep / dP, VR_amax * timeStep / dR);
 
     int nt = (cour_num <= maximumCourantNumber) 
                 ? 1 
@@ -144,17 +144,17 @@ double internal::conditionalMean(
     const Matrix1D<bool>& flag) 
 {
     if (a.size_q1 != flag.size_q1) {
-        cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
-        cout << "Matrix sizes are different. ";
-        cout << "a.size_q1 = " << a.size_q1 << ", ";
-        cout << "flag.size_q1 = " << flag.size_q1 << endl;; 
+        std::cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        std::cout << "Matrix sizes are different. ";
+        std::cout << "a.size_q1 = " << a.size_q1 << ", ";
+        std::cout << "flag.size_q1 = " << flag.size_q1 << std::endl;; 
         exit(EXIT_FAILURE);
     }
 
     double result {0.};
     int counter {0};
     for (auto i = 0; i < a.size_q1; ++i) {
-        if (flag[i] && !isnan(a[i])) {
+        if (flag[i] && !std::isnan(a[i])) {
             result += a[i];
             ++counter;
         }
@@ -182,7 +182,7 @@ Matrix2D<double> internal::bin(
     auto dP = P[1][0] - P[0][0];
     auto dR = R[0][1] - R[0][0];
 
-    vector<Matrix1D<bool>> P_flags(P_size);
+    std::vector<Matrix1D<bool>> P_flags(P_size);
     for (auto iP = 1; iP < P_size - 1; ++iP) {
         auto P_c = P[iP][0];
         P_flags[iP] = (data.P <= P_c + dP * 0.5) && (data.P >= P_c - dP * 0.5);        
@@ -192,7 +192,7 @@ Matrix2D<double> internal::bin(
 
 
     //maybe? - replace boolean vectors with 1.0 - 0.0 vectors and perform dot product instead of conditional mean
-    vector<Matrix1D<bool>> R_flags(R_size);
+    std::vector<Matrix1D<bool>> R_flags(R_size);
     for (auto iR = 0; iR < R_size; ++iR) {
         auto R_c = R[0][iR];
         R_flags[iR] = (data.R <= R_c + dR * 0.5) && (data.R >= R_c - dR * 0.5);        
@@ -233,7 +233,7 @@ data_assimilation::ObservationSpace internal::convertToObservationSpace(
     int size {0};
     for (auto iP = 0; iP < data.size_q1; ++iP) {
         for (auto iR = 0; iR < data.size_q2; ++iR) {
-            if (data[iP][iR] != FILLVAL && !isnan(data[iP][iR])) {
+            if (data[iP][iR] != FILLVAL && !std::isnan(data[iP][iR])) {
                 ++size;
             }
         }
@@ -257,7 +257,7 @@ data_assimilation::ObservationSpace internal::convertToObservationSpace(
     for (auto iP = 0; iP < data.size_q1; ++iP) {
         for (auto iR = 0; iR < data.size_q2; ++iR) {
             int H_idx = iR + iP * data.size_q2;
-            if (data[iP][iR] != FILLVAL && !isnan(data[iP][iR])) {
+            if (data[iP][iR] != FILLVAL && !std::isnan(data[iP][iR])) {
                 result.data[counter] = data[iP][iR]; 
                 result.H[counter][H_idx] = 1.;
                 ++counter;
@@ -268,7 +268,7 @@ data_assimilation::ObservationSpace internal::convertToObservationSpace(
     return result;
 }
 
-bool internal::str2bool(const string& str)
+bool internal::str2bool(const std::string& str)
 {
     return (str == "true" || str == "True" || str == "TRUE");
 }
@@ -320,7 +320,7 @@ data_assimilation::ProcessedMatFileData internal::readData(
     return result;
 }
 
-data_assimilation::ProcessedMatFileData internal::cat(const vector<ProcessedMatFileData>& pmfDataSplit) {
+data_assimilation::ProcessedMatFileData internal::cat(const std::vector<ProcessedMatFileData>& pmfDataSplit) {
     if (pmfDataSplit.size() == 0) {
         return {};
     }
@@ -363,7 +363,7 @@ Matrix1D<double> internal::interp1d_linear(
     int notnan = 0;
     for (int i = 0; i < sz; ++i) {
         // check for FILLVAL?  && x_in[i] != FILLVAL && f_in[i]!= FILLVAL
-        if (!isnan(x_in[i]) && !isnan(f_in[i])){
+        if (!std::isnan(x_in[i]) && !std::isnan(f_in[i])){
             ++notnan;
         }
     }
@@ -381,7 +381,7 @@ Matrix1D<double> internal::interp1d_linear(
 
         int ind = 0;
         for (int i = 0; i < sz; ++i) {
-            if (!isnan(x_in[i]) && !isnan(f_in[i])){
+            if (!std::isnan(x_in[i]) && !std::isnan(f_in[i])){
                 x_in_new[ind] = x_in[i];
                 f_in_new[ind] = f_in[i];
                 ++ind;
@@ -585,7 +585,7 @@ double internal::interp2d_linear_dependent(
     return result[0][0];
 }
 
-vector<vector<data_assimilation::Observations>> internal::interpolate_old(
+std::vector<std::vector<data_assimilation::Observations>> internal::interpolate_old(
     const ProcessedMatFileData& data,
     const Matrix2D<double>& V_grid,
     const Matrix2D<double>& K_grid)
@@ -609,7 +609,7 @@ vector<vector<data_assimilation::Observations>> internal::interpolate_old(
         }
     }
     
-    vector<vector<Observations>> result(V_size, vector<Observations>(K_size));
+    std::vector<std::vector<Observations>> result(V_size, std::vector<Observations>(K_size));
     //int counter = 0;
 #pragma omp parallel for schedule(dynamic,1) collapse(2)
     for (int iV = 0; iV < V_size; ++iV) {
@@ -642,7 +642,7 @@ vector<vector<data_assimilation::Observations>> internal::interpolate_old(
     return result;
 }
 
-vector<vector<data_assimilation::Observations>> internal::interpolate(
+std::vector<std::vector<data_assimilation::Observations>> internal::interpolate(
     const std::vector<ProcessedMatFileData>& data,
     const Matrix2D<double>& V_grid,
     const Matrix2D<double>& K_grid)
@@ -654,7 +654,7 @@ vector<vector<data_assimilation::Observations>> internal::interpolate(
     for(auto& instrumentData : data) nT += instrumentData.MLT.size_q1;
     Matrix1D<double> R(nT);
     Matrix1D<double> P(nT);
-    vector<Matrix3D<double>> K_in;
+    std::vector<Matrix3D<double>> K_in;
     K_in.reserve(data.size());
     int counter = 0;
     for(auto& instrumentData : data)
@@ -671,7 +671,7 @@ vector<vector<data_assimilation::Observations>> internal::interpolate(
             }
         }
     }
-    vector<vector<Observations>> result(V_size, vector<Observations>(K_size));
+    std::vector<std::vector<Observations>> result(V_size, std::vector<Observations>(K_size));
     //int counter = 0;
 #pragma omp parallel for schedule(dynamic,1) collapse(2)
     for (int iV = 0; iV < V_size; ++iV) {

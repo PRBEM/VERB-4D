@@ -221,10 +221,10 @@ Matrix1D<bool> logicalOperation(
     Operation operation
 ) {
     if (a.size_q1 != b.size_q1) {
-        cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
-        cout << "Matrix sizes are different. ";
-        cout << "a.size_q1 = " << a.size_q1 << ", ";
-        cout << "b.size_q1 = " << b.size_q1 << endl;; 
+        std::cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        std::cout << "Matrix sizes are different. ";
+        std::cout << "a.size_q1 = " << a.size_q1 << ", ";
+        std::cout << "b.size_q1 = " << b.size_q1 << std::endl;; 
         exit(EXIT_FAILURE);
     }
     
@@ -318,12 +318,12 @@ Matrix2D<bool> operator<=(double number, const Matrix2D<double>& A) {
 
 Matrix2D<bool> operator&&(const Matrix2D<bool>& A, const Matrix2D<bool>& B) {
     if (A.size_q1 != B.size_q1 || A.size_q2 != B.size_q2) {
-        cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
-        cout << "Matrix sizes are different. ";
-        cout << "A.size_q1 = " << A.size_q1 << ", ";
-        cout << "B.size_q1 = " << B.size_q1 << ", "; 
-        cout << "A.size_q2 = " << A.size_q2 << ", ";
-        cout << "B.size_q2 = " << B.size_q2 << endl; 
+        std::cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        std::cout << "Matrix sizes are different. ";
+        std::cout << "A.size_q1 = " << A.size_q1 << ", ";
+        std::cout << "B.size_q1 = " << B.size_q1 << ", "; 
+        std::cout << "A.size_q2 = " << A.size_q2 << ", ";
+        std::cout << "B.size_q2 = " << B.size_q2 << std::endl; 
         exit(EXIT_FAILURE);
     }
     
@@ -342,10 +342,10 @@ Matrix1D<double> operator-(
     const Matrix1D<double>& a, const Matrix1D<double>& b
 ) {
     if (a.size_q1 != b.size_q1) {
-        cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
-        cout << "Matrix sizes are different. ";
-        cout << "a.size_q1 = " << a.size_q1 << ", ";
-        cout << "b.size_q1 = " << b.size_q1 << endl; 
+        std::cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        std::cout << "Matrix sizes are different. ";
+        std::cout << "a.size_q1 = " << a.size_q1 << ", ";
+        std::cout << "b.size_q1 = " << b.size_q1 << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -361,10 +361,10 @@ Matrix1D<double> operator*(
     const Matrix2D<double>& A, const Matrix1D<double>& b
 ) {
     if (A.size_q2 != b.size_q1) {
-        cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
-        cout << "Matrix/vector size mismatch. ";
-        cout << "A.size_q2 = " << A.size_q2 << ", ";
-        cout << "b.size_q1 = " << b.size_q1 << endl; 
+        std::cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        std::cout << "Matrix/vector size mismatch. ";
+        std::cout << "A.size_q2 = " << A.size_q2 << ", ";
+        std::cout << "b.size_q1 = " << b.size_q1 << std::endl; 
         exit(EXIT_FAILURE);
     }
 
@@ -396,10 +396,10 @@ Matrix2D<double> operator*(
 ) {
 
     if (A.size_q2 != B.size_q1) {
-        cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
-        cout << "Matrix/matrix size mismatch. ";
-        cout << "A.size_q2 = " << A.size_q2 << ", ";
-        cout << "B.size_q1 = " << B.size_q1 << endl; 
+        std::cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        std::cout << "Matrix/matrix size mismatch. ";
+        std::cout << "A.size_q2 = " << A.size_q2 << ", ";
+        std::cout << "B.size_q1 = " << B.size_q1 << std::endl; 
         exit(EXIT_FAILURE);
     }
     //Lapack uses column major matrices (while we use row major) and therefore
@@ -432,10 +432,10 @@ Matrix2D<double> abtrans(
 ) {
 
     if (A.size_q2 != B.size_q2) {
-        cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
-        cout << "Matrix/matrix size mismatch. ";
-        cout << "A.size_q2 = " << A.size_q2 << ", ";
-        cout << "B.size_q2 = " << B.size_q2 << endl; 
+        std::cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        std::cout << "Matrix/matrix size mismatch. ";
+        std::cout << "A.size_q2 = " << A.size_q2 << ", ";
+        std::cout << "B.size_q2 = " << B.size_q2 << std::endl; 
         exit(EXIT_FAILURE);
     }
 
@@ -466,12 +466,12 @@ Matrix2D<double> operator+(
     const Matrix2D<double>& A, const Matrix2D<double>& B) {
 
     if (A.size_q1 != B.size_q1 || A.size_q2 != B.size_q2) {
-        cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
-        cout << "Matrix sizes are different. ";
-        cout << "A.size_q1 = " << A.size_q1 << ", ";
-        cout << "B.size_q1 = " << B.size_q1 << ", "; 
-        cout << "A.size_q2 = " << A.size_q2 << ", ";
-        cout << "B.size_q2 = " << B.size_q2 << endl; 
+        std::cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        std::cout << "Matrix sizes are different. ";
+        std::cout << "A.size_q1 = " << A.size_q1 << ", ";
+        std::cout << "B.size_q1 = " << B.size_q1 << ", "; 
+        std::cout << "A.size_q2 = " << A.size_q2 << ", ";
+        std::cout << "B.size_q2 = " << B.size_q2 << std::endl; 
         exit(EXIT_FAILURE);
     }
 
@@ -490,12 +490,12 @@ Matrix2D<double> operator-(
     const Matrix2D<double>& A, const Matrix2D<double>& B) {
 
     if (A.size_q1 != B.size_q1 || A.size_q2 != B.size_q2) {
-        cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
-        cout << "Matrix sizes are different. ";
-        cout << "A.size_q1 = " << A.size_q1 << ", ";
-        cout << "B.size_q1 = " << B.size_q1 << ", "; 
-        cout << "A.size_q2 = " << A.size_q2 << ", ";
-        cout << "B.size_q2 = " << B.size_q2 << endl; 
+        std::cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        std::cout << "Matrix sizes are different. ";
+        std::cout << "A.size_q1 = " << A.size_q1 << ", ";
+        std::cout << "B.size_q1 = " << B.size_q1 << ", "; 
+        std::cout << "A.size_q2 = " << A.size_q2 << ", ";
+        std::cout << "B.size_q2 = " << B.size_q2 << std::endl; 
         exit(EXIT_FAILURE);
     }
 
@@ -514,10 +514,10 @@ Matrix2D<double> operator-(
 Matrix2D<double> inv(Matrix2D<double> A) {
 
     if (A.size_q1 != A.size_q2) {
-        cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
-        cout << "Matrix is not a square one. ";
-        cout << "A.size_q1 = " << A.size_q1 << ", ";
-        cout << "A.size_q2 = " << A.size_q2 << endl;
+        std::cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        std::cout << "Matrix is not a square one. ";
+        std::cout << "A.size_q1 = " << A.size_q1 << ", ";
+        std::cout << "A.size_q2 = " << A.size_q2 << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -557,11 +557,11 @@ Matrix2D<double> toMatrix2D(
     const Matrix1D<double>& A, size_t size_q1, size_t size_q2
 ) {
     if (A.size_q1 != size_q1 * size_q2) {
-        cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
-        cout << "Sizes mismatch:";
-        cout << "A.size_q1 = " << A.size_q1 << ", ";
-        cout << "size_q1 = " << size_q1 << ", "; 
-        cout << "size_q2 = " << size_q2 << endl; 
+        std::cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        std::cout << "Sizes mismatch:";
+        std::cout << "A.size_q1 = " << A.size_q1 << ", ";
+        std::cout << "size_q1 = " << size_q1 << ", "; 
+        std::cout << "size_q2 = " << size_q2 << std::endl; 
         exit(EXIT_FAILURE);
     }
 

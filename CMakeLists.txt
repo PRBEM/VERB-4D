@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 2.8)
 project(VERB4D C CXX)
-add_definitions(-std=c++11)
+add_definitions(-std=c++17)
 
 # Enable/disable tests
 include(CTest)
@@ -113,3 +113,6 @@ target_link_libraries(VERB4D_Solver ${DEPLIBS})
 if(ENABLE_TESTING)
     add_subdirectory(test)
 endif()
+if(FAST_CONVECTION)
+    add_definitions(-DFAST_CONVECTION)
+endif(FAST_CONVECTION)

@@ -19,6 +19,8 @@
 #include "Matrix.h"
 #include "Logger.h"
 #include <inttypes.h>
+#include <limits>
+#include <algorithm>
 
 using namespace std;
 
@@ -244,8 +246,10 @@ Matrix1D<T>::~Matrix1D() {
 template<class T>
 void Matrix1D<T>::AllocateMemory( int size_q1 ) {
 	this->size_q1 = size_q1;
+	num_elements = size_q1;
 	// using inline template for memory allocation
 	matrix_array = matrix<T>(size_q1);
+	plane_array = matrix_array;
 	initialized = true;
 }
 
@@ -437,7 +441,7 @@ inline Matrix1D<T> Matrix1D<T>::operator/ (const T Val) const {
 template<class T>
 inline Matrix1D<T> Matrix1D<T>::times (const Matrix1D<T> &M) const {
 	int i1;
-	Matrix1D<T> Tmp(*this);
+	Matrix1D<T> Tmp(size_q1);
 	for (i1 = 0; i1 < this->size_q1; i1++)
 		Tmp[i1] = matrix_array[i1] * M.matrix_array[i1];
 	return Tmp;
@@ -451,7 +455,7 @@ inline Matrix1D<T> Matrix1D<T>::times (const Matrix1D<T> &M) const {
 template<class T>
 inline Matrix1D<T> Matrix1D<T>::divide (const Matrix1D<T> &M) const {
 	int i1;
-	Matrix1D<T> Tmp(*this);
+	Matrix1D<T> Tmp(size_q1);
 	for (i1 = 0; i1 < this->size_q1; i1++)
 		Tmp[i1] = matrix_array[i1] / M.matrix_array[i1];
 	return Tmp;
@@ -492,7 +496,7 @@ inline T Matrix1D<T>::dot( const Matrix1D<T> &W ) const {
 * Write matrix data to file.
 */
 template<class T>
-void Matrix1D<T>::writeToFile(string filename) {
+void Matrix1D<T>::writeToFile(string filename) const {
 	int i1;
 	ofstream output(filename.c_str());
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
@@ -513,7 +517,7 @@ void Matrix1D<T>::writeToFile(string filename) {
 * Write matrix data to file with grid.
 */
 template<class T>
-void Matrix1D<T>::writeToFile(string filename, Matrix1D<T> &grid_q1) {
+void Matrix1D<T>::writeToFile(string filename, const Matrix1D<T> &grid_q1) const {
 	int i1;
 	ofstream output(filename.c_str());
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
@@ -892,7 +896,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , int columnNumber)
 * \param grid_q1 - checks grid data against the file data
 */
 template<class T>
-void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
+void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T>& grid_q1) {
 	int i1;
 	string inBuf;
 	double loaded_q1;
@@ -944,7 +948,7 @@ void Matrix1D<T>::readFromFile(string filename, const Matrix1D<T> grid_q1) {
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
+void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T>& grid_x)
 {
 
 #if (MATLAB_CAPABLE)
@@ -1289,7 +1293,7 @@ void Matrix1D<T>::readFromMatlabFile(string file , const Matrix1D<T> grid_x)
 * Default value set to 1e99
 */
 template<class T>
-T Matrix1D<T>::min() {
+T Matrix1D<T>::min() const {
 	T tmp = 1e99;
 	int i1;
 	for (i1 = 0; i1 < size_q1; i1++) {
@@ -1303,8 +1307,8 @@ T Matrix1D<T>::min() {
 * Default value seet to 0
 */
 template<class T>
-T Matrix1D<T>::max() {
-	T tmp = 0;
+T Matrix1D<T>::max() const {
+	T tmp = -std::numeric_limits<T>::infinity();
 	int i1;
 	for (i1 = 0; i1 < size_q1; i1++) {
 		tmp = (tmp>matrix_array[i1])?tmp:matrix_array[i1];
@@ -1317,7 +1321,7 @@ T Matrix1D<T>::max() {
 * Default value set to 0
 */
 template<class T>
-T Matrix1D<T>::maxabs() {
+T Matrix1D<T>::maxabs() const {
 	T tmp = 0;
 	int i1;
 	for (i1 = 0; i1 < size_q1; i1++) {
@@ -1331,13 +1335,27 @@ T Matrix1D<T>::maxabs() {
 * Changes every element to a positive value with the same magnitude
 */
 template<class T>
-Matrix1D<T> Matrix1D<T>::abs() {
+Matrix1D<T> Matrix1D<T>::abs() const {
 	Matrix1D<T> tmp(this->size_q1);
 	int i1;
 	for (i1 = 0; i1 < size_q1; i1++) {
 		tmp[i1] = (matrix_array[i1]>0)?matrix_array[i1]:-matrix_array[i1];
 	}
 	return tmp;
+}
+
+/**
+* Replace all matrix malues smaller than val with val.
+*
+* \param val - new minimal value.
+*/
+template<class T>
+Matrix1D<T>& Matrix1D<T>::max_of(T val) {
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = std::max(plane_array[i], val);
+	}
+	return *this;
 }
 
 //////////////////////////////////////////////////
@@ -1390,8 +1408,10 @@ template<class T>
 void Matrix2D<T>::AllocateMemory( int size_q1, int size_q2 ) {
 	this->size_q1 = size_q1;
 	this->size_q2 = size_q2;
+	num_elements = size_q1 * size_q2;
 	// using matrix inline template to allocate memory
 	matrix_array = matrix<T>(size_q1, size_q2);
+	plane_array = matrix_array[0];
 	initialized = true;
 }
 
@@ -1437,9 +1457,10 @@ template<class T>
 inline Matrix2D<T>& Matrix2D<T>::operator= (const T val) {
 	int i1, i2;
 	if (initialized) {
-		for (i1 = 0; i1 < this->size_q1; i1++)
-			for (i2 = 0; i2 < this->size_q2; i2++)
-				matrix_array[i1][i2] = val;
+		for(int i = 0; i < num_elements; i++)
+		{
+			plane_array[i] = val;
+		}
 	} else {
 		printf("MATRIX_ERROR: Using un-itialized matrix");
 		exit(EXIT_FAILURE);
@@ -1454,10 +1475,10 @@ inline Matrix2D<T>& Matrix2D<T>::operator= (const T val) {
 */
 template<class T>
 inline Matrix2D<T>& Matrix2D<T>::operator+= (const Matrix2D<T> &M) {
-	int i1, i2;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i1 = 0; i2 < this->size_q2; i2++)
-				matrix_array[i1][i2] += M.matrix_array[i1][i2];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] += M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -1466,10 +1487,10 @@ inline Matrix2D<T>& Matrix2D<T>::operator+= (const Matrix2D<T> &M) {
 */
 template<class T>
 inline Matrix2D<T>& Matrix2D<T>::operator-= (const Matrix2D<T> &M) {
-	int i1, i2;
-	for (i1 = 0; i1 < this->size_q1; i2++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			matrix_array[i1][i2] -= M.matrix_array[i1][i2];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] -= M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -1479,10 +1500,10 @@ inline Matrix2D<T>& Matrix2D<T>::operator-= (const Matrix2D<T> &M) {
 */
 template<class T>
 inline Matrix2D<T>& Matrix2D<T>::operator*= (const T Val) {
-	int i1, i2;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i1 = 0; i1 < this->size_q2; i2++)
-				matrix_array[i1][i2] *= Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] *= Val;
+	}
 	return *this;
 }
 
@@ -1494,11 +1515,11 @@ inline Matrix2D<T>& Matrix2D<T>::operator*= (const T Val) {
 */
 template<class T>
 inline Matrix2D<T> Matrix2D<T>::operator* (const T Val) const {
-	int i1, i2;
-	Matrix2D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			Tmp[i1][i2] = matrix_array[i1][i2] * Val;
+	Matrix2D<T> Tmp(size_q1, size_q2);
+	for (int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] * Val;
+	}
 	return Tmp;
 }
 
@@ -1509,11 +1530,11 @@ inline Matrix2D<T> Matrix2D<T>::operator* (const T Val) const {
 */
 template<class T>
 inline Matrix2D<T> Matrix2D<T>::operator/(const T Val) const {
-	int i1, i2;
-	Matrix2D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			Tmp[i1][i2] = matrix_array[i1][i2] / Val;
+	Matrix2D<T> Tmp(size_q1, size_q2);
+	for (int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] / Val;
+	}
 	return Tmp;
 }
 
@@ -1524,11 +1545,11 @@ inline Matrix2D<T> Matrix2D<T>::operator/(const T Val) const {
 */
 template<class T>
 inline Matrix2D<T> Matrix2D<T>::divide (const Matrix2D<T> &M) const {
-	int i1, i2;
-	Matrix2D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			Tmp[i1][i2] = matrix_array[i1][i2] / M[i1][i2];
+	Matrix2D<T> Tmp(size_q1, size_q2);
+	for (int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] / M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -1539,11 +1560,11 @@ inline Matrix2D<T> Matrix2D<T>::divide (const Matrix2D<T> &M) const {
 */
 template<class T>
 inline Matrix2D<T> Matrix2D<T>::times (const Matrix2D<T> &M) const {
-	int i1, i2;
-	Matrix2D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			Tmp[i1][i2] = matrix_array[i1][i2] * M[i1][i2];
+	Matrix2D<T> Tmp(size_q1, size_q2);
+	for (int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] * M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -1553,13 +1574,11 @@ inline Matrix2D<T> Matrix2D<T>::times (const Matrix2D<T> &M) const {
 * Default value seet to 0
 */
 template<class T>
-T Matrix2D<T>::max() {
-	T tmp = 0;
-	int i1, i2;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			tmp = (tmp>matrix_array[i1][i2])?tmp:matrix_array[i1][i2];
-		}
+T Matrix2D<T>::max() const {
+	T tmp = -std::numeric_limits<T>::infinity();
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::max(tmp, plane_array[i]);
 	}
 	return tmp;
 }
@@ -1569,13 +1588,12 @@ T Matrix2D<T>::max() {
 * Default value set to 0
 */
 template<class T>
-T Matrix2D<T>::maxabs() {
+T Matrix2D<T>::maxabs() const {
 	T tmp = 0;
-	int i1, i2;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			tmp = (tmp>fabs((double)matrix_array[i1][i2]))?tmp:fabs((double)matrix_array[i1][i2]);
-		}
+	for(int i = 0; i < num_elements; i++)
+	{
+		T current = std::abs(plane_array[i]);
+		tmp = std::max(tmp, current);
 	}
 	return tmp;
 }
@@ -1583,16 +1601,14 @@ T Matrix2D<T>::maxabs() {
 
 /**
 * Return minimum value of the 2d matrix.
-* Default value set to 1e99
+* Default value set to infinity
 */
 template<class T>
-T Matrix2D<T>::min() {
-	T tmp = 1e99;
-	int i1, i2;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			tmp = (tmp<matrix_array[i1][i2])?tmp:matrix_array[i1][i2];
-		}
+T Matrix2D<T>::min() const {
+	T tmp = std::numeric_limits<T>::infinity();
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::min(tmp, plane_array[i]);
 	}
 	return tmp;
 }
@@ -1602,31 +1618,28 @@ T Matrix2D<T>::min() {
 * Changes every element to a positive value with the same magnitude
 */
 template<class T>
-Matrix2D<T> Matrix2D<T>::abs() {
-	Matrix2D<T> tmp(this->size_q1, this->size_q2);
-	int i1, i2;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			tmp[i1][i2] = (matrix_array[i1][i2]>0)?matrix_array[i1][i2]:-matrix_array[i1][i2];
-		}
+Matrix2D<T> Matrix2D<T>::abs() const {
+	Matrix2D<T> tmp(size_q1, size_q2);
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp.plane_array[i] = std::abs(plane_array[i]);
 	}
 	return tmp;
 }
 
 
 /**
-* Divide all values of matrix to value Val.
+* Replace all matrix malues smaller than val with val.
 *
-* \param val - value to divide.
+* \param val - new minimal value.
 */
 template<class T>
-Matrix2D<T> Matrix2D<T>::max_of(T val) {
-	int i1, i2;
-	Matrix2D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			Tmp[i1][i2] = (matrix_array[i1][i2]>val)?matrix_array[i1][i2]:val;
-	return Tmp;
+Matrix2D<T>& Matrix2D<T>::max_of(T val) {
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = std::max(plane_array[i], val);
+	}
+	return *this;
 }
 
 /**
@@ -1647,7 +1660,7 @@ inline int Matrix2D<T>::index1d(int x, int y) const {
 * \param filename - file name
 */
 template<class T>
-void Matrix2D<T>::writeToFile(string filename) {
+void Matrix2D<T>::writeToFile(string filename) const {
 	int i1, i2;
 	ofstream output(filename.c_str());
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
@@ -1672,7 +1685,7 @@ void Matrix2D<T>::writeToFile(string filename) {
 * Simply that means - write all three matrixes to a file.
 */
 template<class T>
-void Matrix2D<T>::writeToFile(string filename, Matrix2D<T> &grid_x, Matrix2D<T> &grid_y) {
+void Matrix2D<T>::writeToFile(string filename, const Matrix2D<T> &grid_x, const Matrix2D<T> &grid_y) const {
 	int i1, i2;
 	ofstream output(filename.c_str());
 	output << "VARIABLES = \"" << ((grid_x.name!="")?grid_x.name:"x") << "\", \"" << ((grid_y.name!="")?grid_y.name:"y") << "\", \"" << ((this->name!="")?this->name:"f") << "\" "<< endl;
@@ -1686,6 +1699,31 @@ void Matrix2D<T>::writeToFile(string filename, Matrix2D<T> &grid_x, Matrix2D<T> 
 	output.close();
 }
 
+template<class T>
+void Matrix2D<T>::writeToBinaryFile(string filename) const {
+    FILE *outputFile = fopen(filename.c_str(), "wb");
+    if (outputFile != NULL) {
+        int status;
+
+		int32_t size_array[2] =  { size_q1, size_q2};
+		status = fwrite(size_array, sizeof(int32_t), 2, outputFile);
+		if (status!=2){
+			printf("Writing error");
+			exit(EXIT_FAILURE);
+		}
+
+		int size_total = this->size_q1 * this->size_q2;
+		status = fwrite(this->plane_array, sizeof(T), size_total, outputFile);
+		if (status!=size_total){
+			printf("Writing error");
+			exit(EXIT_FAILURE);
+		}
+    } else {
+        printf("MATRIX_WRITE_ERROR: Error writing file %s.\n", filename.c_str());
+        exit(EXIT_FAILURE);
+    }
+    fclose(outputFile);
+}
 
 /**
 * Read matrix data from file with grid, by column
@@ -2058,7 +2096,7 @@ void Matrix2D<T>::readFromMatlabFile(string file ,  int columnNumber)
 * \param grids x,y - checks grids data against the file data
 */
 template<class T>
-void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const Matrix2D<T> grid_y) {
+void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T>& grid_x, const Matrix2D<T>& grid_y) {
 	int i1, i2;
 	string inBuf;
 	double loaded_x, loaded_y;
@@ -2110,7 +2148,7 @@ void Matrix2D<T>::readFromFile(string filename, const Matrix2D<T> grid_x, const 
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T> grid_x, const Matrix2D<T> grid_y)
+void Matrix2D<T>::readFromMatlabFile(string file , const Matrix2D<T>& grid_x, const Matrix2D<T>& grid_y)
 {
 
 #if (MATLAB_CAPABLE)
@@ -2429,6 +2467,21 @@ Matrix1D<T> Matrix2D<T>::xSlice(int p_x) const {
 }
 
 /**
+* Take an x-slice of 2d matrix and write to out.
+*/
+template<class T>
+void Matrix2D<T>::xSlice(Matrix1D<T>& out, int p_x) const {
+	if (p_x > this->size_q1) {
+		printf("MATRIX_ERROR: xSlice outside or array boundary: %d > %d", p_x, this->size_q1);
+		exit(EXIT_FAILURE);
+	}
+
+	for (size_t i2 = 0; i2 < size_q2; i2++) {
+		out[i2] = matrix_array[p_x][i2];
+	}
+}
+
+/**
 * Make y-slice of 2d matrix = 1d matrix.
 */
 template<class T>
@@ -2447,6 +2500,20 @@ Matrix1D<T> Matrix2D<T>::ySlice(int p_y) const {
 	return tmp;
 }
 
+/**
+* Take a y-slice of 2d matrix and write to out.
+*/
+template<class T>
+void Matrix2D<T>::ySlice(Matrix1D<T>& out, int p_y) const {
+	if (p_y > this->size_q2) {
+		printf("MATRIX_ERROR: ySlice outside or array boundary: %d > %d", p_y, this->size_q2);
+		exit(EXIT_FAILURE);
+	}
+
+	for (size_t i1 = 0; i1 < size_q1; i1++) {
+		out[i1] = matrix_array[i1][p_y];
+	}
+}
 //////////////////////////////////////////////////
 //
 //	Matrix 3D
@@ -2482,7 +2549,6 @@ Matrix3D<T>::Matrix3D( const Matrix3D<T> &M ) {
 template<class T>
 Matrix3D<T>::~Matrix3D() {
 	if (initialized) free_matrix<T>(matrix_array, size_q1, size_q2);
-	//		delete[] plane_array; - it's get deleted with matrix_array[0][0][0] or something?
 }
 
 /**
@@ -2493,6 +2559,7 @@ void Matrix3D<T>::AllocateMemory( int size_q1, int size_q2, int size_q3) {
 	this->size_q1 = size_q1;
 	this->size_q2 = size_q2;
 	this->size_q3 = size_q3;
+	num_elements = size_q1 * size_q2 * size_q3;
 	matrix_array = matrix<T>(size_q1, size_q2, size_q3);
 	plane_array = matrix_array[0][0];
 	initialized = true;
@@ -2610,12 +2677,10 @@ return *this;
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::operator= (const T Val) {
-	// std::fill_n(matrix_array[0][0][0], size_q1*size*y*size*z, Val); // might be faster
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				this->matrix_array[i1][i2][i3] = Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = Val;
+	}
 	return *this;
 }
 
@@ -2625,11 +2690,10 @@ inline Matrix3D<T>& Matrix3D<T>::operator= (const T Val) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::operator+= (const Matrix3D<T> &M) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] += M.matrix_array[i1][i2][i3];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] += M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -2638,11 +2702,10 @@ inline Matrix3D<T>& Matrix3D<T>::operator+= (const Matrix3D<T> &M) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::operator-= (const Matrix3D<T> &M) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] -= M.matrix_array[i1][i2][i3];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] -= M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -2651,11 +2714,10 @@ inline Matrix3D<T>& Matrix3D<T>::operator-= (const Matrix3D<T> &M) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::operator*= (const T Val) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] *= Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] *= Val;
+	}
 	return *this;
 }
 
@@ -2664,11 +2726,10 @@ inline Matrix3D<T>& Matrix3D<T>::operator*= (const T Val) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::operator/= (const T Val) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] /= Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] /= Val;
+	}
 	return *this;
 }
 
@@ -2677,11 +2738,10 @@ inline Matrix3D<T>& Matrix3D<T>::operator/= (const T Val) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::operator+= (const T Val) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] += Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] += Val;
+	}
 	return *this;
 }
 
@@ -2690,11 +2750,10 @@ inline Matrix3D<T>& Matrix3D<T>::operator+= (const T Val) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::operator-= (const T Val) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] -= Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] -= Val;
+	}
 	return *this;
 }
 
@@ -2703,11 +2762,10 @@ inline Matrix3D<T>& Matrix3D<T>::operator-= (const T Val) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::times_equal (const Matrix3D<T> &M) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] *= M.matrix_array[i1][i2][i3];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] *= M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -2716,11 +2774,10 @@ inline Matrix3D<T>& Matrix3D<T>::times_equal (const Matrix3D<T> &M) {
 */
 template<class T>
 inline Matrix3D<T>& Matrix3D<T>::divide_equal (const Matrix3D<T> &M) {
-	int i1, i2, i3;
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				matrix_array[i1][i2][i3] /= M.matrix_array[i1][i2][i3];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] /= M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -2729,12 +2786,11 @@ inline Matrix3D<T>& Matrix3D<T>::divide_equal (const Matrix3D<T> &M) {
 */
 template<class T>
 inline Matrix3D<T> Matrix3D<T>::operator+ (const Matrix3D<T> &M) const {
-	int i1, i2, i3;
-	Matrix3D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				Tmp[i1][i2][i3] = matrix_array[i1][i2][i3] + M.matrix_array[i1][i2][i3];
+	Matrix3D<T> Tmp(size_q1, size_q2, size_q3);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] + M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -2743,12 +2799,11 @@ inline Matrix3D<T> Matrix3D<T>::operator+ (const Matrix3D<T> &M) const {
 */
 template<class T>
 inline Matrix3D<T> Matrix3D<T>::operator- (const Matrix3D<T> &M) const {
-	int i1, i2, i3;
-	Matrix3D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				Tmp[i1][i2][i3] = matrix_array[i1][i2][i3] - M.matrix_array[i1][i2][i3];
+	Matrix3D<T> Tmp(size_q1, size_q2, size_q3);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] - M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -2758,12 +2813,11 @@ inline Matrix3D<T> Matrix3D<T>::operator- (const Matrix3D<T> &M) const {
 */
 template<class T>
 inline Matrix3D<T> Matrix3D<T>::operator* (const T Val) const {
-	int i1, i2, i3;
-	Matrix3D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				Tmp[i1][i2][i3] = matrix_array[i1][i2][i3] * Val;
+	Matrix3D<T> Tmp(size_q1, size_q2, size_q3);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] * Val;
+	}
 	return Tmp;
 }
 
@@ -2773,12 +2827,11 @@ inline Matrix3D<T> Matrix3D<T>::operator* (const T Val) const {
 */
 template<class T>
 inline Matrix3D<T> Matrix3D<T>::operator/ (const T Val) const {
-	int i1, i2, i3;
-	Matrix3D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				Tmp[i1][i2][i3] = matrix_array[i1][i2][i3] / Val;
+	Matrix3D<T> Tmp(size_q1, size_q2, size_q3);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] / Val;
+	}
 	return Tmp;
 }
 
@@ -2787,12 +2840,11 @@ inline Matrix3D<T> Matrix3D<T>::operator/ (const T Val) const {
 */
 template<class T>
 inline Matrix3D<T> Matrix3D<T>::times (const Matrix3D<T> &M) const {
-	int i1, i2, i3;
-	Matrix3D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				Tmp[i1][i2][i3] = matrix_array[i1][i2][i3] * M.matrix_array[i1][i2][i3];
+	Matrix3D<T> Tmp(size_q1, size_q2, size_q3);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] * M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -2801,12 +2853,11 @@ inline Matrix3D<T> Matrix3D<T>::times (const Matrix3D<T> &M) const {
 */
 template<class T>
 inline Matrix3D<T> Matrix3D<T>::divide (const Matrix3D<T> &M) const {
-	int i1, i2, i3;
-	Matrix3D<T> Tmp(*this);
-	for (i1 = 0; i1 < this->size_q1; i1++)
-		for (i2 = 0; i2 < this->size_q2; i2++)
-			for (i3 = 0; i3 < this->size_q3; i3++)
-				Tmp[i1][i2][i3] = matrix_array[i1][i2][i3] / M.matrix_array[i1][i2][i3];
+	Matrix3D<T> Tmp(size_q1, size_q2, size_q3);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] / M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -2816,7 +2867,7 @@ inline Matrix3D<T> Matrix3D<T>::divide (const Matrix3D<T> &M) const {
 * File has two header lines.
 */
 template<class T>
-void Matrix3D<T>::writeToFile(string filename, string info) {
+void Matrix3D<T>::writeToFile(string filename, string info) const {
 	int i1, i2, i3;
 	ofstream output(filename.c_str());
 	output << "VARIABLES = \""<< ((this->name!="")?this->name:"f") <<"\" "<< endl;
@@ -2837,7 +2888,7 @@ void Matrix3D<T>::writeToFile(string filename, string info) {
 * File has two header lines.
 */
 template<class T>
-void Matrix3D<T>::writeToFile(string filename, Matrix3D<T> &grid_x, Matrix3D<T> &grid_y, Matrix3D<T> &grid_z) {
+void Matrix3D<T>::writeToFile(string filename, const Matrix3D<T>& grid_x, const Matrix3D<T>& grid_y, const Matrix3D<T>& grid_z) const {
 	int i1, i2, i3;
 	ofstream output(filename.c_str());
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
@@ -3241,7 +3292,7 @@ void Matrix3D<T>::readFromMatlabFile(string file , int columnNumber)
 * \param grids x,y,z - checks grids data against the file data
 */
 template<class T>
-void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const Matrix3D<T> grid_y, const Matrix3D<T> grid_z) {
+void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T>& grid_x, const Matrix3D<T>& grid_y, const Matrix3D<T>& grid_z) {
 	int i1, i2, i3;
 	string inBuf;
 	double loaded_x, loaded_y, loaded_z;
@@ -3304,7 +3355,7 @@ void Matrix3D<T>::readFromFile(string filename, const Matrix3D<T> grid_x, const 
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, const Matrix3D<T> grid_y, const Matrix3D<T> grid_z)
+void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T>& grid_x, const Matrix3D<T>& grid_y, const Matrix3D<T>& grid_z)
 {
 
 #if (MATLAB_CAPABLE)
@@ -3593,37 +3644,24 @@ void Matrix3D<T>::readFromMatlabFile(string file , const Matrix3D<T> grid_x, con
 * \param filename - file to read grids from
 */
 template<class T>
-void Matrix3D<T>::writeToBinaryFile(string filename) {
+void Matrix3D<T>::writeToBinaryFile(string filename) const {
     FILE *outputFile = fopen(filename.c_str(), "wb");
     if (outputFile != NULL) {
-        int size_of_int32 = sizeof(int32_t);
-        int32_t buffer_int32;
         int status;
 
-        int size_array[3] = {size_q1, size_q2, size_q3};
-        for (int i = 0; i<3; i++){
-            buffer_int32 = static_cast<int32_t>(size_array[i]);
-            status = fwrite(&buffer_int32, size_of_int32, 1, outputFile);
-            if (status!=1){
-                printf("Writing error");
-                exit(EXIT_FAILURE);
-            }
-        }
+		int32_t size_array[3] =  { size_q1, size_q2, size_q3 };
+		status = fwrite(size_array, sizeof(int32_t), 3, outputFile);
+		if (status!=3){
+			printf("Writing error");
+			exit(EXIT_FAILURE);
+		}
 
-        int size_of_double = sizeof(double);
-        double buffer_double;
-        for (int i1 = 0; i1 < size_q1; i1++) {
-              for (int i2 = 0; i2 < size_q2; i2++) {
-                    for (int i3 = 0; i3 < size_q3; i3++) {
-                        buffer_double = matrix_array[i1][i2][i3];
-                        status = fwrite(&buffer_double, size_of_double, 1, outputFile);
-                        if (status!=1){
-                              printf("Writing error");
-                              exit(EXIT_FAILURE);
-                        }
-                    }
-              }
-        }
+		int size_total = this->size_q1 * this->size_q2 * this->size_q3;
+		status = fwrite(this->plane_array, sizeof(T), size_total, outputFile);
+		if (status!=size_total){
+			printf("Writing error");
+			exit(EXIT_FAILURE);
+		}
     } else {
         printf("MATRIX_WRITE_ERROR: Error writing file %s.\n", filename.c_str());
         exit(EXIT_FAILURE);
@@ -3650,44 +3688,19 @@ void Matrix3D<T>::readFromBinaryFile(string filename) {
 		if (inputFile != NULL) {
             int status;
 
-            int size_of_int32 = sizeof(int32_t);
-            char *buffer_int32;
-            buffer_int32 = (char *) malloc(size_of_int32);
-            if (buffer_int32 == NULL){
-                printf("Memory error");
-                exit(EXIT_FAILURE);
-            }
-
-            for (int i = 0; i < 3; i++){
-                status = fread(buffer_int32, size_of_int32, 1, inputFile);
-                if (status!=1){
-                    printf("Reading error");
-                    exit(EXIT_FAILURE);
-                }
-            }
-
-            int size_of_double = sizeof(double);
-            char *buffer_double;
-            buffer_double = (char*) malloc(size_of_double);
-            if (buffer_double == NULL) {
-                  printf("Memory error");
-                  exit(EXIT_FAILURE);
-            }
-			for (int i1 = 0; i1 < size_q1; i1++) {
-				for (int i2 = 0; i2 < size_q2; i2++) {
-					for (int i3 = 0; i3 < size_q3; i3++) {
-                        status = fread(buffer_double, size_of_double, 1, inputFile);
-                        if (status!=1){
-                            printf("Reading error");
-                            exit(EXIT_FAILURE);
-                        } else {
-                            matrix_array[i1][i2][i3] = *((double*) buffer_double);
-                        }
-					}
-				}
+			int32_t buffer_int32[3];
+			status = fread(buffer_int32, sizeof(int32_t), 3, inputFile);
+			if (status!=3){
+				printf("Reading error");
+				exit(EXIT_FAILURE);
 			}
-			free(buffer_int32);
-			free(buffer_double);
+
+			int size_total = this->size_q1 * this->size_q2 * this->size_q3;
+			status = fread(this->plane_array, sizeof(T), size_total, inputFile);
+			if (status!=size_total){
+				printf("Reading error");
+				exit(EXIT_FAILURE);
+			}
 		} else {
 			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
 			exit(EXIT_FAILURE);
@@ -3702,7 +3715,7 @@ void Matrix3D<T>::readFromBinaryFile(string filename) {
 * WARNING: writing to 3D matlab array is not available at the moment
 */
 template<class T>
-void Matrix3D<T>::writeToAnyFile(string filename, string io_method, string info) {
+void Matrix3D<T>::writeToAnyFile(string filename, string io_method, string info) const {
     string ext;
     if (io_method.compare("ascii") == 0){
         ext = ".plt";
@@ -3746,7 +3759,7 @@ void Matrix3D<T>::readFromAnyFile(string filename, string io_method) {
 * WARNING: if io_method == "binary", .pltb file does not contain grid. In this case the function works the same as Matrix3D<T>::readFromAnyFile(string, string, int)
 */
 template<class T>
-void Matrix3D<T>::readFromAnyFile(string filename, string io_method, const Matrix3D<T> grid_q1, const Matrix3D<T> grid_q2, const Matrix3D<T> grid_q3){
+void Matrix3D<T>::readFromAnyFile(string filename, string io_method, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3){
     string ext;
     if (io_method.compare("ascii") == 0){
         ext = ".plt";
@@ -3778,15 +3791,11 @@ inline int Matrix3D<T>::index1d(int x, int y, int z) {
 * Default value set to 1e99
 */
 template<class T>
-T Matrix3D<T>::min() {
-	T tmp = 1e99;
-	int i1, i2, i3;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			for (i3 = 0; i3 < size_q3; i3++) {
-				tmp = (tmp<matrix_array[i1][i2][i3])?tmp:matrix_array[i1][i2][i3];
-			}
-		}
+T Matrix3D<T>::min() const {
+	T tmp = std::numeric_limits<T>::infinity();
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::min(tmp, plane_array[i]);
 	}
 	return tmp;
 }
@@ -3796,15 +3805,11 @@ T Matrix3D<T>::min() {
 * Default value seet to 0
 */
 template<class T>
-T Matrix3D<T>::max() {
-	T tmp = 0;
-	int i1, i2, i3;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			for (i3 = 0; i3 < size_q3; i3++) {
-				tmp = (tmp>matrix_array[i1][i2][i3])?tmp:matrix_array[i1][i2][i3];
-			}
-		}
+T Matrix3D<T>::max() const {
+	T tmp = -std::numeric_limits<T>::infinity();
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::max(tmp, plane_array[i]);
 	}
 	return tmp;
 }
@@ -3814,15 +3819,11 @@ T Matrix3D<T>::max() {
 * Default value set to 0
 */
 template<class T>
-T Matrix3D<T>::maxabs() {
+T Matrix3D<T>::maxabs() const {
 	T tmp = 0;
-	int i1, i2, i3;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			for (i3 = 0; i3 < size_q3; i3++) {
-				tmp = (tmp>fabs((double)matrix_array[i1][i2][i3]))?tmp:fabs((double)matrix_array[i1][i2][i3]);
-			}
-		}
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::max(tmp, std::abs(plane_array[i]));
 	}
 	return tmp;
 }
@@ -3832,19 +3833,28 @@ T Matrix3D<T>::maxabs() {
 * Changes every element to a positive value with the same magnitude
 */
 template<class T>
-Matrix3D<T> Matrix3D<T>::abs() {
-	Matrix3D<T> tmp(this->size_q1, this->size_q2, this->size_q3);
-	int i1, i2, i3;
-	for (i1 = 0; i1 < size_q1; i1++) {
-		for (i2 = 0; i2 < size_q2; i2++) {
-			for (i3 = 0; i3 < size_q3; i3++) {
-				tmp[i1][i2][i3] = (matrix_array[i1][i2][i3]>0)?matrix_array[i1][i2][i3]:-matrix_array[i1][i2][i3];
-			}
-		}
+Matrix3D<T> Matrix3D<T>::abs() const {
+	Matrix3D<T> tmp(size_q1, size_q2, size_q3);
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp.plane_array[i] = std::abs(plane_array[i]);
 	}
 	return tmp;
 }
 
+/**
+* Replace all matrix malues smaller than val with val.
+*
+* \param val - new minimal value.
+*/
+template<class T>
+Matrix3D<T>& Matrix3D<T>::max_of(T val) {
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = std::max(plane_array[i], val);
+	}
+	return *this;
+}
 
 /**
 * Take x-slice of 3d matrix turning it into a 2d matrix.
@@ -3861,6 +3871,19 @@ Matrix2D<T> Matrix3D<T>::xSlice(int p_x) const {
 		}
 	}
 	return tmp;
+}
+
+/**
+* Take an x-slice of 3d matrix and write it to out
+* \param p_x - index at which to slice x dimension
+*/
+template<class T>
+void Matrix3D<T>::xSlice(Matrix2D<T>& out, int p_x) const {
+	for (size_t i2 = 0; i2 < size_q2; i2++) {
+		for (size_t i3 = 0; i3 < size_q3; i3++) {
+			out[i2][i3] = matrix_array[p_x][i2][i3];
+		}
+	}
 }
 
 /**
@@ -3881,6 +3904,19 @@ Matrix2D<T> Matrix3D<T>::ySlice(int p_y) const {
 }
 
 /**
+* Take a y-slice of 3d matrix and write it to out
+* \param p_x - index at which to slice x dimension
+*/
+template<class T>
+void Matrix3D<T>::ySlice(Matrix2D<T>& out, int p_y) const {
+	for (size_t i1 = 0; i1 < size_q1; i1++) {
+		for (size_t i3 = 0; i3 < size_q3; i3++) {
+			out[i1][i3] = matrix_array[i1][p_y][i3];
+		}
+	}
+}
+
+/**
 * Take z-slice of 3d matrix turning it into a 2d matrix.
 * \param p_z - index at which to slice z dimension
 */
@@ -3895,6 +3931,19 @@ Matrix2D<T> Matrix3D<T>::zSlice(int p_z) const {
 		}
 	}
 	return tmp;
+}
+
+/**
+* Take a z-slice of 3d matrix and write it to out
+* \param p_x - index at which to slice x dimension
+*/
+template<class T>
+void Matrix3D<T>::zSlice(Matrix2D<T>& out, int p_z) const {
+	for (size_t i1 = 0; i1 < size_q1; i1++) {
+		for (size_t i2 = 0; i2 < size_q2; i2++) {
+			out[i1][i2] = matrix_array[i1][i2][p_z];
+		}
+	}
 }
 
 /**
@@ -3914,6 +3963,18 @@ Matrix1D<T> Matrix3D<T>::xySlice(int p_x, int p_y) const {
 }
 
 /**
+* Take an xy-slice of 3d matrix and write it to out.
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+*/
+template<class T>
+void Matrix3D<T>::xySlice(Matrix1D<T>& out, int p_x, int p_y) const {
+	for (size_t i3 = 0; i3 < size_q3; i3++) {
+		out[i3] = matrix_array[p_x][p_y][i3];
+	}
+}
+
+/**
 * Take yz-slice of 3d matrix turning it into a 1d matrix.
 * \param p_y - index at which to slice y dimension
 * \param p_z - index at which to slice z dimension
@@ -3930,6 +3991,18 @@ Matrix1D<T> Matrix3D<T>::yzSlice(int p_y, int p_z) const {
 }
 
 /**
+* Take a yz-slice of 3d matrix and write it to out.
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix3D<T>::yzSlice(Matrix1D<T>& out, int p_y, int p_z) const {
+	for (size_t i1 = 0; i1 < size_q1; i1++) {
+		out[i1] = matrix_array[i1][p_y][p_z];
+	}
+}
+
+/**
 * Take xz-slice of 3d matrix turning it into a 1d matrix.
 * \param p_x - index at which to slice x dimension
 * \param p_z - index at which to slice z dimension
@@ -3943,6 +4016,18 @@ Matrix1D<T> Matrix3D<T>::xzSlice(int p_x, int p_z) const {
 		tmp[i2] = matrix_array[p_x][i2][p_z];
 	}
 	return tmp;
+}
+
+/**
+* Take an xz-slice of 3d matrix and write it to out.
+* \param p_x - index at which to slice x dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix3D<T>::xzSlice(Matrix1D<T>& out, int p_x, int p_z) const {
+	for (size_t i2 = 0; i2 < size_q2; i2++) {
+		out[i2] = matrix_array[p_x][i2][p_z];
+	}
 }
 
 
@@ -3993,6 +4078,7 @@ void Matrix4D<T>::AllocateMemory( int w_size, int x_size, int y_size, int z_size
 	this->size_x = x_size;
 	this->size_y = y_size;
 	this->size_z = z_size;
+	num_elements = size_w * size_x * size_y * size_z;
 	matrix_array = matrix<T>(w_size, x_size, y_size, z_size);
 	plane_array = matrix_array[0][0][0];
 	initialized = true;
@@ -4042,7 +4128,7 @@ inline T& Matrix4D<T>::operator() (int w, int x, int y, int z) {
 	}
 #endif
 	// return (w,x,y,z) value
-	return plane_array[((w*size_x + x)*size_y + y)*size_z];
+	return plane_array[((w*size_x + x)*size_y + y)*size_z + z];
 }
 
 /**
@@ -4087,12 +4173,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator= (const Matrix4D<T> &M) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator= (const T Val) {
-	// std::fill_n(matrix_array[0][0][0], size_x*size*y*size*z, Val); // might be faster
-	for (int w = 0; w < this->size_w; w++)
-		for (int x = 0; x < this->size_x; x++)
-			for (int y = 0; y < this->size_y; y++)
-				for (int z = 0; z < this->size_z; z++)
-					this->matrix_array[w][x][y][z] = Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = Val;
+	}
 	return *this;
 }
 
@@ -4102,12 +4186,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator= (const T Val) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator+= (const Matrix4D<T> &M) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] += M.matrix_array[w][x][y][z];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] += M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -4116,12 +4198,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator+= (const Matrix4D<T> &M) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator-= (const Matrix4D<T> &M) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] -= M.matrix_array[w][x][y][z];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] -= M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -4130,12 +4210,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator-= (const Matrix4D<T> &M) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator*= (const T Val) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] *= Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] *= Val;
+	}
 	return *this;
 }
 
@@ -4144,12 +4222,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator*= (const T Val) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator/= (const T Val) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] /= Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] /= Val;
+	}
 	return *this;
 }
 
@@ -4158,12 +4234,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator/= (const T Val) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator+= (const T Val) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] += Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] += Val;
+	}
 	return *this;
 }
 
@@ -4172,12 +4246,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator+= (const T Val) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::operator-= (const T Val) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] -= Val;
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] -= Val;
+	}
 	return *this;
 }
 
@@ -4186,12 +4258,10 @@ inline Matrix4D<T>& Matrix4D<T>::operator-= (const T Val) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::times_equal (const Matrix4D<T> &M) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] *= M.matrix_array[w][x][y][z];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] *= M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -4200,12 +4270,10 @@ inline Matrix4D<T>& Matrix4D<T>::times_equal (const Matrix4D<T> &M) {
 */
 template<class T>
 inline Matrix4D<T>& Matrix4D<T>::divide_equal (const Matrix4D<T> &M) {
-	int w, x, y, z;
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					matrix_array[w][x][y][z] /= M.matrix_array[w][x][y][z];
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] /= M.plane_array[i];
+	}
 	return *this;
 }
 
@@ -4214,13 +4282,11 @@ inline Matrix4D<T>& Matrix4D<T>::divide_equal (const Matrix4D<T> &M) {
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator+ (const Matrix4D<T> &M) const {
-	int w, x, y, z;
-	Matrix4D<T> Tmp(*this);
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					Tmp[w][x][y][z] = matrix_array[w][x][y][z] + M.matrix_array[w][x][y][z];
+	Matrix4D<T> Tmp(size_w, size_x, size_y, size_z);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] + M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -4229,13 +4295,11 @@ inline Matrix4D<T> Matrix4D<T>::operator+ (const Matrix4D<T> &M) const {
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator- (const Matrix4D<T> &M) const {
-	int w, x, y, z;
-	Matrix4D<T> Tmp(*this);
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					Tmp[w][x][y][z] = matrix_array[w][x][y][z] - M.matrix_array[w][x][y][z];
+	Matrix4D<T> Tmp(size_w, size_x, size_y, size_z);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] - M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -4245,13 +4309,11 @@ inline Matrix4D<T> Matrix4D<T>::operator- (const Matrix4D<T> &M) const {
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator* (const T Val) const {
-	int w, x, y, z;
-	Matrix4D<T> Tmp(*this);
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					Tmp[w][x][y][z] = matrix_array[w][x][y][z] * Val;
+	Matrix4D<T> Tmp(size_w, size_x, size_y, size_z);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] * Val;
+	}
 	return Tmp;
 }
 
@@ -4261,13 +4323,11 @@ inline Matrix4D<T> Matrix4D<T>::operator* (const T Val) const {
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::operator/ (const T Val) const {
-	int w, x, y, z;
-	Matrix4D<T> Tmp(*this);
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					Tmp[w][x][y][z] = matrix_array[w][x][y][z] / Val;
+	Matrix4D<T> Tmp(size_w, size_x, size_y, size_z);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] / Val;
+	}
 	return Tmp;
 }
 
@@ -4276,13 +4336,11 @@ inline Matrix4D<T> Matrix4D<T>::operator/ (const T Val) const {
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::times (const Matrix4D<T> &M) const {
-	int w, x, y, z;
-	Matrix4D<T> Tmp(*this);
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					Tmp[w][x][y][z] = matrix_array[w][x][y][z] * M.matrix_array[w][x][y][z];
+	Matrix4D<T> Tmp(size_w, size_x, size_y, size_z);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] * M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -4291,13 +4349,11 @@ inline Matrix4D<T> Matrix4D<T>::times (const Matrix4D<T> &M) const {
 */
 template<class T>
 inline Matrix4D<T> Matrix4D<T>::divide (const Matrix4D<T> &M) const {
-	int w, x, y, z;
-	Matrix4D<T> Tmp(*this);
-	for (w = 0; w < this->size_w; w++)
-		for (x = 0; x < this->size_x; x++)
-			for (y = 0; y < this->size_y; y++)
-				for (z = 0; z < this->size_z; z++)
-					Tmp[w][x][y][z] = matrix_array[w][x][y][z] / M.matrix_array[w][x][y][z];
+	Matrix4D<T> Tmp(size_w, size_x, size_y, size_z);
+	for(int i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] / M.plane_array[i];
+	}
 	return Tmp;
 }
 
@@ -4307,7 +4363,7 @@ inline Matrix4D<T> Matrix4D<T>::divide (const Matrix4D<T> &M) const {
 * File has two header lines.
 */
 template<class T>
-void Matrix4D<T>::writeToFile(string filename, string info) {
+void Matrix4D<T>::writeToFile(string filename, string info) const {
 	int w, x, y, z;
 	ofstream output(filename.c_str());
 	output << "VARIABLES = \""<< ((this->name!="")?this->name:"f") <<"\" "<< endl;
@@ -4337,7 +4393,7 @@ void Matrix4D<T>::writeToFile(string filename, string info) {
 * Used in conjunction with writeToMatlabFile() to save the 4 grid variables and val into a single .mat file
 */
 template<class T>
-mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
+mxArray* Matrix4D<T>::createStructMatrix(string filename, string info) const
 {
 
 	int w,x,y,z;
@@ -4452,7 +4508,7 @@ mxArray* Matrix4D<T>::createStructMatrix(string filename, string info)
 * Struct has 7 fields in including - arr time size, size1, size2, size3, size4
 */
 template<class T>
-void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
+void Matrix4D<T>::writeToMatlabFile(string filename, string info) const {
 
 #if (MATLAB_CAPABLE)
 
@@ -4586,7 +4642,7 @@ void Matrix4D<T>::writeToMatlabFile(string filename, string info) {
 * File has two header lines.
 */
 template<class T>
-void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) {
+void Matrix4D<T>::writeToFile(string filename, const Matrix4D<T> &grid_w, const Matrix4D<T> &grid_x, const Matrix4D<T> &grid_y, const Matrix4D<T> &grid_z) {
 	int w, x, y, z;
 	ofstream output(filename.c_str());
 	//if (output==NULL && (filename.find("Debug") == string::npos)) {
@@ -4616,7 +4672,7 @@ void Matrix4D<T>::writeToFile(string filename, Matrix4D<T> &grid_w, Matrix4D<T> 
 * Uses the createStructMatrix() function to pack all the grid dimensions into seperate variables and then combines these variables into a single matlab structure to save in .mat
 */
 template<class T>
-void Matrix4D<T>::writeToMatlabFile(string file, Matrix4D<T> &grid_w, Matrix4D<T> &grid_x, Matrix4D<T> &grid_y, Matrix4D<T> &grid_z) {
+void Matrix4D<T>::writeToMatlabFile(string file, const Matrix4D<T> &grid_w, const Matrix4D<T> &grid_x, const Matrix4D<T> &grid_y, const Matrix4D<T> &grid_z) const {
 
 #if (MATLAB_CAPABLE)
 
@@ -5100,7 +5156,7 @@ void Matrix4D<T>::readFromMatlabFile(string file , int columnNumber)
 * \param grids w,x,y,z - checks grids data against the file data
 */
 template<class T>
-void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z) {
+void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z) {
 	int w, x, y, z;
 	string inBuf;
 	double loaded_w, loaded_x, loaded_y, loaded_z;
@@ -5182,7 +5238,7 @@ void Matrix4D<T>::readFromFile(string filename, const Matrix4D<T> grid_w, const 
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z)
+void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z)
 {
 
 #if (MATLAB_CAPABLE)
@@ -5463,36 +5519,25 @@ void Matrix4D<T>::readFromMatlabFile(string file , const Matrix4D<T> grid_w, con
 * \param filename - file to read grids from
 */
 template<class T>
-void Matrix4D<T>::writeToBinaryFile(string filename) {
+void Matrix4D<T>::writeToBinaryFile(string filename) const {
     int w, x, y, z;
     FILE *outputFile = fopen(filename.c_str(), "wb");
     if (outputFile != NULL) {
-        int size_of_int32 = sizeof(int32_t);
-        int32_t buffer_int32;
         int status;
 
-        int size_array[4] = {size_w, size_x, size_y, size_z};
-        for (int i = 0; i < 4; i++){
-            buffer_int32 = static_cast<int32_t>(size_array[i]);
-            status = fwrite(&buffer_int32, size_of_int32, 1, outputFile);
-        }
+        int32_t size_array[4] = {size_w, size_x, size_y, size_z};
+		status = fwrite(size_array, sizeof(int32_t), 4, outputFile);
+		if (status!=4){
+			printf("Writing error");
+			exit(EXIT_FAILURE);
+		}
+		int size_total = this->size_w * this->size_x * this->size_y * this->size_z;
+		status = fwrite(this->plane_array, sizeof(T), size_total, outputFile);
+		if (status!=size_total){
+			printf("Writing error");
+			exit(EXIT_FAILURE);
+		}
 
-        double buffer_double;
-        int size_of_double = sizeof(double);
-        for (w = 0; w < size_w; w++) {
-              for (x = 0; x < size_x; x++) {
-                    for (y = 0; y < size_y; y++) {
-                          for (z = 0; z < size_z; z++) {
-                                buffer_double = matrix_array[w][x][y][z];
-                                status = fwrite(&buffer_double, size_of_double, 1, outputFile);
-                                if (status!=1){
-                                      printf("Writing error");
-                                      exit(EXIT_FAILURE);
-                                }
-                          }
-                    }
-              }
-        }
     } else {
         printf("MATRIX_WRITE_ERROR: Error writing file %s.\n", filename.c_str());
         exit(EXIT_FAILURE);
@@ -5504,7 +5549,7 @@ void Matrix4D<T>::writeToBinaryFile(string filename) {
 * Write 4D data to .plt, .pltb or .mat files. No info is written for .pltb file
 */
 template<class T>
-void Matrix4D<T>::writeToAnyFile(string filename, string io_method, string info) {
+void Matrix4D<T>::writeToAnyFile(string filename, string io_method, string info) const {
     string ext;
     if (io_method.compare("ascii") == 0){
         ext = ".plt";
@@ -5539,46 +5584,19 @@ void Matrix4D<T>::readFromBinaryFile(string filename) {
 		if (inputFile != NULL) {
             int status;
 
-            int size_of_int32 = sizeof(int32_t);
-            char *buffer_int32;
-            buffer_int32 = (char *) malloc(size_of_int32);
-            if (buffer_int32 == NULL){
-                printf("Memory error");
-                exit(EXIT_FAILURE);
-            }
-
-            for (int i = 0; i < 4; i++){
-                status = fread(buffer_int32, size_of_int32, 1, inputFile);
-                if (status!=1){
-                    printf("Reading error");
-                    exit(EXIT_FAILURE);
-                }
-            }
-
-            int size_of_double = sizeof(double);
-            char *buffer_double;
-            buffer_double = (char*) malloc(size_of_double);
-            if (buffer_double == NULL) {
-                  printf("Memory error");
-                  exit(EXIT_FAILURE);
-            }
-			for (w = 0; w < size_w; w++) {
-				for (x = 0; x < size_x; x++) {
-					for (y = 0; y < size_y; y++) {
-						for (z = 0; z < size_z; z++) {
-                              status = fread(buffer_double, size_of_double, 1, inputFile);
-                              if (status!=1){
-                                    printf("Reading error");
-                                    exit(EXIT_FAILURE);
-                              } else {
-                                    matrix_array[w][x][y][z] = *((double*) buffer_double);
-                              }
-						}
-					}
-				}
+			int32_t buffer_int32[4];
+			status = fread(buffer_int32, sizeof(int32_t), 4, inputFile);
+			if (status!=4){
+				printf("Reading error");
+				exit(EXIT_FAILURE);
 			}
-			free(buffer_int32);
-			free(buffer_double);
+
+			int size_total = this->size_w * this->size_x * this->size_y * this->size_z;
+			status = fread(this->plane_array, sizeof(T), size_total, inputFile);
+			if (status!=size_total){
+				printf("Reading error");
+				exit(EXIT_FAILURE);
+			}
 		} else {
 			printf("MATRIX_LOAD_ERROR: Error reading file %s.\n", filename.c_str());
 			exit(EXIT_FAILURE);
@@ -5614,7 +5632,7 @@ void Matrix4D<T>::readFromAnyFile(string filename, string io_method) {
 * WARNING: if io_method == "binary", .pltb file does not contain grid. In this case the function works the same as Matrix4D<T>::readFromAnyFile(string, string, int)
 */
 template<class T>
-void Matrix4D<T>::readFromAnyFile(string filename, string io_method, const Matrix4D<T> grid_w, const Matrix4D<T> grid_x, const Matrix4D<T> grid_y, const Matrix4D<T> grid_z){
+void Matrix4D<T>::readFromAnyFile(string filename, string io_method, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z){
     string ext;
     if (io_method.compare("ascii") == 0){
         ext = ".plt";
@@ -5648,17 +5666,11 @@ inline int Matrix4D<T>::index1d(int w, int x, int y, int z) {
 * Default value set to 1e99
 */
 template<class T>
-T Matrix4D<T>::min() {
-	T tmp = 1e99;
-	int w, x, y, z;
-	for (w = 0; w < size_w; w++) {
-		for (x = 0; x < size_x; x++) {
-			for (y = 0; y < size_y; y++) {
-				for (z = 0; z < size_z; z++) {
-					tmp = (tmp<matrix_array[w][x][y][z])?tmp:matrix_array[w][x][y][z];
-				}
-			}
-		}
+T Matrix4D<T>::min() const {
+	T tmp = std::numeric_limits<T>::infinity();
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::min(tmp, plane_array[i]);
 	}
 	return tmp;
 }
@@ -5668,17 +5680,11 @@ T Matrix4D<T>::min() {
 * Default value set to 0
 */
 template<class T>
-T Matrix4D<T>::max() {
-	T tmp = 0;
-	int w, x, y, z;
-	for (w = 0; w < size_w; w++) {
-		for (x = 0; x < size_x; x++) {
-			for (y = 0; y < size_y; y++) {
-				for (z = 0; z < size_z; z++) {
-					tmp = (tmp>matrix_array[w][x][y][z])?tmp:matrix_array[w][x][y][z];
-				}
-			}
-		}
+T Matrix4D<T>::max() const {
+	T tmp = -std::numeric_limits<T>::infinity();
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::max(tmp, plane_array[i]);
 	}
 	return tmp;
 }
@@ -5688,17 +5694,11 @@ T Matrix4D<T>::max() {
 * Default value set to 0
 */
 template<class T>
-T Matrix4D<T>::maxabs() {
+T Matrix4D<T>::maxabs() const {
 	T tmp = 0;
-	int w, x, y, z;
-	for (w = 0; w < size_w; w++) {
-		for (x = 0; x < size_x; x++) {
-			for (y = 0; y < size_y; y++) {
-				for (z = 0; z < size_z; z++) {
-					tmp = (tmp>fabs((double)matrix_array[w][x][y][z]))?tmp:fabs((double)matrix_array[w][x][y][z]);
-				}
-			}
-		}
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp = std::max(tmp, std::abs(plane_array[i]));
 	}
 	return tmp;
 }
@@ -5708,19 +5708,27 @@ T Matrix4D<T>::maxabs() {
 * Changes every element to a positive value with the same magnitude
 */
 template<class T>
-Matrix4D<T> Matrix4D<T>::abs() {
-	Matrix4D<T> tmp(this->size_w, this->size_x, this->size_y, this->size_z);
-	int w, x, y, z;
-	for (w = 0; w < size_w; w++) {
-		for (x = 0; x < size_x; x++) {
-			for (y = 0; y < size_y; y++) {
-				for (z = 0; z < size_z; z++) {
-					tmp[w][x][y][z] = (matrix_array[w][x][y][z]>0)?matrix_array[w][x][y][z]:-matrix_array[w][x][y][z];
-				}
-			}
-		}
+Matrix4D<T> Matrix4D<T>::abs() const {
+	Matrix4D<T> tmp(size_w, size_x, size_y, size_z);
+	for(int i = 0; i < num_elements; i++)
+	{
+		tmp.plane_array[i] = std::abs(plane_array[i]);
 	}
 	return tmp;
+}
+
+/**
+* Replace all matrix malues smaller than val with val.
+*
+* \param val - new minimal value.
+*/
+template<class T>
+Matrix4D<T>& Matrix4D<T>::max_of(T val) {
+	for(int i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = std::max(plane_array[i], val);
+	}
+	return *this;
 }
 
 /**
@@ -5744,6 +5752,22 @@ Matrix3D<T> Matrix4D<T>::wSlice(int p_w) const {
 }
 
 /**
+* Take a w-slice of 4d matrix and write it to out.
+* squeeze matrix to 3d getting all the data when the w dimension is at index p_w
+* \param p_w - index at which to slice w dimension
+*/
+template<class T>
+void Matrix4D<T>::wSlice(Matrix3D<T>& out, int p_w) const {
+	for (size_t x = 0; x < size_x; x++) {
+		for (size_t y = 0; y < size_y; y++) {
+			for (size_t z = 0; z < size_z; z++) {
+				out[x][y][z] = matrix_array[p_w][x][y][z];
+			}
+		}
+	}
+}
+
+/**
 * Take x-slice of 4d matrix turining it into 3d matrix.
 * squeeze matrix to 3d getting all the data when the x dimension is at index p_x
 * \param p_x - index at which to slice x dimension
@@ -5761,6 +5785,22 @@ Matrix3D<T> Matrix4D<T>::xSlice(int p_x) const {
 		}
 	}
 	return tmp;
+}
+
+/**
+* Take an x-slice of 4d matrix and write it to out.
+* squeeze matrix to 3d getting all the data when the x dimension is at index p_x
+* \param p_x - index at which to slice x dimension
+*/
+template<class T>
+void Matrix4D<T>::xSlice(Matrix3D<T>& out, int p_x) const {
+	for (size_t w = 0; w < size_w; w++) {
+		for (size_t y = 0; y < size_y; y++) {
+			for (size_t z = 0; z < size_z; z++) {
+				out[w][y][z] = matrix_array[w][p_x][y][z];
+			}
+		}
+	}
 }
 
 /**
@@ -5784,6 +5824,22 @@ Matrix3D<T> Matrix4D<T>::ySlice(int p_y) const {
 }
 
 /**
+* Take a y-slice of 4d matrix and write it to out.
+* squeeze matrix to 3d getting all the data when the y dimension is at index p_y
+* \param p_y - index at which to slice y dimension
+*/
+template<class T>
+void Matrix4D<T>::ySlice(Matrix3D<T>& out, int p_y) const {
+	for (size_t w = 0; w < size_w; w++) {
+		for (size_t x = 0; x < size_x; x++) {
+			for (size_t z = 0; z < size_z; z++) {
+				out[w][x][z] = matrix_array[w][x][p_y][z];
+			}
+		}
+	}
+}
+
+/**
 * Take z-slice of 4d matrix turning it into 3d matrix.
 * squeeze matrix to 3d getting all the data when the z dimension is at index p_z
 * \param p_z - index at which to slice z dimension
@@ -5801,6 +5857,22 @@ Matrix3D<T> Matrix4D<T>::zSlice(int p_z) const {
 		}
 	}
 	return tmp;
+}
+
+/**
+* Take a z-slice of 4d matrix and write it to out.
+* squeeze matrix to 3d getting all the data when the z dimension is at index p_z
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix4D<T>::zSlice(Matrix3D<T>& out, int p_z) const {
+	for (size_t w = 0; w < size_w; w++) {
+		for (size_t x = 0; x < size_x; x++) {
+			for (size_t y = 0; y < size_y; y++) {
+				out[w][x][y] = matrix_array[w][x][y][p_z];
+			}
+		}
+	}
 }
 
 /**
@@ -5822,6 +5894,20 @@ Matrix2D<T> Matrix4D<T>::wxSlice(int p_w, int p_x) const {
 }
 
 /**
+* Take a wx-slice of 4d matrix and write it to out.
+* \param p_w - index at which to slice w dimension
+* \param p_x - index at which to slice x dimension
+*/
+template<class T>
+void Matrix4D<T>::wxSlice(Matrix2D<T>& out, int p_w, int p_x) const {
+	for (size_t y = 0; y < size_y; y++) {
+		for (size_t z = 0; z < size_z; z++) {
+			out[y][z] = matrix_array[p_w][p_x][y][z];
+		}
+	}
+}
+
+/**
 * Take wy-slice of 4d matrix turning it into a 2d matrix.
 * \param p_w - index at which to slice w dimension
 * \param p_y - index at which to slice y dimension
@@ -5837,6 +5923,20 @@ Matrix2D<T> Matrix4D<T>::wySlice(int p_w, int p_y) const {
 		}
 	}
 	return tmp;
+}
+
+/**
+* Take a wy-slice of 4d matrix and write it to out.
+* \param p_w - index at which to slice w dimension
+* \param p_y - index at which to slice y dimension
+*/
+template<class T>
+void Matrix4D<T>::wySlice(Matrix2D<T>& out, int p_w, int p_y) const {
+	for (size_t x = 0; x < size_x; x++) {
+		for (size_t z = 0; z < size_z; z++) {
+			out[x][z] = matrix_array[p_w][x][p_y][z];
+		}
+	}
 }
 
 /**
@@ -5858,6 +5958,20 @@ Matrix2D<T> Matrix4D<T>::wzSlice(int p_w, int p_z) const {
 }
 
 /**
+* Take  wz-slice of 4d matrix and write it to out.
+* \param p_w - index at which to slice w dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix4D<T>::wzSlice(Matrix2D<T>& out, int p_w, int p_z) const {
+	for (size_t x = 0; x < size_x; x++) {
+		for (size_t y = 0; y < size_y; y++) {
+			out[x][y] = matrix_array[p_w][x][y][p_z];
+		}
+	}
+}
+
+/**
 * Take xy-slice of 4d matrix turning it into a 2d matrix.
 * \param p_x - index at which to slice x dimension
 * \param p_y - index at which to slice y dimension
@@ -5873,6 +5987,20 @@ Matrix2D<T> Matrix4D<T>::xySlice(int p_x, int p_y) const {
 		}
 	}
 	return tmp;
+}
+
+/**
+* Take a xy-slice of 4d matrix and write it to out.
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+*/
+template<class T>
+void Matrix4D<T>::xySlice(Matrix2D<T>& out, int p_x, int p_y) const {
+	for (size_t w = 0; w < size_w; w++) {
+		for (size_t z = 0; z < size_z; z++) {
+			out[w][z] = matrix_array[w][p_x][p_y][z];
+		}
+	}
 }
 
 /**
@@ -5894,6 +6022,20 @@ Matrix2D<T> Matrix4D<T>::xzSlice(int p_x, int p_z) const {
 }
 
 /**
+* Take an xz-slice of 4d matrix and write it to out.
+* \param p_x - index at which to slice x dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix4D<T>::xzSlice(Matrix2D<T>& out, int p_x, int p_z) const {
+	for (size_t w = 0; w < size_w; w++) {
+		for (size_t y = 0; y < size_y; y++) {
+			out[w][y] = matrix_array[w][p_x][y][p_z];
+		}
+	}
+}
+
+/**
 * Take yz-slice of 4d matrix turning it into a 2d matrix.
 * \param p_y - index at which to slice y dimension
 * \param p_z - index at which to slice z dimension
@@ -5909,6 +6051,20 @@ Matrix2D<T> Matrix4D<T>::yzSlice(int p_y, int p_z) const {
 		}
 	}
 	return tmp;
+}
+
+/**
+* Take a yz-slice of 4d matrix and write it to out.
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix4D<T>::yzSlice(Matrix2D<T>& out, int p_y, int p_z) const {
+	for (size_t w = 0; w < size_w; w++) {
+		for (size_t x = 0; x < size_x; x++) {
+			out[w][x] = matrix_array[w][x][p_y][p_z];
+		}
+	}
 }
 
 /**
@@ -5929,6 +6085,19 @@ Matrix1D<T> Matrix4D<T>::wxySlice(int p_w, int p_x, int p_y) const {
 }
 
 /**
+* Take a wxy-slice of 4d matrix and write it to out.
+* \param p_w - index at which to slice w dimension
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+*/
+template<class T>
+void Matrix4D<T>::wxySlice(Matrix1D<T>& out, int p_w, int p_x, int p_y) const {
+	for (size_t z = 0; z < size_z; z++) {
+		out[z] = matrix_array[p_w][p_x][p_y][z];
+	}
+}
+
+/**
 * Take wxz-slice of 4d matrix turning it into a 1d matrix.
 * \param p_w - index at which to slice w dimension
 * \param p_x - index at which to slice x dimension
@@ -5943,6 +6112,19 @@ Matrix1D<T> Matrix4D<T>::wxzSlice(int p_w, int p_x, int p_z) const {
 		tmp[y] = matrix_array[p_w][p_x][y][p_z];
 	}
 	return tmp;
+}
+
+/**
+* Take a wxz-slice of 4d matrix and write it to out.
+* \param p_w - index at which to slice w dimension
+* \param p_x - index at which to slice x dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix4D<T>::wxzSlice(Matrix1D<T>& out, int p_w, int p_x, int p_z) const {
+	for (size_t y = 0; y < size_y; y++) {
+		out[y] = matrix_array[p_w][p_x][y][p_z];
+	}
 }
 
 /**
@@ -5963,6 +6145,19 @@ Matrix1D<T> Matrix4D<T>::wyzSlice(int p_w, int p_y, int p_z) const {
 }
 
 /**
+* Take a wyz-slice of 4d matrix and write it to out.
+* \param p_w - index at which to slice w dimension
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix4D<T>::wyzSlice(Matrix1D<T>& out, int p_w, int p_y, int p_z) const {
+	for (size_t x = 0; x < size_x; x++) {
+		out[x] = matrix_array[p_w][x][p_y][p_z];
+	}
+}
+
+/**
 * Take xyz-slice of 4d matrix turning it into a 1d matrix.
 * \param p_x - index at which to slice x dimension
 * \param p_y - index at which to slice y dimension
@@ -5979,6 +6174,18 @@ Matrix1D<T> Matrix4D<T>::xyzSlice(int p_x, int p_y, int p_z) const {
 	return tmp;
 }
 
+/**
+* Take an xyz-slice of 4d matrix and write it to out.
+* \param p_x - index at which to slice x dimension
+* \param p_y - index at which to slice y dimension
+* \param p_z - index at which to slice z dimension
+*/
+template<class T>
+void Matrix4D<T>::xyzSlice(Matrix1D<T>& out, int p_x, int p_y, int p_z) const {
+	for (size_t w = 0; w < size_w; w++) {
+		out[w] = matrix_array[w][p_x][p_y][p_z];
+	}
+}
 
 /**
 * Constructor for CalculationMatrix class.
@@ -6060,7 +6267,7 @@ int CalculationMatrix::index1d(int x, int y, int z) {
 * Save matrix to file.
 * Includes varaible names and sizes
 */
-void CalculationMatrix::writeToFile(string filename) {
+void CalculationMatrix::writeToFile(string filename) const {
 	int in;
 
 	ofstream output(filename.c_str());
@@ -6070,15 +6277,15 @@ void CalculationMatrix::writeToFile(string filename) {
 		exit(EXIT_FAILURE);
 	}
 	output << "VARIABLES = \"";
-	for (DiagMatrix::iterator it = (*this).begin(); it != (*this).end(); it++) {
-		output << "\"" << it->first << "\", ";
+	for (const auto& element : *this) {
+		output << "\"" << element.first << "\", ";
 	}
 	output << endl;
 	output << "ZONE T=\"" << "\", I=" << total_size << endl;
 	output.setf(ios_base::scientific, ios_base::floatfield);
 	for (in = 0; in < this->total_size; in++) {
-		for (DiagMatrix::iterator it = (*this).begin(); it != (*this).end(); it++) {
-			output << "\t" << it->second[in];
+		for (const auto& element : *this) {
+			output << "\t" << element.second[in];
 		}
 		output << endl;
 	}

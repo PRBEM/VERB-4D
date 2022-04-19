@@ -18,10 +18,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//#include <strings.h>
-#include <string>
-using namespace std;
-
 #include "Logger.h"
 
 #include "UpdatableMatrix.h"
@@ -32,22 +28,53 @@ using namespace std;
 
 
 
-//bool ReadInitialData(string InputFolder,
+//bool ReadInitialData(std::string InputFolder,
 //		int &P_size, int &R_size, int &I_size, int &K_size, int &L_size,
 //		long int &it_total, double &dt, double &output_time, double &total_time, int &output_step);
-bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* argv[],
-		double &total_time, double &dt, double &output_time, double &time_first, long int &it_first, int &max_threads,
-		string &inversion_method, string &include_boundary, string &Vl_BC_from_convection, string &Vu_BC_from_convection, string &io_method,
-		string &run_remapping, string &run_convection, string &run_radial_diffusion, string &run_local_diffusion, string &positive_PSD,
-		Matrix4D<double> &PSD,
-		Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V, Matrix4D<double> &K, UpdatableMatrix < Matrix4D<double> > &L,
-		int &P_size, int &R_size, int &V_size, int &K_size, int &L_size,
-		Matrix3D<double> &P_LBC, Matrix3D<double> &P_UBC, UpdatableMatrix< Matrix3D<double> > &R_LBC, UpdatableMatrix< Matrix3D<double> > &R_UBC, UpdatableMatrix< Matrix3D<double> > &V_LBC, UpdatableMatrix< Matrix3D<double> >&V_UBC, UpdatableMatrix< Matrix3D<double> > &K_LBC, UpdatableMatrix< Matrix3D<double> > &K_UBC, UpdatableMatrix< Matrix3D<double> > &L_LBC, UpdatableMatrix< Matrix3D<double> > &L_UBC,
-		string &P_LBC_type, string &P_UBC_type, string &R_LBC_type, string &R_UBC_type, string &V_LBC_type, string &V_UBC_type, string &K_LBC_type, string &K_UBC_type, string &L_LBC_type, string &L_UBC_type,
-		UpdatableListMatrix < Matrix4D<double> > &DLL, UpdatableListMatrix < Matrix4D<double> > &DVV, UpdatableListMatrix < Matrix4D<double> > &DKK, UpdatableListMatrix < Matrix4D<double> > &DVK,
-		UpdatableMatrix < Matrix4D<double> > &VP, UpdatableMatrix < Matrix4D<double> > &VL,
-		UpdatableMatrix < Matrix4D<double> > &G_local, UpdatableMatrix < Matrix4D<double> >  &G_radial,
-		UpdatableListMatrix < Matrix4D<double> > &Sources, UpdatableListMatrix < Matrix4D<double> > &Losses, UpdatableListMatrix < Matrix4D<double> > &Losses_conv);
+bool ReadInitialData(
+	std::string &InputFolder, std::string &OutputFolder, int argc, char* argv[],
+	double &total_time, double &dt, double &output_time, double &time_first, long int &it_first, int &max_threads,
+	std::string &inversion_method,
+	std::string &include_boundary,
+	std::string &Vl_BC_from_convection, 
+	std::string &Vu_BC_from_convection,
+	std::string &io_method,
+	std::string &run_remapping,
+	std::string &run_convection,
+	std::string &run_radial_diffusion, 
+	std::string &run_local_diffusion,
+	std::string &positive_PSD,
+	Matrix4D<double> &PSD,
+	Matrix4D<double> &P,
+	Matrix4D<double> &R,
+	Matrix4D<double> &V,
+	Matrix4D<double> &K, 
+	UpdatableMatrix<Matrix4D<double>> &L,
+	int &P_size, int &R_size, int &V_size, int &K_size, int &L_size,
+	Matrix3D<double> &P_LBC, Matrix3D<double> &P_UBC, 
+	UpdatableMatrix<Matrix3D<double>> &R_LBC, 
+	UpdatableMatrix<Matrix3D<double>> &R_UBC, 
+	UpdatableMatrix<Matrix3D<double>> &V_LBC, 
+	UpdatableMatrix<Matrix3D<double>> &V_UBC, 
+	UpdatableMatrix<Matrix3D<double>> &K_LBC, 
+	UpdatableMatrix<Matrix3D<double>> &K_UBC, 
+	UpdatableMatrix<Matrix3D<double>> &L_LBC, 
+	UpdatableMatrix<Matrix3D<double>> &L_UBC,
+	std::string &P_LBC_type, std::string &P_UBC_type, std::string &R_LBC_type, std::string &R_UBC_type, 
+	std::string &V_LBC_type, std::string &V_UBC_type, std::string &K_LBC_type, std::string &K_UBC_type, 
+	std::string &L_LBC_type, std::string &L_UBC_type,
+	UpdatableListMatrix<Matrix4D<double>> &DLL, 
+	UpdatableListMatrix < Matrix4D<double> > &DVV, 
+	UpdatableListMatrix<Matrix4D<double>> &DKK, 
+	UpdatableListMatrix < Matrix4D<double> > &DVK,
+	UpdatableMatrix<Matrix4D<double>> &VP, 
+	UpdatableMatrix<Matrix4D<double>> &VL,
+	UpdatableMatrix<Matrix4D<double>> &G_local, 
+	UpdatableMatrix<Matrix4D<double>>  &G_radial,
+	UpdatableListMatrix<Matrix4D<double>> &Sources, 
+	UpdatableListMatrix<Matrix4D<double>> &Losses, 
+	UpdatableListMatrix<Matrix4D<double>> &Losses_conv
+);
 
 
 // Implemented function but not ever used
@@ -56,7 +83,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		Matrix3D<double> psd_slice,
 		// UpdatableMatrix2D &BC,
 		Matrix3D<double> &BC,
-		string &BC_type,
+		std::string &BC_type,
 		Matrix3D<double> Q_slice1, Matrix3D<double> Q_slice2, Matrix3D<double> Q_slice3)
 */
 

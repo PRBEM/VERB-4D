@@ -78,7 +78,7 @@ std::vector<std::vector<data_assimilation::Observations>> data_assimilation::get
     const Matrix2D<double>& K,
     const std::vector<pmf::Parameters>& parameters) 
 {
-    vector<ProcessedMatFileData> pmfDataSplit;
+    std::vector<ProcessedMatFileData> pmfDataSplit;
     for (auto par : parameters) {
         pmfDataSplit.push_back(internal::readData(timeStart, timeEnd, par));
     }
@@ -97,7 +97,7 @@ std::vector<std::vector<data_assimilation::Observations>> data_assimilation::get
     const Matrix2D<double>& K,
     const std::vector<pmf::Parameters>& parameters) 
 {
-    vector<ProcessedMatFileData> pmfDataSplit;
+    std::vector<ProcessedMatFileData> pmfDataSplit;
     for (auto par : parameters) {
         pmfDataSplit.push_back(internal::readData(timeStart, timeEnd, par));
     }  
