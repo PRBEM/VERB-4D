@@ -524,7 +524,7 @@ int main(int argc, char* argv[]) {
             for (int iV = V_size-1; iV >= 0; iV--) {
                 for (int iK = 0; iK < K_size; iK++) {
 #else
-#pragma omp for
+#pragma omp for schedule(dynamic,1)
             for (long index = (V_size * K_size) - 1; index >= 0; index--) {{ // Double brackes are needed for compatability with OPENMP 3.0 code.
                 // Manually collapsing into a single for loop in order to optimize
                 int iV = index % V_size;
