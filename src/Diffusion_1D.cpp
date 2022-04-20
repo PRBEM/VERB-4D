@@ -35,14 +35,15 @@
  * @param Losses - Matrix used for Losses (loss cone)
  * @param dt - change in time of single time step
  */
-bool Diffusion_1D(	Matrix1D<double> &psd,
-					Matrix1D<double> x, int x_size,
-					double x_LBC, double x_UBC,
-					string x_LBC_type, string x_UBC_type,
-					Matrix1D<double> Dxx, Matrix1D<double> G,
-					Matrix1D<double> Sources, Matrix1D<double> Losses,
-					double dt) {
-
+bool Diffusion_1D(	
+		Matrix1D<double> &psd,
+		const Matrix1D<double>& x, int x_size,
+		double x_LBC, double x_UBC,
+		const string& x_LBC_type, const string& x_UBC_type,
+		const Matrix1D<double>& Dxx, const Matrix1D<double>& G,
+		const Matrix1D<double>& Sources, const Matrix1D<double>& Losses,
+		double dt) 
+{
 	CalculationMatrix matr_A(x_size, 1, 1, 1), matr_B(x_size, 1, 1, 0), matr_C(x_size, 1, 1, 0);
 
 	// Set all diagonals (1-D matrices) to 0

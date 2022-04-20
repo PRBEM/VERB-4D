@@ -17,12 +17,13 @@
 * Function that creates a 1D Diffusion Matrix and returns a bool upon completion
 */
 bool Diffusion_1D(
-				  Matrix1D<double> &psd,
-				  Matrix1D<double> x, int x_size,
-				  double x_LBC, double x_UBC,
-				  string x_LBC_type, string x_UBC_type,
-				  Matrix1D<double> Dxx, Matrix1D<double> G,
-				  Matrix1D<double> Sources, Matrix1D<double> Losses,
-				  double dt);
+	Matrix1D<double>& psd,
+	const Matrix1D<double>& x, int x_size,
+	double x_LBC, double x_UBC,
+	const string& x_LBC_type, const string& x_UBC_type,
+	const Matrix1D<double>& Dxx, const Matrix1D<double>& G,
+	const Matrix1D<double>& Sources, const Matrix1D<double>& Losses,
+	double dt
+);
 
 #endif /* DIFFUSION_1D_H_ */

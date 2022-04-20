@@ -1108,11 +1108,11 @@ void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
 */
 void SecondDerivativeApproximation_1D(CalculationMatrix &matr_A,
 		int ix, ///< index for current location
-		string FirstDerivative, ///< determines whether first derivative approx. is with the point to the right or left of ix
-		string SecondDerivative, ///< determines whether second derivative approx. is with the point to the right or left of ix
-		Matrix1D<double> &x, ///< x matrix
-		Matrix1D<double> &D, ///< Diffusion coefficient
-		Matrix1D<double> &G, ///< Jacobian
+		const string& FirstDerivative, ///< determines whether first derivative approx. is with the point to the right or left of ix
+		const string& SecondDerivative, ///< determines whether second derivative approx. is with the point to the right or left of ix
+		const Matrix1D<double> &x, ///< x matrix
+		const Matrix1D<double> &D, ///< Diffusion coefficient
+		const Matrix1D<double> &G, ///< Jacobian
 		double multiplicator) ///< multiplier based on number of iterations done (m)
 	{
 

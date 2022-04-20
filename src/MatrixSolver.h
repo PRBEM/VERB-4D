@@ -62,10 +62,11 @@ void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X);
 
 
 void SecondDerivativeApproximation_1D(CalculationMatrix &matr_A, int ix,
-		string FirstDerivative, string SecondDerivative,
-		Matrix1D<double> &x, ///< Coordinate x
-		Matrix1D<double> &D, ///< Diffusion coefficient
-		Matrix1D<double> &G, ///< Jacobian
+		const string& FirstDerivative,
+		const string& SecondDerivative,
+		const Matrix1D<double> &x, ///< Coordinate x
+		const Matrix1D<double> &D, ///< Diffusion coefficient
+		const Matrix1D<double> &G, ///< Jacobian
 		double multiplicator);
 
 

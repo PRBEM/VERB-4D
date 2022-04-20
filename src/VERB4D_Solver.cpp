@@ -600,15 +600,23 @@ int main(int argc, char* argv[]) {
             Logger::message << "Radial diffusion:" << endl;;
             std::cout<< "           ";
 
+
+#pragma omp parallel shared(progress_total, progress_count)
+{
             Matrix1D<double> PSD_L(L_size);
+            Matrix1D<double> lgrid_slice(L_size);
+            Matrix1D<double> dll_slice(L_size);
+            Matrix1D<double> source_slice(L_size);
+            Matrix1D<double> gradial_slice(L_size);
+            Matrix1D<double> loss_slice(L_size);
 
 #if defined _OPENMP && _OPENMP >= 200711
-#pragma omp parallel for private(PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
+#pragma omp for schedule(dynamic,1) collapse(3)
             for (int iP = 0; iP < P_size; iP++) {
                 for (int iV = 0; iV < V_size; iV++) {
                     for (int iK = 0; iK < K_size; iK++) {
 #else
-#pragma omp parallel for private(PSD_L) shared(progress_total, progress_count)
+#pragma omp for schedule(dynamic,1)
             for (long index = 0; index < P_size * V_size * K_size; index++) {{{
                 int iP = index / (V_size * K_size);
                 int iV = (index / K_size) % V_size;
@@ -620,14 +628,22 @@ int main(int argc, char* argv[]) {
                 }
 
                 // 1d slice
-                PSD_L = PSD.wyzSlice(iP, iV, iK);
+                PSD.wyzSlice(PSD_L, iP, iV, iK);
+                L.wyzSlice(lgrid_slice, iP, iV, iK);
+                DLL.wyzSlice(dll_slice, iP, iV, iK);
+                Sources.wyzSlice(source_slice, iP, iV, iK);
+                G_radial.wyzSlice(gradial_slice, iP, iV, iK);
+                Losses.wyzSlice(loss_slice, iP, iV, iK);
+                
+                source_slice *= radial_losses;
+                loss_slice *= radial_losses;
 
                 // 1d diffusion
-                Diffusion_1D(PSD_L, L.wyzSlice(iP, iV, iK), L_size, Ll_BC[iP][iV][iK], Lu_BC[iP][iV][iK],
-                        Ll_BC_type, Lu_BC_type, DLL.wyzSlice(iP, iV, iK), G_radial.wyzSlice(iP, iV, iK),
-                        Sources.wyzSlice(iP, iV, iK) * radial_losses,
-                        Losses.wyzSlice(iP, iV, iK) * radial_losses, dt);
-
+                Diffusion_1D(
+                    PSD_L, lgrid_slice, L_size, Ll_BC[iP][iV][iK], Lu_BC[iP][iV][iK],
+                    Ll_BC_type, Lu_BC_type, dll_slice, gradial_slice,
+                    source_slice, loss_slice, dt
+                );
 
                 // copy results back
                 for (int iL = 0; iL < L_size; iL++) {
@@ -637,7 +653,7 @@ int main(int argc, char* argv[]) {
 #pragma omp critical
                         progress_count += 1;
             }}}
-
+}
             // ADDED FOR TESTING
             //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_after_radial.plt");
 
