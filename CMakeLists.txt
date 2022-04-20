@@ -80,3 +80,14 @@ set(VERB4D_SOURCES
 # Build and link
 add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
 target_link_libraries(VERB4D_Solver ${DEPLIBS})
+
+# Flag compile tpye feedback
+string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_upper)
+if(CMAKE_BUILD_TYPE_upper STREQUAL "RELEASE")
+    add_definitions(-DRELEASE)
+endif()
+
+# Flag to decide convection step size in Convection_2D.cpp
+if(DEFINED FAST_CONVECTION)
+    add_definitions(-DFAST_CONVECTION)
+endif()

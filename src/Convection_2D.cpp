@@ -89,7 +89,11 @@ bool Convection_2D(
 	// Either use the smallest time step for both, or specify the maximum time step here and then different time steps will be used
 	// (the Courant condition will be checked inside of Convection_1D one more time)
 	// ">" is more accurate, but "<" is much-much faster and (hopefully?) still more accurate than completely unrelated time steps
-	num_steps = (num_steps_P > num_steps_R) ? num_steps_P : num_steps_R;
+#ifdef FAST_CONVECTION
+    num_steps = (num_steps_P < num_steps_R) ? num_steps_P : num_steps_R;
+#else
+    num_steps = (num_steps_P > num_steps_R) ? num_steps_P : num_steps_R;
+#endif
 
 	dt = dt_total / num_steps;
 

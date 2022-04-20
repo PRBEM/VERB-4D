@@ -148,7 +148,15 @@ using namespace std;
 
 int main(int argc, char* argv[]) {
     Logger::createInstance();
-    Logger::message << "Compilation time: " << __DATE__ << ", " << __TIME__ << endl;
+    std::string compile_type = "Debug";
+    std::string fast_convection = "";
+#ifdef RELEASE
+    compile_type = "Release";
+#endif
+#ifdef FAST_CONVECTION
+    fast_convection = " (with fast convection)";
+#endif
+    Logger::message << compile_type << fast_convection << " compiled on: " << __DATE__ << ", " << __TIME__ << endl;
 
     // Variables
     // Grid, 4D:
