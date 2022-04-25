@@ -6,6 +6,7 @@
  *      Author: dimath
  */
 #include "Parameters.h"
+#include "BoundaryConditionType.hpp"
 
 /** Constructor for Parameters: 
 * opens file and saves file to Parameters field 'parametersFile',
@@ -183,3 +184,4 @@ template void Parameters::getParameter(string, int&, bool);
 template void Parameters::getParameter(string, long&, bool);
 //template void Parameters::getParameter(string, bool&, bool);
 template void Parameters::getParameter(string, string&, bool);
+template void Parameters::getParameter(string, BoundaryConditionType&, bool);

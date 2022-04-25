@@ -52,16 +52,16 @@
  * @param dt - change in time of single time step
  */
 bool Diffusion_2D(
-				  Matrix2D<double> &psd,
-				  Matrix2D<double> x, Matrix2D<double> y,
-				  int x_size, int y_size,
-				  Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-				  Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-				  string x_LBC_type, string x_UBC_type,
-				  string y_LBC_type, string y_UBC_type,
-				  Matrix2D<double> Dxx, Matrix2D<double> Dyy, Matrix2D<double> Dxy, Matrix2D<double> Dyx,
-				  Matrix2D<double> G, Matrix2D<double> Sources, Matrix2D<double> Losses, double dt) {
-
+		Matrix2D<double> &psd,
+		Matrix2D<double> x, Matrix2D<double> y,
+		int x_size, int y_size,
+		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
+		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
+		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
+		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
+		Matrix2D<double> Dxx, Matrix2D<double> Dyy, Matrix2D<double> Dxy, Matrix2D<double> Dyx,
+		Matrix2D<double> G, Matrix2D<double> Sources, Matrix2D<double> Losses, double dt) 
+{
 	CalculationMatrix
 		matr_A(x_size, y_size, 1, 1),
 		matr_B(x_size, y_size, 1, 0),

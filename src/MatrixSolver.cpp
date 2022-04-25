@@ -40,17 +40,18 @@ using namespace std;
 
 /** Supportive sub-function to add boundary conditions to model matrix
  */
-void AddBoundary(DiagMatrix &matr_A, string type, int in, int id1, double dh) {
+void AddBoundary(DiagMatrix &matr_A, BoundaryConditionType type, int in, int id1, double dh) 
+{
 	int id0 = 0;
-	if (type == "BCT_CONSTANT_VALUE") { // for condition on value
+	if (type == BoundaryConditionType::ConstantValue) { // for condition on value
 		matr_A[id0][in] = 1;
 		matr_A[id1][in] = 0;
-	} else if (type == "BCT_CONSTANT_DERIVATIVE") { // for condition on derivative
+	} else if (type == BoundaryConditionType::ConstantDerivative) { // for condition on derivative
 		// !!! Works incorrectly for a derivative != 0
 		matr_A[id0][in] = 1 / dh;
 		matr_A[id1][in] = -1 / dh;
 	} else {
-		printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", type.c_str());
+		std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << type << std::endl;
 		exit(EXIT_FAILURE);
 	}
 }
@@ -65,9 +66,9 @@ bool AddBoundaries_1D(
 	Matrix1D<double> &x,
 	int x_size,
 	double x_LBC, double x_UBC,
-	string x_LBC_type, string x_UBC_type,
-	int ix) {
-
+	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
+	int ix) 
+{
 	int in, id1;
 	double dh;
 
@@ -80,15 +81,15 @@ bool AddBoundaries_1D(
 		dh = x[ix + 1] - x[ix];
 		//AddBoundary(matr_A, x_LBC_type, in, id, dh);
 		int id0 = 0;
-		if (x_LBC_type == "BCT_CONSTANT_VALUE") { // for condition on value
+		if (x_LBC_type == BoundaryConditionType::ConstantValue) { // for condition on value
 			matr_A[id0][in] = 1;
 			matr_A[id1][in] = 0;
-		} else if (x_LBC_type == "BCT_CONSTANT_DERIVATIVE") { // for condition on derivative
+		} else if (x_LBC_type == BoundaryConditionType::ConstantDerivative) { // for condition on derivative
 			// !!! Works incorrectly for a derivative != 0
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_LBC_type.c_str());
+			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_LBC_type << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -99,15 +100,15 @@ bool AddBoundaries_1D(
 		dh = x[ix] - x[ix - 1];
 		//AddBoundary(matr_A, x_UBC_type, in, id, dh);
 		int id0 = 0;
-		if (x_UBC_type == "BCT_CONSTANT_VALUE") { // for condition on value
+		if (x_UBC_type == BoundaryConditionType::ConstantValue) { // for condition on value
 			matr_A[id0][in] = 1;
 			matr_A[id1][in] = 0;
-		} else if (x_UBC_type == "BCT_CONSTANT_DERIVATIVE") { // for condition on derivative
+		} else if (x_UBC_type == BoundaryConditionType::ConstantDerivative) { // for condition on derivative
 			// !!! Works incorrectly for a derivative != 0
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_UBC_type.c_str());
+			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -126,10 +127,10 @@ bool AddBoundaries_2D(
 		int x_size, int y_size,
 		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-		string &x_LBC_type, string &x_UBC_type,
-		string &y_LBC_type, string &y_UBC_type,
-		int ix, int iy, int in) {
-
+		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
+		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
+		int ix, int iy, int in) 
+{
 	int id1;
 	double dh;
 
@@ -141,15 +142,15 @@ bool AddBoundaries_2D(
 		dh = x[ix + 1][iy] - x[ix][iy];
 		//AddBoundary(matr_A, x_LBC_type, in, id, dh);
 		int id0 = 0;
-		if (x_LBC_type == "BCT_CONSTANT_VALUE") { // for condition on value
+		if (x_LBC_type == BoundaryConditionType::ConstantValue) { // for condition on value
 			matr_A[id0][in] = 1;
 			matr_A[id1][in] = 0;
-		} else if (x_LBC_type == "BCT_CONSTANT_DERIVATIVE") { // for condition on derivative
+		} else if (x_LBC_type == BoundaryConditionType::ConstantDerivative) { // for condition on derivative
 			// !!! Works incorrectly for a derivative != 0
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_LBC_type.c_str());
+			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_LBC_type << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -160,15 +161,15 @@ bool AddBoundaries_2D(
 		dh = x[ix][iy] - x[ix - 1][iy];
 		//AddBoundary(matr_A, x_UBC_type, in, id, dh);
 		int id0 = 0;
-		if (x_UBC_type == "BCT_CONSTANT_VALUE") { // for condition on value
+		if (x_UBC_type == BoundaryConditionType::ConstantValue) { // for condition on value
 			matr_A[id0][in] = 1;
 			matr_A[id1][in] = 0;
-		} else if (x_UBC_type == "BCT_CONSTANT_DERIVATIVE") { // for condition on derivative
+		} else if (x_UBC_type == BoundaryConditionType::ConstantDerivative) { // for condition on derivative
 			// !!! Works incorrectly for a derivative != 0
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_UBC_type.c_str());
+			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -179,15 +180,15 @@ bool AddBoundaries_2D(
 		dh = y[ix][iy + 1] - y[ix][iy];
 		//AddBoundary(matr_A, y_LBC_type, in, id, dh);
 		int id0 = 0;
-		if (y_LBC_type == "BCT_CONSTANT_VALUE") { // for condition on value
+		if (y_LBC_type == BoundaryConditionType::ConstantValue) { // for condition on value
 			matr_A[id0][in] = 1;
 			matr_A[id1][in] = 0;
-		} else if (y_LBC_type == "BCT_CONSTANT_DERIVATIVE") { // for condition on derivative
+		} else if (y_LBC_type == BoundaryConditionType::ConstantDerivative) { // for condition on derivative
 			// !!! Works incorrectly for a derivative != 0
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", y_LBC_type.c_str());
+			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << y_LBC_type << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -198,15 +199,15 @@ bool AddBoundaries_2D(
 		dh = y[ix][iy] - y[ix][iy - 1];
 		//AddBoundary(matr_A, y_UBC_type, in, id, dh);
 		int id0 = 0;
-		if (y_UBC_type == "BCT_CONSTANT_VALUE") { // for condition on value
+		if (y_UBC_type == BoundaryConditionType::ConstantValue) { // for condition on value
 			matr_A[id0][in] = 1;
 			matr_A[id1][in] = 0;
-		} else if (y_UBC_type == "BCT_CONSTANT_DERIVATIVE") { // for condition on derivative
+		} else if (y_UBC_type == BoundaryConditionType::ConstantDerivative) { // for condition on derivative
 			// !!! Works incorrectly for a derivative != 0
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", y_UBC_type.c_str());
+			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << y_UBC_type << std::endl;;
 			exit(EXIT_FAILURE);
 		}
 
@@ -227,11 +228,11 @@ bool MakeModelMatrix_2D_ADI1_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 		int x_size, int y_size,
 		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-		string x_LBC_type, string x_UBC_type,
-		string y_LBC_type, string y_UBC_type,
+		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
+		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
 		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-		Matrix2D<double> &G, double dt) {
-
+		Matrix2D<double> &G, double dt) 
+{
 	// Make diagonals to be equal to zero
 	DiagMatrix::iterator it;
 	for (it = matr_A.begin(); it != matr_A.end(); it++)	it->second = 0;
@@ -337,11 +338,11 @@ bool MakeModelMatrix_2D_ADI1_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 		int x_size, int y_size,
 		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-		string x_LBC_type, string x_UBC_type,
-		string y_LBC_type, string y_UBC_type,
+		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
+		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
 		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-		Matrix2D<double> &G, double dt) {
-
+		Matrix2D<double> &G, double dt) 
+{
 	// Make diagonals to be equal to zero
 	DiagMatrix::iterator it;
 	for (it = matr_A.begin(); it != matr_A.end(); it++)	it->second = 0;
@@ -450,11 +451,11 @@ bool MakeModelMatrix_2D_ADI2_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 		int x_size, int y_size,
 		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-		string x_LBC_type, string x_UBC_type,
-		string y_LBC_type, string y_UBC_type,
+		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
+		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
 		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-		Matrix2D<double> &G, double dt) {
-
+		Matrix2D<double> &G, double dt) 
+{
 	// Make diagonals to be equal to zero
 	DiagMatrix::iterator it;
 	for (it = matr_A.begin(); it != matr_A.end(); it++)	it->second = 0;
@@ -606,11 +607,11 @@ bool MakeModelMatrix_2D_ADI2_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 		int x_size, int y_size,
 		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-		string x_LBC_type, string x_UBC_type,
-		string y_LBC_type, string y_UBC_type,
+		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
+		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
 		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-		Matrix2D<double> &G, double dt) {
-
+		Matrix2D<double> &G, double dt) 
+{
 	// Make diagonals to be equal to zero
 	DiagMatrix::iterator it;
 	for (it = matr_A.begin(); it != matr_A.end(); it++)	it->second = 0;
@@ -762,8 +763,8 @@ bool MakeModelMatrix_2D_ADI3_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 		int x_size, int y_size,
 		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-		string x_LBC_type, string x_UBC_type,
-		string y_LBC_type, string y_UBC_type,
+		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
+		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
 		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
 		Matrix2D<double> &G, double dt) {
 
@@ -893,8 +894,8 @@ bool MakeModelMatrix_2D_ADI3_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 		int x_size, int y_size,
 		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-		string x_LBC_type, string x_UBC_type,
-		string y_LBC_type, string y_UBC_type,
+		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
+		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
 		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
 		Matrix2D<double> &G, double dt) {
 

@@ -128,6 +128,7 @@
 #include "ReadInitialData.h"
 #include "UpdatableMatrix.h"
 #include "Interpolation.h"
+#include "BoundaryConditionType.hpp"
 
 #include <omp.h>
 
@@ -198,11 +199,11 @@ int main(int argc, char* argv[]) {
     UpdatableMatrix<Matrix3D<double> > Kl_BC, Ku_BC;
     UpdatableMatrix<Matrix3D<double> > Ll_BC, Lu_BC;
     // Type of boundary condition either BCT_CONSTANT_VALUE or BCT_CONSTANT_DERIVATIVE
-    string Pl_BC_type, Pu_BC_type;
-    string Rl_BC_type, Ru_BC_type;
-    string Vl_BC_type, Vu_BC_type;
-    string Kl_BC_type, Ku_BC_type;
-    string Ll_BC_type, Lu_BC_type;
+    BoundaryConditionType Pl_BC_type, Pu_BC_type;
+    BoundaryConditionType Rl_BC_type, Ru_BC_type;
+    BoundaryConditionType Vl_BC_type, Vu_BC_type;
+    BoundaryConditionType Kl_BC_type, Ku_BC_type;
+    BoundaryConditionType Ll_BC_type, Lu_BC_type;
 
     // Parameters input
     int P_size, R_size, V_size, K_size, L_size;
@@ -574,11 +575,11 @@ int main(int argc, char* argv[]) {
             std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
 #pragma omp master
             {
-            if(Vl_BC_from_convection == "true" && (Vl_BC_type == "BCT_CONSTANT_VALUE")){ //rewrite boundary conditions at lower V
+            if(Vl_BC_from_convection == "true" && (Vl_BC_type == BoundaryConditionType::ConstantValue)){ //rewrite boundary conditions at lower V
                 Vl_BC = PSD.ySlice(0);
                 std::cout << "Vl_BC from convection are used: max(Vl_BC) = " << Vl_BC.max() << endl;
             }
-            if(Vu_BC_from_convection == "true" && (Vu_BC_type == "BCT_CONSTANT_VALUE")){ //rewrite boundary conditions at lower V
+            if(Vu_BC_from_convection == "true" && (Vu_BC_type == BoundaryConditionType::ConstantValue)){ //rewrite boundary conditions at lower V
                 Vu_BC = PSD.ySlice(V_size-1);
                 std::cout << "Vu_BC from convection are used: max(Vu_BC) = " << Vu_BC.max() << endl;
             }
@@ -726,37 +727,40 @@ int main(int argc, char* argv[]) {
                 // If parameters.ini specify "Lapack" then Lapack will be used
                 if (inversion_method == "Lapack") {
                     Diffusion_2D(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
-                            Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
-                            Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
-                            Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
-                            DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
-                            Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+                        Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+                        Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+                        Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+                        DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+                        Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
                 }
                 // Currently setup to calculate 2d Diffusion using Diffusion_2D_ADI3
                 // Can change to Diffusion_2D_ADI1 or Diffusion_2D_ADI2 for different methods of inversion
                 else if (inversion_method == "ADI") {
                     Diffusion_2D_ADI3(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
-                            Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
-                            Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
-                            Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
-                            DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
-                            Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+                        Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+                        Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+                        Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+                        DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+                        Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt
+                    );
                 }
                 else if (inversion_method == "ADI2") {
                     Diffusion_2D_ADI2(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
-                            Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
-                            Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
-                            Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
-                            DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
-                            Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+                        Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+                        Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+                        Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+                        DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+                        Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt
+                    );
                 }
                 else if (inversion_method == "ADI1") {
                     Diffusion_2D_ADI1(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
-                            Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
-                            Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
-                            Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
-                            DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
-                            Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+                        Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+                        Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+                        Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+                        DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+                        Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt
+                    );
                 }
                 else {
                     Logger::error << "Error: Unknown inversion method " << inversion_method << endl;

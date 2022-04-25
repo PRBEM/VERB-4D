@@ -19,9 +19,8 @@
 #include "Matrix.h"
 #include "MatrixSolver.h"
 
-
 #include "Convection_1D_ULTIMATE_QUICKEST6.h"
-
+#include "BoundaryConditionType.hpp"
 
 /**
 * Function that creates a 2D Convection matrix and returns a bool upon completion
@@ -32,8 +31,8 @@ bool Convection_2D(
 	int P_size, int R_size,
 	const Matrix1D<double>& P_LBC, const Matrix1D<double>& P_UBC,
 	const Matrix1D<double>& R_LBC, const Matrix1D<double>& R_UBC,
-	string P_LBC_type, string P_UBC_type,
-	string R_LBC_type, string R_UBC_type,
+	BoundaryConditionType P_LBC_type, BoundaryConditionType P_UBC_type,
+	BoundaryConditionType R_LBC_type, BoundaryConditionType R_UBC_type,
 	const Matrix2D<double>& VP, const Matrix2D<double>& VR,
 	const Matrix2D<double>& Sources, const Matrix2D<double>& Losses,
 	double dt_total, double min_PSD, double min_V

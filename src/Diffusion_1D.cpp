@@ -39,7 +39,7 @@ bool Diffusion_1D(
 		Matrix1D<double> &psd,
 		const Matrix1D<double>& x, int x_size,
 		double x_LBC, double x_UBC,
-		const string& x_LBC_type, const string& x_UBC_type,
+		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 		const Matrix1D<double>& Dxx, const Matrix1D<double>& G,
 		const Matrix1D<double>& Sources, const Matrix1D<double>& Losses,
 		double dt) 
@@ -58,8 +58,6 @@ bool Diffusion_1D(
 	for (ix = 0; ix < x_size; ix++) {
 		// calculating current line number (in)
 		in = ix;
-
-
 		
 		// Boundary conditions
 		if (ix == 0 && x_size >= 3) {
@@ -69,16 +67,20 @@ bool Diffusion_1D(
 			dh = x[ix + 1] - x[ix];
 			//AddBoundary(matr_A, x_LBC_type, in, id, dh);
 			int id0 = 0;
-			if (x_LBC_type == "BCT_CONSTANT_VALUE") { // for condition on value
-				matr_A[id0][in] = 1;
-				matr_A[id1][in] = 0;
-			} else if (x_LBC_type == "BCT_CONSTANT_DERIVATIVE") { // for condition on derivative
-				// !!! Works incorrectly for a derivative != 0
-				matr_A[id0][in] = 1 / dh;
-				matr_A[id1][in] = -1 / dh;
-			} else {
-				printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_LBC_type.c_str());
-				exit(EXIT_FAILURE);
+			switch (x_LBC_type)
+			{
+				case BoundaryConditionType::ConstantValue:
+					matr_A[id0][in] = 1;
+					matr_A[id1][in] = 0;
+					break;
+			 	case BoundaryConditionType::ConstantDerivative:
+					// !!! Works incorrectly for a derivative != 0
+					matr_A[id0][in] = 1 / dh;
+					matr_A[id1][in] = -1 / dh;
+					break;
+				default:
+					std::cout << "1D_DIFF_BOUNDARY: unknown boundary type: " << x_LBC_type << std::endl;
+					exit(EXIT_FAILURE);
 			}
 
 		} else if (ix == x_size - 1 && x_size >= 3) {
@@ -88,16 +90,20 @@ bool Diffusion_1D(
 			dh = x[ix] - x[ix - 1];
 			//AddBoundary(matr_A, x_UBC_type, in, id, dh);
 			int id0 = 0;
-			if (x_UBC_type == "BCT_CONSTANT_VALUE") { // for condition on value
-				matr_A[id0][in] = 1;
-				matr_A[id1][in] = 0;
-			} else if (x_UBC_type == "BCT_CONSTANT_DERIVATIVE") { // for condition on derivative
-				// !!! Works incorrectly for a derivative != 0
-				matr_A[id0][in] = 1 / dh;
-				matr_A[id1][in] = -1 / dh;
-			} else {
-				printf("2D_DIFF_BOUNDARY: unknown boundary type: %s", x_UBC_type.c_str());
-				exit(EXIT_FAILURE);
+			switch (x_UBC_type)
+			{
+				case BoundaryConditionType::ConstantValue:
+					matr_A[id0][in] = 1;
+					matr_A[id1][in] = 0;
+					break;
+				case BoundaryConditionType::ConstantDerivative:
+					// !!! Works incorrectly for a derivative != 0
+					matr_A[id0][in] = 1 / dh;
+					matr_A[id1][in] = -1 / dh;
+					break;
+				default:
+					std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
+					exit(EXIT_FAILURE);
 			}
 
 		} else {
@@ -146,12 +152,13 @@ bool Diffusion_1D(
 	//psd.writeToFile("./Debug_output/PSD.dat");
 
 	tridag(
-			&matr_A[-1][0], // just a way to get a pointer to first element of an array
-			&matr_A[0][0],
-			&matr_A[+1][0],
-			&RHS[0],
-			&psd[0],
-			x_size);
+		&matr_A[-1][0], // just a way to get a pointer to first element of an array
+		&matr_A[0][0],
+		&matr_A[+1][0],
+		&RHS[0],
+		&psd[0],
+		x_size
+	);
 
 	return true;
 }
