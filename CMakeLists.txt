@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 2.8)
 project(VERB4D C CXX)
-add_definitions(-std=c++11)
+set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
@@ -81,11 +81,13 @@ set(VERB4D_SOURCES
 add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
 target_link_libraries(VERB4D_Solver ${DEPLIBS})
 
-# Flag compile tpye feedback
-string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_upper)
-if(CMAKE_BUILD_TYPE_upper STREQUAL "RELEASE")
-    add_definitions(-DRELEASE)
+# Flag compile type feedback
+if($(CMAKE_BUILD_TYPE))
+    string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_upper)
+    if(CMAKE_BUILD_TYPE_upper STREQUAL "RELEASE")
+        add_definitions(-DRELEASE)
     endif()
+endif()
     
 # Flag to decide convection step size in Convection_2D.cpp
 if(${FAST_CONVECTION})

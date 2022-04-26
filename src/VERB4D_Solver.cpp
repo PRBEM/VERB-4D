@@ -301,7 +301,7 @@ int main(int argc, char* argv[]) {
     }
 
     // For recording length of time for all calculations to complete
-    std::clock_t start_time, tic, tok;
+    std::clock_t start_time;
     start_time = clock();
     double wall_timer = omp_get_wtime();
 

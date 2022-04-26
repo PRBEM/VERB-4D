@@ -29,7 +29,7 @@ Matrix1D<double> Cubic1D(Matrix1D<double> &old_grid, Matrix1D<double> &values, M
 	vector<double> f(old_grid.size_q1);
 
 	// copying old grid int x and values into f
-	for (int i = 0; i < old_grid.size_q1; i++) {
+	for (size_t i = 0; i < old_grid.size_q1; i++) {
 		x.push_back(old_grid[i]);
 		f.push_back(values[i]);
 	}
@@ -38,7 +38,7 @@ Matrix1D<double> Cubic1D(Matrix1D<double> &old_grid, Matrix1D<double> &values, M
 	Opm::MonotCubicInterpolator interpolator(x, f);
 
 	// put the values generated from the interpolator into the newly created grid
-	for (int i = 0; i < new_grid.size_q1; i++) {
+	for (size_t i = 0; i < new_grid.size_q1; i++) {
 		values[i] = interpolator.evaluate(new_grid[i]);
 	}
 

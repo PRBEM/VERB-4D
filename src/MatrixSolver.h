@@ -62,20 +62,20 @@ void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X);
 
 void SecondDerivativeApproximation_1D(
 	CalculationMatrix &matr_A, int ix,
-	const string& FirstDerivative,
-	const string& SecondDerivative,
+	const std::string& FirstDerivative,
+	const std::string& SecondDerivative,
 	const Matrix1D<double> &x, ///< Coordinate x
 	const Matrix1D<double> &D, ///< Diffusion coefficient
 	const Matrix1D<double> &G, ///< Jacobian
 	double multiplicator
 );
 
-void GetDerivativeVector_2D(string derivativeType, int &dx, int &dy);
+void GetDerivativeVector_2D(std::string derivativeType, int &dx, int &dy);
 
 void SecondDerivativeApproximation_2D(
 	CalculationMatrix &matr_A,
 	int ix, int iy,
-	string FirstDerivative, string SecondDerivative,
+	std::string FirstDerivative, std::string SecondDerivative,
 	Matrix2D<double> &x, 				///< Coordinate x
 	Matrix2D<double> &y,  				///< Coordinate y
 	Matrix2D<double> &D, 				///< Diffusion coefficient
@@ -86,7 +86,7 @@ void SecondDerivativeApproximation_2D(
 void SecondDerivativeApproximation_2D_y(
 	CalculationMatrix &matr_A,
 	int ix, int iy,
-	string FirstDerivative, string SecondDerivative,
+	std::string FirstDerivative, std::string SecondDerivative,
 	Matrix2D<double> &x, 				///< Coordinate x
 	Matrix2D<double> &y,  				///< Coordinate y
 	Matrix2D<double> &D, 				///< Diffusion coefficient
@@ -97,7 +97,7 @@ void SecondDerivativeApproximation_2D_y(
 void AnySecondDerivativeApproximation_2D(
 	CalculationMatrix &matr_A,
 	int ix, int iy,
-	string FirstDerivative, string SecondDerivative,
+	std::string FirstDerivative, std::string SecondDerivative,
 	Matrix2D<double> &x, ///< Coordinate x
 	Matrix2D<double> &y, ///< Coordinate y
 	Matrix2D<double> &Coef1, ///< Coefficient outside of the term
@@ -108,7 +108,7 @@ void AnySecondDerivativeApproximation_2D(
 void AnySecondDerivativeApproximation_2D_y(
 	CalculationMatrix &matr_A,
 	int ix, int iy,
-	string FirstDerivative, string SecondDerivative,
+	std::string FirstDerivative, std::string SecondDerivative,
 	Matrix2D<double> &x, ///< Coordinate x
 	Matrix2D<double> &y, ///< Coordinate y
 	Matrix2D<double> &Coef1, ///< Coefficient outside of the term

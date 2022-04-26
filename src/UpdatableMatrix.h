@@ -42,17 +42,17 @@ private:
 	// Matrix3D<double> updated_arr;
 
 	//
-	// string last_data_filename; /// data-filename
-	string scale_string; /// Filename for matrix scaling
-	string update_filename; /// Filename for Matrix data updating (e.g. to load a completely different data)
-	string Q1_from_string; /// Filename for limiting Q1 (usually it's MLT, lower limit)
-	string Q1_to_string; /// Filename for limiting Q1 (usually it's MLT, upper limit)
-	string Q2_from_string; /// Filename for limiting Q2 (usually it's the radial distance range, e.g. above or below plasmapause)
-	string Q2_to_string; /// Filename for limiting Q2 (usually it's the radial distance range, e.g. above or below plasmapause)
-	string Q3_from_string; /// Filename for limiting Q3 (usually it's V, lower limit)
-	string Q3_to_string; /// Filename for limiting Q3 (usually it's V, upper limit)
-	string Q4_from_string; /// Filename for limiting Q4 (usually it's K, lower limit)
-	string Q4_to_string; /// Filename for limiting Q4 (usually it's K, upper limit)
+	// std::string last_data_filename; /// data-filename
+	std::string scale_string; /// Filename for matrix scaling
+	std::string update_filename; /// Filename for Matrix data updating (e.g. to load a completely different data)
+	std::string Q1_from_string; /// Filename for limiting Q1 (usually it's MLT, lower limit)
+	std::string Q1_to_string; /// Filename for limiting Q1 (usually it's MLT, upper limit)
+	std::string Q2_from_string; /// Filename for limiting Q2 (usually it's the radial distance range, e.g. above or below plasmapause)
+	std::string Q2_to_string; /// Filename for limiting Q2 (usually it's the radial distance range, e.g. above or below plasmapause)
+	std::string Q3_from_string; /// Filename for limiting Q3 (usually it's V, lower limit)
+	std::string Q3_to_string; /// Filename for limiting Q3 (usually it's V, upper limit)
+	std::string Q4_from_string; /// Filename for limiting Q4 (usually it's K, lower limit)
+	std::string Q4_to_string; /// Filename for limiting Q4 (usually it's K, upper limit)
 
 	double last_update_time; /// Indicates when the Matrix was updated last time
 
@@ -64,8 +64,8 @@ public:
 	MatrixND original_arr;
 
 	// to simplify things
-	inline MatrixND& operator= (const MatrixND &M);
-	inline MatrixND& operator= (const double Val);
+	MatrixND& operator= (const MatrixND &M);
+	MatrixND& operator= (const double Val);
 
 	void saveCurrent(); // Save current matrix as original to be scaled/limited later
 
@@ -74,13 +74,13 @@ public:
 	//void AllocateMemory( int size_Q1, int size_Q2, int size_Q3 );
 	//void AllocateMemory( int size_Q1, int size_Q2, int size_Q3, int size_Q4 );
 
-	//void readFromFile(string filename, const MatrixND grid_w); ///< Load matrix to a file
-	//void readFromFile(string filename, const MatrixND grid_w, const MatrixND grid_x); ///< Load matrix to a file
-	//void readFromFile(string filename, const MatrixND grid_w, const MatrixND grid_x, const MatrixND grid_y); ///< Load matrix to a file
-	//void readFromFile(string filename, const MatrixND grid_w, const MatrixND grid_x, const MatrixND grid_y, const MatrixND grid_z); ///< Load matrix to a file
+	//void readFromFile(std::string filename, const MatrixND grid_w); ///< Load matrix to a file
+	//void readFromFile(std::string filename, const MatrixND grid_w, const MatrixND grid_x); ///< Load matrix to a file
+	//void readFromFile(std::string filename, const MatrixND grid_w, const MatrixND grid_x, const MatrixND grid_y); ///< Load matrix to a file
+	//void readFromFile(std::string filename, const MatrixND grid_w, const MatrixND grid_x, const MatrixND grid_y, const MatrixND grid_z); ///< Load matrix to a file
 
-	bool readFromIniFile(string ini_filename, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
-	bool readFromString(string file_line_string, const MatrixND &Q1, const MatrixND &Q2, const MatrixND &Q3, const MatrixND &Q4);
+	bool readFromIniFile(std::string ini_filename, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
+	bool readFromString(std::string file_line_string, const MatrixND &Q1, const MatrixND &Q2, const MatrixND &Q3, const MatrixND &Q4);
 	bool update(double time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
 
 };
@@ -112,19 +112,19 @@ private:
 public:
 
 	// to simplify things
-	inline MatrixND& operator= (const MatrixND &M);
-	inline MatrixND& operator= (const double Val);
+	MatrixND& operator= (const MatrixND &M);
+	MatrixND& operator= (const double Val);
 
-	bool readFromIniFile(string ini_filename, const MatrixND &Q1, const MatrixND &Q2, const MatrixND &Q3, const MatrixND &Q4);
+	bool readFromIniFile(std::string ini_filename, const MatrixND &Q1, const MatrixND &Q2, const MatrixND &Q3, const MatrixND &Q4);
 	void update(double time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
 
 };
 
 // couple of helpful functions
-string GetCurrentTimeValue(const string &filename, const double &current_time, double &update_time);
-string GetCurrentTimeValue(const string &filename, long &pos, const double &current_time, double &update_time);
+std::string GetCurrentTimeValue(const std::string &filename, const double &current_time, double &update_time);
+std::string GetCurrentTimeValue(const std::string &filename, long &pos, const double &current_time, double &update_time);
 bool is_number(const std::string& s);
 /// FUNCTION NOT IMPLEMENTED
-double stringToValue(string string_value, double current_time);
+double stringToValue(std::string string_value, double current_time);
 
 #endif /* UPDATABLEMATRIX_H_ */
