@@ -70,13 +70,15 @@ bool Convection_2D(
 	// Find number of sub-time steps required to satisfy the Courant condition for both directions: P and R
 	if (P_size >= 3) {
 		dP = (P[1][0] - P[0][0]); // FIXME - will work only for regular grid
-		num_steps_P = (((double) dt_total * VP.maxabs() / dP / maxCourNum) <= 1) ? 1 : ceil((double) dt_total * VP.maxabs() / dP / maxCourNum);
+		double num_steps_double = (double)dt_total * VP.maxabs() / dP / maxCourNum;
+		num_steps_P =  num_steps_double <= 1 ? 1 : ceil(num_steps_double);
 	} else {
 		num_steps_P = 1;
 	}
 	if (R_size >= 3) {
 		dR = (R[0][1] - R[0][0]); // FIXME - will work only for regular grid
-		num_steps_R = (((double) dt_total * VR.maxabs() / dR / maxCourNum) <= 1) ? 1 : ceil((double) dt_total * VR.maxabs() / dR / maxCourNum);
+		double num_steps_double = (double)dt_total * VR.maxabs() / dR / maxCourNum;
+		num_steps_R = num_steps_double <= 1 ? 1 : ceil(num_steps_double);
 	} else {
 		num_steps_R = 1;
 	}
@@ -112,17 +114,16 @@ bool Convection_2D(
 
 	// precompute losses
 	Matrix2D<double> losses_exp = Losses.exp(dt);
-
 	for (int it = 0; it < num_steps; it++) {
 		if (P_size >= 3) {
 			for (iR = 0; iR < R_size-1; iR++) {
 
 				// 1d slice
-				PSD_P = PSD_PR.ySlice(iR);
-				P_P   = P.ySlice(iR);
-				VP_P  = VP.ySlice(iR);
+				PSD_PR.ySlice(PSD_P, iR);
+				P.ySlice(P_P, iR);
+				VP.ySlice(VP_P, iR);
 				// Speedup: if PSD~=0 or V~=0, skip the thing
-				if (PSD_P.max() < min_PSD || VP.ySlice(iR).maxabs() < min_V)
+				if (PSD_P.max() < min_PSD || VP_P.maxabs() < min_V)
 					continue;
 
 				Convection_1D_ULTIMATE_QUICKEST6( 
@@ -144,12 +145,12 @@ bool Convection_2D(
 			for (iP = 0; iP < P_size; iP++) {
 
 				// 2d slice
-				PSD_R = PSD_PR.xSlice(iP);
-				R_R   = R.xSlice(iP);
-				VR_R  = VR.xSlice(iP);
+				PSD_PR.xSlice(PSD_R, iP);
+				R.xSlice(R_R, iP);
+				VR.xSlice(VR_R, iP);
 
 				// Speedup: if PSD~=0 or V~=0, skip the thing
-				if (PSD_R.max() < min_PSD || VR.xSlice(iP).maxabs() < min_V) // XXX: 1e-21 should be a parameter, based on the minimum of the initial PSD or something
+				if (PSD_R.max() < min_PSD || VR_R.maxabs() < min_V) // XXX: 1e-21 should be a parameter, based on the minimum of the initial PSD or something
 					continue;
 
 				Convection_1D_ULTIMATE_QUICKEST6( 

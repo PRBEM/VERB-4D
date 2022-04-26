@@ -60,10 +60,6 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
         exit(EXIT_FAILURE);
     }
 
-    // double CourNum_f; // Courant number of a face
-    // added by hayley for testing
-    Matrix1D<double> CourNum_f(x_size);
-
     double d1, d3, d5, d7, d9;
     [[maybe_unused]] double D10;
     double D2, D4, D6, D8;
@@ -156,24 +152,23 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
 
         // All equations and formulas for these calculations can be found at http://www.hadian.ir/teaching/CompHydr/3.pdf
         // Start calculation
+        double face_last, face_current, courant_last, courant_current;
         for (ix = 0; ix <= x_size - 1; ix++) {
             // calculate at ix = 0 if the boundary condition is periodic
             if (ix == 0) {                           // special case
                 if (x_LBC_type == BoundaryConditionType::Periodic) {  // Periodic
-                    CourNum_f[ix] = (CourNum[x_size - 2] + CourNum[0]) / 2;
+                    courant_current = (CourNum[x_size - 2] + CourNum[0]) / 2;
                     // CourNum_f = CourNum[0];
                 } else {
                     continue;  // skip to the next ix - we need to calculate at ix = 1 only for periodic conditions
                 }
             } else {
-                CourNum_f[ix] = (CourNum[ix - 1] + CourNum[ix]) / 2;
+                courant_current = (CourNum[ix - 1] + CourNum[ix]) / 2;
                 // CourNum_f = CourNum[ix];
             }
             
-            const double courant_current = CourNum_f[ix];
             const double courant_squared = courant_current * courant_current;
             const double courant_abs = fabs(courant_current);
-            double& face_current = PSD_f[ix];
 
             // Copy values into PSD_U, PSD_C, and PSD_D to use only these later
             if (courant_current >= 0) {  // Page 33
@@ -332,23 +327,17 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                     }
                 }
             }
-        }
 
-        // update PSD
-        double PSD_r, PSD_l, CourNum_r, CourNum_l;  // values on left and right faces (between (i and i-1), and (i and i+1))
-        for (ix = 0; ix < x_size - 1; ix++) {
-            if (ix == 0 && x_LBC_type != BoundaryConditionType::Periodic) {  // special case
-                continue;                                   // need to calculate ix == 0 point only for periodic;
+            // update PSD
+            // courant_last, courant_current are values on left and right faces (between (i and i-1), and (i and i+1))
+            if (ix > 0)  // special case
+            {
+                // (7)
+                // PSD[ix] = PSD[ix] - CourNum[ix] * (PSD_r - PSD_l); - old version that makes the total PSD oscillate
+                PSD[ix - 1] -= (courant_current * face_current - courant_last * face_last);
             }
-
-            // (7)
-            PSD_r = PSD_f[ix + 1];
-            CourNum_r = CourNum_f[ix + 1];
-            PSD_l = PSD_f[ix];
-            CourNum_l = CourNum_f[ix];
-
-            // PSD[ix] = PSD[ix] - CourNum[ix] * (PSD_r - PSD_l); - old version that makes the total PSD oscillate
-            PSD[ix] = PSD[ix] - (CourNum_r * PSD_r - CourNum_l * PSD_l);
+            face_last = face_current;
+            courant_last = courant_current;
         }
         if (x_LBC_type == BoundaryConditionType::Periodic) {  // special case
             PSD[x_size - 1] = PSD[0];        // need to update ix == x_size-1 point for periodic;
