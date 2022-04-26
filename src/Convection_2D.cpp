@@ -110,6 +110,9 @@ bool Convection_2D(
 	Matrix1D<double> zero_r(R_size);
 	zero_r = 0;
 
+	// precompute losses
+	Matrix2D<double> losses_exp = Losses.exp(dt);
+
 	for (int it = 0; it < num_steps; it++) {
 		if (P_size >= 3) {
 			for (iR = 0; iR < R_size-1; iR++) {
@@ -165,7 +168,7 @@ bool Convection_2D(
 		}
 		for (iP = 0; iP < P_size; iP++){
             for(iR = 0; iR < R_size; iR++){
-            PSD_PR[iP][iR] = PSD_PR[iP][iR] * exp(Losses[iP][iR] * dt);
+            PSD_PR[iP][iR] = PSD_PR[iP][iR] * losses_exp[iP][iR];
             }
         }
 	}

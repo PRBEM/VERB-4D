@@ -1579,6 +1579,18 @@ T Matrix2D<T>::maxabs() const {
 	return tmp;
 }
 
+/**
+* Return exp(matrix*multiplicator) of the 2d matrix.
+*/
+template<class T>
+Matrix2D<T> Matrix2D<T>::exp(double multiplicator) const {
+	Matrix2D<T> tmp(size_q1, size_q2);
+	for(size_t i = 0; i < num_elements; i++)
+	{
+		tmp.plane_array[i] = std::exp(plane_array[i]*multiplicator);
+	}
+	return tmp;
+}
 
 /**
 * Return minimum value of the 2d matrix.

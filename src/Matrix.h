@@ -208,6 +208,7 @@ public:
 	T maxabs() const;
 	T min() const;
 	Matrix2D<T> abs() const;
+	Matrix2D<T> exp(double multiplicator=1) const;
 	// It returns maximum between values from class psd2DSlice and argument (VC::zero_f in that case)
 	Matrix2D<T>& max_of(T val);
 
