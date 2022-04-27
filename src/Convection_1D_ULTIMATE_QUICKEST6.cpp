@@ -152,26 +152,26 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
 
         // All equations and formulas for these calculations can be found at http://www.hadian.ir/teaching/CompHydr/3.pdf
         // Start calculation
-        double face_last, face_current, courant_last, courant_current;
+        double psd_face_left, psd_face_right, courant_left, courant_right;
         for (ix = 0; ix <= x_size - 1; ix++) {
             // calculate at ix = 0 if the boundary condition is periodic
             if (ix == 0) {                           // special case
                 if (x_LBC_type == BoundaryConditionType::Periodic) {  // Periodic
-                    courant_current = (CourNum[x_size - 2] + CourNum[0]) / 2;
+                    courant_right = (CourNum[x_size - 2] + CourNum[0]) / 2;
                     // CourNum_f = CourNum[0];
                 } else {
                     continue;  // skip to the next ix - we need to calculate at ix = 1 only for periodic conditions
                 }
             } else {
-                courant_current = (CourNum[ix - 1] + CourNum[ix]) / 2;
+                courant_right = (CourNum[ix - 1] + CourNum[ix]) / 2;
                 // CourNum_f = CourNum[ix];
             }
             
-            const double courant_squared = courant_current * courant_current;
-            const double courant_abs = fabs(courant_current);
+            const double courant_squared = courant_right * courant_right;
+            const double courant_abs = fabs(courant_right);
 
             // Copy values into PSD_U, PSD_C, and PSD_D to use only these later
-            if (courant_current >= 0) {  // Page 33
+            if (courant_right >= 0) {  // Page 33
                 // PSD_U = PSD[ix-2];
                 // PSD_C = PSD[ix-1];
                 // PSD_D = PSD[ix];
@@ -224,11 +224,11 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
             //  note: CURV = PSD_D - 2*PSD_C + PSD_U;
             // continue;
 
-            face_current = 0.5 * (PSD_C + PSD_D[1]);  // A.1
+            psd_face_right = 0.5 * (PSD_C + PSD_D[1]);  // A.1
 
             d1 = PSD_C - PSD_D[1];  // A.2
             // 2 order
-            face_current += 0.5 * courant_abs * d1;
+            psd_face_right += 0.5 * courant_abs * d1;
 
             // Using table A1 to get the coefficients for the odd differences and table A2 for the even differences
             // Even is divided by 2
@@ -237,40 +237,40 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
 
             if (always_3rd_order) {  // !never_3rd_order && (always_3rd_order || (CURVAV < THC1 && GRAD < THG))) {
                 // 3 order - QUICKEST method
-                face_current += (courant_squared - 1) / three_factorial * (D2 + d3 / 2);  // A.16
+                psd_face_right += (courant_squared - 1) / three_factorial * (D2 + d3 / 2);  // A.16
 
             } else {
                 // 4 order - PSD_f is still second order
-                face_current += (courant_squared - 1) / three_factorial * (D2 + courant_abs / 4 * d3);
+                psd_face_right += (courant_squared - 1) / three_factorial * (D2 + courant_abs / 4 * d3);
 
                 D4 = (PSD_U[2] - 3 * PSD_U[1] + 2 * PSD_C + 2 * PSD_D[1] - 3 * PSD_D[2] + PSD_D[3]) / 2;
                 d5 = PSD_U[2] - 5 * PSD_U[1] + 10 * PSD_C - 10 * PSD_D[1] + 5 * PSD_D[2] - PSD_D[3];
 
                 if (always_5rd_order) {  // !never_5rd_order && always_5rd_order) {
                     // 5 order
-                    face_current += (courant_squared - 1) * (courant_squared - 4) / five_factorial * (D4 + d5 / 2);
+                    psd_face_right += (courant_squared - 1) * (courant_squared - 4) / five_factorial * (D4 + d5 / 2);
 
                 } else {
                     // 6 order - PSD_f is still 4th order.
-                    face_current += (courant_squared - 1) * (courant_squared - 4) / five_factorial * (D4 + courant_abs / 6 * d5);
+                    psd_face_right += (courant_squared - 1) * (courant_squared - 4) / five_factorial * (D4 + courant_abs / 6 * d5);
 
                     D6 = (PSD_U[3] - 5 * PSD_U[2] + 9 * PSD_U[1] - 5 * PSD_C - 5 * PSD_D[1] + 9 * PSD_D[2] - 5 * PSD_D[3] + PSD_D[4]) / 2;
                     d7 = PSD_U[3] - 7 * PSD_U[2] + 21 * PSD_U[1] - 35 * PSD_C + 35 * PSD_D[1] - 21 * PSD_D[2] + 7 * PSD_D[3] - PSD_D[4];
 
                     if (always_7rd_order) {  // !never_7rd_order && (always_7rd_order || (CURVAV < THC2 && GRAD < THG))) {
                         // 7 order
-                        face_current += (courant_squared - 1) * (courant_squared - 4) * (courant_squared - 9) / seven_factorial * (D6 + d7 / 2);
+                        psd_face_right += (courant_squared - 1) * (courant_squared - 4) * (courant_squared - 9) / seven_factorial * (D6 + d7 / 2);
                     } else {
                         // I think there is a bug somewhere here for 8-9 orders :( <- this comment is not from hayley
                         // 8 order
-                        face_current += (courant_squared - 1) * (courant_squared - 4) * (courant_squared - 9) / seven_factorial * (D6 + courant_abs / 8 * d7);
+                        psd_face_right += (courant_squared - 1) * (courant_squared - 4) * (courant_squared - 9) / seven_factorial * (D6 + courant_abs / 8 * d7);
 
                         // 8 even:  +1 -7 +20 -28 +14  +14  -28 +20 -7 +1
                         // 9 odd: +1 -9 +36 -84 +126 -126 +84 -36 +9 -1
                         D8 = (PSD_U[4] - 7 * PSD_U[3] + 20 * PSD_U[2] - 28 * PSD_U[1] + 14 * PSD_C + 14 * PSD_D[1] - 28 * PSD_D[2] + 20 * PSD_D[3] - 7 * PSD_D[4] + PSD_D[5]) / 2;
                         d9 = PSD_U[4] - 9 * PSD_U[3] + 36 * PSD_U[2] - 84 * PSD_U[1] + 126 * PSD_C - 126 * PSD_D[1] + 84 * PSD_D[2] - 36 * PSD_D[3] + 9 * PSD_D[4] - PSD_D[5];
                         // 9 order
-                        face_current += (courant_squared - 1) * (courant_squared - 4) * (courant_squared - 9) * (courant_squared - 16) / nine_factorial * (D8 + d9 / 2);
+                        psd_face_right += (courant_squared - 1) * (courant_squared - 4) * (courant_squared - 9) * (courant_squared - 16) / nine_factorial * (D8 + d9 / 2);
                     }
                 }
             }
@@ -311,7 +311,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                 // limiting
                 if (ACURV >= ADEL) {  // (4)
                     // not monotionic, or something
-                    face_current = PSD_C;
+                    psd_face_right = PSD_C;
                 } else if (courant_abs > 1e-31) {  // this will not work if velocity is zero
                     // cont. from page 48
                     // !!! PSD_REF = PSD_U + (PSD_C - PSD_U)/CourNum[ix]; // (3)
@@ -319,25 +319,25 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                     PSD_REF = PSD_U[1] + (PSD_C - PSD_U[1]) / courant_abs;  // (3)
 
                     if (DEL > 0) {                                             // (5) limit
-                        face_current = fmax(face_current, PSD_C);                    // max
-                        face_current = fmin(face_current, fmin(PSD_REF, PSD_D[1]));  // min, min
+                        psd_face_right = fmax(psd_face_right, PSD_C);                    // max
+                        psd_face_right = fmin(psd_face_right, fmin(PSD_REF, PSD_D[1]));  // min, min
                     } else if (DEL < 0) {                                      // (6)
-                        face_current = fmin(face_current, PSD_C);                    // min
-                        face_current = fmax(face_current, fmax(PSD_REF, PSD_D[1]));  // max, max
+                        psd_face_right = fmin(psd_face_right, PSD_C);                    // min
+                        psd_face_right = fmax(psd_face_right, fmax(PSD_REF, PSD_D[1]));  // max, max
                     }
                 }
             }
 
             // update PSD
-            // courant_last, courant_current are values on left and right faces (between (i and i-1), and (i and i+1))
+            // courant_left, courant_right are values on left and right faces (between (i and i-1), and (i and i+1))
             if (ix > 0)  // special case
             {
                 // (7)
                 // PSD[ix] = PSD[ix] - CourNum[ix] * (PSD_r - PSD_l); - old version that makes the total PSD oscillate
-                PSD[ix - 1] -= (courant_current * face_current - courant_last * face_last);
+                PSD[ix - 1] -= (courant_right * psd_face_right - courant_left * psd_face_left);
             }
-            face_last = face_current;
-            courant_last = courant_current;
+            psd_face_left = psd_face_right;
+            courant_left = courant_right;
         }
         if (x_LBC_type == BoundaryConditionType::Periodic) {  // special case
             PSD[x_size - 1] = PSD[0];        // need to update ix == x_size-1 point for periodic;
