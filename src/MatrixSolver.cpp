@@ -63,7 +63,7 @@ void AddBoundary(DiagMatrix &matr_A, BoundaryConditionType type, int in, int id1
 */
 bool AddBoundaries_1D(
 	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-	Matrix1D<double> &x,
+	const Matrix1D<double> &x,
 	int x_size,
 	double x_LBC, double x_UBC,
 	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
@@ -123,10 +123,10 @@ bool AddBoundaries_1D(
 */
 bool AddBoundaries_2D(
 		CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-		Matrix2D<double> &x, Matrix2D<double> &y,
+		const Matrix2D<double> &x, const Matrix2D<double> &y,
 		int x_size, int y_size,
-		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
+		const Matrix1D<double>& x_LBC, const Matrix1D<double>& x_UBC,
+		const Matrix1D<double>& y_LBC, const Matrix1D<double>& y_UBC,
 		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
 		int ix, int iy, int in) 
@@ -1169,7 +1169,7 @@ void SecondDerivativeApproximation_1D(CalculationMatrix &matr_A,
  * Used in approximation.
  * If it gets derivativeType == DT_ALPHA_left, for example, that means we have alpha-left-derivative, which is ( f(alpha) - f(alpha-1) ) / ( delta alpha ). So it returns dAlpha = -1, as a derivative direction vector.
  */
-void GetDerivativeVector_2D(string derivativeType, int &dx, int &dy) {
+void GetDerivativeVector_2D(const string& derivativeType, int &dx, int &dy) {
 	if (derivativeType == "x_left") {
 		dx = -1;
 	} else if (derivativeType == "x_right") {
@@ -1197,11 +1197,11 @@ void GetDerivativeVector_2D(string derivativeType, int &dx, int &dy) {
  */
 void SecondDerivativeApproximation_2D(CalculationMatrix &matr_A,
 		int ix, int iy,
-		string FirstDerivative, string SecondDerivative,
-		Matrix2D<double> &x, ///< Coordinate x
-		Matrix2D<double> &y, ///< Coordinate y
-		Matrix2D<double> &D, ///< Diffusion coefficient
-		Matrix2D<double> &G, ///< Jacobian
+		const string& FirstDerivative, const string& SecondDerivative,
+		const Matrix2D<double> &x, ///< Coordinate x
+		const Matrix2D<double> &y, ///< Coordinate y
+		const Matrix2D<double> &D, ///< Diffusion coefficient
+		const Matrix2D<double> &G, ///< Jacobian
 		double multiplicator) {
 
 	int dx1 = 0, dy1 = 0;

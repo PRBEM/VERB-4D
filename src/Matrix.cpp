@@ -161,7 +161,7 @@ template<class T>inline T**** matrix(size_t size_w, size_t size_x, size_t size_y
 
 /// Freeing memory for 1D matrix
 template<class T>inline void free_matrix(T* m) {
-	delete m;
+	delete[] m;
 }
 
 /// Freeing memory for 2D matrix

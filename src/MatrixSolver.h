@@ -28,7 +28,7 @@ void AddBoundary(DiagMatrix &Matrix_A, BoundaryConditionType type, int in, int i
 
 bool AddBoundaries_1D(
 	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-	Matrix1D<double> &x,
+	const Matrix1D<double> &x,
 	int x_size,
 	double x_LBC, double x_UBC,
 	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
@@ -36,10 +36,10 @@ bool AddBoundaries_1D(
 
 bool AddBoundaries_2D(
 	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-	Matrix2D<double> &x, Matrix2D<double> &y,
+	const Matrix2D<double> &x, const Matrix2D<double> &y,
 	int x_size, int y_size,
-	Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-	Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
+	const Matrix1D<double>& x_LBC, const Matrix1D<double>& x_UBC,
+	const Matrix1D<double>& y_LBC, const Matrix1D<double>& y_UBC,
 	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
 	int ix, int iy, int in
@@ -70,16 +70,16 @@ void SecondDerivativeApproximation_1D(
 	double multiplicator
 );
 
-void GetDerivativeVector_2D(std::string derivativeType, int &dx, int &dy);
+void GetDerivativeVector_2D(const std::string& derivativeType, int &dx, int &dy);
 
 void SecondDerivativeApproximation_2D(
 	CalculationMatrix &matr_A,
 	int ix, int iy,
-	std::string FirstDerivative, std::string SecondDerivative,
-	Matrix2D<double> &x, 				///< Coordinate x
-	Matrix2D<double> &y,  				///< Coordinate y
-	Matrix2D<double> &D, 				///< Diffusion coefficient
-	Matrix2D<double> &G, 				///< Jacobian
+	const std::string& FirstDerivative, const std::string& SecondDerivative,
+	const Matrix2D<double> &x, 				///< Coordinate x
+	const Matrix2D<double> &y,  				///< Coordinate y
+	const Matrix2D<double> &D, 				///< Diffusion coefficient
+	const Matrix2D<double> &G, 				///< Jacobian
 	double multiplicator
 );
 

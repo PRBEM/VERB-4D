@@ -53,14 +53,14 @@
  */
 bool Diffusion_2D(
 		Matrix2D<double> &psd,
-		Matrix2D<double> x, Matrix2D<double> y,
+		const Matrix2D<double>& x, const Matrix2D<double>& y,
 		int x_size, int y_size,
-		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
+		const Matrix1D<double>& x_LBC, const Matrix1D<double>& x_UBC,
+		const Matrix1D<double>& y_LBC, const Matrix1D<double>& y_UBC,
 		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> Dxx, Matrix2D<double> Dyy, Matrix2D<double> Dxy, Matrix2D<double> Dyx,
-		Matrix2D<double> G, Matrix2D<double> Sources, Matrix2D<double> Losses, double dt) 
+		const Matrix2D<double>& Dxx, const Matrix2D<double>& Dyy, const Matrix2D<double>& Dxy, const Matrix2D<double>& Dyx,
+		const Matrix2D<double>& G, const Matrix2D<double>& Sources, const Matrix2D<double>& Losses, double dt) 
 {
 	CalculationMatrix
 		matr_A(x_size, y_size, 1, 1),
@@ -98,21 +98,18 @@ bool Diffusion_2D(
 			// calculating current line number (in)
 			in = matr_A.index1d(ix, iy);
 
-			if ( (ix == 0 && x_size >= 3)
-					|| (ix == x_size - 1 && x_size >= 3)
-					|| (iy == 0 && y_size >= 3)
-					|| (iy == y_size - 1 && y_size >= 3)) {
+			if((ix == 0 && x_size >= 3)
+				|| (ix == x_size - 1 && x_size >= 3)
+				|| (iy == 0 		 && y_size >= 3)
+				|| (iy == y_size - 1 && y_size >= 3)) {
 
 				// if at the boundary
 				// add boundary conditions
 				AddBoundaries_2D(
 					matr_A, matr_B, matr_C,
-					x, y,
-					x_size, y_size,
-					x_LBC, x_UBC,
-					y_LBC, y_UBC,
-					x_LBC_type, x_UBC_type,
-					y_LBC_type, y_UBC_type,
+					x, y, x_size, y_size,
+					x_LBC, x_UBC, y_LBC, y_UBC,
+					x_LBC_type, x_UBC_type, y_LBC_type, y_UBC_type,
 					ix, iy, in);
 
 			} else {
