@@ -82,7 +82,7 @@ add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
 target_link_libraries(VERB4D_Solver ${DEPLIBS})
 
 # Flag compile type feedback
-if($(CMAKE_BUILD_TYPE))
+if(DEFINED CMAKE_BUILD_TYPE)
     string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_upper)
     if(CMAKE_BUILD_TYPE_upper STREQUAL "RELEASE")
         add_definitions(-DRELEASE)
