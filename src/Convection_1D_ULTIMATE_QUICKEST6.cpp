@@ -2,7 +2,7 @@
  * \file Convection_1D_ULTIMATE_QUICKEST6.cpp
  *
  * Leonard, 1991; Leonard and Niknafs, 1991;
- * 
+ *
  * Leonard BP (1988) Universal Limiter for transient interpolation modeling of the advective transport equations: the ULTIMATE conservative difference scheme, NASA technical Memorandum 100916 ICOMP-88-11
  *
  * It works somehow, edit with a great care! - edited by Hayley to correct and issue with the PSD update. Without this correction, the total PSD will gain and drop periodically with the drift
@@ -10,7 +10,7 @@
  * All equations and formulas for these calculations can be found at http://www.hadian.ir/teaching/CompHydr/3.pdf .
  * Mostly coming from 3.5 Simplified Ultimate Quickest strategy from B.P Leonard the Ultimate conservative difference scheme.
  * In the source code mathematical equations are numbered corresponding to the numbering of equations found in the paper
- * 
+ *
  * \brief Calculates the convection in 1D given a 1D matrix of Phase Space Densities, boundary conditions, diffusion, sources and losses
  */
 
@@ -18,7 +18,7 @@
 #include "BoundaryConditionType.hpp"
 
 /** Using the Standard namespace
-*/
+ */
 using namespace std;
 
 #define gst 5

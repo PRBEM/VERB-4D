@@ -10,7 +10,6 @@
 
 #include "Matrix.h"
 
-using namespace std;
 
 
 /** One-dimensional interpolation

@@ -12,9 +12,7 @@
 
 #include "Convection_2D.h"
 
-
 using namespace std;
-
 
 /**
  * Calculation of 2D convection
@@ -90,11 +88,11 @@ bool Convection_2D(
 
 	// Either use the smallest time step for both, or specify the maximum time step here and then different time steps will be used
 	// (the Courant condition will be checked inside of Convection_1D one more time)
-	// ">" is more accurate, but "<" is much-much faster and (hopefully?) still more accurate than completely unrelated time steps
+	// "min" is more accurate, but "max" is much-much faster and (hopefully?) still more accurate than completely unrelated time steps
 #ifdef FAST_CONVECTION
-    num_steps = (num_steps_P < num_steps_R) ? num_steps_P : num_steps_R;
+    num_steps = std::min(num_steps_P, num_steps_R);
 #else
-    num_steps = (num_steps_P > num_steps_R) ? num_steps_P : num_steps_R;
+    num_steps = std::max(num_steps_P, num_steps_R);
 #endif
 
 	dt = dt_total / num_steps;
@@ -172,8 +170,36 @@ bool Convection_2D(
             PSD_PR[iP][iR] = PSD_PR[iP][iR] * losses_exp[iP][iR];
             }
         }
-	}
 
+        if (R_size >= 3) {
+            for (iP = 0; iP < P_size; iP++) {
+                // 2d slice
+                PSD_R = PSD_PR.xSlice(iP);
+                R_R = R.xSlice(iP);
+                VR_R = VR.xSlice(iP);
 
-	return true;
+                // Speedup: if PSD~=0 or V~=0, skip the thing
+                if (PSD_R.max() < min_PSD || VR.xSlice(iP).maxabs() < min_V)  // XXX: 1e-21 should be a parameter, based on the minimum of the initial PSD or something
+                    continue;
+
+                Convection_1D_ULTIMATE_QUICKEST6(
+                    PSD_R, R_R, R_size,
+                    R_LBC[iP], R_UBC[iP],  // P, I, K
+                    R_LBC_type, R_UBC_type,
+                    VR_R,
+                    zero_r, zero_r, dt);
+
+                // copy results back
+                for (iR = 0; iR < R_size; iR++)
+                    PSD_PR[iP][iR] = PSD_R[iR];
+            }
+        }
+        for (iP = 0; iP < P_size; iP++) {
+            for (iR = 0; iR < R_size; iR++) {
+                PSD_PR[iP][iR] = PSD_PR[iP][iR] * exp(Losses[iP][iR] * dt);
+            }
+        }
+    }
+
+    return true;
 }

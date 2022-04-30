@@ -38,7 +38,7 @@ void Logger::writeError(const std::string& message)
 	if (mDebugLevel >= DEBUG_LEVEL_ERROR) {
 		// type out [Error]
 		const char *type = "[Error] ";
-		string str = type + message;
+		std::string str = type + message;
 		// write out message
 		writeMessage(str, MessageType::MESSAGE_ERROR); // Add [Error] //message = message.append("[Error]: ");....
 	}
@@ -56,7 +56,7 @@ void Logger::writeWarning(const std::string& message)
 	if (mDebugLevel >= DEBUG_LEVEL_WARNING) {
 		// type out [Error]
 		const char *type = "[Warning] ";
-		string str = type + message;
+		std::string str = type + message;
 		// write out message
 		writeMessage(str, MessageType::MESSAGE_WARNING);
 	}
@@ -73,7 +73,7 @@ void Logger::writeMessage(const std::string& message)
 
 /// Add message directly to the end of a file
 void Logger::appendToFile(const std::string& message){
-	logFile << message << flush;
+	logFile << message << std::flush;
 }
 
 /// Write out message to logger with the inputted message type 
@@ -82,7 +82,7 @@ void Logger::writeMessage(const std::string& message, MessageType type)
 	std::string text(message);
 			//std::replace(text.begin(), text.end(), '\n', ' '); // Fix it later
 	// Send message to standard console out
-	cout << message;
+	std::cout << message;
 	// add message to end of file
 	appendToFile(text);
 #ifdef _DEBUG
@@ -154,7 +154,7 @@ int Logger::Streamer::StringBuffer::sync()
 
 Logger* Logger::sInstance = 0;
 Logger::DebugLevel Logger::mDebugLevel = Logger::DebugLevel::DEBUG_LEVEL_DISABLED;
-ofstream Logger::logFile;
+std::ofstream Logger::logFile;
 
 
 

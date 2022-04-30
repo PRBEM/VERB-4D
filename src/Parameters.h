@@ -18,7 +18,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-using namespace std;
 
 #include "Logger.h"
 
@@ -26,25 +25,25 @@ using namespace std;
 /**
 @brief Holds the parameters along with their corresponding file and arguments 
 */
-class Parameters : public stringstream {
+class Parameters : public std::stringstream {
 private:
 	/// store the file contents being read in
-	ifstream parametersFile;
+	std::ifstream parametersFile;
 	/// store the arguments being sent in
-	vector<string> argv;
+	std::vector<std::string> argv;
 
 public:
-	Parameters(string filename, int argc = 1, char* argv[] = NULL);
+	Parameters(std::string filename, int argc = 1, char* argv[] = NULL);
 	~Parameters();
 
 	void close();
 
 	/// Find the parameters given and return them as a parameter struct
-	Parameters& findParameter(string parameterName, string defaultValue = "");
+	Parameters& findParameter(std::string parameterName, std::string defaultValue = "");
 
 	/// get the parameter value and store it into variable
 	template <typename T>
-	void getParameter(string parameterName, T &variable, bool mustBeFound = false);
+	void getParameter(std::string parameterName, T &variable, bool mustBeFound = false);
 
 
 };

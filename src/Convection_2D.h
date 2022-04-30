@@ -16,6 +16,7 @@
 #ifndef CONVECTION_2D_ULTIMATE_QUICKEST_H_
 #define CONVECTION_2D_ULTIMATE_QUICKEST_H_
 
+#include "Convection_1D_ULTIMATE_QUICKEST6.h"
 #include "Matrix.h"
 #include "MatrixSolver.h"
 

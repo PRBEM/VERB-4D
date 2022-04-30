@@ -6,7 +6,7 @@
 #include <vector>
 #include <map>
 #include <string>
-
+#include <stdexcept>
 /*
   MonotCubicInterpolator
   Copyright (C) 2006 Statoil ASA
@@ -81,7 +81,7 @@ class MonotCubicInterpolator {
   MonotCubicInterpolator(const std::string & datafilename)
   {
     if (!read(datafilename)) {
-      throw("Unable to constuct MonotCubicInterpolator from file.") ;
+      throw std::runtime_error("Unable to constuct MonotCubicInterpolator from file.") ;
     } ;
   }
 
@@ -101,7 +101,7 @@ class MonotCubicInterpolator {
  MonotCubicInterpolator(const char* datafilename)
   {
     if (!read(std::string(datafilename))) {
-      throw("Unable to constuct MonotCubicInterpolator from file.") ;
+      throw std::runtime_error("Unable to constuct MonotCubicInterpolator from file.") ;
     } ;
   }
 
@@ -117,7 +117,7 @@ class MonotCubicInterpolator {
    MonotCubicInterpolator(const char* datafilename, int xColumn, int fColumn)
   {
     if (!read(std::string(datafilename),xColumn,fColumn)) {
-      throw("Unable to constuct MonotCubicInterpolator from file.") ;
+      throw std::runtime_error("Unable to constuct MonotCubicInterpolator from file.") ;
     } ;
   }
 
@@ -132,7 +132,7 @@ class MonotCubicInterpolator {
    MonotCubicInterpolator(const std::string & datafilename, int xColumn, int fColumn)
   {
     if (!read(datafilename,xColumn,fColumn)) {
-      throw("Unable to constuct MonotCubicInterpolator from file.") ;
+      throw std::runtime_error("Unable to constuct MonotCubicInterpolator from file.") ;
     } ;
   }
 

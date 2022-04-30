@@ -105,7 +105,7 @@ namespace Opm
 MonotCubicInterpolator::
 MonotCubicInterpolator(const vector<double> & x, const vector<double> & f) {
   if (x.size() != f.size()) {
-    throw("Unable to constuct MonotCubicInterpolator from vectors.") ;
+    throw std::runtime_error("Unable to constuct MonotCubicInterpolator from vectors.") ;
   }
 
   // Add the contents of the input vectors to our map of values.
@@ -173,7 +173,7 @@ void
 MonotCubicInterpolator::
 addPair(double newx, double newf) {
   if (std::isnan(newx) || std::isinf(newx) || std::isnan(newf) || std::isinf(newf)) {
-    throw("MonotCubicInterpolator: addPair() received inf/nan input.");
+    throw std::runtime_error("MonotCubicInterpolator: addPair() received inf/nan input.");
   }
   data[newx] = newf ;
 
@@ -189,7 +189,7 @@ MonotCubicInterpolator::
 evaluate(double x) const {
 
   if (std::isnan(x) || std::isinf(x)) {
-    throw("MonotCubicInterpolator: evaluate() received inf/nan input.");
+    throw std::runtime_error("MonotCubicInterpolator: evaluate() received inf/nan input.");
   }
 
   // xf becomes the first (xdata,fdata) pair where xdata >= x
@@ -311,7 +311,7 @@ MonotCubicInterpolator::
 getMissingX() const
 {
   if( data.size() < 2) {
-    throw("MonotCubicInterpolator::getMissingX() only one datapoint.");
+    throw std::runtime_error("MonotCubicInterpolator::getMissingX() only one datapoint.");
   }
 
   // Search for biggest difference value in function-datavalues:
@@ -344,7 +344,7 @@ pair<double,double>
 MonotCubicInterpolator::
 getMaximumF() const {
   if (data.size() <= 1) {
-    throw ("MonotCubicInterpolator::getMaximumF() empty data.") ;
+    throw std::runtime_error("MonotCubicInterpolator::getMaximumF() empty data.") ;
   }
   if (strictlyIncreasing)
     return *data.rbegin();
@@ -367,7 +367,7 @@ pair<double,double>
 MonotCubicInterpolator::
 getMinimumF() const {
   if (data.size() <= 1) {
-    throw ("MonotCubicInterpolator::getMinimumF() empty data.") ;
+    throw std::runtime_error("MonotCubicInterpolator::getMinimumF() empty data.") ;
   }
   if (strictlyIncreasing)
     return *data.begin();
@@ -474,7 +474,7 @@ computeInternalFunctionData() const {
       // first two values must be equal if we get
       // here, but that should have been taken care
       // of by the while loop above.
-      throw("Programming logic error.") ;
+      throw std::runtime_error("Programming logic error.") ;
     }
 
   }

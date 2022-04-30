@@ -107,7 +107,7 @@ template <typename MatrixND>
 class UpdatableListMatrix : public MatrixND {
 private:
 	/// These are the matrices that need to be combined to get the final, updated matrix
-	vector < UpdatableMatrix<MatrixND> > matricesList;
+	std::vector <UpdatableMatrix<MatrixND>> matricesList;
 
 public:
 

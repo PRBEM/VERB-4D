@@ -354,11 +354,11 @@ bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, const Ma
 
 	// Convert input string into input stream
 	// It's much easier to work with streams
-	stringstream file_line_stream;
+	std::stringstream file_line_stream;
 	file_line_stream << file_line_string;
 
 	// Read data filename from the stream (first parameter)
-	string data_filename;
+	std::string data_filename;
 	file_line_stream >> data_filename;
 	Logger::message << "	Data: " << data_filename << endl;
 
