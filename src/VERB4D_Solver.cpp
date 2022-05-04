@@ -514,7 +514,7 @@ int main(int argc, char* argv[]) {
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Convection, for each V and K (therefore for each mu and J)
-        if ((3 < P_size && 3 < R_size) && (run_convection == "true")) {
+        if ((3 < P_size || 3 < R_size) && (run_convection == "true")) {
             progress_count = 0;
             progress_total = V_size * K_size;
             Logger::message << "Convection:" << endl;
