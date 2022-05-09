@@ -87,7 +87,7 @@ bool Convection_2D(
 
     // Either use the smallest time step for both, or specify the maximum time step here and then different time steps will be used
     // (the Courant condition will be checked inside of Convection_1D one more time)
-    // "min" is more accurate, but "max" is much-much faster and (hopefully?) still more accurate than completely unrelated time steps
+    // "max" is more accurate, but "min" is much-much faster and (hopefully?) still more accurate than completely unrelated time steps
 #ifdef FAST_CONVECTION
     num_steps = std::min(num_steps_P, num_steps_R);
 #else
