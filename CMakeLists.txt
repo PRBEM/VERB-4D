@@ -83,9 +83,13 @@ target_link_libraries(VERB4D_Solver ${DEPLIBS})
 
 # Flag compile type feedback
 if(DEFINED CMAKE_BUILD_TYPE)
-    string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_upper)
-    if(CMAKE_BUILD_TYPE_upper STREQUAL "RELEASE")
-        add_definitions(-DRELEASE)
+    if(CMAKE_BUILD_TYPE STREQUAL "")
+        message(WARNING "\nCMAKE_BUILD_TPYE not specified. Run cmake with -DCMAKE_BUILD_TYPE=Release or -DCMAKE_BUILD_TYPE=Debug")
+    else(CMAKE_BUILD_TYPE STREQUAL "")
+        string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_upper)
+        if(CMAKE_BUILD_TYPE_upper STREQUAL "RELEASE")
+            add_definitions(-DRELEASE)
+        endif()
     endif()
 endif()
     
