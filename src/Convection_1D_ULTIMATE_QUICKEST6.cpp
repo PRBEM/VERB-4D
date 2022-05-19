@@ -152,7 +152,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
 
         // All equations and formulas for these calculations can be found at http://www.hadian.ir/teaching/CompHydr/3.pdf
         // Start calculation
-        double psd_face_left, psd_face_right, courant_left, courant_right;
+        double psd_face_left = 0.0, psd_face_right = 0.0, courant_left = 0.0, courant_right = 0.0;
         for (ix = 0; ix <= x_size - 1; ix++) {
             // calculate at ix = 0 if the boundary condition is periodic
             if (ix == 0) {                           // special case
