@@ -832,8 +832,8 @@ int main(int argc, char* argv[]) {
     // logger records if everything went correctly
 
     Logger::message << "Program was terminated correctly." << endl;
-    Logger::message << "Wall-clock time: " << (omp_get_wtime() - wall_timer) << " sec; ";
-    Logger::message << "CPU time: " << (double)((clock() - start_time) / CLOCKS_PER_SEC) << " sec." << endl;
+    Logger::message << "Wall-clock time: " << std::fixed << std::setprecision(2) << (omp_get_wtime() - wall_timer) << " sec; ";
+    Logger::message << "CPU time: " << (float)(clock() - start_time) / CLOCKS_PER_SEC << " sec." << endl;
 
     Logger::deleteInstance();
     return 0;
