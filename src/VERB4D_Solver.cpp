@@ -111,7 +111,7 @@
 
 #include <math.h>
 #include <omp.h>
-#include <time.h>
+//#include <time.h> // Why do we need this if we have <ctime>?
 
 #include <chrono>
 #include <ctime>

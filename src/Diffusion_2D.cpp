@@ -10,10 +10,6 @@
 #include "Diffusion_2D.h"
 #include <iostream>
 
-#include <ctime>
-#include <time.h>
-
-
 /**
  * 2D Diffusion - returns true on successful completion
  *

@@ -22,6 +22,7 @@
 #include <iostream>
 #include <sstream>
 #include <assert.h>
+#include <ctime>
 
 // Matlab library which will have to be linked at compile time
 // Usually found in matlabroot/extern/include where matlabroot is the result of typing the matlabroot command into matlab
@@ -538,7 +539,7 @@ public:
 	int y_size; ///< size in y direction of matrix
 	int total_size; ///< total size of matrix
 	// flag, if needs to be recalculated
-	std::string change_ind;						///< Variables useful for changes tracking (store here time when changed)
+	clock_t change_ind;						///< Variables useful for changes tracking (store here time when changed)
 
 	// Constructors
 	CalculationMatrix() { this->initialized = false; }
