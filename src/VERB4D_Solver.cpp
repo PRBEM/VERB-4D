@@ -277,8 +277,8 @@ int main(int argc, char* argv[]) {
     L_copy = L;
 
     // minimum step is 1 hour
-    it_total = it_first + round(double(time_total) / dt);  // total number of hours given it_first offset
-    output_step = round(double(time_output) / dt);
+    it_total = (long)(it_first + round(double(time_total) / dt));  // total number of hours given it_first offset
+    output_step = (int)round(double(time_output) / dt);
     if (output_step < 1) {
         output_step = 1;
     }
