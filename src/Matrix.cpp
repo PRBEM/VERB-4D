@@ -1691,21 +1691,18 @@ void Matrix2D<T>::writeToFile(const std::string& filename, const Matrix2D<T> &gr
 }
 
 template<class T>
-void Matrix2D<T>::writeToBinaryFile(const string& filename) const {
-    FILE *outputFile = fopen(filename.c_str(), "wb");
-    if (outputFile != NULL) {
-        int status;
-
-		int32_t size_array[2] =  { (int32_t)size_q1, (int32_t)size_q2};
-		status = fwrite(size_array, sizeof(int32_t), 2, outputFile);
-		if (status!=2){
+void Matrix2D<T>::writeToBinaryFile(const std::string& filename) const {
+	std::ofstream outputFile(filename, std::ios::binary | std::ios::out);
+    if (outputFile.is_open()) {
+		int32_t size_array[2] =  { (int32_t)size_q1, (int32_t)size_q2 };
+		outputFile.write((char*)size_array, 2 * sizeof(int32_t));
+		if (!outputFile.good()){
 			printf("Writing error");
 			exit(EXIT_FAILURE);
 		}
 
-		int size_total = this->size_q1 * this->size_q2;
-		status = fwrite(this->plane_array, sizeof(T), size_total, outputFile);
-		if (status!=size_total){
+		outputFile.write((char*)plane_array, num_elements * sizeof(T));
+		if (!outputFile.good()){
 			printf("Writing error");
 			exit(EXIT_FAILURE);
 		}
@@ -1713,7 +1710,7 @@ void Matrix2D<T>::writeToBinaryFile(const string& filename) const {
         printf("MATRIX_WRITE_ERROR: Error writing file %s.\n", filename.c_str());
         exit(EXIT_FAILURE);
     }
-    fclose(outputFile);
+    outputFile.close();
 }
 
 /**
