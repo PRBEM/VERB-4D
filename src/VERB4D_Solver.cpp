@@ -408,7 +408,7 @@ int main(int argc, char* argv[]) {
                             // show progress % if 0 threads
                             if (omp_get_thread_num() == 0) {
                                 std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
-                                    << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+                                    << (int) ((double) progress_count / progress_total * 100) << "%" << flush;
                             } else {
                                 std::cout << "thread" << omp_get_thread_num();
                             }
@@ -432,7 +432,7 @@ int main(int argc, char* argv[]) {
                         }
                     }
                 }
-                std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int)((double)progress_count / progress_total * 100) << "\%" << endl;
+                std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int)((double)progress_count / progress_total * 100) << "%" << endl;
 
                 // Copy the new L into L_copy for future interpolations
                 L_copy = L;
@@ -557,7 +557,7 @@ int main(int argc, char* argv[]) {
                 // Output current progress percentage when number of threads = 0
                 if (omp_get_thread_num() == 0) {
                     std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
-                            << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+                            << (int) ((double) progress_count / progress_total * 100) << "%" << flush;
                 }
 
                         // update all slices for convection
@@ -595,7 +595,7 @@ int main(int argc, char* argv[]) {
                 }
             }
             // Output final progress (it should be 100%)
-            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
+            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "%" << endl;
 #pragma omp master
             {
             if(Vl_BC_from_convection == "true" && (Vl_BC_type == BoundaryConditionType::ConstantValue)){ //rewrite boundary conditions at lower V
@@ -648,7 +648,7 @@ int main(int argc, char* argv[]) {
 #endif
                 // print percentage done
                 if (omp_get_thread_num() == 0){
-                    std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+                    std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "%" << flush;
                 }
 
                 // 1d slice
@@ -681,7 +681,7 @@ int main(int argc, char* argv[]) {
             // ADDED FOR TESTING
             //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_after_radial.plt");
 
-            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
+            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "%" << endl;
 //#pragma omp master
 //            {
 //            if((Vl_BC_from_convection == "true") && (Vl_BC_type == "BCT_CONSTANT_VALUE")) { //rewrite boundary conditions at lower V
@@ -730,7 +730,7 @@ int main(int argc, char* argv[]) {
 
                 if (omp_get_thread_num() == 0) {
                     std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
-                        << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+                        << (int) ((double) progress_count / progress_total * 100) << "%" << flush;
                 }
 
 #pragma omp critical
@@ -799,8 +799,8 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int)((double)progress_count / progress_total * 100) << "\%" << endl;
-            std::cout << "Number of skipped points: " << (int)((double)number_of_skipped_points / progress_total * 100) << "\%" << endl;
+            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int)((double)progress_count / progress_total * 100) << "%" << endl;
+            std::cout << "Number of skipped points: " << (int)((double)number_of_skipped_points / progress_total * 100) << "%" << endl;
         }
 
         int number_of_negative_points = 0;
