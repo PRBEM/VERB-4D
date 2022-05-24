@@ -822,7 +822,8 @@ int main(int argc, char* argv[]) {
 
         // Output the PSD data for each timestep into the output folder
         if ((it % output_step) == 0) {
-            if (it > 1) {
+            // Wait until the writting of the last output file is finished
+            if (it / output_step > 1) {
                 output_writer.wait();
             }
             output_writer = std::async(std::launch::async, write_PSD_output, outputFolder, io_method, int(it / output_step), PSD);
