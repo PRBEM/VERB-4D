@@ -153,17 +153,13 @@ using namespace std;
 #define min_V 1e-10
 #define min_Dxx 1e-10
 
-void write_PSD_output(const string& outputFolder, const string& io_method, const int num_output, const Matrix4D<double> PSD) {
-    ostringstream PSD_filename, time_string;
+void write_PSD_output(const string& outputFolder, const string& io_method, const string& PSD_filename, const Matrix4D<double> PSD) {
+    ostringstream time_string;
     time_string.precision(5);
     time_string.setf(ios::fixed);
-
     time_string << time;
-    PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(num_output);
 
-    Logger::message << endl
-                    << "Writing results: " << PSD_filename.str() << endl;
-    PSD.writeToAnyFile(PSD_filename.str(), io_method, time_string.str());
+    PSD.writeToAnyFile(PSD_filename, io_method, time_string.str());
 };
 
 int main(int argc, char* argv[]) {
@@ -826,7 +822,14 @@ int main(int argc, char* argv[]) {
             if (it / output_step > 1) {
                 output_writer.wait();
             }
-            output_writer = std::async(std::launch::async, write_PSD_output, outputFolder, io_method, int(it / output_step), PSD);
+
+            ostringstream PSD_filename;
+            PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step);
+            
+            Logger::message << endl
+                            << "Writing results: " << PSD_filename.str() << endl;
+
+            output_writer = std::async(std::launch::async, write_PSD_output, outputFolder, io_method, PSD_filename.str(), PSD);
         }
     }
 
