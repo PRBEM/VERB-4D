@@ -30,27 +30,6 @@ if(MATLAB_FOUND)
     add_definitions(-DMATLAB_CAPABLE=true)
 endif(MATLAB_FOUND)
 
-if(WIN32)
-    # The libraries for lapack and BLAS for windows are in the lib folder
-    set(LAPACK_LIBRARIES ${CMAKE_SOURCE_DIR}/lib/clapack.lib)
-    set(BLAS_LIBRARIES   ${CMAKE_SOURCE_DIR}/lib/blas.lib)
-    set(F2C_LIBRARIES    ${CMAKE_SOURCE_DIR}/lib/libf2c.lib)
-else(WIN32)
-    # Installed by distribution's package manager
-    find_package(LAPACK REQUIRED)
-    find_package(BLAS REQUIRED)
-endif(WIN32)
-
-# Libraries to link against
-list(APPEND DEPLIBS
-    ${LAPACK_LIBRARIES}
-    ${BLAS_LIBRARIES})
-
-# Fortran to C library for windows, needed by lapack
-if(WIN32)
-    list(APPEND DEPLIBS ${F2C_LIBRARIES})
-endif(WIN32)
-
 # Add directories for include files
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
@@ -79,6 +58,26 @@ set(VERB4D_SOURCES
 
 # Build and link
 add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
+if(WIN32)
+    # The libraries for lapack and BLAS for windows are in the lib folder
+    set(LAPACK_LIBRARIES ${CMAKE_SOURCE_DIR}/lib/clapack.lib)
+    set(BLAS_LIBRARIES   ${CMAKE_SOURCE_DIR}/lib/blas.lib)
+    set(F2C_LIBRARIES    ${CMAKE_SOURCE_DIR}/lib/libf2c.lib)
+    # Libraries to link against
+    # including Fortran to C library for windows, needed by lapack
+    list(APPEND DEPLIBS
+        ${LAPACK_LIBRARIES}
+        ${BLAS_LIBRARIES}
+        ${F2C_LIBRARIES})
+else(WIN32)
+    # Set path to openblas library
+    add_library(openblas SHARED IMPORTED)
+    set_target_properties(openblas PROPERTIES IMPORTED_LOCATION $ENV{HOME}/.local/lib/libopenblas.so)
+    set_target_properties(VERB4D_Solver PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+    list(APPEND DEPLIBS openblas)
+    install(TARGETS VERB4D_Solver DESTINATION bin)
+endif(WIN32)
+
 target_link_libraries(VERB4D_Solver ${DEPLIBS})
 
 # Flag compile type feedback
