@@ -1074,20 +1074,20 @@ void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
 	// X is stored in B after Lapack solution
 	// and we stored B in B_res previousely
 	// So, it's "B_res - A*B" should be zero
-	for (in = 0; in < m_size; in++) {
-		for (it = A.begin(); it != A.end(); it++) {
-			if (in + it->first >= 0 && in + it->first < m_size) {
-				//cout << B_res[in] << "-=" << it->second[in] << "*" << B[in] << endl;
-				B_res[in] -= it->second[in] * B[in + it->first];
-			}
-		}
-	}
+	// for (in = 0; in < m_size; in++) {
+	// 	for (it = A.begin(); it != A.end(); it++) {
+	// 		if (in + it->first >= 0 && in + it->first < m_size) {
+	// 			//cout << B_res[in] << "-=" << it->second[in] << "*" << B[in] << endl;
+	// 			B_res[in] -= it->second[in] * B[in + it->first];
+	// 		}
+	// 	}
+	// }
 
-	// calculate max error
-	double max = 0;
-	for (int i = 0; i < m_size; i++) {
-		max = (max > fabs(B_res(i))) ? max : B_res(i);
-	}
+	// // calculate max error
+	// double max = 0;
+	// for (int i = 0; i < m_size; i++) {
+	// 	max = (max > fabs(B_res(i))) ? max : B_res(i);
+	// }
 
 /*	if(max>1) {
 		printf(" Max error: %e.\n", max);
