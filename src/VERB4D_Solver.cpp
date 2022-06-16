@@ -286,6 +286,7 @@ int main(int argc, char* argv[]) {
     PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
 
     // Output zero step - writing PSD_0 file
+    future<void> output_writer;
     ostringstream PSD_filename, time_string;
 
     time_string.precision(5);
@@ -293,9 +294,7 @@ int main(int argc, char* argv[]) {
 
     PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0;
     Logger::message << "Writing results: " << PSD_filename.str() << endl;
-    time_string.str("");
-    time_string << time_first;
-    PSD.writeToAnyFile(PSD_filename.str(), io_method, time_string.str());
+    output_writer = std::async(std::launch::async, write_PSD_output, outputFolder, io_method, PSD_filename.str(), PSD);
 
     // When to apply loss term:
     // It's better to apply it during pitch-angle diffusion, unless we don't have any pitch-angle diffusion
@@ -348,8 +347,6 @@ int main(int argc, char* argv[]) {
 
     // variables to show the progress of calculation
     int progress_count, progress_total;
-
-    future<void> output_writer;
 
     Matrix3D<double> P_lowerR = P.xSlice(0);
     Matrix3D<double> V_lowerR = V.xSlice(0);
@@ -818,10 +815,8 @@ int main(int argc, char* argv[]) {
 
         // Output the PSD data for each timestep into the output folder
         if ((it % output_step) == 0) {
-            // Wait until the writting of the last output file is finished
-            if (it / output_step > 1) {
-                output_writer.wait();
-            }
+            // Wait until the writing of the last output file is finished
+            output_writer.wait();
 
             ostringstream PSD_filename;
             PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step);
