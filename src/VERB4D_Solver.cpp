@@ -111,7 +111,7 @@
 
 #include <math.h>
 #include <omp.h>
-#include <time.h>
+//#include <time.h> // Why do we need this if we have <ctime>?
 
 #include <chrono>
 #include <ctime>
@@ -273,8 +273,8 @@ int main(int argc, char* argv[]) {
     L_copy = L;
 
     // minimum step is 1 hour
-    it_total = it_first + round(double(time_total) / dt);  // total number of hours given it_first offset
-    output_step = round(double(time_output) / dt);
+    it_total = (long)(it_first + round(double(time_total) / dt));  // total number of hours given it_first offset
+    output_step = (int)round(double(time_output) / dt);
     if (output_step < 1) {
         output_step = 1;
     }
@@ -401,7 +401,7 @@ int main(int argc, char* argv[]) {
                             // show progress % if 0 threads
                             if (omp_get_thread_num() == 0) {
                                 std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
-                                    << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+                                    << (int) ((double) progress_count / progress_total * 100) << "%" << flush;
                             } else {
                                 std::cout << "thread" << omp_get_thread_num();
                             }
@@ -425,7 +425,7 @@ int main(int argc, char* argv[]) {
                         }
                     }
                 }
-                std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int)((double)progress_count / progress_total * 100) << "\%" << endl;
+                std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int)((double)progress_count / progress_total * 100) << "%" << endl;
 
                 // Copy the new L into L_copy for future interpolations
                 L_copy = L;
@@ -550,7 +550,7 @@ int main(int argc, char* argv[]) {
                 // Output current progress percentage when number of threads = 0
                 if (omp_get_thread_num() == 0) {
                     std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
-                            << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+                            << (int) ((double) progress_count / progress_total * 100) << "%" << flush;
                 }
 
                         // update all slices for convection
@@ -588,7 +588,7 @@ int main(int argc, char* argv[]) {
                 }
             }
             // Output final progress (it should be 100%)
-            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
+            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "%" << endl;
 #pragma omp master
             {
             if(Vl_BC_from_convection == "true" && (Vl_BC_type == BoundaryConditionType::ConstantValue)){ //rewrite boundary conditions at lower V
@@ -641,7 +641,7 @@ int main(int argc, char* argv[]) {
 #endif
                 // print percentage done
                 if (omp_get_thread_num() == 0){
-                    std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+                    std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "%" << flush;
                 }
 
                 // 1d slice
@@ -674,7 +674,7 @@ int main(int argc, char* argv[]) {
             // ADDED FOR TESTING
             //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_after_radial.plt");
 
-            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "\%" << endl;
+            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "%" << endl;
 //#pragma omp master
 //            {
 //            if((Vl_BC_from_convection == "true") && (Vl_BC_type == "BCT_CONSTANT_VALUE")) { //rewrite boundary conditions at lower V
@@ -723,7 +723,7 @@ int main(int argc, char* argv[]) {
 
                 if (omp_get_thread_num() == 0) {
                     std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
-                        << (int) ((double) progress_count / progress_total * 100) << "\%" << flush;
+                        << (int) ((double) progress_count / progress_total * 100) << "%" << flush;
                 }
 
 #pragma omp critical
@@ -792,8 +792,8 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int)((double)progress_count / progress_total * 100) << "\%" << endl;
-            std::cout << "Number of skipped points: " << (int)((double)number_of_skipped_points / progress_total * 100) << "\%" << endl;
+            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int)((double)progress_count / progress_total * 100) << "%" << endl;
+            std::cout << "Number of skipped points: " << (int)((double)number_of_skipped_points / progress_total * 100) << "%" << endl;
         }
 
         int number_of_negative_points = 0;
@@ -831,8 +831,8 @@ int main(int argc, char* argv[]) {
     // logger records if everything went correctly
 
     Logger::message << "Program was terminated correctly." << endl;
-    Logger::message << "Wall-clock time: " << (omp_get_wtime() - wall_timer) << " sec; ";
-    Logger::message << "CPU time: " << (double)((clock() - start_time) / CLOCKS_PER_SEC) << " sec." << endl;
+    Logger::message << "Wall-clock time: " << std::fixed << std::setprecision(2) << (omp_get_wtime() - wall_timer) << " sec; ";
+    Logger::message << "CPU time: " << (float)(clock() - start_time) / CLOCKS_PER_SEC << " sec." << endl;
 
     Logger::deleteInstance();
     return 0;

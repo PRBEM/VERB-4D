@@ -49,7 +49,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
     double maxCourNum = 1;
     double ux_max = Ux.maxabs();
     double steps_double = (double)dt_total * ux_max / dx / maxCourNum;
-    int num_steps = (steps_double <= 1) ? 1 : ceil(steps_double);
+    int num_steps = (steps_double <= 1) ? 1 : (int)ceil(steps_double);
 
     double dt = dt_total / num_steps;
 

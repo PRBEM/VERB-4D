@@ -13,8 +13,11 @@
 #define matrix_array_MATRIX_CPP
 
 
-
-
+#if defined(_WIN32) || defined(_WIN64)
+	 // Matrix2D<T>::writeToBinaryFile uses fopen function. Which apparently is old and deprecated in CRT (C runtime library)
+	 // This directive disables the warning in Visual Studio. (see https://docs.microsoft.com/en-us/cpp/c-runtime-library/security-features-in-the-crt?view=msvc-170)
+	#define _CRT_SECURE_NO_WARNINGS
+#endif
 
 #include "Matrix.h"
 #include "Logger.h"
