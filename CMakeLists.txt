@@ -32,6 +32,7 @@ endif(MATLAB_FOUND)
 
 # Add directories for include files
 include_directories(${PROJECT_SOURCE_DIR}/src)
+# include_directories($ENV{HOME}/intel/oneapi/mkl/latest/include)
 
 # Recursively search for header files to include for project files.  This isn't
 # necessary to compile, but its nice to have in Visual Studio solutions.
@@ -74,7 +75,14 @@ else(WIN32)
     add_library(openblas SHARED IMPORTED)
     set_target_properties(openblas PROPERTIES IMPORTED_LOCATION $ENV{HOME}/.local/lib/libopenblas.so)
     set_target_properties(VERB4D_Solver PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-    list(APPEND DEPLIBS openblas)
+
+    set(MKL_THREADING sequential)
+    find_package(MKL CONFIG REQUIRED)
+    target_include_directories(VERB4D_Solver PUBLIC ${MKL_INCLUDE})
+    
+    list(APPEND DEPLIBS openblas ${MKL_IMPORTED_TARGETS})
+    
+    set_target_properties(VERB4D_Solver PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
     install(TARGETS VERB4D_Solver DESTINATION bin)
 endif(WIN32)
 

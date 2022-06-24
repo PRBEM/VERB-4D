@@ -35,6 +35,7 @@
 #include <ctime>
 #include <iostream>
 #include <stdlib.h>
+#include "mkl_sparse_qr.h"
 
 using namespace std;
 
@@ -1097,6 +1098,37 @@ void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
 	delete IPIV;
 	delete Array;
 	delete newmat;
+}
+
+void mkl_sparse_solve(double* values, int* columns, int* rowB, int* rowE, const double* rhs, double* solution, int m_size)
+{
+	sparse_matrix_t csrA;
+	sparse_status_t status = mkl_sparse_d_create_csr(
+        &csrA, SPARSE_INDEX_BASE_ZERO, m_size, m_size,
+        &rowB[0], &rowE[0], &columns[0], &values[0]
+    );
+	matrix_descr descr {
+        SPARSE_MATRIX_TYPE_GENERAL,
+        SPARSE_FILL_MODE_UPPER,
+        SPARSE_DIAG_NON_UNIT
+    };
+
+	status = mkl_sparse_qr_reorder(csrA, descr);
+	if(status != SPARSE_STATUS_SUCCESS)
+	{
+		std::cout << "MKL reorder error\n";
+		exit(EXIT_FAILURE);
+	}
+	status = mkl_sparse_d_qr(
+		SPARSE_OPERATION_NON_TRANSPOSE, csrA, descr, 
+		SPARSE_LAYOUT_ROW_MAJOR, 1, solution,
+		m_size, rhs, m_size
+	);
+	if(status != SPARSE_STATUS_SUCCESS)
+	{
+		std::cout << "MKL solve error\n";
+		exit(EXIT_FAILURE);
+	}
 }
 
 /**
