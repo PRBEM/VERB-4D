@@ -1108,9 +1108,9 @@ void mkl_sparse_solve(double* values, int* columns, int* rowB, int* rowE, const 
         &rowB[0], &rowE[0], &columns[0], &values[0]
     );
 	matrix_descr descr {
-        SPARSE_MATRIX_TYPE_GENERAL,
-        SPARSE_FILL_MODE_UPPER,
-        SPARSE_DIAG_NON_UNIT
+        SPARSE_MATRIX_TYPE_GENERAL, // mkl sparse solve only avaible for general matrices; 
+        SPARSE_FILL_MODE_UPPER, // fill mode and unit diagonal have to be set but 
+        SPARSE_DIAG_NON_UNIT // are not important for non-triangular matrix types
     };
 
 	status = mkl_sparse_qr_reorder(csrA, descr);
