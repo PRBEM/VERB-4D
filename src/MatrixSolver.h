@@ -200,5 +200,6 @@ bool MakeModelMatrix_2D_ADI3_x(
 	Matrix2D<double> &G, double dt
 );
 
+void mkl_sparse_solve(double* values, int* columns, int* rowB, int* rowE, const double* rhs, double* solution, int m_size);
 #endif
 

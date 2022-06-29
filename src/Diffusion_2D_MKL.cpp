@@ -1,4 +1,5 @@
 #include "Matrix.h"
+#include "MatrixSolver.h"
 #include "BoundaryConditionType.hpp"
 #include "Logger.h"
 #include <vector>
@@ -7,7 +8,7 @@ void initialize_sparse_values(
         const mat2d& v_grid, const mat2d& k_grid,
         BoundaryConditionType v_lower, BoundaryConditionType v_upper,
         BoundaryConditionType k_lower, BoundaryConditionType k_upper,
-        const mat2d& Dvv, const mat2d& Dvk, const mat2d& Dkv, mat2d& Dkk, 
+        const mat2d& Dvv, const mat2d& Dvk, const mat2d& Dkv, const mat2d& Dkk, 
         const mat2d& jacobian, const mat2d& loss, double dt,
         std::vector<double>& values)
 {
@@ -15,7 +16,8 @@ void initialize_sparse_values(
     int k_size = k_grid.size_q2;
     values.clear();
     values.reserve(
-        v_size * (k_size - 2) * 9
+        2 * (2 * (v_size + 2)) // two blocks in the beginning and two in the end, coresponding to lower and upper K boundary
+        + 3 * (k_size - 2) * (v_size + 2 * (v_size - 1)) // inner rows, 3 blocks, with one main diagonal and two off-diagonals each
     );
 
     double v_offdiag_lower, v_offdiag_upper;
@@ -187,4 +189,105 @@ void initialize_sparse_values(
     values.push_back(-k_offdiag_upper);
     values.push_back(-v_offdiag_upper);
     values.push_back(1);
+}
+
+void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_indices, std::vector<int>& rows_csr)
+{
+    column_indices.clear();
+    column_indices.reserve(
+        2 * (2 * (v_size + 2)) // two blocks in the beginning and two in the end, coresponding to lower and upper K boundary
+      + 3 * (k_size - 2) * (v_size + 2 * (v_size - 1)) // inner rows, 3 blocks, with one main diagonal and two off-diagonals each
+    );
+    rows_csr.clear();
+    rows_csr.reserve(v_size * k_size);
+
+    // lower K boundary, lower V boundary
+    rows_csr.push_back(0);
+    column_indices.push_back(0);
+    column_indices.push_back(1);
+    column_indices.push_back(v_size);
+    column_indices.push_back(v_size + 1);
+    rows_csr.push_back(4);
+
+    // lower K boundary, inner V
+    for(int i = 1; i < v_size - 1; i++)
+    {
+        column_indices.push_back(i);
+        column_indices.push_back(v_size + i);
+        rows_csr.push_back(2);
+    }
+
+    // lower K boundary, upper V boundary
+    column_indices.push_back(v_size - 2);
+    column_indices.push_back(v_size - 1);
+    column_indices.push_back(2 * v_size - 2);
+    column_indices.push_back(2 * v_size - 1);
+    rows_csr.push_back(4);
+
+    // inner K
+    for(int j = 1; j < k_size - 2; j++)
+    {
+        // lower V boundary
+        column_indices.push_back(j * v_size);
+        column_indices.push_back(j * v_size + 1);
+        rows_csr.push_back(2);
+        
+        // inner V
+        for(int i = 1; i < v_size - 2; i++)
+        {
+            column_indices.push_back((j-1) * v_size + i-1);
+            column_indices.push_back((j-1) * v_size + i);
+            column_indices.push_back((j-1) * v_size + i+1);
+
+            column_indices.push_back(j * v_size + i-1);
+            column_indices.push_back(j * v_size + i);
+            column_indices.push_back(j * v_size + i+1);
+            
+            column_indices.push_back((j+1) * v_size + i-1);
+            column_indices.push_back((j+1) * v_size + i);
+            column_indices.push_back((j+1) * v_size + i+1);
+
+            rows_csr.push_back(9);
+        }
+        // upper V boundary
+        column_indices.push_back((j + 1) * v_size - 2);
+        column_indices.push_back((j + 1) * v_size - 1);
+        rows_csr.push_back(2);
+    }
+    // upper K boundary, lower V boundary
+    column_indices.push_back((k_size - 2) * v_size);
+    column_indices.push_back((k_size - 2) * v_size + 1);
+    column_indices.push_back((k_size - 1) * v_size);
+    column_indices.push_back((k_size - 1) * v_size + 1);
+    rows_csr.push_back(4);
+
+    // upper K boundary, inner V
+    for(int i = 1; i < v_size - 1; i++)
+    {
+        column_indices.push_back((k_size - 2) * v_size + i);
+        column_indices.push_back((k_size - 1) * v_size + i);
+        rows_csr.push_back(2);
+    }
+
+    // upper K boundary, upper V boundary
+    column_indices.push_back((k_size - 1) * v_size - 2);
+    column_indices.push_back((k_size - 1) * v_size - 1);
+    column_indices.push_back(k_size * v_size - 2);
+    column_indices.push_back(k_size * v_size - 1);
+    rows_csr.push_back(4);
+}
+
+void Diffusion_2D_MKL(mat2d& psd, const mat2d& v_grid, const mat2d& k_grid,
+        BoundaryConditionType v_lower, BoundaryConditionType v_upper,
+        BoundaryConditionType k_lower, BoundaryConditionType k_upper,
+        const mat2d& Dvv, const mat2d& Dvk, const mat2d& Dkv, const mat2d& Dkk, 
+        const mat2d& jacobian, const mat2d& loss, double dt,
+        std::vector<int>& column_indices, std::vector<int>& rows_csr)
+{
+    std::vector<double> sparse_values;
+    initialize_sparse_values(
+        v_grid, k_grid, v_lower, v_upper, k_lower, k_upper,
+        Dvv, Dvk, Dkv, Dkk, jacobian, loss, dt, sparse_values
+    );
+    mkl_sparse_solve(sparse_values.data(), column_indices.data(), rows_csr.data(), rows_csr.data() + 1, NULL, &psd[0][0], v_grid.size_q1 * k_grid.size_q2);
 }

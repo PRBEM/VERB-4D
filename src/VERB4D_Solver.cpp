@@ -125,6 +125,7 @@
 #include "Convection_2D.h"
 #include "Diffusion_1D.h"
 #include "Diffusion_2D.h"    // Different solution methods for 2D diffusion
+#include "Diffusion_2D_MKL.hpp"    // Intel MKL sparse solve 
 #include "Diffusion_ADI1.h"  // Straightforward ADI
 #include "Diffusion_ADI2.h"  // Fuliang Xiao's ADI
 #include "Diffusion_ADI3.h"  // Jihye Shin and Sungsoo S. Kim (2008)'s ADI - most stable
@@ -368,6 +369,15 @@ int main(int argc, char* argv[]) {
     Matrix3D<double> P_upperK = P.zSlice(K.size_z - 1);
     Matrix3D<double> R_upperK = R.zSlice(K.size_z - 1);
     Matrix3D<double> V_upperK = V.zSlice(K.size_z - 1);
+    
+    // initiliaze sparse column and row indices for MKL sparse solver for local diffusion
+    std::vector<int> column_indices, rows_csr;
+    if( inversion_method == "MKL" && run_local_diffusion == "true")
+    {
+        initialize_sparse_indices(V_size, K_size, column_indices, rows_csr);
+    }
+    
+    
     // Main loop
     // Start time
     for (long int it = it_first; it < it_total; it++) {
@@ -749,6 +759,15 @@ int main(int argc, char* argv[]) {
                         Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
                         DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
                         Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+                }
+                else if (inversion_method == "MKL")
+                {
+                    Diffusion_2D_MKL(
+                        PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type,
+                        DVV.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DKK.wxSlice(iP, iR),
+                        G_local.wxSlice(iP, iR),Losses.wxSlice(iP, iR) * local_losses, dt,
+                        column_indices, rows_csr
+                    );
                 }
                 // Currently setup to calculate 2d Diffusion using Diffusion_2D_ADI3
                 // Can change to Diffusion_2D_ADI1 or Diffusion_2D_ADI2 for different methods of inversion
