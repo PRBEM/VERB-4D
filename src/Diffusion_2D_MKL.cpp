@@ -284,52 +284,8 @@ void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_
 
 void initialize_rhs(std::vector<double>& rhs, int m_size)
 {
-    rhs.clear();
-    rhs.reserve(m_size);
+    rhs.resize(m_size);
     std::fill(rhs.data(), rhs.data() + m_size, 1);
-}
-
-void mkl_sparse_solve(double* values, int* columns, int* rowB, int* rowE, const double* rhs, double* solution, int m_size)
-{
-	sparse_matrix_t csrA;
-	sparse_status_t status = mkl_sparse_d_create_csr(
-        &csrA, SPARSE_INDEX_BASE_ZERO, m_size, m_size,
-        rowB, rowE, columns, values
-    );
-	if(status != SPARSE_STATUS_SUCCESS)
-	{
-		std::cout << "MKL create csr error\n";
-		exit(EXIT_FAILURE);
-	}
-	matrix_descr descr {
-        SPARSE_MATRIX_TYPE_GENERAL, // mkl sparse solve only avaible for general matrices; 
-        SPARSE_FILL_MODE_UPPER, // fill mode and unit diagonal have to be set but 
-        SPARSE_DIAG_NON_UNIT // are not important for non-triangular matrix types
-    };
-
-	status = mkl_sparse_qr_reorder(csrA, descr);
-	if(status != SPARSE_STATUS_SUCCESS)
-	{
-		std::cout << "MKL reorder error\n";
-		exit(EXIT_FAILURE);
-	}
-	status = mkl_sparse_d_qr(
-		SPARSE_OPERATION_NON_TRANSPOSE, csrA, descr, 
-		SPARSE_LAYOUT_COLUMN_MAJOR, 1, solution,
-		m_size, rhs, m_size
-	);
-	if(status != SPARSE_STATUS_SUCCESS)
-	{
-		std::cout << "MKL solve error\n";
-		exit(EXIT_FAILURE);
-	}
-
-	status = mkl_sparse_destroy(csrA);
-	if(status != SPARSE_STATUS_SUCCESS)
-	{
-		std::cout << "MKL destroy error\n";
-		exit(EXIT_FAILURE);
-	}
 }
 
 void Diffusion_2D_MKL(mat2d& psd, const mat2d& v_grid, const mat2d& k_grid,
@@ -337,7 +293,7 @@ void Diffusion_2D_MKL(mat2d& psd, const mat2d& v_grid, const mat2d& k_grid,
         BoundaryConditionType k_lower, BoundaryConditionType k_upper,
         const mat2d& Dvv, const mat2d& Dvk, const mat2d& Dkv, const mat2d& Dkk, 
         const mat2d& jacobian, const mat2d& loss, double dt,
-        std::vector<int>& column_indices, std::vector<int>& rows_csr)
+        sparse_matrix_t* csrA)
 {
     std::vector<double> sparse_values;
     initialize_sparse_values(
@@ -349,8 +305,21 @@ void Diffusion_2D_MKL(mat2d& psd, const mat2d& v_grid, const mat2d& k_grid,
     int m_size = v_grid.size_q1 * k_grid.size_q2;
     initialize_rhs(rhs, m_size);
 
-    mkl_sparse_solve(
-        sparse_values.data(), column_indices.data(), rows_csr.data(), rows_csr.data() + 1,
-        rhs.data(), &psd[0][0], m_size
+    sparse_status_t status = mkl_sparse_d_qr_factorize(*csrA, sparse_values.data());
+    if(status != SPARSE_STATUS_SUCCESS)
+	{
+		std::cout << "MKL factorize error " << status << '\n';
+		exit(EXIT_FAILURE);
+	}
+
+    status = mkl_sparse_d_qr_solve(
+        SPARSE_OPERATION_NON_TRANSPOSE,
+        *csrA, sparse_values.data(), SPARSE_LAYOUT_COLUMN_MAJOR,
+        1, &psd[0][0], m_size, rhs.data(), 1
     );
+    if(status != SPARSE_STATUS_SUCCESS)
+	{
+		std::cout << "MKL solve error " << status << '\n';
+		exit(EXIT_FAILURE);
+	}
 }

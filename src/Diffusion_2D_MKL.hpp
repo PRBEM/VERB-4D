@@ -1,6 +1,8 @@
 #include "Matrix.h"
 #include "BoundaryConditionType.hpp"
 #include <vector>
+#include "mkl_sparse_qr.h"
+
 typedef Matrix2D<double> mat2d;
 void initialize_sparse_values(
     const mat2d& v_grid, const mat2d& k_grid,
@@ -19,5 +21,8 @@ void Diffusion_2D_MKL(
     BoundaryConditionType k_lower, BoundaryConditionType k_upper,
     const mat2d& Dvv, const mat2d& Dvk, const mat2d& Dkv, const mat2d& Dkk, 
     const mat2d& jacobian, const mat2d& loss, double dt,
-    std::vector<int>& column_indices, std::vector<int>& rows_csr
+    sparse_matrix_t* csrA
 );
+
+void initialize_rhs(std::vector<double>& rhs, int m_size);
+void mkl_sparse_solve(double* values, int* columns, int* rowB, int* rowE, const double* rhs, double* solution, int m_size);
