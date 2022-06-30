@@ -48,6 +48,7 @@ set(VERB4D_SOURCES
     src/Convection_2D.cpp
     src/Diffusion_1D.cpp
     src/Diffusion_2D.cpp
+    src/Diffusion_2D_MKL.cpp
     src/Diffusion_ADI1.cpp
     src/Diffusion_ADI2.cpp
     src/Diffusion_ADI3.cpp
@@ -90,6 +91,7 @@ else(WIN32)
     set_target_properties(VERB4D_Solver PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
 
     set(MKL_THREADING sequential)
+    set(MKL_INTERFACE lp64)
     find_package(MKL CONFIG REQUIRED)
     target_include_directories(VERB4D_Solver PUBLIC ${MKL_INCLUDE})
     

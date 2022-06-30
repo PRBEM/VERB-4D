@@ -3,6 +3,10 @@
 #include "BoundaryConditionType.hpp"
 #include "Logger.h"
 #include <vector>
+#include <iostream>
+#include <algorithm>
+#include "mkl_sparse_qr.h"
+
 typedef Matrix2D<double> mat2d;
 void initialize_sparse_values(
         const mat2d& v_grid, const mat2d& k_grid,
@@ -17,9 +21,9 @@ void initialize_sparse_values(
     values.clear();
     values.reserve(
         2 * (2 * (v_size + 2)) // two blocks in the beginning and two in the end, coresponding to lower and upper K boundary
-        + 3 * (k_size - 2) * (v_size + 2 * (v_size - 1)) // inner rows, 3 blocks, with one main diagonal and two off-diagonals each
+        + (k_size - 2) * (v_size + 2 * (v_size - 1)) // inner rows, main diag block with one main diagonal and two off-diagonals
+        + 2 * (k_size - 2) * (3 * (v_size - 2))   // off-diag block with 3 diags of length v_size - 2
     );
-
     double v_offdiag_lower, v_offdiag_upper;
     double k_offdiag_lower, k_offdiag_upper;
     switch(v_lower)
@@ -196,7 +200,8 @@ void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_
     column_indices.clear();
     column_indices.reserve(
         2 * (2 * (v_size + 2)) // two blocks in the beginning and two in the end, coresponding to lower and upper K boundary
-      + 3 * (k_size - 2) * (v_size + 2 * (v_size - 1)) // inner rows, 3 blocks, with one main diagonal and two off-diagonals each
+        + (k_size - 2) * (v_size + 2 * (v_size - 1)) // inner rows, main diag block with one main diagonal and two off-diagonals
+        + 2 * (k_size - 2) * (3 * (v_size - 2))
     );
     rows_csr.clear();
     rows_csr.reserve(v_size * k_size);
@@ -207,14 +212,14 @@ void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_
     column_indices.push_back(1);
     column_indices.push_back(v_size);
     column_indices.push_back(v_size + 1);
-    rows_csr.push_back(4);
+    rows_csr.push_back(rows_csr.back() + 4);
 
     // lower K boundary, inner V
     for(int i = 1; i < v_size - 1; i++)
     {
         column_indices.push_back(i);
         column_indices.push_back(v_size + i);
-        rows_csr.push_back(2);
+        rows_csr.push_back(rows_csr.back() + 2);
     }
 
     // lower K boundary, upper V boundary
@@ -222,18 +227,18 @@ void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_
     column_indices.push_back(v_size - 1);
     column_indices.push_back(2 * v_size - 2);
     column_indices.push_back(2 * v_size - 1);
-    rows_csr.push_back(4);
+    rows_csr.push_back(rows_csr.back() + 4);
 
     // inner K
-    for(int j = 1; j < k_size - 2; j++)
+    for(int j = 1; j < k_size - 1; j++)
     {
         // lower V boundary
         column_indices.push_back(j * v_size);
         column_indices.push_back(j * v_size + 1);
-        rows_csr.push_back(2);
+        rows_csr.push_back(rows_csr.back() + 2);
         
         // inner V
-        for(int i = 1; i < v_size - 2; i++)
+        for(int i = 1; i < v_size - 1; i++)
         {
             column_indices.push_back((j-1) * v_size + i-1);
             column_indices.push_back((j-1) * v_size + i);
@@ -247,26 +252,26 @@ void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_
             column_indices.push_back((j+1) * v_size + i);
             column_indices.push_back((j+1) * v_size + i+1);
 
-            rows_csr.push_back(9);
+            rows_csr.push_back(rows_csr.back() + 9);
         }
         // upper V boundary
         column_indices.push_back((j + 1) * v_size - 2);
         column_indices.push_back((j + 1) * v_size - 1);
-        rows_csr.push_back(2);
+        rows_csr.push_back(rows_csr.back() + 2);
     }
     // upper K boundary, lower V boundary
     column_indices.push_back((k_size - 2) * v_size);
     column_indices.push_back((k_size - 2) * v_size + 1);
     column_indices.push_back((k_size - 1) * v_size);
     column_indices.push_back((k_size - 1) * v_size + 1);
-    rows_csr.push_back(4);
+    rows_csr.push_back(rows_csr.back() + 4);
 
     // upper K boundary, inner V
     for(int i = 1; i < v_size - 1; i++)
     {
         column_indices.push_back((k_size - 2) * v_size + i);
         column_indices.push_back((k_size - 1) * v_size + i);
-        rows_csr.push_back(2);
+        rows_csr.push_back(rows_csr.back() + 2);
     }
 
     // upper K boundary, upper V boundary
@@ -274,7 +279,57 @@ void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_
     column_indices.push_back((k_size - 1) * v_size - 1);
     column_indices.push_back(k_size * v_size - 2);
     column_indices.push_back(k_size * v_size - 1);
-    rows_csr.push_back(4);
+    rows_csr.push_back(rows_csr.back() + 4);
+}
+
+void initialize_rhs(std::vector<double>& rhs, int m_size)
+{
+    rhs.clear();
+    rhs.reserve(m_size);
+    std::fill(rhs.data(), rhs.data() + m_size, 1);
+}
+
+void mkl_sparse_solve(double* values, int* columns, int* rowB, int* rowE, const double* rhs, double* solution, int m_size)
+{
+	sparse_matrix_t csrA;
+	sparse_status_t status = mkl_sparse_d_create_csr(
+        &csrA, SPARSE_INDEX_BASE_ZERO, m_size, m_size,
+        rowB, rowE, columns, values
+    );
+	if(status != SPARSE_STATUS_SUCCESS)
+	{
+		std::cout << "MKL create csr error\n";
+		exit(EXIT_FAILURE);
+	}
+	matrix_descr descr {
+        SPARSE_MATRIX_TYPE_GENERAL, // mkl sparse solve only avaible for general matrices; 
+        SPARSE_FILL_MODE_UPPER, // fill mode and unit diagonal have to be set but 
+        SPARSE_DIAG_NON_UNIT // are not important for non-triangular matrix types
+    };
+
+	status = mkl_sparse_qr_reorder(csrA, descr);
+	if(status != SPARSE_STATUS_SUCCESS)
+	{
+		std::cout << "MKL reorder error\n";
+		exit(EXIT_FAILURE);
+	}
+	status = mkl_sparse_d_qr(
+		SPARSE_OPERATION_NON_TRANSPOSE, csrA, descr, 
+		SPARSE_LAYOUT_COLUMN_MAJOR, 1, solution,
+		m_size, rhs, m_size
+	);
+	if(status != SPARSE_STATUS_SUCCESS)
+	{
+		std::cout << "MKL solve error\n";
+		exit(EXIT_FAILURE);
+	}
+
+	status = mkl_sparse_destroy(csrA);
+	if(status != SPARSE_STATUS_SUCCESS)
+	{
+		std::cout << "MKL destroy error\n";
+		exit(EXIT_FAILURE);
+	}
 }
 
 void Diffusion_2D_MKL(mat2d& psd, const mat2d& v_grid, const mat2d& k_grid,
@@ -289,5 +344,13 @@ void Diffusion_2D_MKL(mat2d& psd, const mat2d& v_grid, const mat2d& k_grid,
         v_grid, k_grid, v_lower, v_upper, k_lower, k_upper,
         Dvv, Dvk, Dkv, Dkk, jacobian, loss, dt, sparse_values
     );
-    mkl_sparse_solve(sparse_values.data(), column_indices.data(), rows_csr.data(), rows_csr.data() + 1, NULL, &psd[0][0], v_grid.size_q1 * k_grid.size_q2);
+
+    std::vector<double> rhs;
+    int m_size = v_grid.size_q1 * k_grid.size_q2;
+    initialize_rhs(rhs, m_size);
+
+    mkl_sparse_solve(
+        sparse_values.data(), column_indices.data(), rows_csr.data(), rows_csr.data() + 1,
+        rhs.data(), &psd[0][0], m_size
+    );
 }
