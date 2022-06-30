@@ -148,11 +148,20 @@
 #define min_V 1e-10
 #define min_Dxx 1e-10
 
+<<<<<<< HEAD
 void write_PSD_output(const std::string& outputFolder, const std::string& io_method, const std::string& PSD_filename, Matrix4D<double> PSD, double time_stamp) {
     std::ostringstream time_string;
     time_string.precision(5);
     time_string.setf(std::ios::fixed);
     time_string << time_stamp;
+=======
+void write_PSD_output(const string& outputFolder, const string& io_method, const string& PSD_filename, const double& time, const Matrix4D<double> PSD) {
+    ostringstream time_string;
+    time_string.precision(5);
+    time_string.setf(ios::fixed);
+    time_string.str("");
+    time_string << time;
+>>>>>>> 064590b (Critical bugfix! Time is now included into the plt writing.)
 
     PSD.writeToAnyFile(PSD_filename, io_method, time_string.str());
 };
@@ -286,12 +295,21 @@ int main(int argc, char* argv[]) {
     std::future<void> output_writer;
     std::ostringstream PSD_filename, time_string;
 
+<<<<<<< HEAD
     time_string.precision(5);
     time_string.setf(std::ios::fixed);
 
     PSD_filename << outputFolder << "PSD_" << std::setw(5) << std::setfill('0') << 0;
     Logger::message << "Writing results: " << PSD_filename.str() << std::endl;
     output_writer = std::async(std::launch::async, write_PSD_output, outputFolder, io_method, PSD_filename.str(), PSD, time_first);
+=======
+    //time_string.precision(5);
+    //time_string.setf(ios::fixed);
+
+    PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0;
+    Logger::message << "Writing results: " << PSD_filename.str() << endl;
+    output_writer = std::async(std::launch::async, write_PSD_output, outputFolder, io_method, PSD_filename.str(), time_first, PSD);
+>>>>>>> 064590b (Critical bugfix! Time is now included into the plt writing.)
 
     // When to apply loss term:
     // It's better to apply it during pitch-angle diffusion, unless we don't have any pitch-angle diffusion
@@ -820,7 +838,11 @@ int main(int argc, char* argv[]) {
             Logger::message << std::endl
                             << "Writing results: " << PSD_filename.str() << std::endl;
 
+<<<<<<< HEAD
             output_writer = std::async(std::launch::async, write_PSD_output, outputFolder, io_method, PSD_filename.str(), PSD, time_current);
+=======
+            output_writer = std::async(std::launch::async, write_PSD_output, outputFolder, io_method, PSD_filename.str(), time, PSD);
+>>>>>>> 064590b (Critical bugfix! Time is now included into the plt writing.)
         }
     }
 
