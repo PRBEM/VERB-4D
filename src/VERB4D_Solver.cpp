@@ -801,8 +801,10 @@ int main(int argc, char* argv[]) {
                 {
                     Diffusion_2D_MKL(
                         PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type,
+                        Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+                        Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
                         DVV.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DKK.wxSlice(iP, iR),
-                        G_local.wxSlice(iP, iR),Losses.wxSlice(iP, iR) * local_losses, dt,
+                        G_local.wxSlice(iP, iR), Losses.wxSlice(iP, iR) * local_losses, Sources.wxSlice(iP, iR) * local_losses, dt,
                         sparse_matrix_handles[omp_get_thread_num()]
                     );
                 }
@@ -888,7 +890,7 @@ int main(int argc, char* argv[]) {
     for(auto& csr_handle : sparse_matrix_handles)
     {
         mkl_sparse_destroy(*csr_handle);
-        // delete csr_handle;
+        // delete csr_handle; //mkl_sparse_destroy seems to delete the pointer
     }
     Logger::message << "Program was terminated correctly." << endl;
     Logger::message << "Wall-clock time: " << (omp_get_wtime() - wall_timer) << " sec; ";

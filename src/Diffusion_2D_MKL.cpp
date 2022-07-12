@@ -6,13 +6,13 @@
 #include <iostream>
 #include <algorithm>
 #include "mkl_sparse_qr.h"
+#include "Diffusion_2D_MKL.hpp"
 
-typedef Matrix2D<double> mat2d;
 void initialize_sparse_values(
         const mat2d& v_grid, const mat2d& k_grid,
-        BoundaryConditionType v_lower, BoundaryConditionType v_upper,
-        BoundaryConditionType k_lower, BoundaryConditionType k_upper,
-        const mat2d& Dvv, const mat2d& Dvk, const mat2d& Dkv, const mat2d& Dkk, 
+        BoundaryConditionType v_lower_type, BoundaryConditionType v_upper_type,
+        BoundaryConditionType k_lower_type, BoundaryConditionType k_upper_type,
+        const mat2d& Dvv, const mat2d& Dvk, const mat2d& Dkv, const mat2d& Dkk,
         const mat2d& jacobian, const mat2d& loss, double dt,
         std::vector<double>& values)
 {
@@ -26,7 +26,7 @@ void initialize_sparse_values(
     );
     double v_offdiag_lower, v_offdiag_upper;
     double k_offdiag_lower, k_offdiag_upper;
-    switch(v_lower)
+    switch(v_lower_type)
     {
         case BoundaryConditionType::ConstantDerivative:
             v_offdiag_lower = 1;
@@ -38,7 +38,7 @@ void initialize_sparse_values(
             Logger::error << "Lower diffusion boundary condition in V must be either constant value or constant derivative\n";
             exit(EXIT_FAILURE);
     }
-    switch(v_upper)
+    switch(v_upper_type)
     {
         case BoundaryConditionType::ConstantDerivative:
             v_offdiag_upper = 1;
@@ -50,7 +50,7 @@ void initialize_sparse_values(
             Logger::error << "Upper diffusion boundary condition in V must be either constant value or constant derivative\n";
             exit(EXIT_FAILURE);
     }
-    switch(k_lower)
+    switch(k_lower_type)
     {
         case BoundaryConditionType::ConstantDerivative:
             k_offdiag_lower = 1;
@@ -62,7 +62,7 @@ void initialize_sparse_values(
             Logger::error << "Lower diffusion boundary condition in K must be either constant value or constant derivative\n";
             exit(EXIT_FAILURE);
     }
-    switch(k_upper)
+    switch(k_upper_type)
     {
         case BoundaryConditionType::ConstantDerivative:
             k_offdiag_upper = 1;
@@ -121,7 +121,7 @@ void initialize_sparse_values(
                   + (jacobian[i][j]   * Dkv[i][j]   / dk_right - jacobian[i][j]   * Dkv[i][j]   / dk_left)
             );
             values.push_back(-coeff);
-                
+
             // f(i-1,j+1) coeff
             coeff = -0.25 * (jacobian[i-1][j] * Dvk[i-1][j] + jacobian[i][j+1] * Dkv[i][j+1]) / (jacobian[i][j] * dv_left * dk_right);
             values.push_back(-coeff);
@@ -133,15 +133,15 @@ void initialize_sparse_values(
                   + (jacobian[i][j]   * Dvk[i][j]   / dv_right - jacobian[i][j]   * Dvk[i][j]   / dv_left)
                   + (jacobian[i][j-1] * Dkv[i][j-1] / dv_right - jacobian[i][j-1] * Dkv[i][j-1] / dv_left)
             );
-            values.push_back(-coeff);        
-            
+            values.push_back(-coeff);
+
             // f(i,j) coeff, 1/dt and loss
             factor = -0.5 / jacobian[i][j];
             coeff = factor * (
                 jacobian[i+1][j] * Dvv[i+1][j] / (dv_right * dv_right) + 2 * jacobian[i][j] * Dvv[i][j] / (dv_left * dv_right) + jacobian[i-1][j] * Dvv[i-1][j] / (dv_left * dv_left)
               + jacobian[i][j+1] * Dkk[i][j+1] / (dk_right * dk_right) + 2 * jacobian[i][j] * Dkk[i][j] / (dk_left * dk_right) + jacobian[i][j-1] * Dkk[i][j-1] / (dk_left * dk_left)
               - (1 / (dv_right * dk_right) - 1 / (dv_right * dk_left) - 1 / (dv_left * dk_right) + 1 / (dv_left * dk_left)) * (Dvk[i][j] + Dkv[i][j]) * jacobian[i][j] / 2
-            ); 
+            );
             values.push_back(1/dt - loss[i][j] - coeff);
 
             // f(i,j+1) coeff
@@ -156,7 +156,7 @@ void initialize_sparse_values(
             // f(i+1,j-1) coeff
             coeff = -0.25 * (jacobian[i+1][j] * Dvk[i+1][j] + jacobian[i][j-1] * Dkv[i][j-1]) / (jacobian[i][j] * dv_right * dk_left);
             values.push_back(-coeff);
-            
+
             // f(i+1,j) coeff
             factor = 0.25 / (jacobian[i][j] * dv_right);
             coeff = factor * (
@@ -165,7 +165,7 @@ void initialize_sparse_values(
                   + (jacobian[i][j]   * Dkv[i][j]   / dk_left  - jacobian[i][j]   * Dkv[i][j]   / dk_right)
             );
             values.push_back(-coeff);
-            
+
             // f(i+1,j+1) coeff
             coeff = 0.25 * (jacobian[i+1][j] * Dvk[i+1][j] + jacobian[i][j+1] * Dkv[i][j+1]) / (jacobian[i][j] * dv_right * dk_right);
             values.push_back(-coeff);
@@ -236,7 +236,7 @@ void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_
         column_indices.push_back(j * v_size);
         column_indices.push_back(j * v_size + 1);
         rows_csr.push_back(rows_csr.back() + 2);
-        
+
         // inner V
         for(int i = 1; i < v_size - 1; i++)
         {
@@ -247,7 +247,7 @@ void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_
             column_indices.push_back(j * v_size + i-1);
             column_indices.push_back(j * v_size + i);
             column_indices.push_back(j * v_size + i+1);
-            
+
             column_indices.push_back((j+1) * v_size + i-1);
             column_indices.push_back((j+1) * v_size + i);
             column_indices.push_back((j+1) * v_size + i+1);
@@ -282,44 +282,67 @@ void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_
     rows_csr.push_back(rows_csr.back() + 4);
 }
 
-void initialize_rhs(std::vector<double>& rhs, int m_size)
+void initialize_rhs(std::vector<double>& rhs, const Matrix2D<double>& psd, const mat1d& v_lower, const mat1d& v_upper, const mat1d& k_lower, const mat1d& k_upper, const mat2d& source, double dt)
 {
-    rhs.resize(m_size);
-    std::fill(rhs.data(), rhs.data() + m_size, 1);
+    rhs.clear();
+    rhs.reserve(psd.size_q1 * psd.size_q2);
+    for(int i = 0; i < psd.size_q1; i++)
+    {
+        rhs.push_back(k_lower[i]);
+    }
+    for(int j = 1; j < psd.size_q2 - 1; j++)
+    {
+        rhs.push_back(v_lower[j]);
+        for(int i = 1; i < psd.size_q1 - 1; i++)
+        {
+            rhs.push_back(psd[i][j] / dt + source[i][j]);
+        }
+        rhs.push_back(v_upper[j]);
+    }
+    for(int i = 0; i < psd.size_q1; i++)
+    {
+        rhs.push_back(k_upper[i]);
+    }
 }
 
 void Diffusion_2D_MKL(mat2d& psd, const mat2d& v_grid, const mat2d& k_grid,
-        BoundaryConditionType v_lower, BoundaryConditionType v_upper,
-        BoundaryConditionType k_lower, BoundaryConditionType k_upper,
-        const mat2d& Dvv, const mat2d& Dvk, const mat2d& Dkv, const mat2d& Dkk, 
-        const mat2d& jacobian, const mat2d& loss, double dt,
+        BoundaryConditionType v_lower_type, BoundaryConditionType v_upper_type,
+        BoundaryConditionType k_lower_type, BoundaryConditionType k_upper_type,
+        const mat1d& v_lower, const mat1d& v_upper, const mat1d& k_lower, const mat1d& k_upper,
+        const mat2d& Dvv, const mat2d& Dvk, const mat2d& Dkv, const mat2d& Dkk,
+        const mat2d& jacobian, const mat2d& loss, const mat2d& source, double dt,
         sparse_matrix_t* csrA)
 {
     std::vector<double> sparse_values;
     initialize_sparse_values(
-        v_grid, k_grid, v_lower, v_upper, k_lower, k_upper,
+        v_grid, k_grid, v_lower_type, v_upper_type, k_lower_type, k_upper_type,
         Dvv, Dvk, Dkv, Dkk, jacobian, loss, dt, sparse_values
     );
 
     std::vector<double> rhs;
-    int m_size = v_grid.size_q1 * k_grid.size_q2;
-    initialize_rhs(rhs, m_size);
-
+    initialize_rhs(rhs, psd, v_lower, v_upper, k_lower, k_upper, source, dt);
     sparse_status_t status = mkl_sparse_d_qr_factorize(*csrA, sparse_values.data());
     if(status != SPARSE_STATUS_SUCCESS)
 	{
 		std::cout << "MKL factorize error " << status << '\n';
 		exit(EXIT_FAILURE);
 	}
-
+    Matrix1D<double> dummy(psd.size_q1 * psd.size_q2);
     status = mkl_sparse_d_qr_solve(
         SPARSE_OPERATION_NON_TRANSPOSE,
         *csrA, sparse_values.data(), SPARSE_LAYOUT_COLUMN_MAJOR,
-        1, &psd[0][0], m_size, rhs.data(), 1
+        1, &dummy[0], v_grid.size_q1 * k_grid.size_q2, rhs.data(), 1
     );
     if(status != SPARSE_STATUS_SUCCESS)
 	{
 		std::cout << "MKL solve error " << status << '\n';
 		exit(EXIT_FAILURE);
 	}
+    for(int i = 0; i < psd.size_q1; i++)
+    {
+        for(int j = 0; j < psd.size_q2; j++)
+        {
+            psd[i][j] = dummy[j * psd.size_q1 + i];
+        }
+    }
 }
