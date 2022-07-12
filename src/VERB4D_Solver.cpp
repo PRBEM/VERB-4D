@@ -138,8 +138,6 @@
 
 #include <omp.h>
 
-using namespace std;
-
 //#define DEBUG_MODE
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -153,11 +151,11 @@ using namespace std;
 #define min_V 1e-10
 #define min_Dxx 1e-10
 
-void write_PSD_output(const string& outputFolder, const string& io_method, const string& PSD_filename, const Matrix4D<double> PSD) {
-    ostringstream time_string;
+void write_PSD_output(const std::string& outputFolder, const std::string& io_method, const std::string& PSD_filename, Matrix4D<double> PSD, double time_stamp) {
+    std::ostringstream time_string;
     time_string.precision(5);
-    time_string.setf(ios::fixed);
-    time_string << time;
+    time_string.setf(std::ios::fixed);
+    time_string << time_stamp;
 
     PSD.writeToAnyFile(PSD_filename, io_method, time_string.str());
 };
@@ -172,7 +170,7 @@ int main(int argc, char* argv[]) {
 #ifdef FAST_CONVECTION
     fast_convection = " (with fast convection)";
 #endif
-    Logger::message << compile_type << fast_convection << " compiled on: " << __DATE__ << ", " << __TIME__ << endl;
+    Logger::message << compile_type << fast_convection << " compiled on: " << __DATE__ << ", " << __TIME__ << std::endl;
 
     // Variables
     // Grid, 4D:
@@ -236,35 +234,37 @@ int main(int argc, char* argv[]) {
     // The inversion method can be Lapack or ADI
     // Lapack cannot be used with multiple threads (must be updated to scalapack)
     // Instead ADI should be used for parallelization - It should be changed in the matlab Conv_Dif.m file if using more than 1 thread
-    string inputFolder = "./VERB4D_input/";
-    string outputFolder = "./VERB4D_output/";
-    string inversion_method = "Lapack";
-    string include_boundary = "true";
-    string Vl_BC_from_convection = "false";
-    string Vu_BC_from_convection = "false";
-    string io_method = "ascii";
-    string run_remapping = "true";
-    string run_convection = "true";
-    string run_radial_diffusion = "true";
-    string run_local_diffusion = "true";
-    string positive_PSD = "false";
+    std::string inputFolder = "./VERB4D_input/";
+    std::string outputFolder = "./VERB4D_output/";
+    std::string inversion_method = "Lapack";
+    std::string include_boundary = "true";
+    std::string Vl_BC_from_convection = "false";
+    std::string Vu_BC_from_convection = "false";
+    std::string io_method = "ascii";
+    std::string run_remapping = "true";
+    std::string run_convection = "true";
+    std::string run_radial_diffusion = "true";
+    std::string run_local_diffusion = "true";
+    std::string positive_PSD = "false";
 
     bool initialLoad = false;  // Check the load of the initial files
 
     // Read all the inputs - store them into variables
     // These inputs come from the matlab files that are generated when running Conv_Dif.m examples
-    initialLoad = ReadInitialData(inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
-                                  inversion_method, include_boundary, Vl_BC_from_convection, Vu_BC_from_convection, io_method, run_remapping, run_convection,
-                                  run_radial_diffusion, run_local_diffusion, positive_PSD,
-                                  PSD, P, R, V, K, L,
-                                  P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
-                                  Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
-                                  Vu_BC_type, Kl_BC_type, Ku_BC_type, Ll_BC_type, Lu_BC_type, DLL, DVV, DKK, DVK, VP, VR, G_local, G_radial,
-                                  Sources, Losses, Losses_conv);
+    initialLoad = ReadInitialData(
+        inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
+        inversion_method, include_boundary, Vl_BC_from_convection, Vu_BC_from_convection, io_method, run_remapping, run_convection,
+        run_radial_diffusion, run_local_diffusion, positive_PSD,
+        PSD, P, R, V, K, L,
+        P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
+        Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
+        Vu_BC_type, Kl_BC_type, Ku_BC_type, Ll_BC_type, Lu_BC_type, DLL, DVV, DKK, DVK, VP, VR, G_local, G_radial,
+        Sources, Losses, Losses_conv
+    );
 
     // Check that all nesesarry files were loaded
     if (!initialLoad) {
-        Logger::error << "Error: ReadInitialData return false. Check the initial files." << endl;
+        Logger::error << "Error: ReadInitialData return false. Check the initial files." << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -280,21 +280,21 @@ int main(int argc, char* argv[]) {
     }
 
     // logs the timestep and output step information
-    Logger::message << "Total time " << time_total << ". Time step " << dt << " (" << it_total << " steps)." << endl;
-    Logger::message << "Output each " << output_step << " step. " << endl;
+    Logger::message << "Total time " << time_total << ". Time step " << dt << " (" << it_total << " steps)." << std::endl;
+    Logger::message << "Output each " << output_step << " step. " << std::endl;
 
     PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
 
     // Output zero step - writing PSD_0 file
-    future<void> output_writer;
-    ostringstream PSD_filename, time_string;
+    std::future<void> output_writer;
+    std::ostringstream PSD_filename, time_string;
 
     time_string.precision(5);
-    time_string.setf(ios::fixed);
+    time_string.setf(std::ios::fixed);
 
-    PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << 0;
-    Logger::message << "Writing results: " << PSD_filename.str() << endl;
-    output_writer = std::async(std::launch::async, write_PSD_output, outputFolder, io_method, PSD_filename.str(), PSD);
+    PSD_filename << outputFolder << "PSD_" << std::setw(5) << std::setfill('0') << 0;
+    Logger::message << "Writing results: " << PSD_filename.str() << std::endl;
+    output_writer = std::async(std::launch::async, write_PSD_output, outputFolder, io_method, PSD_filename.str(), PSD, time_first);
 
     // When to apply loss term:
     // It's better to apply it during pitch-angle diffusion, unless we don't have any pitch-angle diffusion
@@ -324,7 +324,7 @@ int main(int argc, char* argv[]) {
 #pragma omp parallel
     {
 #pragma omp master
-        Logger::message << "Number of threads: " << omp_get_num_threads() << endl;
+        Logger::message << "Number of threads: " << omp_get_num_threads() << std::endl;
     }
 
     // Check time-step for ADI method - the stable time step is completely empirical (i.e. made-up)
@@ -333,17 +333,17 @@ int main(int argc, char* argv[]) {
     if (inversion_method == "ADI") {
         // This check should be included for other inversion_methods
         if (sqrt(1.0 / V.size_y) <= dt) {
-            Logger::error << "Calculating with ADI, time step " << dt << " is too large." << endl;
+            Logger::error << "Calculating with ADI, time step " << dt << " is too large." << std::endl;
             exit(EXIT_FAILURE);
         }
         Logger::message << "Calculating with "
-                        << "Diffusion_2D_ADI3" << endl;
+                        << "Diffusion_2D_ADI3" << std::endl;
     } else {
-        Logger::message << inversion_method << endl;
+        Logger::message << inversion_method << std::endl;
     }
 
     // Indexers to keep track of P,R,V,K,L
-    double time;
+    double time_current;
 
     // variables to show the progress of calculation
     int progress_count, progress_total;
@@ -372,19 +372,18 @@ int main(int argc, char* argv[]) {
     // Start time
     for (long int it = it_first; it < it_total; it++) {
         // update time by dt every iteration
-        time = time_first + it * dt;
-        Logger::message << endl
-                        << std::setprecision(15) << "Time[" << it << "/" << it_total << "]: " << time << " (days)" << endl;
+        time_current = time_first + it * dt;
+        Logger::message << std::endl << std::setprecision(15) << "Time[" << it << "/" << it_total << "]: " << time_current << " (days)" << std::endl;
 
         // Update boundary conditions and diffusion coefficients
 
         // Update magnetic field (update R)
         if (run_remapping == "true") {
-            if (L.update(time, P, R, V, K)) {
+            if (L.update(time_current, P, R, V, K)) {
                 // If we've updated L, we most likely need to update Jacobians
                 // XXX: Do we need to update Jacobians if we didn't update L?
-                G_local.update(time, P, R, V, K);
-                G_radial.update(time, P, R, V, K);
+                G_local.update(time_current, P, R, V, K);
+                G_radial.update(time_current, P, R, V, K);
 
                 // If L was updated - interpolate PSD to new L
                 progress_count = 0;
@@ -400,8 +399,8 @@ int main(int argc, char* argv[]) {
                         for (int iK = 0; iK < K_size; iK++) {
                             // show progress % if 0 threads
                             if (omp_get_thread_num() == 0) {
-                                std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
-                                    << (int) ((double) progress_count / progress_total * 100) << "%" << flush;
+                                std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8)
+                                    << (int) ((double) progress_count / progress_total * 100) << "%" << std::flush;
                             } else {
                                 std::cout << "thread" << omp_get_thread_num();
                             }
@@ -425,7 +424,7 @@ int main(int argc, char* argv[]) {
                         }
                     }
                 }
-                std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int)((double)progress_count / progress_total * 100) << "%" << endl;
+                std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8) << (int)((double)progress_count / progress_total * 100) << "%" << std::endl;
 
                 // Copy the new L into L_copy for future interpolations
                 L_copy = L;
@@ -438,59 +437,59 @@ int main(int argc, char* argv[]) {
 
         // Update convection velocities VP and VR and log the maximum absolute values
         if ((3 < P_size || 3 < R_size) && (run_convection == "true")) {
-            VP.update(time, P, R, V, K);
-            Logger::message << "max(VP) = " << VP.maxabs() << endl;
-            VR.update(time, P, R, V, K);
-            Logger::message << "max(VR) = " << VR.maxabs() << endl;
+            VP.update(time_current, P, R, V, K);
+            Logger::message << "max(VP) = " << VP.maxabs() << std::endl;
+            VR.update(time_current, P, R, V, K);
+            Logger::message << "max(VR) = " << VR.maxabs() << std::endl;
         }
 
         // Diffusion coefficients
         if ((3 < L_size) && (run_radial_diffusion == "true")) {
-            DLL.update(time, P, L, V, K);
-            Logger::message << "max(DLL) = " << DLL.maxabs() << endl;
+            DLL.update(time_current, P, L, V, K);
+            Logger::message << "max(DLL) = " << DLL.maxabs() << std::endl;
         }
 
         if ((3 < V_size && 3 < K_size) && (run_local_diffusion == "true")) {
-            DVV.update(time, P, R, V, K);
-            Logger::message << "max(DVV) = " << DVV.maxabs() << endl;
-            DVK.update(time, P, R, V, K);
-            Logger::message << "max(DVK) = " << DVK.maxabs() << endl;
-            DKK.update(time, P, R, V, K);
-            Logger::message << "max(DKK) = " << DKK.maxabs() << endl;
+            DVV.update(time_current, P, R, V, K);
+            Logger::message << "max(DVV) = " << DVV.maxabs() << std::endl;
+            DVK.update(time_current, P, R, V, K);
+            Logger::message << "max(DVK) = " << DVK.maxabs() << std::endl;
+            DKK.update(time_current, P, R, V, K);
+            Logger::message << "max(DKK) = " << DKK.maxabs() << std::endl;
         }
 
         // Sources and losses
-        Sources.update(time, P, R, V, K);
-        Losses.update(time, P, R, V, K);
-        Losses_conv.update(time, P, R, V, K);
+        Sources.update(time_current, P, R, V, K);
+        Losses.update(time_current, P, R, V, K);
+        Losses_conv.update(time_current, P, R, V, K);
 
         // Boundary conditions
         // By default - it's constant PSD
         if (R_size > 3) {
             // Put PSD-slice into the boundary condition. It will be updated from the ini-file, if there is something in the ini-file.
             //R_LBC.original_arr =(PSD.xSlice(0));
-            Rl_BC.update(time, P_lowerR, V_lowerR, K_lowerR);
+            Rl_BC.update(time_current, P_lowerR, V_lowerR, K_lowerR);
             //R_UBC.original_arr =(PSD.xSlice(PSD.size_x - 1));
-            Ru_BC.update(time, P_upperR, V_upperR, K_upperR);
+            Ru_BC.update(time_current, P_upperR, V_upperR, K_upperR);
         }
         if (L_size > 3) {
             //L_LBC.original_arr =(PSD.xSlice(0));
-            Ll_BC.update(time, P_lowerR, V_lowerR, K_lowerR);
+            Ll_BC.update(time_current, P_lowerR, V_lowerR, K_lowerR);
             //L_UBC.original_arr =(PSD.xSlice(PSD.size_x - 1));
-            Lu_BC.update(time, P_upperR, V_upperR, K_upperR);
+            Lu_BC.update(time_current, P_upperR, V_upperR, K_upperR);
 
         }
         if (V_size > 3) {
             //V_LBC.original_arr =(PSD.ySlice(0));
-            Vl_BC.update(time, P_lowerV, R_lowerV, K_lowerV);
+            Vl_BC.update(time_current, P_lowerV, R_lowerV, K_lowerV);
             //V_UBC.original_arr =(PSD.ySlice(PSD.size_y - 1));
-            Vu_BC.update(time, P_upperV, R_upperV, K_upperV);
+            Vu_BC.update(time_current, P_upperV, R_upperV, K_upperV);
         }
         if (K_size > 3) {
             //K_LBC.original_arr =(PSD.zSlice(0));
-            Kl_BC.update(time, P_lowerK, R_lowerK, V_lowerK);
+            Kl_BC.update(time_current, P_lowerK, R_lowerK, V_lowerK);
             //K_UBC.original_arr =(PSD.zSlice(PSD.size_z - 1));
-            Ku_BC.update(time, P_upperK, R_upperK, V_upperK);
+            Ku_BC.update(time_current, P_upperK, R_upperK, V_upperK);
         }
 
         // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -500,8 +499,8 @@ int main(int argc, char* argv[]) {
         // checking if DVV^2 - min(DVK^2) is greater than 0, if not log and exit
         double check = (DVV.times(DKK) - DVK.times(DVK)).min();
         if (check < 0) {
-            Logger::error << "Fatal error: (DVV*DKK - DVK*DVK) = " << check << " < 0." << endl;
-            Logger::error << "The computation would be unstable." << endl;
+            Logger::error << "Fatal error: (DVV*DKK - DVK*DVK) = " << check << " < 0." << std::endl;
+            Logger::error << "The computation would be unstable." << std::endl;
             exit(EXIT_FAILURE);
         }
 
@@ -510,7 +509,7 @@ int main(int argc, char* argv[]) {
         if ((3 < P_size || 3 < R_size) && (run_convection == "true")) {
             progress_count = 0;
             progress_total = V_size * K_size;
-            Logger::message << "Convection:" << endl;
+            Logger::message << "Convection:" << std::endl;
             std::cout << "           ";
 
             Matrix2D<double> PSD_PR(P_size, R_size);
@@ -549,8 +548,8 @@ int main(int argc, char* argv[]) {
 #endif
                 // Output current progress percentage when number of threads = 0
                 if (omp_get_thread_num() == 0) {
-                    std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
-                            << (int) ((double) progress_count / progress_total * 100) << "%" << flush;
+                    std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8)
+                            << (int) ((double) progress_count / progress_total * 100) << "%" << std::flush;
                 }
 
                         // update all slices for convection
@@ -588,16 +587,16 @@ int main(int argc, char* argv[]) {
                 }
             }
             // Output final progress (it should be 100%)
-            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "%" << endl;
+            std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8) << (int) ((double) progress_count / progress_total * 100) << "%" << std::endl;
 #pragma omp master
             {
             if(Vl_BC_from_convection == "true" && (Vl_BC_type == BoundaryConditionType::ConstantValue)){ //rewrite boundary conditions at lower V
                 Vl_BC = PSD.ySlice(0);
-                std::cout << "Vl_BC from convection are used: max(Vl_BC) = " << Vl_BC.max() << endl;
+                std::cout << "Vl_BC from convection are used: max(Vl_BC) = " << Vl_BC.max() << std::endl;
             }
             if(Vu_BC_from_convection == "true" && (Vu_BC_type == BoundaryConditionType::ConstantValue)){ //rewrite boundary conditions at lower V
                 Vu_BC = PSD.ySlice(V_size-1);
-                std::cout << "Vu_BC from convection are used: max(Vu_BC) = " << Vu_BC.max() << endl;
+                std::cout << "Vu_BC from convection are used: max(Vu_BC) = " << Vu_BC.max() << std::endl;
             }
             }
         }
@@ -614,7 +613,7 @@ int main(int argc, char* argv[]) {
         if ((L_size >= 3) && (run_radial_diffusion == "true")) {
             progress_count = 0;
             progress_total = P_size * V_size * K_size; // total size of solution matrix
-            Logger::message << "Radial diffusion:" << endl;
+            Logger::message << "Radial diffusion:" << std::endl;
             std::cout<< "           ";
 
 
@@ -641,7 +640,7 @@ int main(int argc, char* argv[]) {
 #endif
                 // print percentage done
                 if (omp_get_thread_num() == 0){
-                    std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "%" << flush;
+                    std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8) << (int) ((double) progress_count / progress_total * 100) << "%" << std::flush;
                 }
 
                 // 1d slice
@@ -674,7 +673,7 @@ int main(int argc, char* argv[]) {
             // ADDED FOR TESTING
             //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_after_radial.plt");
 
-            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "%" << endl;
+            std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8) << (int) ((double) progress_count / progress_total * 100) << "%" << std::endl;
 //#pragma omp master
 //            {
 //            if((Vl_BC_from_convection == "true") && (Vl_BC_type == "BCT_CONSTANT_VALUE")) { //rewrite boundary conditions at lower V
@@ -698,7 +697,7 @@ int main(int argc, char* argv[]) {
             int number_of_skipped_points = 0;
             progress_count = 0;
             progress_total = P_size * R_size;
-            Logger::message << "Local diffusion: " << endl;
+            Logger::message << "Local diffusion: " << std::endl;
             std::cout << "           ";
 
             Matrix2D<double> PSD_IK(V_size, K_size);
@@ -722,8 +721,8 @@ int main(int argc, char* argv[]) {
                     }
 
                 if (omp_get_thread_num() == 0) {
-                    std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
-                        << (int) ((double) progress_count / progress_total * 100) << "%" << flush;
+                    std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8)
+                        << (int) ((double) progress_count / progress_total * 100) << "%" << std::flush;
                 }
 
 #pragma omp critical
@@ -780,7 +779,7 @@ int main(int argc, char* argv[]) {
                     );
                 }
                 else {
-                    Logger::error << "Error: Unknown inversion method " << inversion_method << endl;
+                    Logger::error << "Error: Unknown inversion method " << inversion_method << std::endl;
                 }
 
                     // copy results back
@@ -792,8 +791,8 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            std::cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int)((double)progress_count / progress_total * 100) << "%" << endl;
-            std::cout << "Number of skipped points: " << (int)((double)number_of_skipped_points / progress_total * 100) << "%" << endl;
+            std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8) << (int)((double)progress_count / progress_total * 100) << "%" << std::endl;
+            std::cout << "Number of skipped points: " << (int)((double)number_of_skipped_points / progress_total * 100) << "%" << std::endl;
         }
 
         int number_of_negative_points = 0;
@@ -811,28 +810,28 @@ int main(int argc, char* argv[]) {
             }
         }
         //std::cout << "Number of negative points: " << number_of_negative_points << endl;
-        Logger::message << endl << "Number of negative points: " << number_of_negative_points << " of " << P_size*R_size*V_size*K_size << endl;
+        Logger::message << std::endl << "Number of negative points: " << number_of_negative_points << " of " << P_size*R_size*V_size*K_size << std::endl;
 
         // Output the PSD data for each timestep into the output folder
         if ((it % output_step) == 0) {
             // Wait until the writing of the last output file is finished
             output_writer.wait();
 
-            ostringstream PSD_filename;
-            PSD_filename << outputFolder << "PSD_" << setw(5) << setfill('0') << int(it / output_step);
+            std::ostringstream PSD_filename;
+            PSD_filename << outputFolder << "PSD_" << std::setw(5) << std::setfill('0') << int(it / output_step);
             
-            Logger::message << endl
-                            << "Writing results: " << PSD_filename.str() << endl;
+            Logger::message << std::endl
+                            << "Writing results: " << PSD_filename.str() << std::endl;
 
-            output_writer = std::async(std::launch::async, write_PSD_output, outputFolder, io_method, PSD_filename.str(), PSD);
+            output_writer = std::async(std::launch::async, write_PSD_output, outputFolder, io_method, PSD_filename.str(), PSD, time_current);
         }
     }
 
     // logger records if everything went correctly
 
-    Logger::message << "Program was terminated correctly." << endl;
+    Logger::message << "Program was terminated correctly." << std::endl;
     Logger::message << "Wall-clock time: " << std::fixed << std::setprecision(2) << (omp_get_wtime() - wall_timer) << " sec; ";
-    Logger::message << "CPU time: " << (float)(clock() - start_time) / CLOCKS_PER_SEC << " sec." << endl;
+    Logger::message << "CPU time: " << (float)(clock() - start_time) / CLOCKS_PER_SEC << " sec." << std::endl;
 
     Logger::deleteInstance();
     return 0;
