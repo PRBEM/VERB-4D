@@ -109,9 +109,8 @@
  * The PSD output files are usually analyzed/plotted using Matlab function plot_results which is found in every VERB4D example
  */
 
-#include <math.h>
+#include <cmath>
 #include <omp.h>
-//#include <time.h> // Why do we need this if we have <ctime>?
 
 #include <chrono>
 #include <ctime>
@@ -135,8 +134,6 @@
 #include "UpdatableMatrix.h"
 #include "Interpolation.h"
 #include "BoundaryConditionType.hpp"
-
-#include <omp.h>
 
 //#define DEBUG_MODE
 
