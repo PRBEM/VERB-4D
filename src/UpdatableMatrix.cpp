@@ -787,7 +787,11 @@ bool UpdatableListMatrix<MatrixND>::readFromIniFile(string ini_filename, const M
 
 		}
 	}
-
+	if(matricesList.empty())
+	{
+		Logger::message << ini_filename << " empty file. Setting matrix to zero." << std::endl;
+		(*this) = 0;
+	}
 	return true;
 
 }
