@@ -12,8 +12,6 @@
 #include <iostream>
 
 #include <ctime>
-#include <time.h>
-
 
 /** Create model matrices and solve the system,
  * The method is from

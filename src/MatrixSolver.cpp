@@ -28,7 +28,7 @@
 #endif
 
 #include "MatrixSolver.h"
-#include <math.h>
+#include <cmath>
 //#include <malloc.h>
 #include <stdlib.h>
 #include <string>
