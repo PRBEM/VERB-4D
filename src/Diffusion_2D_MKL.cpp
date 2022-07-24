@@ -106,32 +106,33 @@ void initialize_sparse_values(
         {
             double dv_left  = v_grid[i][j] - v_grid[i-1][j];
             double dv_right = v_grid[i+1][j] - v_grid[i][j];
-            double dk_left  = k_grid[i][j] - v_grid[i][j-1];
-            double dk_right = k_grid[i][j+1] - v_grid[i][j];
-
+            double dk_left  = k_grid[i][j] - k_grid[i][j-1];
+            double dk_right = k_grid[i][j+1] - k_grid[i][j];
             // f(i-1,j-1) coeff
             double coeff = 0.25 * (jacobian[i-1][j] * Dvk[i-1][j] + jacobian[i][j-1] * Dkv[i][j-1]) / (jacobian[i][j] * dv_left * dk_left);
             values.push_back(-coeff);
 
-            // f(i-1,j) coeff
-            double factor = 0.25 / (jacobian[i][j] * dv_left);
-            coeff = factor * (
-                2 * (jacobian[i][j]   * Dvv[i][j]   / dv_right + jacobian[i-1][j] * Dvv[i-1][j] / dv_left)
-                  + (jacobian[i-1][j] * Dvk[i-1][j] / dk_right - jacobian[i-1][j] * Dvk[i-1][j] / dk_left)
-                  + (jacobian[i][j]   * Dkv[i][j]   / dk_right - jacobian[i][j]   * Dkv[i][j]   / dk_left)
-            );
-            values.push_back(-coeff);
-
-            // f(i-1,j+1) coeff
-            coeff = -0.25 * (jacobian[i-1][j] * Dvk[i-1][j] + jacobian[i][j+1] * Dkv[i][j+1]) / (jacobian[i][j] * dv_left * dk_right);
-            values.push_back(-coeff);
-
             // f(i,j-1) coeff
-            factor = 0.25 / (jacobian[i][j] * dk_left);
+            double factor = 0.25 / (jacobian[i][j] * dk_left);
             coeff = factor * (
                 2 * (jacobian[i][j]   * Dkk[i][j]   / dk_right + jacobian[i][j-1] * Dkk[i][j-1] / dk_left)
                   + (jacobian[i][j]   * Dvk[i][j]   / dv_right - jacobian[i][j]   * Dvk[i][j]   / dv_left)
                   + (jacobian[i][j-1] * Dkv[i][j-1] / dv_right - jacobian[i][j-1] * Dkv[i][j-1] / dv_left)
+            );
+            values.push_back(-coeff);
+
+            // f(i+1,j-1) coeff
+            coeff = -0.25 * (jacobian[i+1][j] * Dvk[i+1][j] + jacobian[i][j-1] * Dkv[i][j-1]) / (jacobian[i][j] * dv_right * dk_left);
+            values.push_back(-coeff);
+
+            
+
+            // f(i-1,j) coeff
+            factor = 0.25 / (jacobian[i][j] * dv_left);
+            coeff = factor * (
+                2 * (jacobian[i][j]   * Dvv[i][j]   / dv_right + jacobian[i-1][j] * Dvv[i-1][j] / dv_left)
+                  + (jacobian[i-1][j] * Dvk[i-1][j] / dk_right - jacobian[i-1][j] * Dvk[i-1][j] / dk_left)
+                  + (jacobian[i][j]   * Dkv[i][j]   / dk_right - jacobian[i][j]   * Dkv[i][j]   / dk_left)
             );
             values.push_back(-coeff);
 
@@ -143,20 +144,7 @@ void initialize_sparse_values(
               - (1 / (dv_right * dk_right) - 1 / (dv_right * dk_left) - 1 / (dv_left * dk_right) + 1 / (dv_left * dk_left)) * (Dvk[i][j] + Dkv[i][j]) * jacobian[i][j] / 2
             );
             values.push_back(1/dt - loss[i][j] - coeff);
-
-            // f(i,j+1) coeff
-            factor = 0.25 / (jacobian[i][j] * dk_right);
-            coeff = factor * (
-                2 * (jacobian[i][j+1] * Dkk[i][j+1] / dk_right + jacobian[i][j]   * Dkk[i][j]   / dk_left)
-                  +  jacobian[i][j]   * Dvk[i][j]   / dv_left  - jacobian[i][j]   * Dvk[i][j]   / dv_right
-                  +  jacobian[i][j]   * Dkv[i][j]   / dv_left  - jacobian[i][j+1] * Dkv[i][j+1] / dv_right
-            );
-            values.push_back(-coeff);
-
-            // f(i+1,j-1) coeff
-            coeff = -0.25 * (jacobian[i+1][j] * Dvk[i+1][j] + jacobian[i][j-1] * Dkv[i][j-1]) / (jacobian[i][j] * dv_right * dk_left);
-            values.push_back(-coeff);
-
+                        
             // f(i+1,j) coeff
             factor = 0.25 / (jacobian[i][j] * dv_right);
             coeff = factor * (
@@ -166,13 +154,26 @@ void initialize_sparse_values(
             );
             values.push_back(-coeff);
 
+            // f(i-1,j+1) coeff
+            coeff = -0.25 * (jacobian[i-1][j] * Dvk[i-1][j] + jacobian[i][j+1] * Dkv[i][j+1]) / (jacobian[i][j] * dv_left * dk_right);
+            values.push_back(-coeff);
+            
+            // f(i,j+1) coeff
+            factor = 0.25 / (jacobian[i][j] * dk_right);
+            coeff = factor * (
+                2 * (jacobian[i][j+1] * Dkk[i][j+1] / dk_right + jacobian[i][j]   * Dkk[i][j]   / dk_left)
+                  +  jacobian[i][j+1] * Dvk[i][j+1] / dv_left  - jacobian[i][j]   * Dvk[i][j]   / dv_right
+                  +  jacobian[i][j]   * Dkv[i][j]   / dv_left  - jacobian[i][j+1] * Dkv[i][j+1] / dv_right
+            );
+            values.push_back(-coeff);
+
             // f(i+1,j+1) coeff
             coeff = 0.25 * (jacobian[i+1][j] * Dvk[i+1][j] + jacobian[i][j+1] * Dkv[i][j+1]) / (jacobian[i][j] * dv_right * dk_right);
             values.push_back(-coeff);
         }
 
         // upper V boundary
-        values.push_back(-v_offdiag_lower);
+        values.push_back(-v_offdiag_upper);
         values.push_back(1);
     }
     // upper K boundary, lower V boundary
@@ -204,7 +205,7 @@ void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_
         + 2 * (k_size - 2) * (3 * (v_size - 2))
     );
     rows_csr.clear();
-    rows_csr.reserve(v_size * k_size);
+    rows_csr.reserve(v_size * k_size + 1);
 
     // lower K boundary, lower V boundary
     rows_csr.push_back(0);
@@ -313,6 +314,7 @@ void Diffusion_2D_MKL(mat2d& psd, const mat2d& v_grid, const mat2d& k_grid,
         const mat2d& jacobian, const mat2d& loss, const mat2d& source, double dt,
         sparse_matrix_t* csrA)
 {
+    int mat_size = psd.size_q1 * psd.size_q2;
     std::vector<double> sparse_values;
     initialize_sparse_values(
         v_grid, k_grid, v_lower_type, v_upper_type, k_lower_type, k_upper_type,
@@ -321,17 +323,18 @@ void Diffusion_2D_MKL(mat2d& psd, const mat2d& v_grid, const mat2d& k_grid,
 
     std::vector<double> rhs;
     initialize_rhs(rhs, psd, v_lower, v_upper, k_lower, k_upper, source, dt);
+
     sparse_status_t status = mkl_sparse_d_qr_factorize(*csrA, sparse_values.data());
     if(status != SPARSE_STATUS_SUCCESS)
 	{
 		std::cout << "MKL factorize error " << status << '\n';
 		exit(EXIT_FAILURE);
 	}
-    Matrix1D<double> dummy(psd.size_q1 * psd.size_q2);
+    
+    Matrix1D<double> dummy(mat_size);
     status = mkl_sparse_d_qr_solve(
-        SPARSE_OPERATION_NON_TRANSPOSE,
-        *csrA, sparse_values.data(), SPARSE_LAYOUT_COLUMN_MAJOR,
-        1, &dummy[0], v_grid.size_q1 * k_grid.size_q2, rhs.data(), 1
+        SPARSE_OPERATION_NON_TRANSPOSE, *csrA, sparse_values.data(),
+        SPARSE_LAYOUT_COLUMN_MAJOR, 1, &dummy[0], mat_size, rhs.data(), 1
     );
     if(status != SPARSE_STATUS_SUCCESS)
 	{
