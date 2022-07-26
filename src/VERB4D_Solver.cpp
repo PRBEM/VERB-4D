@@ -380,6 +380,11 @@ int main(int argc, char* argv[]) {
     if( inversion_method == "MKL" && run_local_diffusion == "true")
     {
         std::vector<double> dummy_values;
+        initialize_sparse_values(
+            V.wxSlice(0,0), K.wxSlice(0,0), Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type,
+            DVV.wxSlice(0,0), DVK.wxSlice(0,0), DVK.wxSlice(0,0), DKK.wxSlice(0,0), 
+            G_local.wxSlice(0,0), Losses.wxSlice(0,0), dt, dummy_values
+        );
         matrix_descr descr{
             SPARSE_MATRIX_TYPE_GENERAL, // mkl sparse solve only avaible for general matrices; 
             SPARSE_FILL_MODE_UPPER, // fill mode and unit diagonal have to be set but 
@@ -387,17 +392,11 @@ int main(int argc, char* argv[]) {
         };
         for(int j = 0; j < num_threads; j++)
         {
-            sparse_matrix_handles.push_back(new sparse_matrix_t);
             column_indices.push_back(std::vector<int>());
             rows_csr.push_back(std::vector<int>());
-
             initialize_sparse_indices(V_size, K_size, column_indices[j], rows_csr[j]);
-            initialize_sparse_values(
-                V.wxSlice(0,0), K.wxSlice(0,0), Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type,
-                DVV.wxSlice(0,0), DVK.wxSlice(0,0), DVK.wxSlice(0,0), DKK.wxSlice(0,0), 
-                G_local.wxSlice(0,0), Losses.wxSlice(0,0), dt, dummy_values
-            );
 
+            sparse_matrix_handles.push_back(new sparse_matrix_t);
             sparse_status_t status = mkl_sparse_d_create_csr(
                 sparse_matrix_handles[j], SPARSE_INDEX_BASE_ZERO,
                 V_size * K_size, V_size * K_size,

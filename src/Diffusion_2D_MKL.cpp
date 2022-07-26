@@ -20,7 +20,7 @@ void initialize_sparse_values(
     int k_size = k_grid.size_q2;
     values.clear();
     values.reserve(
-        2 * (2 * (v_size + 2)) // two blocks in the beginning and two in the end, coresponding to lower and upper K boundary
+        2 * (2 * (v_size - 2)) // two blocks in the beginning and two in the end, coresponding to lower and upper K boundary
         + (k_size - 2) * (v_size + 2 * (v_size - 1)) // inner rows, main diag block with one main diagonal and two off-diagonals
         + 2 * (k_size - 2) * (3 * (v_size - 2))   // off-diag block with 3 diags of length v_size - 2
     );
@@ -76,10 +76,9 @@ void initialize_sparse_values(
     }
 
     // lower K boundary, lower V boundary
+    // in this edge case, the V boundary condition its prioritized
     values.push_back(1);
     values.push_back(-v_offdiag_lower);
-    values.push_back(-k_offdiag_lower);
-    values.push_back(k_offdiag_lower * v_offdiag_lower);
 
     // lower K boundary, inner V
     for(int i = 1; i < v_size - 1; i++)
@@ -89,10 +88,10 @@ void initialize_sparse_values(
     }
 
     // lower K boundary, upper V boundary
+    // again, V boundary condition is prioritized
     values.push_back(-v_offdiag_upper);
     values.push_back(1);
-    values.push_back(k_offdiag_lower * v_offdiag_upper);
-    values.push_back(-k_offdiag_lower);
+
 
     // inner K
     for(int j = 1; j < k_size - 1; j++)
@@ -177,8 +176,6 @@ void initialize_sparse_values(
         values.push_back(1);
     }
     // upper K boundary, lower V boundary
-    values.push_back(-k_offdiag_upper);
-    values.push_back(k_offdiag_upper * v_offdiag_lower);
     values.push_back(1);
     values.push_back(-v_offdiag_lower);
 
@@ -190,8 +187,6 @@ void initialize_sparse_values(
     }
 
     // upper K boundary, upper V boundary
-    values.push_back(k_offdiag_upper * v_offdiag_upper);
-    values.push_back(-k_offdiag_upper);
     values.push_back(-v_offdiag_upper);
     values.push_back(1);
 }
@@ -200,7 +195,7 @@ void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_
 {
     column_indices.clear();
     column_indices.reserve(
-        2 * (2 * (v_size + 2)) // two blocks in the beginning and two in the end, coresponding to lower and upper K boundary
+        2 * (2 * (v_size - 2)) // two blocks in the beginning and two in the end, coresponding to lower and upper K boundary
         + (k_size - 2) * (v_size + 2 * (v_size - 1)) // inner rows, main diag block with one main diagonal and two off-diagonals
         + 2 * (k_size - 2) * (3 * (v_size - 2))
     );
@@ -211,9 +206,7 @@ void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_
     rows_csr.push_back(0);
     column_indices.push_back(0);
     column_indices.push_back(1);
-    column_indices.push_back(v_size);
-    column_indices.push_back(v_size + 1);
-    rows_csr.push_back(rows_csr.back() + 4);
+    rows_csr.push_back(rows_csr.back() + 2);
 
     // lower K boundary, inner V
     for(int i = 1; i < v_size - 1; i++)
@@ -226,9 +219,7 @@ void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_
     // lower K boundary, upper V boundary
     column_indices.push_back(v_size - 2);
     column_indices.push_back(v_size - 1);
-    column_indices.push_back(2 * v_size - 2);
-    column_indices.push_back(2 * v_size - 1);
-    rows_csr.push_back(rows_csr.back() + 4);
+    rows_csr.push_back(rows_csr.back() + 2);
 
     // inner K
     for(int j = 1; j < k_size - 1; j++)
@@ -261,11 +252,9 @@ void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_
         rows_csr.push_back(rows_csr.back() + 2);
     }
     // upper K boundary, lower V boundary
-    column_indices.push_back((k_size - 2) * v_size);
-    column_indices.push_back((k_size - 2) * v_size + 1);
     column_indices.push_back((k_size - 1) * v_size);
     column_indices.push_back((k_size - 1) * v_size + 1);
-    rows_csr.push_back(rows_csr.back() + 4);
+    rows_csr.push_back(rows_csr.back() + 2);
 
     // upper K boundary, inner V
     for(int i = 1; i < v_size - 1; i++)
@@ -276,11 +265,9 @@ void initialize_sparse_indices(int v_size, int k_size, std::vector<int>& column_
     }
 
     // upper K boundary, upper V boundary
-    column_indices.push_back((k_size - 1) * v_size - 2);
-    column_indices.push_back((k_size - 1) * v_size - 1);
     column_indices.push_back(k_size * v_size - 2);
     column_indices.push_back(k_size * v_size - 1);
-    rows_csr.push_back(rows_csr.back() + 4);
+    rows_csr.push_back(rows_csr.back() + 2);
 }
 
 void initialize_rhs(std::vector<double>& rhs, const Matrix2D<double>& psd, const mat1d& v_lower, const mat1d& v_upper, const mat1d& k_lower, const mat1d& k_upper, const mat2d& source, double dt)
