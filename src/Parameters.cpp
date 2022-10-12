@@ -6,6 +6,7 @@
  *      Author: dimath
  */
 #include "Parameters.h"
+#include "BoundaryConditionType.hpp"
 
 /** Constructor for Parameters: 
 * opens file and saves file to Parameters field 'parametersFile',
@@ -66,7 +67,7 @@ Parameters& Parameters::findParameter(std::string parameterName, std::string def
 		}
 		// set the parameter value if it can find its name in the current argument
 		// return the parameter once it is set
-		if (line.find(parameterName) != -1) {
+		if (line.find(parameterName) != std::string::npos) {
 			this->str(line.substr(line.find("=") + 1));
 			return *this;
 		}
@@ -83,7 +84,7 @@ Parameters& Parameters::findParameter(std::string parameterName, std::string def
 
 		// set the parameter value if it can find its name in the current line
 		// return the parameter once it is set
-		if (line.find(parameterName) != -1) {
+		if (line.find(parameterName) != std::string::npos) {
 			this->str(line.substr(line.find("=") + 1));
 			return *this;
 		}
@@ -133,7 +134,7 @@ void Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 
 		// set the parameter value if it can find its name in the current argument
 		// log the value and store the value into variable
-		if (line.find(parameterName) != -1) {
+		if (line.find(parameterName) != std::string::npos) {
 			parameterValue = line.substr(line.find("=") + 1);
 			Logger::message << parameterName << " = " << parameterValue << std::endl;
 					// stringstream(parameterValue) >> variable;
@@ -153,7 +154,7 @@ void Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 
 		// set the parameter value if it can find its name in the current line
 		// log the value and store the value into variable
-		if (line.find(parameterName) != -1) {
+		if (line.find(parameterName) != std::string::npos) {
 			parameterValue = line.substr(line.find("=") + 1);
 			Logger::message << parameterName << " = " << parameterValue << std::endl;
 			// stringstream(parameterValue) >> variable;
@@ -183,3 +184,4 @@ template void Parameters::getParameter(std::string, int&, bool);
 template void Parameters::getParameter(std::string, long&, bool);
 //template void Parameters::getParameter(string, bool&, bool);
 template void Parameters::getParameter(std::string, std::string&, bool);
+template void Parameters::getParameter(std::string, BoundaryConditionType&, bool);

@@ -177,8 +177,8 @@ Matrix2D<double> internal::bin(
     const Matrix2D<double>& R,
     const string& type) 
 {
-    int P_size = P.size_q1;
-    int R_size = R.size_q2;
+    size_t P_size = P.size_q1;
+    size_t R_size = R.size_q2;
 
     auto dP = P[1][0] - P[0][0];
     auto dR = R[0][1] - R[0][0];
@@ -231,7 +231,7 @@ Matrix2D<double> internal::bin(
 data_assimilation::ObservationSpace internal::convertToObservationSpace(
     const Matrix2D<double>& data)
 {
-    int size {0};
+    size_t size {0};
     for (auto iP = 0; iP < data.size_q1; ++iP) {
         for (auto iR = 0; iR < data.size_q2; ++iR) {
             if (data[iP][iR] != FILLVAL && !std::isnan(data[iP][iR])) {
@@ -878,7 +878,7 @@ std::vector<std::vector<data_assimilation::Observations>> internal::interpolate_
     const Matrix2D<double>& V_grid,
     const Matrix2D<double>& K_grid)
 {
-    int nT = data.MLT.size_q1;
+    size_t nT = data.MLT.size_q1;
 
     Matrix1D<double> P {nT};
     for (auto it = 0; it < nT; ++it) {

@@ -12,17 +12,18 @@
 
 #include "Matrix.h"
 #include "MatrixSolver.h"
+#include "BoundaryConditionType.hpp"
 
 /**
 * Function that creates a 1D Diffusion Matrix and returns a bool upon completion
 */
 bool Diffusion_1D(
-	Matrix1D<double> &psd,
-	Matrix1D<double> x, int x_size,
+	Matrix1D<double>& psd,
+	const Matrix1D<double>& x, int x_size,
 	double x_LBC, double x_UBC,
-	std::string x_LBC_type, std::string x_UBC_type,
-	Matrix1D<double> Dxx, Matrix1D<double> G,
-	Matrix1D<double> Sources, Matrix1D<double> Losses,
+	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
+	const Matrix1D<double>& Dxx, const Matrix1D<double>& G,
+	const Matrix1D<double>& Sources, const Matrix1D<double>& Losses,
 	double dt
 );
 

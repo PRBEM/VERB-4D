@@ -7,6 +7,7 @@
  */
 
 #include "ReadInitialData.h"
+#include "BoundaryConditionType.hpp"
 #include <filesystem>
 
 using namespace std;
@@ -143,15 +144,25 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
 		string &inversion_method, string &include_boundary, string &Vl_BC_from_convection, string &Vu_BC_from_convection, string &io_method,
 		string &run_remapping, string &run_convection, string &run_radial_diffusion, string &run_local_diffusion, string &positive_PSD,
-		Matrix4D<double> &PSD,
-		Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V, Matrix4D<double> &K, UpdatableMatrix < Matrix4D<double> > &L,
-		int &P_size, int &R_size, int &V_size, int &K_size, int &L_size,
-		Matrix3D<double> &PSD_l_P, Matrix3D<double> &PSD_u_P, UpdatableMatrix< Matrix3D<double> > &PSD_l_R, UpdatableMatrix< Matrix3D<double> > &PSD_u_R, UpdatableMatrix< Matrix3D<double> > &PSD_l_V, UpdatableMatrix< Matrix3D<double> >&PSD_u_V, UpdatableMatrix< Matrix3D<double> > &PSD_l_K, UpdatableMatrix< Matrix3D<double> > &PSD_u_K, UpdatableMatrix< Matrix3D<double> > &PSD_l_L, UpdatableMatrix< Matrix3D<double> > &PSD_u_L,
-		string &Pl_BC_type, string &Pu_BC_type, string &Rl_BC_type, string &Ru_BC_type, string &Vl_BC_type, string &Vu_BC_type, string &Kl_BC_type, string &Ku_BC_type, string &Ll_BC_type, string &Lu_BC_type,
-		UpdatableListMatrix < Matrix4D<double> > &DLL, UpdatableListMatrix < Matrix4D<double> > &DVV, UpdatableListMatrix < Matrix4D<double> > &DKK, UpdatableListMatrix < Matrix4D<double> > &DVK,
-		UpdatableMatrix < Matrix4D<double> > &VP, UpdatableMatrix < Matrix4D<double> > &VL,
-		UpdatableMatrix < Matrix4D<double> >  &G_local, UpdatableMatrix < Matrix4D<double> >  &G_radial,
-		UpdatableListMatrix < Matrix4D<double> > &Sources, UpdatableListMatrix < Matrix4D<double> > &Losses, UpdatableListMatrix < Matrix4D<double> > &Losses_conv) {
+		Matrix4D<double> &PSD, Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V, Matrix4D<double> &K, 
+		UpdatableMatrix<Matrix4D<double>> &L, int &P_size, int &R_size, int &V_size, int &K_size, int &L_size,
+		Matrix3D<double> &PSD_l_P, Matrix3D<double> &PSD_u_P, 
+		UpdatableMatrix<Matrix3D<double>> &PSD_l_R, UpdatableMatrix<Matrix3D<double>> &PSD_u_R, 
+		UpdatableMatrix<Matrix3D<double>> &PSD_l_V, UpdatableMatrix<Matrix3D<double>> &PSD_u_V, 
+		UpdatableMatrix<Matrix3D<double>> &PSD_l_K, UpdatableMatrix<Matrix3D<double>> &PSD_u_K, 
+		UpdatableMatrix<Matrix3D<double>> &PSD_l_L, UpdatableMatrix<Matrix3D<double>> &PSD_u_L,
+		BoundaryConditionType &Pl_BC_type, BoundaryConditionType &Pu_BC_type, 
+		BoundaryConditionType &Rl_BC_type, BoundaryConditionType &Ru_BC_type, 
+		BoundaryConditionType &Vl_BC_type, BoundaryConditionType &Vu_BC_type, 
+		BoundaryConditionType &Kl_BC_type, BoundaryConditionType &Ku_BC_type, 
+		BoundaryConditionType &Ll_BC_type, BoundaryConditionType &Lu_BC_type,
+		UpdatableListMatrix<Matrix4D<double>> &DLL, UpdatableListMatrix<Matrix4D<double>> &DVV, 
+		UpdatableListMatrix<Matrix4D<double>> &DKK, UpdatableListMatrix<Matrix4D<double>> &DVK,
+		UpdatableMatrix<Matrix4D<double>> &VP, UpdatableMatrix<Matrix4D<double>> &VL,
+		UpdatableMatrix<Matrix4D<double>> &G_local, UpdatableMatrix<Matrix4D<double>> &G_radial,
+		UpdatableListMatrix<Matrix4D<double>> &Sources, 
+		UpdatableListMatrix<Matrix4D<double>> &Losses, 
+		UpdatableListMatrix<Matrix4D<double>> &Losses_conv) {
 
 	Parameters parameters("parameters.ini", argc, argv);
 
@@ -298,8 +309,9 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	}
 
     // Read from Lstar file if Lstar.tab is not present
-    if (!L.readFromIniFile(InputFolder + "Lstar.tab", P, R, V, K))
+    if (!L.readFromIniFile(InputFolder + "Lstar.tab", P, R, V, K)){
         L.readFromAnyFile(InputFolder + "Lstar", io_method, P, R, V, K);
+	}
 
 	L.update(time_first, P, R, V, K); // Load L-star so it'll be available
 	
@@ -312,38 +324,48 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	// For all of the following load the .tab file if it exists, if not load the corresponding data file
 
-    if (!DLL.readFromIniFile(InputFolder + "DLL.tab", P, L, V, K))
+    if (!DLL.readFromIniFile(InputFolder + "DLL.tab", P, L, V, K)){
         DLL.readFromAnyFile(InputFolder + "DLL", io_method, P, L, V, K);
+	}
 
-    if (!DVV.readFromIniFile(InputFolder + "DVV.tab", P, R, V, K))
+    if (!DVV.readFromIniFile(InputFolder + "DVV.tab", P, R, V, K)){
 		DVV.readFromAnyFile(InputFolder + "DVV", io_method, P, R, V, K);
+	}
 
-    if (!DKK.readFromIniFile(InputFolder + "DKK.tab", P, R, V, K))
+    if (!DKK.readFromIniFile(InputFolder + "DKK.tab", P, R, V, K)){
 		DKK.readFromAnyFile(InputFolder + "DKK", io_method, P, R, V, K);
+	}
 
-    if (!DVK.readFromIniFile(InputFolder + "DVK.tab", P, R, V, K))
+    if (!DVK.readFromIniFile(InputFolder + "DVK.tab", P, R, V, K)){
 		DVK.readFromAnyFile(InputFolder + "DVK", io_method, P, R, V, K);
+	}
 
-    if (!VP.readFromIniFile(InputFolder + "VP.tab", P, R, V, K))
+    if (!VP.readFromIniFile(InputFolder + "VP.tab", P, R, V, K)){
 		VP.readFromAnyFile(InputFolder + "VP", io_method, P, R, V, K);
+	}
 
-    if (!VL.readFromIniFile(InputFolder + "VR.tab", P, R, V, K))
+    if (!VL.readFromIniFile(InputFolder + "VR.tab", P, R, V, K)){
 		VL.readFromAnyFile(InputFolder + "VR", io_method, P, R, V, K);
+	}
 
-    if (!G_local.readFromIniFile(InputFolder + "G_local.tab", P, R, V, K))
+    if (!G_local.readFromIniFile(InputFolder + "G_local.tab", P, R, V, K)){
 		G_local.readFromAnyFile(InputFolder + "G_local", io_method, P, R, V, K);
+	}
 
-    if (!G_radial.readFromIniFile(InputFolder + "G_radial.tab", P, R, V, K))
+    if (!G_radial.readFromIniFile(InputFolder + "G_radial.tab", P, R, V, K)){
 		G_radial.readFromAnyFile(InputFolder + "G_radial", io_method, P, R, V, K);
+	}
 
 	G_local.update(time_first, P, R, V, K);
 	G_radial.update(time_first, P, R, V, K);
 
-    if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K))
+    if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K)){
 		Sources.readFromAnyFile(InputFolder + "Sources", io_method, P, R, V, K);
+	}
 
-    if (!Losses.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K))
+    if (!Losses.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K)){
         Losses.readFromAnyFile(InputFolder + "Losses_losscone", io_method, P, R, V, K);
+	}
 
     if (!Losses_conv.readFromIniFile(InputFolder + "Losses_conv.tab", P, R, V, K))
     {
@@ -353,22 +375,22 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	// BC conditions
 	// Always use periodic boundary for Phi
-	Pl_BC_type = "BCT_PERIODIC";
-	Pu_BC_type = "BCT_PERIODIC";
+	Pl_BC_type = BoundaryConditionType::Periodic;
+	Pu_BC_type = BoundaryConditionType::Periodic;
 
 	// default values
-	Rl_BC_type = "BCT_CONSTANT_VALUE";
-	Ru_BC_type = "BCT_CONSTANT_VALUE";
+	Rl_BC_type = BoundaryConditionType::ConstantValue;
+	Ru_BC_type = BoundaryConditionType::ConstantValue;
 	Ll_BC_type = Rl_BC_type;
 	Lu_BC_type = Ru_BC_type;
 
-	Vl_BC_type = "BCT_CONSTANT_VALUE";
-	Vu_BC_type = "BCT_CONSTANT_VALUE";
+	Vl_BC_type = BoundaryConditionType::ConstantValue;
+	Vu_BC_type = BoundaryConditionType::ConstantValue;
 
-	Kl_BC_type = "BCT_CONSTANT_VALUE";
+	Kl_BC_type = BoundaryConditionType::ConstantValue;
 	//K_LBC_type = "BCT_CONSTANT_DERIVATIVE"; // - Careful with this - derivative is df/dK|const(V), which at alpha=0 is not the same as const(energy)
 	//K_UBC_type = "BCT_CONSTANT_VALUE";
-	Ku_BC_type = "BCT_CONSTANT_DERIVATIVE";
+	Ku_BC_type = BoundaryConditionType::ConstantValue;
 
 	// store all of the boundary conditions parameters from BC.ini
 	Parameters BC_parameters(InputFolder + "BC.ini", argc, argv);

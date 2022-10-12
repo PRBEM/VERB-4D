@@ -112,8 +112,8 @@ private:
 public:
 
 	// to simplify things
-	inline MatrixND& operator= (const MatrixND &M);
-	inline MatrixND& operator= (const double Val);
+	MatrixND& operator= (const MatrixND &M);
+	MatrixND& operator= (const double Val);
 
 	bool readFromIniFile(std::string ini_filename, const MatrixND &Q1, const MatrixND &Q2, const MatrixND &Q3, const MatrixND &Q4);
 	void update(double time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());

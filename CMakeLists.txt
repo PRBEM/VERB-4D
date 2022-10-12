@@ -5,7 +5,7 @@
 
 cmake_minimum_required(VERSION 2.8)
 project(VERB4D C CXX)
-add_definitions(-std=c++17)
+set(CMAKE_CXX_STANDARD 17)
 
 # Enable/disable tests
 include(CTest)
@@ -109,10 +109,20 @@ endif(DATA_ASSIMILATION)
 add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
 target_link_libraries(VERB4D_Solver ${DEPLIBS})
 
-# Add tests
-if(ENABLE_TESTING)
-    add_subdirectory(test)
+# Flag compile type feedback
+if(DEFINED CMAKE_BUILD_TYPE)
+    if(CMAKE_BUILD_TYPE STREQUAL "")
+        message(WARNING "\nCMAKE_BUILD_TPYE not specified. Run cmake with -DCMAKE_BUILD_TYPE=Release or -DCMAKE_BUILD_TYPE=Debug")
+    else(CMAKE_BUILD_TYPE STREQUAL "")
+        string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE_upper)
+        if(CMAKE_BUILD_TYPE_upper STREQUAL "RELEASE")
+            add_definitions(-DRELEASE)
+        endif()
+    endif()
 endif()
-if(FAST_CONVECTION)
+    
+# Flag to decide convection step size in Convection_2D.cpp
+if(${FAST_CONVECTION})
     add_definitions(-DFAST_CONVECTION)
-endif(FAST_CONVECTION)
+endif()
+unset(FAST_CONVECTION CACHE)

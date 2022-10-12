@@ -193,8 +193,7 @@ void MatrixLimit(UpdatableMatrix< Matrix1D<double> > &M, const Matrix1D<double> 
 
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
 	if (Q1_from > Q1.min() || Q1_to < Q1.max()) {
-		int iQ1;
-		for (iQ1 = 0; iQ1 < Q1.size_q1; iQ1++) {
+		for (size_t iQ1 = 0; iQ1 < Q1.size_q1; iQ1++) {
 			if (
 					Q1[iQ1] < Q1_from || Q1[iQ1] > Q1_to
 				) {
@@ -215,9 +214,8 @@ void MatrixLimit(UpdatableMatrix<Matrix2D<double>> &M, const Matrix2D<double> &Q
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
 	if (Q1_from > Q1.min() || Q1_to < Q1.max() || Q2_from > Q2.min() || Q2_to < Q2.max()) {
-		int iQ1, iQ2;
-		for (iQ1 = 0; iQ1 < Q1.size_q1; iQ1++) {
-			for (iQ2 = 0; iQ2 < Q1.size_q2; iQ2++) {
+		for (size_t iQ1 = 0; iQ1 < Q1.size_q1; iQ1++) {
+			for (size_t iQ2 = 0; iQ2 < Q1.size_q2; iQ2++) {
 				if (
 						Q1[iQ1][iQ2] < Q1_from || Q1[iQ1][iQ2] > Q1_to ||
 						Q2[iQ1][iQ2] < Q2_from || Q2[iQ1][iQ2] > Q2_to
@@ -240,10 +238,9 @@ void MatrixLimit(UpdatableMatrix< Matrix3D<double> > &M, const Matrix3D<double> 
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
 	if (Q1_from > Q1.min() || Q1_to < Q1.max() || Q2_from > Q2.min() || Q2_to < Q2.max() || Q3_from > Q3.min() || Q3_to < Q3.max()) {
-		int iQ1, iQ2, iQ3;
-		for (iQ1 = 0; iQ1 < Q1.size_q1; iQ1++) {
-			for (iQ2 = 0; iQ2 < Q1.size_q2; iQ2++) {
-				for (iQ3 = 0; iQ3 < Q1.size_q3; iQ3++) {
+		for (size_t iQ1 = 0; iQ1 < Q1.size_q1; iQ1++) {
+			for (size_t iQ2 = 0; iQ2 < Q1.size_q2; iQ2++) {
+				for (size_t iQ3 = 0; iQ3 < Q1.size_q3; iQ3++) {
 					if (
 							Q1[iQ1][iQ2][iQ3] < Q1_from || Q1[iQ1][iQ2][iQ3] > Q1_to ||
 							Q2[iQ1][iQ2][iQ3] < Q2_from || Q2[iQ1][iQ2][iQ3] > Q2_to ||
@@ -268,11 +265,10 @@ void MatrixLimit(UpdatableMatrix< Matrix4D<double> > &M, const Matrix4D<double> 
 		double Q1_from, double Q1_to, double Q2_from, double Q2_to, double Q3_from, double Q3_to, double Q4_from, double Q4_to) {
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
 	if (Q1_from > Q1.min() || Q1_to < Q1.max() || Q2_from > Q2.min() || Q2_to < Q2.max() || Q3_from > Q3.min() || Q3_to < Q3.max() || Q4_from > Q4.min() || Q4_to < Q4.max()) {
-		int iQ1, iQ2, iQ3, iQ4;
-		for (iQ1 = 0; iQ1 < Q1.size_w; iQ1++) {
-			for (iQ2 = 0; iQ2 < Q1.size_x; iQ2++) {
-				for (iQ3 = 0; iQ3 < Q1.size_y; iQ3++) {
-					for (iQ4 = 0; iQ4 < Q1.size_z; iQ4++) {
+		for (size_t iQ1 = 0; iQ1 < Q1.size_w; iQ1++) {
+			for (size_t iQ2 = 0; iQ2 < Q1.size_x; iQ2++) {
+				for (size_t iQ3 = 0; iQ3 < Q1.size_y; iQ3++) {
+					for (size_t iQ4 = 0; iQ4 < Q1.size_z; iQ4++) {
 						if (
 								Q1[iQ1][iQ2][iQ3][iQ4] < Q1_from || Q1[iQ1][iQ2][iQ3][iQ4] > Q1_to ||
 								Q2[iQ1][iQ2][iQ3][iQ4] < Q2_from || Q2[iQ1][iQ2][iQ3][iQ4] > Q2_to ||
@@ -791,7 +787,11 @@ bool UpdatableListMatrix<MatrixND>::readFromIniFile(string ini_filename, const M
 
 		}
 	}
-
+	if(matricesList.empty())
+	{
+		Logger::message << ini_filename << " empty file. Setting matrix to zero." << std::endl;
+		(*this) = 0;
+	}
 	return true;
 
 }

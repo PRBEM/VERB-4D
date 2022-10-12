@@ -186,7 +186,7 @@ addPair(double newx, double newf) {
 
 double
 MonotCubicInterpolator::
-evaluate(double x) const{
+evaluate(double x) const {
 
   if (std::isnan(x) || std::isinf(x)) {
     throw std::runtime_error("MonotCubicInterpolator: evaluate() received inf/nan input.");
