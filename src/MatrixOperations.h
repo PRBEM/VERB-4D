@@ -53,6 +53,7 @@ Matrix2D<double> operator*(const Matrix2D<double>& A, const Matrix2D<double>& B)
 Matrix2D<double> operator+(const Matrix2D<double>& a, const Matrix2D<double>& b); 
 Matrix2D<double> operator-(const Matrix2D<double>& a, const Matrix2D<double>& b); 
 Matrix2D<double> inv(Matrix2D<double> A); 
+Matrix2D<double> trans_solve(const Matrix2D<double>& A, Matrix2D<double> B); 
 Matrix1D<double> toMatrix1D(const Matrix2D<double>& A); 
 Matrix2D<double> toMatrix2D(const Matrix1D<double>& A, size_t size_q1, size_t size_q2);
 Matrix2D<double> abtrans(const Matrix2D<double>& A, const Matrix2D<double>& B);

@@ -4,7 +4,6 @@
 #include <memory>
 #include "MatrixOperations.h"
 
-
 extern "C" {
 
 int dgemv_(char *trans, long *m, long *n, double *alpha, 
@@ -22,6 +21,8 @@ int dgetrf_(long *m, long *n, double *a, long * lda,
 int dgetri_(long *n, double *a, long *lda, long *ipiv, 
             double *work, long *lwork, long *info);
 
+int dgesv_(long *n, long* nrhs, double* a, long* lda,
+          long* ipiv, double* b, long* ldb, long* info);
 }
 
 Matrix1D<double> cat(const Matrix1D<double>& a, const Matrix1D<double>& b)
@@ -476,7 +477,6 @@ Matrix2D<double> operator+(
     }
 
     Matrix2D<double> result {A.size_q1, A.size_q2};
-
     for (auto i = 0; i < result.size_q1; ++i) {
         for (auto j = 0; j < result.size_q2; ++j) {
             result[i][j] = A[i][j] + B[i][j];
@@ -541,6 +541,27 @@ Matrix2D<double> inv(Matrix2D<double> A) {
     dgetri_(&n, a, &lda, ipiv.get(), work.get(), &lwork, &info);
 
     return A;
+}
+// solve the system of transposed matrices A^T * X^T = B^T equivalent to X * A = B
+Matrix2D<double> trans_solve(const Matrix2D<double>& A, Matrix2D<double> B) {
+    long nrhs {B.size_q1};
+    long n {A.size_q1};   
+    long m {A.size_q2};   
+    double *a {A[0]};
+    double *b {B[0]};
+    long lda {n};
+    long ldb {B.size_q2};
+    std::unique_ptr<long[]> ipiv {new long[m]};
+    long info {0};
+    long lwork {n};
+
+/*     int dgetrf_(long *m, long *n, double *a, long * lda, 
+                long *ipiv, long *info);
+
+    int dgetri_(long *n, double *a, long *lda, long *ipiv, 
+                double *work, long *lwork, long *info); */
+    dgesv_(&n, &nrhs, a, &lda, ipiv.get(), b, &ldb, &info);
+    return B;
 }
 
 Matrix1D<double> toMatrix1D(const Matrix2D<double>& A) {

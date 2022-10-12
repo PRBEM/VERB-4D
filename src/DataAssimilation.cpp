@@ -221,8 +221,8 @@ void data_assimilation::runKalmanFilter(
     auto Pf_times_HT = abtrans(Pf, H);
     
     //Kalman matrix [n x m]
-    auto K = Pf_times_HT * inv(H * Pf_times_HT + R);
-
+    // auto K = Pf_times_HT * inv(H * Pf_times_HT + R);
+    auto K = trans_solve(H * Pf_times_HT + R, Pf_times_HT);
     forecast += K * (obs - H * forecast);
     Pa = Pf - K * H * Pf;
 }

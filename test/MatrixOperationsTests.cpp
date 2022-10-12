@@ -552,6 +552,33 @@ void TestConversions() {
     }
 }
 
+void TestMatrixSolve()
+{
+    Matrix2D<double> A = initialize(
+        {
+            {4., 7., 0., 0.},
+            {2., 6., 0., 0.},
+            {0., 0., 4., 7.},
+            {0., 0., 2., 6.}
+        }
+    );
+
+    Matrix2D<double> B = initialize(
+        {
+            {1., 2., 3., 4.},
+            {5., 6., 7., 8.}
+        }
+    );
+
+    Matrix2D<double> expected = initialize(
+        {
+            {0.2,  0.1, 1.0, -0.5},
+            {1.8, -1.1, 2.6, -1.7}
+        }
+    );
+    TestEqualTol(trans_solve(A, B), expected);
+}
+
 void TestMatrixOperations() {
     TestRunner tr;
     RUN_TEST(tr, TestCat);
@@ -562,4 +589,5 @@ void TestMatrixOperations() {
     RUN_TEST(tr, TestOperators);
     RUN_TEST(tr, TestMatrixInversion);
     RUN_TEST(tr, TestConversions);
+    RUN_TEST(tr, TestMatrixSolve);
 }

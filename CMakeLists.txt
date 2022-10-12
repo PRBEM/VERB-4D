@@ -120,7 +120,12 @@ if(DEFINED CMAKE_BUILD_TYPE)
         endif()
     endif()
 endif()
-    
+
+# Add tests
+if(ENABLE_TESTING)
+    add_subdirectory(test)
+endif()
+
 # Flag to decide convection step size in Convection_2D.cpp
 if(${FAST_CONVECTION})
     add_definitions(-DFAST_CONVECTION)
