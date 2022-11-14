@@ -80,14 +80,14 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
     Matrix1D<double> PSD_unlimited;
     Matrix1D<double> PSD_unlimited_t;
     Matrix1D<double> PSD_faces;
-    Matrix1D<double> courant_faces;
     if(use_limiting)
     {
         PSD_unlimited.AllocateMemory(x_size);
         PSD_unlimited_t.AllocateMemory(x_size + gst + gst);
         PSD_faces.AllocateMemory(x_size);
-        courant_faces.AllocateMemory(x_size);
     }
+    // if no limiter is used, write directly to PSD
+    Matrix1D<double>& PSD_out = use_limiting ? PSD_unlimited : PSD;
 
     int ig;  // ghost points iterator
     for (int it = 0; it < num_steps; it++) {
@@ -252,7 +252,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
             if (ix > 0)  // special case
             {
                 // (7)
-                PSD_unlimited[ix-1] = PSD[ix - 1] - (courant_right * psd_face_right - courant_left * psd_face_left);
+                PSD_out[ix-1] = PSD[ix - 1] - (courant_right * psd_face_right - courant_left * psd_face_left);
             }
             if(use_limiting)
             {
@@ -262,20 +262,20 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
             courant_left = courant_right;
         }
         if (x_LBC_type == BoundaryConditionType::Periodic) {  // special case
-            PSD_unlimited[x_size - 1] = PSD_unlimited[0];        // need to update ix == x_size-1 point for periodic;
+            PSD_out[x_size - 1] = PSD_out[0];        // need to update ix == x_size-1 point for periodic;
         }
         else if (x_LBC_type == BoundaryConditionType::ConstantValue) {
-            PSD_unlimited[0] = x_LBC;
+            PSD_out[0] = x_LBC;
         }
         else if (x_LBC_type == BoundaryConditionType::ConstantDerivative) {
-            PSD_unlimited[0] = PSD_unlimited[1];
+            PSD_out[0] = PSD_out[1];
         }
 
         if (x_UBC_type == BoundaryConditionType::ConstantValue) {
-            PSD_unlimited[x_size - 1] = x_UBC;
+            PSD_out[x_size - 1] = x_UBC;
         }
         else if (x_UBC_type == BoundaryConditionType::ConstantDerivative) {
-            PSD_unlimited[x_size - 1] = PSD[x_size - 2];
+            PSD_out[x_size - 1] = PSD_out[x_size - 2];
         }
         
         if(use_limiting)
@@ -482,13 +482,6 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
             else if (x_UBC_type == BoundaryConditionType::ConstantDerivative)
             {
                 PSD[x_size - 1] = PSD[x_size - 2];
-            }
-        }
-        else
-        {
-            for (int ix = 0; ix < x_size; ix++)
-            {
-                PSD[ix] = PSD_unlimited[ix];
             }
         }
     }
