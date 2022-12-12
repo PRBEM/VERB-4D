@@ -16,6 +16,6 @@ fi
 
 cd ./build
 cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF -DUSE_THREAD=0 -DUSE_LOCKING=1 -DUSE_OPENMP=1
-make -j8
+make -j
 cp ./lib/libopenblas.so* $local_lib
 cd ..

@@ -56,28 +56,18 @@ set(VERB4D_SOURCES
     src/UpdatableMatrix.cpp
     src/VERB4D_Solver.cpp)
 
-# Build and link
+# add source files to executable
 add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
+
+# Set path to openblas library and link to executable
+add_library(openblas SHARED IMPORTED)
 if(WIN32)
-    # The libraries for lapack and BLAS for windows are in the lib folder
-    set(LAPACK_LIBRARIES ${CMAKE_SOURCE_DIR}/lib/clapack.lib)
-    set(BLAS_LIBRARIES   ${CMAKE_SOURCE_DIR}/lib/blas.lib)
-    set(F2C_LIBRARIES    ${CMAKE_SOURCE_DIR}/lib/libf2c.lib)
-    # Libraries to link against
-    # including Fortran to C library for windows, needed by lapack
-    list(APPEND DEPLIBS
-        ${LAPACK_LIBRARIES}
-        ${BLAS_LIBRARIES}
-        ${F2C_LIBRARIES})
+    set_target_properties(openblas PROPERTIES IMPORTED_IMPLIB $ENV{HOMEPATH}/AppData/Local/OpenBLAS/openblas.lib)
 else(WIN32)
-    # Set path to openblas library
-    add_library(openblas SHARED IMPORTED)
     set_target_properties(openblas PROPERTIES IMPORTED_LOCATION $ENV{HOME}/.local/lib/libopenblas.so)
     set_target_properties(VERB4D_Solver PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-    list(APPEND DEPLIBS openblas)
-    install(TARGETS VERB4D_Solver DESTINATION bin)
 endif(WIN32)
-
+list(APPEND DEPLIBS openblas)
 target_link_libraries(VERB4D_Solver ${DEPLIBS})
 
 # Flag compile type feedback
