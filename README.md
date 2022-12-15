@@ -3,7 +3,7 @@ Source code for the VERB-4D solver. Need to be used together with Matlab or Pyth
 create all necessary input. The main file is in `./src/VERB4D_Solver.cpp`
 
 ## Requirements
-Download cmake 2.8 and above. Note that any new source files should be added to
+Download cmake 3.1 and above. Note that any new source files should be added to
 the VERB4D_SOURCES line in CMakeLists.txt, and the build files must be
 regenerated with the below commands.
 
@@ -15,43 +15,69 @@ cmake. Use homebrew or the package manager of your choice to install them:
 
 A C++ compiler is necessary, a Fortran compiler (only for OpenBLAS) recomended.
 If no Fortran compiler is installed, OpenBLAS will compile from C code instead.
-On Linux, gcc and gfortran can easily be installed if not already available.
-On Windows, the MSVC C++ compiler can be installed using [Visual Studio](https://visualstudio.microsoft.com/downloads/).
-The Intel Fortran compiler can be installed as part of the [Intel oneAPI HPC Toolkit](https://www.intel.com/content/www/us/en/develop/documentation/get-started-with-intel-oneapi-hpc-windows/top.html).
 
-On OSX, you will need to install gcc or g++ in order to support compilation
+#### Linux
+The gcc and gfortran compilers can easily be installed if not already available.
+
+#### Windows
+The MSVC C++ compiler can be installed using [Visual Studio](https://visualstudio.microsoft.com/downloads/).
+This build of OpenBLAS compiles from C code and might be less optimized than
+building from the Fortran source code.
+
+The recommended way of building OpenBLAS on Windows is by using the [Ninja](https://ninja-build.org/)
+build system instead of Visual Studio. Additionally [MSYS2](https://www.msys2.org/) is necessary
+to install MinGW's gcc and gfortran compiler. To install both compilers, open 
+an MSYS2 MinGW terminal and run
+```
+pacman -S mingw-w64-x86_64-gcc
+pacman -S mingw-w64-x86_64-gcc-fortran
+pacman -Syu
+```
+Make sure that the location of `ninja.exe` and the MinGW binary folder, e.g. `C:\msys64\mingw64\bin\`, is on your PATH.
+#### OSX
+You will need to install gcc or g++ in order to support compilation
 with OpenMP. The version of gcc on OSX 10.10 is actually linked to clang. You
 will need to install a version of gcc from homebrew or ports. To test that it
 works, run the command `gcc-5 --version` and verify that it is indeed gcc and
 not clang.
 
 ## Build instructions
-Clone the repository recursively to also get the OpenBLAS library
+Clone the verb4d_solver repository
 
 #### via ssh 
 ```
-git clone --recurse-submodules git@rbm9.gfz-potsdam.de:verb/verb4d_solver.git
+git clone git@rbm9.gfz-potsdam.de:verb/verb4d_solver.git
 ```
 
 #### via https
 ```
-git clone --recurse-submodules https://rbm9.gfz-potsdam.de/verb/verb4d_solver.git
+git clone https://rbm9.gfz-potsdam.de/verb/verb4d_solver.git
+```
+Enter the verb4d_solver directory, checkout the openblas branch and update the
+OpenBLAS submodule.
+```
+cd verb4d_solver
+git checkout openblas
+git submodule update --init
 ```
 
 ### Compile and install the OpenBLAS library
 #### Linux / OSX
-Enter the verb4d_solver directory, build the shared OpenBLAS library and install it to `~/.local/lib` by calling
+Build the shared OpenBLAS library and install it to `~/.local/lib` by calling
 ```
-cd verb4d_solver
 ./install_openblas.sh
 ```
 ### Windows
-Open a PowerShell Terminal and execute
+For the Visual Studio build, open a PowerShell terminal and execute
 ```
-cd verb4d_solver
-install_openblas.ps1
+install_openblas_vs.ps1
 ```
-to compile OpenBLAS as a dynamic libray and copy the library files to `<drive>:\Users\<user>\AppData\Local\OpenBLAS\`.
+For the Ninja build, make sure that both gcc and gfortran are installed (e.g. `gfortran --version`).
+Call the Ninja install script
+```
+install_openblas_ninja.ps1
+```
+Both build types compile OpenBLAS as a dynamic libray and copy the library files to `<drive>:\Users\<user>\AppData\Local\OpenBLAS\`.
 This location is automatically appended to the user's PATH environment variable, so VERB-4D can use it at runtime.
 
 ### Compile the VERB-4D solver
