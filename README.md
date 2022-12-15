@@ -1,25 +1,31 @@
-# VERB4D
+# VERB-4D solver
 Source code for the VERB-4D solver. Need to be used together with Matlab or Python setup scripts that
 create all necessary input. The main file is in `./src/VERB4D_Solver.cpp`
 
-## Build instructions
+## Requirements
 Download cmake 2.8 and above. Note that any new source files should be added to
 the VERB4D_SOURCES line in CMakeLists.txt, and the build files must be
 regenerated with the below commands.
 
-### OSX / Linux
 The following dependencies are required and will be automatically searched via
 cmake. Use homebrew or the package manager of your choice to install them:
 
 * MatLab (optional)
 * OpenBLAS (added as a submodule)
 
+A C++ compiler is necessary, a Fortran compiler (only for OpenBLAS) recomended.
+If no Fortran compiler is installed, OpenBLAS will compile from C code instead.
+On Linux, gcc and gfortran can easily be installed if not already available.
+On Windows, the MSVC C++ compiler can be installed using [Visual Studio](https://visualstudio.microsoft.com/downloads/).
+The Intel Fortran compiler can be installed as part of the [Intel oneAPI HPC Toolkit](https://www.intel.com/content/www/us/en/develop/documentation/get-started-with-intel-oneapi-hpc-windows/top.html).
+
 On OSX, you will need to install gcc or g++ in order to support compilation
-with OpenMP.  The version of gcc on OSX 10.10 is actually linked to clang. You
+with OpenMP. The version of gcc on OSX 10.10 is actually linked to clang. You
 will need to install a version of gcc from homebrew or ports. To test that it
 works, run the command `gcc-5 --version` and verify that it is indeed gcc and
 not clang.
 
+## Build instructions
 Clone the repository recursively to also get the OpenBLAS library
 
 #### via ssh 
@@ -32,52 +38,43 @@ git clone --recurse-submodules git@rbm9.gfz-potsdam.de:verb/verb4d_solver.git
 git clone --recurse-submodules https://rbm9.gfz-potsdam.de/verb/verb4d_solver.git
 ```
 
-#### Compile and install the OpenBlas library
-Enter the verb4d_solver directory and build the OpenBLAS library and install it to `~/.local/lib` by calling
+### Compile and install the OpenBLAS library
+#### Linux / OSX
+Enter the verb4d_solver directory, build the shared OpenBLAS library and install it to `~/.local/lib` by calling
 ```
 cd verb4d_solver
 ./install_openblas.sh
 ```
-
-#### Compile and install the VERB-4D solver via script
-Compile the VERB4D solver and install it to `~/.local/bin` by calling
-```
-source install_verb.sh
-```
-You can now call the executable `VERB4D_Solver` from a simulation folder that contains a `parameters.ini` file.
-
-#### Compile manually
-Create a build folder inside `verb4d_solver`, run CMake with a Release build type and call make to compile
-```
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release`
-make
-```
-
 ### Windows
-The CMake instructions will also work for windows. You will want to create a
-new folder named build inside of the root directory. In the gui, set the
-generator name to "Visual Studio 12" for a Visual Studio 2013 *.sln project.
-
-On the command line, you can run:
-
+Open a PowerShell Terminal and execute
 ```
-$ mkdir build
-$ cd build
-$ cmake .. -G "Visual Studio 14"
+cd verb4d_solver
+install_openblas.ps1
 ```
+to compile OpenBLAS as a dynamic libray and copy the library files to `<drive>:\Users\<user>\AppData\Local\OpenBLAS\`.
+This location is automatically appended to the user's PATH environment variable, so VERB-4D can use it at runtime.
 
-Replace `Visual Studio 14` with the version of your choice. For example,
-`Visual Studio 14` corresponds to VS 2015.
+### Compile the VERB-4D solver
+#### Linux / OSX
 
-Note that the solution includes three projects.
+Compile VERB-4D by calling
+```
+./install_verb.sh
+```
+The executable `VERB4D_Solver` can be found in `./build`.
 
-ZERO_CHECK will rerun cmake. You can/should execute this after changing
-something on your CMake files.
+#### Windows
 
-ALL_BUILD is simply a target which builds all and everything project in the
-active solution, one can compare it to "make all".
+Compile VERB-4D by calling
+```
+install_verb.ps1
+```
+The executable `VERB4D_Solver.exe` can be found in `.\build\Release`.
+
+### Use the VERB-4D solver
+
+Copy the executable to a simulation folder that contains a `parameters.ini` file and run it to start a simulation.
+
 
 ## Old Notes (Possibly outdated)
 ReadMe - COMPILING ON MAC
