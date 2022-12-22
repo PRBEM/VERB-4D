@@ -174,7 +174,7 @@ template<class T>inline void free_matrix(T** m) {
 }
 
 /// Freeing memory for 3D matrix
-template<class T>inline void free_matrix(T*** m, size_t size_x, size_t size_y) {
+template<class T>inline void free_matrix(T*** m, size_t size_x) {
 	delete[](m[0][0]);
 	for (size_t x = 0; x < size_x; x++) {
 		delete[](m[x]);
@@ -184,7 +184,7 @@ template<class T>inline void free_matrix(T*** m, size_t size_x, size_t size_y) {
 
 
 /// Freeing memory for 4D matrix
-template<class T>inline void free_matrix(T**** m, size_t size_w, size_t size_x, size_t size_y) {
+template<class T>inline void free_matrix(T**** m, size_t size_w, size_t size_x) {
 	delete[](m[0][0][0]);
 	for (size_t w = 0; w < size_w; w++) {
 		for (size_t x = 0; x < size_x; x++) {
@@ -212,9 +212,7 @@ template<class T>inline void free_matrix(T**** m, size_t size_w, size_t size_x, 
 *
 */
 template<class T>
-Matrix1D<T>::Matrix1D( size_t size_t , const std::string& name) {
-	initialized = false;
-	// !!! this->name = name;
+Matrix1D<T>::Matrix1D( size_t size_t) {
 	// allocating memory
 	AllocateMemory(size_t);
 }
@@ -576,14 +574,13 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 
 	MATFile *mfPtr; /* MAT-file pointer */
     mxArray *aPtr;  /* mxArray pointer */
-    double *realPtr = nullptr; /* pointer to data */
 	double *PtrW = nullptr; /* pointer to data */
 	double *PtrX = nullptr; /* pointer to data */
     double *PtrY = nullptr; /* pointer to data */
     double *PtrZ = nullptr; /* pointer to data */
 	double *PtrFinal = nullptr; /* pointer to data */
 	double *PtrReturn = nullptr; /* pointer to data */
-	double *PtrL = nullptr; /* pointer to data */
+	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
 	mwSize nElements;       /* number of elements in array */
@@ -951,7 +948,7 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 	double *PtrY = nullptr; /* pointer to data */
 	double *PtrZ = nullptr; /* pointer to data */
 	double *PtrFinal = nullptr; /* pointer to data */
-	double *PtrL = nullptr; /* pointer to data */
+	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
 	mwSize nElements;       /* number of elements in array */
@@ -965,10 +962,10 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 	const char* name;		/* for getting variable names */
 	char nameTemp;		/* for getting variable names */
 	bool wReached = false;
-	bool xReached = false;
+	[[maybe_unused]] bool xReached = false;
 	bool yReached = false;
 	bool zReached = false;
-	bool defaultReached = false;
+	[[maybe_unused]] bool defaultReached = false;
 
 	mfPtr = matOpen(file.c_str(), "r");
    	if (mfPtr == NULL) {
@@ -1777,7 +1774,7 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file ,  int columnNumber
     double *PtrZ = nullptr; /* pointer to data */
 	double *PtrFinal = nullptr; /* pointer to data */
 	double *PtrReturn = nullptr; /* pointer to data */
-	double *PtrL = nullptr; /* pointer to data */
+	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
 	mwSize nElements;       /* number of elements in array */
@@ -1790,7 +1787,7 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file ,  int columnNumber
 	size_t x, y;
 	const char* name;		/* for getting variable names */
 	char nameTemp;		/* for getting variable names */
-	
+
 	bool wReached = false;
 	bool xReached = false;
 	bool yReached = false;
@@ -2148,7 +2145,7 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
     double *PtrY = nullptr; /* pointer to data */
     double *PtrZ = nullptr; /* pointer to data */
 	double *PtrFinal = nullptr; /* pointer to data */
-	double *PtrL = nullptr; /* pointer to data */
+	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
 	mwSize nElements;       /* number of elements in array */
@@ -2161,12 +2158,12 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 	size_t x, y;
 	const char* name;		/* for getting variable names */
 	char nameTemp;		/* for getting variable names */
-	
+
 	bool wReached = false;
 	bool xReached = false;
 	bool yReached = false;
 	bool zReached = false;
-	bool defaultReached = false;
+	[[maybe_unused]] bool defaultReached = false;
 
 	mfPtr = matOpen(file.c_str(), "r");
    	if (mfPtr == NULL) {
@@ -2532,7 +2529,7 @@ Matrix3D<T>::Matrix3D( const Matrix3D<T> &M ) {
 */
 template<class T>
 Matrix3D<T>::~Matrix3D() {
-	if (initialized) free_matrix<T>(matrix_array, size_q1, size_q2);
+	if (initialized) free_matrix<T>(matrix_array, size_q1);
 }
 
 /**
@@ -2608,7 +2605,7 @@ inline Matrix3D<T>& Matrix3D<T>::operator= (const Matrix3D<T> &M) {
 		if (M.initialized) {
 			// free LHS matrix, if it is initialized
 			if (initialized && (size_q1 != M.size_q1 || size_q2 != M.size_q2 || size_q3 != M.size_q3)) {
-				free_matrix<T>(matrix_array, this->size_q1, this->size_q2);
+				free_matrix<T>(matrix_array, this->size_q1);
 				initialized = false;
 			}
 			if (!initialized) {
@@ -2958,14 +2955,13 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 
 	MATFile *mfPtr; /* MAT-file pointer */
     mxArray *aPtr;  /* mxArray pointer */
-    double *realPtr = nullptr; /* pointer to data */
 	double *PtrW = nullptr; /* pointer to data */
 	double *PtrX = nullptr; /* pointer to data */
     double *PtrY = nullptr; /* pointer to data */
     double *PtrZ = nullptr; /* pointer to data */
 	double *PtrFinal = nullptr; /* pointer to data */
 	double *PtrReturn = nullptr; /* pointer to data */
-	double *PtrL = nullptr; /* pointer to data */
+	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
 	mwSize nElements;       /* number of elements in array */
@@ -3343,13 +3339,12 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 
 	MATFile *mfPtr; /* MAT-file pointer */
     mxArray *aPtr;  /* mxArray pointer */
-    double *realPtr = nullptr; /* pointer to data */
 	double *PtrW = nullptr; /* pointer to data */
 	double *PtrX = nullptr; /* pointer to data */
     double *PtrY = nullptr; /* pointer to data */
     double *PtrZ = nullptr; /* pointer to data */
 	double *PtrFinal = nullptr; /* pointer to data */
-	double *PtrL = nullptr; /* pointer to data */
+	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
 	mwSize nElements;       /* number of elements in array */
@@ -3362,11 +3357,11 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
     size_t x,y,z; 			/* for index*/
 	const char* name;		/* for getting variable names */
 	char nameTemp;		/* for getting variable names */
-	bool wReached = false;
+	[[maybe_unused]] bool wReached = false;
 	bool xReached = false;
 	bool yReached = false;
 	bool zReached = false;
-	bool defaultReached = false;
+	[[maybe_unused]] bool defaultReached = false;
 
 	mfPtr = matOpen(file.c_str(), "r");
    	if (mfPtr == NULL) {
@@ -4032,7 +4027,7 @@ Matrix4D<T>::Matrix4D( const Matrix4D<T> &M ) {
 */
 template<class T>
 Matrix4D<T>::~Matrix4D() {
-	if (initialized) free_matrix<T>(matrix_array, size_w, size_x, size_y);
+	if (initialized) free_matrix<T>(matrix_array, size_w, size_x);
 	//		delete[] plane_array; - it's get deleted with matrix_array[0][0][0] or something?
 }
 
@@ -4111,7 +4106,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator= (const Matrix4D<T> &M) {
 		if (M.initialized) {
 			// free LHS matrix, if it is initialized
 			if (initialized && (size_w != M.size_w || size_x != M.size_x || size_y != M.size_y || size_z != M.size_z)) {
-				free_matrix<T>(matrix_array, this->size_w, this->size_x, this->size_y);
+				free_matrix<T>(matrix_array, this->size_w, this->size_x);
 				initialized = false;
 			}
 			if (!initialized) {
@@ -4359,7 +4354,7 @@ void Matrix4D<T>::writeToFile(const std::string& filename, const std::string& in
 * Used in conjunction with writeToMatlabFile() to save the 4 grid variables and val into a single .mat file
 */
 template<class T>
-mxArray* Matrix4D<T>::createStructMatrix(const std::string& filename, const std::string& info) const
+mxArray* Matrix4D<T>::createStructMatrix(const std::string& info) const
 {
 
 	size_t w,x,y,z;
@@ -4757,14 +4752,13 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 
 	MATFile *mfPtr; /* MAT-file pointer */
     mxArray *aPtr;  /* mxArray pointer */
-    double *realPtr = nullptr; /* pointer to data */
 	double *PtrW = nullptr; /* pointer to data */
 	double *PtrX = nullptr; /* pointer to data */
     double *PtrY = nullptr; /* pointer to data */
     double *PtrZ = nullptr; /* pointer to data */
 	double *PtrFinal = nullptr; /* pointer to data */
 	double *PtrReturn = nullptr; /* pointer to data */
-	double *PtrL = nullptr; /* pointer to data */
+	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
 	mwSize nElements;       /* number of elements in array */
@@ -5202,20 +5196,18 @@ void Matrix4D<T>::readFromFile(const std::string& filename, const Matrix4D<T>& g
 template<class T>
 void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z)
 {
-
 #if (MATLAB_CAPABLE)
 
 	Logger::message << "Reading " << file << ": " << endl;
 
 	MATFile *mfPtr; /* MAT-file pointer */
     mxArray *aPtr;  /* mxArray pointer */
-    double *realPtr = nullptr; /* pointer to data */
 	double *PtrW = nullptr; /* pointer to data */
 	double *PtrX = nullptr; /* pointer to data */
     double *PtrY = nullptr; /* pointer to data */
     double *PtrZ = nullptr; /* pointer to data */
 	double *PtrFinal = nullptr; /* pointer to data */
-	double *PtrL = nullptr; /* pointer to data */
+	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
 	mwSize nElements;       /* number of elements in array */
@@ -5609,7 +5601,7 @@ void Matrix4D<T>::readFromAnyFile(const std::string& filename, const std::string
 * \param w,x,y,z - index of element in every dimension for the 4d matrix
 */
 template<class T>
-inline size_t Matrix4D<T>::index1d(size_t w, size_t x, size_t y, size_t z) {
+inline size_t Matrix4D<T>::index1d(size_t w, size_t x, size_t y) {
 	return ((w*size_x + x)*size_y + y)*size_z;
 }
 

@@ -75,7 +75,7 @@ public:
 
 	
 
-	protected:
+protected:
 	/// defualt constructor
 	Logger() {};
 	/// copy constructor
@@ -85,25 +85,18 @@ public:
 	/// default destructor
 	~Logger() {};
 
-	/// stores message into logger, including message type
-	void writeIDEDebugString(const std::string& message, MessageType type);
+private:
+	/// private member function here
+	void writeMessage(const std::string& message);
+	void writeWarning(const std::string& message);
+	void writeError(const std::string& message);
 
-	
+	void appendToFile(const std::string& message);
 
-	private:
-		/// private member function here
-		void writeMessage(const std::string& message);
-		void writeWarning(const std::string& message);
-		void writeError(const std::string& message);
-
-		void appendToFile(const std::string& message);
-
-		void writeMessage(const std::string& message, MessageType type);
-
-		static DebugLevel mDebugLevel;
-		static Logger* sInstance; // ??
-		static std::ofstream logFile;
-	};
+	static DebugLevel mDebugLevel;
+	static Logger* sInstance; // ??
+	static std::ofstream logFile;
+};
 
 
 	

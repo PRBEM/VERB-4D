@@ -79,6 +79,7 @@ set(VERB4D_SOURCES
 
 # Build and link
 add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
+target_compile_options(VERB4D_Solver PRIVATE  -Wall -Wextra -Wpedantic)
 target_link_libraries(VERB4D_Solver ${DEPLIBS})
 
 # Flag compile type feedback

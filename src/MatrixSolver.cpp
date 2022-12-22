@@ -62,7 +62,7 @@ void AddBoundary(DiagMatrix &matr_A, BoundaryConditionType type, int in, int id1
 * \param x_LBC, x_UBC, x_LBC_type, x_UBC_type  - predefined 1D boundaries/types
 */
 bool AddBoundaries_1D(
-	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
+	CalculationMatrix &matr_A, CalculationMatrix &matr_C,
 	const Matrix1D<double> &x,
 	int x_size,
 	double x_LBC, double x_UBC,
@@ -122,7 +122,7 @@ bool AddBoundaries_1D(
 * \param LBC, UBC for x and y - predefined 2D boundaries/types
 */
 bool AddBoundaries_2D(
-		CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
+		CalculationMatrix &matr_A, CalculationMatrix &matr_C,
 		const Matrix2D<double> &x, const Matrix2D<double> &y,
 		int x_size, int y_size,
 		const Matrix1D<double>& x_LBC, const Matrix1D<double>& x_UBC,
@@ -230,7 +230,7 @@ bool MakeModelMatrix_2D_ADI1_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+		Matrix2D<double> &Dxx, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
 		Matrix2D<double> &G, double dt) 
 {
 	// Make diagonals to be equal to zero
@@ -340,7 +340,7 @@ bool MakeModelMatrix_2D_ADI1_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+		Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
 		Matrix2D<double> &G, double dt) 
 {
 	// Make diagonals to be equal to zero
@@ -453,7 +453,7 @@ bool MakeModelMatrix_2D_ADI2_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+		Matrix2D<double> &Dxx, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
 		Matrix2D<double> &G, double dt) 
 {
 	// Make diagonals to be equal to zero
@@ -609,7 +609,7 @@ bool MakeModelMatrix_2D_ADI2_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+		Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
 		Matrix2D<double> &G, double dt) 
 {
 	// Make diagonals to be equal to zero
@@ -823,7 +823,7 @@ bool MakeModelMatrix_2D_ADI3_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 				// if at the boundary
 				// add boundary conditions
 				AddBoundaries_2D(
-					matr_A, matr_B, matr_C,
+					matr_A, matr_C,
 					x, y,
 					x_size, y_size,
 					x_LBC, x_UBC,
@@ -897,7 +897,7 @@ bool MakeModelMatrix_2D_ADI3_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+		Matrix2D<double> &Dyy,
 		Matrix2D<double> &G, double dt) {
 
 	// Make diagonals to be equal to zero
@@ -956,7 +956,7 @@ bool MakeModelMatrix_2D_ADI3_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 				// if at the boundary
 				// add boundary conditions
 				AddBoundaries_2D(
-					matr_A, matr_B, matr_C,
+					matr_A, matr_C,
 					x, y,
 					x_size, y_size,
 					//psd.xSlice(0), psd.xSlice(x.size_x-1),	//x_LBC, x_UBC,
@@ -1018,7 +1018,7 @@ bool MakeModelMatrix_2D_ADI3_y(CalculationMatrix &matr_A, CalculationMatrix &mat
  *
  * LAPACK - Linear Algebra PACKage. For linear algebra methods. Using the lapack library from http://www.netlib.org/lapack/
  */
-void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
+void Lapack(DiagMatrix &A, Matrix1D<double> &B) {
 
 	// Save A and B to check the solution at the end
 	Matrix1D<double> B_res;

@@ -102,7 +102,7 @@ bool Diffusion_2D(
 				// if at the boundary
 				// add boundary conditions
 				AddBoundaries_2D(
-					matr_A, matr_B, matr_C,
+					matr_A, matr_C,
 					x, y, x_size, y_size,
 					x_LBC, x_UBC, y_LBC, y_UBC,
 					x_LBC_type, x_UBC_type, y_LBC_type, y_UBC_type,
@@ -188,7 +188,7 @@ bool Diffusion_2D(
 
 
 	//RHS.writeToFile("RHS.dat");
-	Lapack(matr_A, RHS, psd_1d);
+	Lapack(matr_A, RHS);
 	//RHS.writeToFile("result.dat");
 
 

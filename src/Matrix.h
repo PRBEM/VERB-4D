@@ -59,7 +59,7 @@ public:
 
 	// constructors and destructors
 	Matrix1D() = default;
-	Matrix1D( size_t size_q1, const std::string& name = "f");
+	Matrix1D( size_t size_q1);
 	Matrix1D( const Matrix1D<T> &M );
 	~Matrix1D();
 
@@ -438,7 +438,7 @@ public:
 
 	// ADDED
 #if (MATLAB_CAPABLE)
-	virtual mxArray* createStructMatrix(const std::string& filename, const std::string& info = "") const; ///< Package matrix into matlab variable
+	virtual mxArray* createStructMatrix(const std::string& info = "") const; ///< Package matrix into matlab variable
 #endif
 
 	virtual void writeToMatlabFile(const std::string& filename, const std::string& info = "") const;									///< Save matrix to a file
@@ -456,7 +456,7 @@ public:
 	// Some other stuff
 	std::string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
 
-	size_t index1d(size_t w, size_t x, size_t y, size_t z);								///< Returns index of the element (x,y,z) in 1d array
+	size_t index1d(size_t w, size_t x, size_t y);								///< Returns index of the element (x,y,z) in 1d array
 
 	T min() const;
 	T max() const;
