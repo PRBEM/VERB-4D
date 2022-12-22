@@ -1027,13 +1027,13 @@ void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
 	// iterator for diagonals of the diagonal matrix
 	DiagMatrix::iterator it;
 
-	long m_size = A[0].size_q1;
+	long m_size = static_cast<long>(A[0].size_q1);
 	it = A.begin();
 	long kl = -it->first; // first diagonal
 	it = A.end();
 	it--;
 	long ku = it->first; // last diagonal
-	long int NRHS(1), LDAB(2 * kl + ku + 1), *IPIV(new long[m_size]), LDB(B.size_q1), INFO(1);
+	long int NRHS{ 1 }, LDAB{ 2 * kl + ku + 1 }, * IPIV{ new long[m_size] }, LDB{ static_cast<long>(B.size_q1) }, INFO{ 1 };
 
 	double *Array = new double[(kl+ku+kl+1)*m_size];
 	double **newmat = new double*[m_size];
@@ -1445,8 +1445,7 @@ void AnySecondDerivativeApproximation_2D_y(CalculationMatrix &matr_A,
 * \param u[]	- array, result
 * \param n	- size of the matrix
 */
-bool tridag(double a[], double b[], double c[], double r[], double u[], long n) {
-	long j;
+bool tridag(double a[], double b[], double c[], double r[], double u[], size_t n) {
 	double bet, *gam;
 	gam = new double[n];
 
@@ -1458,9 +1457,9 @@ bool tridag(double a[], double b[], double c[], double r[], double u[], long n) 
 
 	u[0]=r[0]/(bet=b[0]);
 
-	for (j=1;j<=n-1;j++) {
-		gam[j]=c[j-1]/bet;
-		bet=b[j]-a[j]*gam[j];
+	for (size_t j = 1; j <= n - 1; j++) {
+		gam[j] = c[j - 1] / bet;
+		bet = b[j] - a[j] * gam[j];
 
 		if (bet == 0.0) {
 			printf("TRIDAG_MATRIX_ERROR: tridag: error, bet = 0");
@@ -1468,13 +1467,13 @@ bool tridag(double a[], double b[], double c[], double r[], double u[], long n) 
 			//return -1;
 		}
 
-		u[j]=(r[j]-a[j]*u[j-1])/bet;
+		u[j] = (r[j] - a[j] * u[j - 1]) / bet;
 	}
 
-	for (j=(n-2);j>=0;j--)
-		u[j] -= gam[j+1]*u[j+1];
-
-	delete gam;
+	for (size_t j = (n - 1); j >= 1; j--) {
+		u[j - 1] -= gam[j] * u[j];
+	}
+	delete[] gam;
 
 	return true;
 }

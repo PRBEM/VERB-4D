@@ -118,7 +118,7 @@ void AnySecondDerivativeApproximation_2D_y(
 
 
 /// Solve the AU=R system of equations, where A - tridiagonal matrix nxn with diagonals a[], b[], c[].
-bool tridag(double a[], double b[], double c[], double r[], double u[], long n);
+bool tridag(double a[], double b[], double c[], double r[], double u[], size_t n);
 
 /// Lapack function for matrix inversion declaration
 extern "C" {

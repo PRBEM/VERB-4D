@@ -460,7 +460,7 @@ int main(int argc, char* argv[]) {
         Sources.update(time_current, P, R, V, K);
         Losses.update(time_current, P, R, V, K);
         Losses_conv.update(time_current, P, R, V, K);
-
+        
         // Boundary conditions
         // By default - it's constant PSD
         if (R_size > 3) {
