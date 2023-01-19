@@ -23,6 +23,7 @@
 #include <sstream>
 #include <assert.h>
 #include <ctime>
+#include <algorithm>
 
 // Matlab library which will have to be linked at compile time
 // Usually found in matlabroot/extern/include where matlabroot is the result of typing the matlabroot command into matlab
