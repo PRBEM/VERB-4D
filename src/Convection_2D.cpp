@@ -54,7 +54,7 @@ bool Convection_2D(
     BoundaryConditionType P_LBC_type, BoundaryConditionType P_UBC_type,
     BoundaryConditionType R_LBC_type, BoundaryConditionType R_UBC_type,
     const Matrix2D<double>& VP, const Matrix2D<double>& VR,
-    const Matrix2D<double>& Sources, const Matrix2D<double>& Losses,
+    const Matrix2D<double>& Losses,
     double dt_total, double min_PSD, double min_V) {
     // indexes
     int iR, iP;
@@ -100,14 +100,10 @@ bool Convection_2D(
     Matrix1D<double> PSD_P(P_size);
     Matrix1D<double> P_P(P_size);
     Matrix1D<double> VP_P(P_size);
-    Matrix1D<double> zero_p(P_size);
-    zero_p = 0;
 
     Matrix1D<double> PSD_R(R_size);
     Matrix1D<double> R_R(R_size);
     Matrix1D<double> VR_R(R_size);
-    Matrix1D<double> zero_r(R_size);
-    zero_r = 0;
 
     // precompute losses
     Matrix2D<double> losses_exp = Losses.exp(dt);
@@ -126,8 +122,7 @@ bool Convection_2D(
                     PSD_P, P_P, P_size,
                     P_LBC[iR], P_UBC[iR],
                     P_LBC_type, P_UBC_type,
-                    VP_P,
-                    zero_p, zero_p, dt);
+                    VP_P, dt);
 
                 // copy results back
                 for (iP = 0; iP < P_size; iP++)
@@ -151,7 +146,7 @@ bool Convection_2D(
                     R_LBC[iP], R_UBC[iP],  // P, I, K
                     R_LBC_type, R_UBC_type,
                     VR_R,
-                    zero_r, zero_r, dt);
+                    dt);
 
                 // copy results back
                 for (iR = 0; iR < R_size; iR++)

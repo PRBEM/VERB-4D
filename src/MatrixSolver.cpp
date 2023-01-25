@@ -62,7 +62,7 @@ void AddBoundary(DiagMatrix &matr_A, BoundaryConditionType type, int in, int id1
 * \param x_LBC, x_UBC, x_LBC_type, x_UBC_type  - predefined 1D boundaries/types
 */
 bool AddBoundaries_1D(
-	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
+	CalculationMatrix &matr_A, CalculationMatrix &matr_C,
 	const Matrix1D<double> &x,
 	int x_size,
 	double x_LBC, double x_UBC,
@@ -122,7 +122,7 @@ bool AddBoundaries_1D(
 * \param LBC, UBC for x and y - predefined 2D boundaries/types
 */
 bool AddBoundaries_2D(
-		CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
+		CalculationMatrix &matr_A, CalculationMatrix &matr_C,
 		const Matrix2D<double> &x, const Matrix2D<double> &y,
 		int x_size, int y_size,
 		const Matrix1D<double>& x_LBC, const Matrix1D<double>& x_UBC,
@@ -230,7 +230,7 @@ bool MakeModelMatrix_2D_ADI1_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+		Matrix2D<double> &Dxx, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
 		Matrix2D<double> &G, double dt) 
 {
 	// Make diagonals to be equal to zero
@@ -340,7 +340,7 @@ bool MakeModelMatrix_2D_ADI1_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+		Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
 		Matrix2D<double> &G, double dt) 
 {
 	// Make diagonals to be equal to zero
@@ -453,7 +453,7 @@ bool MakeModelMatrix_2D_ADI2_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+		Matrix2D<double> &Dxx, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
 		Matrix2D<double> &G, double dt) 
 {
 	// Make diagonals to be equal to zero
@@ -609,7 +609,7 @@ bool MakeModelMatrix_2D_ADI2_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+		Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
 		Matrix2D<double> &G, double dt) 
 {
 	// Make diagonals to be equal to zero
@@ -823,7 +823,7 @@ bool MakeModelMatrix_2D_ADI3_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 				// if at the boundary
 				// add boundary conditions
 				AddBoundaries_2D(
-					matr_A, matr_B, matr_C,
+					matr_A, matr_C,
 					x, y,
 					x_size, y_size,
 					x_LBC, x_UBC,
@@ -897,7 +897,7 @@ bool MakeModelMatrix_2D_ADI3_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+		Matrix2D<double> &Dyy,
 		Matrix2D<double> &G, double dt) {
 
 	// Make diagonals to be equal to zero
@@ -956,7 +956,7 @@ bool MakeModelMatrix_2D_ADI3_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 				// if at the boundary
 				// add boundary conditions
 				AddBoundaries_2D(
-					matr_A, matr_B, matr_C,
+					matr_A, matr_C,
 					x, y,
 					x_size, y_size,
 					//psd.xSlice(0), psd.xSlice(x.size_x-1),	//x_LBC, x_UBC,
@@ -1018,7 +1018,7 @@ bool MakeModelMatrix_2D_ADI3_y(CalculationMatrix &matr_A, CalculationMatrix &mat
  *
  * LAPACK - Linear Algebra PACKage. For linear algebra methods. Using the lapack library from http://www.netlib.org/lapack/
  */
-void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
+void Lapack(DiagMatrix &A, Matrix1D<double> &B) {
 
 	// Save A and B to check the solution at the end
 	Matrix1D<double> B_res;
@@ -1027,13 +1027,13 @@ void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
 	// iterator for diagonals of the diagonal matrix
 	DiagMatrix::iterator it;
 
-	long m_size = A[0].size_q1;
+	long m_size = static_cast<long>(A[0].size_q1);
 	it = A.begin();
 	long kl = -it->first; // first diagonal
 	it = A.end();
 	it--;
 	long ku = it->first; // last diagonal
-	long int NRHS(1), LDAB(2 * kl + ku + 1), *IPIV(new long[m_size]), LDB(B.size_q1), INFO(1);
+	long int NRHS{ 1 }, LDAB{ 2 * kl + ku + 1 }, * IPIV{ new long[m_size] }, LDB{ static_cast<long>(B.size_q1) }, INFO{ 1 };
 
 	double *Array = new double[(kl+ku+kl+1)*m_size];
 	double **newmat = new double*[m_size];
@@ -1445,8 +1445,7 @@ void AnySecondDerivativeApproximation_2D_y(CalculationMatrix &matr_A,
 * \param u[]	- array, result
 * \param n	- size of the matrix
 */
-bool tridag(double a[], double b[], double c[], double r[], double u[], long n) {
-	long j;
+bool tridag(double a[], double b[], double c[], double r[], double u[], size_t n) {
 	double bet, *gam;
 	gam = new double[n];
 
@@ -1458,9 +1457,9 @@ bool tridag(double a[], double b[], double c[], double r[], double u[], long n) 
 
 	u[0]=r[0]/(bet=b[0]);
 
-	for (j=1;j<=n-1;j++) {
-		gam[j]=c[j-1]/bet;
-		bet=b[j]-a[j]*gam[j];
+	for (size_t j = 1; j <= n - 1; j++) {
+		gam[j] = c[j - 1] / bet;
+		bet = b[j] - a[j] * gam[j];
 
 		if (bet == 0.0) {
 			printf("TRIDAG_MATRIX_ERROR: tridag: error, bet = 0");
@@ -1468,13 +1467,13 @@ bool tridag(double a[], double b[], double c[], double r[], double u[], long n) 
 			//return -1;
 		}
 
-		u[j]=(r[j]-a[j]*u[j-1])/bet;
+		u[j] = (r[j] - a[j] * u[j - 1]) / bet;
 	}
 
-	for (j=(n-2);j>=0;j--)
-		u[j] -= gam[j+1]*u[j+1];
-
-	delete gam;
+	for (size_t j = (n - 1); j >= 1; j--) {
+		u[j - 1] -= gam[j] * u[j];
+	}
+	delete[] gam;
 
 	return true;
 }

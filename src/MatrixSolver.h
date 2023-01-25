@@ -27,7 +27,7 @@
 void AddBoundary(DiagMatrix &Matrix_A, BoundaryConditionType type, int in, int id1, double dh);
 
 bool AddBoundaries_1D(
-	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
+	CalculationMatrix &matr_A, CalculationMatrix &matr_C,
 	const Matrix1D<double> &x,
 	int x_size,
 	double x_LBC, double x_UBC,
@@ -35,7 +35,7 @@ bool AddBoundaries_1D(
 	int ix);
 
 bool AddBoundaries_2D(
-	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
+	CalculationMatrix &matr_A, CalculationMatrix &matr_C,
 	const Matrix2D<double> &x, const Matrix2D<double> &y,
 	int x_size, int y_size,
 	const Matrix1D<double>& x_LBC, const Matrix1D<double>& x_UBC,
@@ -58,7 +58,7 @@ bool MakeModelMatrix_2D(
 	Matrix2D<double> &G, Matrix2D<double> Sources, Matrix2D<double> Losses, double dt
 );
 
-void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X);
+void Lapack(DiagMatrix &A, Matrix1D<double> &B);
 
 void SecondDerivativeApproximation_1D(
 	CalculationMatrix &matr_A, int ix,
@@ -118,7 +118,7 @@ void AnySecondDerivativeApproximation_2D_y(
 
 
 /// Solve the AU=R system of equations, where A - tridiagonal matrix nxn with diagonals a[], b[], c[].
-bool tridag(double a[], double b[], double c[], double r[], double u[], long n);
+bool tridag(double a[], double b[], double c[], double r[], double u[], size_t n);
 
 /// Lapack function for matrix inversion declaration
 extern "C" {
@@ -136,7 +136,7 @@ bool MakeModelMatrix_2D_ADI1_x(
 	Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-	Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+	Matrix2D<double> &Dxx, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
 	Matrix2D<double> &G, double dt
 );
 
@@ -148,7 +148,7 @@ bool MakeModelMatrix_2D_ADI1_y(
 	Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-	Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+	Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
 	Matrix2D<double> &G, double dt
 );
 
@@ -160,7 +160,7 @@ bool MakeModelMatrix_2D_ADI2_x(
 	Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-	Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+	Matrix2D<double> &Dxx, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
 	Matrix2D<double> &G, double dt
 );
 
@@ -172,7 +172,7 @@ bool MakeModelMatrix_2D_ADI2_y(
 	Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-	Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+	Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
 	Matrix2D<double> &G, double dt
 );
 
@@ -184,7 +184,7 @@ bool MakeModelMatrix_2D_ADI3_y(
 	Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-	Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+	Matrix2D<double> &Dyy,
 	Matrix2D<double> &G, double dt
 );
 
@@ -196,7 +196,7 @@ bool MakeModelMatrix_2D_ADI3_x(
 	Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
 	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-	Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
+	Matrix2D<double> &Dxx, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
 	Matrix2D<double> &G, double dt
 );
 

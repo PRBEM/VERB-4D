@@ -48,27 +48,26 @@
 template <typename T>
 class Matrix1D {
 private:
-	T *plane_array;
-	size_t num_elements;
+	T *plane_array = nullptr;
+	size_t num_elements = 0;
 public:
 
-	T *matrix_array;						///< Array to keep the values
-
-	bool initialized;						///< Flag, equal true if initialized
-	size_t size_q1;								///< size x
+	T *matrix_array = nullptr;						///< Array to keep the values
+	bool initialized = false;						///< Flag, equal true if initialized
+	size_t size_q1 = 0;								///< size x
 	std::string name;							///< name of the Matrix
 
 	// constructors and destructors
-	Matrix1D() { initialized = false; };
-	Matrix1D( size_t size_q1, const std::string& name = "f");
+	Matrix1D() = default;
+	Matrix1D( size_t size_q1);
 	Matrix1D( const Matrix1D<T> &M );
 	~Matrix1D();
 
 	virtual void AllocateMemory( size_t size_q1 );
 
 	// Operators
-	T& operator[](int i);													///< Return the i-th value of matrix
-	T& operator[](int i) const;												///< const function to return the i-th value of matrix
+	T& operator[](size_t i);													///< Return the i-th value of matrix
+	T& operator[](size_t i) const;												///< const function to return the i-th value of matrix
 	T& operator()(int q1);													///< Return the x-th value of matrix
 	T& Value (int q1) { return operator()(q1); }								///< Return the (x,y) value of matrix
 	Matrix1D<T>& MatrixArray () { return *this; }							///< Return pointer to the instance of the class.
@@ -143,19 +142,19 @@ template <typename T> class Matrix2D {
 private:
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y] can be used.
 	/// Also, all rows saved in the memory one after another as a big array. So Matrix[x+x_size*y] can be also used.
-	T **matrix_array;
-	T *plane_array;
-	size_t num_elements;
+	T **matrix_array = nullptr;
+	T *plane_array = nullptr;
+	size_t num_elements = 0;
 public:
 	// const static int N_of_dimentions2 = 2;									///< Not used anywhere
 
-	bool initialized;														///< Flag, equal true if initialized
-	size_t size_q1;															///< size x
-	size_t size_q2;															 ///< size_y
+	bool initialized = false;														///< Flag, equal true if initialized
+	size_t size_q1 = 0;															///< size x
+	size_t size_q2 = 0;															 ///< size_y
 	std::string name;															///< name of the Matrix
 
 	// Constructors and destructors
-	Matrix2D() { initialized = false; };
+	Matrix2D() = default;
 	Matrix2D( const Matrix2D<T> &M );
 	Matrix2D( size_t size_q1, size_t size_q2 );
 	~Matrix2D();
@@ -164,8 +163,8 @@ public:
 
 	// Operators
 
-	T* operator[](int i) { return matrix_array[i]; }						///< Return the i-th pointer to 1d-array. Next [j] can be applied, so we have regular [i][j].
-	T* operator[](int i) const { return matrix_array[i]; }				///< const function to return the i-th pointer to 1d-array. Next [j] can be applied, so we have regular [i][j].
+	T* operator[](size_t i) { return matrix_array[i]; }						///< Return the i-th pointer to 1d-array. Next [j] can be applied, so we have regular [i][j].
+	T* operator[](size_t i) const { return matrix_array[i]; }				///< const function to return the i-th pointer to 1d-array. Next [j] can be applied, so we have regular [i][j].
 	T& operator()(int q1, int q2) { return matrix_array[0][q1*size_q2 + q2]; }	///< Return the (x,y)-th value of matrix
 	T& Value (int q1, int q2) { return operator()(q1, q2); }				///< Return the (x,y) value of matrix
 	Matrix2D<T>& MatrixArray () { return *this; }					///< Return pointer to the instance of the class.
@@ -204,7 +203,7 @@ public:
 	Matrix2D divide (const Matrix2D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
 
 	// Return corresponding index of 1d array
-	int index1d(int q1, int q2) const;
+	size_t index1d(size_t q1, size_t q2) const;
 
 	T max() const;
 	T maxabs() const;
@@ -246,20 +245,20 @@ template <typename T>
 class Matrix3D {
 private:
 	/// Plane array of values. All rows saved in the memory one after anouther as a big array.
-	T *plane_array;
+	T *plane_array = nullptr;
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y][z] can be used.
-	T ***matrix_array;
-	size_t num_elements;
+	T ***matrix_array = nullptr;
+	size_t num_elements = 0;
 public:
-	bool initialized;														///< Flag, equal true if initialized
-	size_t size_q1;															///< size x
-	size_t size_q2;															///< size y
-	size_t size_q3;															///< size z
+	bool initialized = false;														///< Flag, equal true if initialized
+	size_t size_q1 = 0;															///< size x
+	size_t size_q2 = 0;															///< size y
+	size_t size_q3 = 0;															///< size z
 	std::string name;															///< name of the Matrix
 
 	// constructors and destructors
 	/// Default constructor. Do nothing.
-	Matrix3D() { initialized = false; };
+	Matrix3D() = default;
 	Matrix3D( const Matrix3D<T> &M );
 	Matrix3D( size_t size_q1, size_t size_q2, size_t size_q3 );
 	~Matrix3D();
@@ -267,8 +266,8 @@ public:
 	virtual void AllocateMemory(size_t size_q1, size_t size_q2, size_t size_q3);
 
 	// Operators
-	T** operator[] (int i); 											///< Return the i-th pointer to 2d-array. Next [j][k] can be applied, so we have regular [i][j][k].
-	T** operator[] (int i) const { return matrix_array[i]; }			///< const function to return the i-th pointer to 2d-array. Next [j][k] can be applied, so we have regular [i][j][k].
+	T** operator[] (size_t i); 											///< Return the i-th pointer to 2d-array. Next [j][k] can be applied, so we have regular [i][j][k].
+	T** operator[] (size_t i) const { return matrix_array[i]; }			///< const function to return the i-th pointer to 2d-array. Next [j][k] can be applied, so we have regular [i][j][k].
 	T& operator() (int q1, int q2, int q3); 							///< Return the (x,y,z) value of matrix
 	T& Value (int q1, int q2, int q3) { return operator()(q1, q2, q3); }	///< Return the (x,y,z) value of matrix
 	Matrix3D<T>& MatrixArray () { return *this; }					///< Return pointer to the instance of the class.
@@ -328,7 +327,7 @@ public:
 	// Some other stuff
 	std::string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
 
-	int index1d(int q1, int q2, int q3);								///< Returns index of the element (x,y,z) in 1d array
+	size_t index1d(size_t q1, size_t q2, size_t q3);								///< Returns index of the element (x,y,z) in 1d array
 
 	T min() const;
 	T max() const;
@@ -370,21 +369,21 @@ public:
 template <typename T> class Matrix4D {
 private:
 	/// Plane array of values. All rows saved in the memory one after anouther as a big array.
-	T *plane_array;
+	T *plane_array = nullptr;
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[w][x][y][z] can be used.
-	T ****matrix_array;
-	size_t num_elements;
+	T ****matrix_array = nullptr;
+	size_t num_elements = 0;
 public:
-	bool initialized;														///< Flag, equal true if initialized
-	size_t size_w;																///< size w
-	size_t size_x;																///< size x
-	size_t size_y; 															///< size y
-	size_t size_z;																///< size z
+	bool initialized = false;														///< Flag, equal true if initialized
+	size_t size_w = 0;																///< size w
+	size_t size_x = 0;																///< size x
+	size_t size_y = 0; 															///< size y
+	size_t size_z = 0;																///< size z
 	std::string name;															///< name of the Matrix
 
 	// constructors and destructors
 	/// Default constructor. Do nothing.
-	Matrix4D() { initialized = false; };
+	Matrix4D() = default;
 	Matrix4D( const Matrix4D<T> &M );
 	Matrix4D( size_t size_w, size_t size_x, size_t size_y, size_t size_z );
 	~Matrix4D();
@@ -392,8 +391,8 @@ public:
 	virtual void AllocateMemory(size_t size_w, size_t size_x, size_t size_y, size_t size_z);
 
 	// Operators
-	T*** operator[] (int i); 											///< Return the i-th pointer to 3d-array. Next [j][k][l] can be applied, so we have regular [i][j][k][l].
-	T*** operator[] (int i) const { return matrix_array[i]; }            ///< const function to return the i-th pointer to 3d-array. Next [j][k][l] can be applied, so we have regular [i][j][k][l].
+	T*** operator[] (size_t i); 											///< Return the i-th pointer to 3d-array. Next [j][k][l] can be applied, so we have regular [i][j][k][l].
+	T*** operator[] (size_t i) const { return matrix_array[i]; }            ///< const function to return the i-th pointer to 3d-array. Next [j][k][l] can be applied, so we have regular [i][j][k][l].
 	T& operator() (int w, int x, int y, int z); 							///< Return the (w,x,y,z) value of matrix
 	T& Value (int w, int x, int y, int z) { return operator()(w, x, y, z); }	///< Return the (w,x,y,z) value of matrix
 	Matrix4D<T>& MatrixArray () { return *this; }					///< Return pointer to the instance of the class.
@@ -439,7 +438,7 @@ public:
 
 	// ADDED
 #if (MATLAB_CAPABLE)
-	virtual mxArray* createStructMatrix(const std::string& filename, const std::string& info = "") const; ///< Package matrix into matlab variable
+	virtual mxArray* createStructMatrix(const std::string& info = "") const; ///< Package matrix into matlab variable
 #endif
 
 	virtual void writeToMatlabFile(const std::string& filename, const std::string& info = "") const;									///< Save matrix to a file
@@ -457,7 +456,7 @@ public:
 	// Some other stuff
 	std::string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
 
-	int index1d(int w, int x, int y, int z);								///< Returns index of the element (x,y,z) in 1d array
+	size_t index1d(size_t w, size_t x, size_t y);								///< Returns index of the element (x,y,z) in 1d array
 
 	T min() const;
 	T max() const;
@@ -543,7 +542,7 @@ public:
 	clock_t change_ind;						///< Variables useful for changes tracking (store here time when changed)
 
 	// Constructors
-	CalculationMatrix() { this->initialized = false; }
+	CalculationMatrix();
 	// !!! CalculationMatrix(int x_size, int y_size = 0, int z_size = 0, int n_of_diags = 1);
 	CalculationMatrix(int x_size, int y_size = 1, int z_size = 1, int n_of_diags = 1);
 

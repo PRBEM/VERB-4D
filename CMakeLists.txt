@@ -79,6 +79,12 @@ set(VERB4D_SOURCES
 
 # Build and link
 add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Gnu")
+    target_compile_options(VERB4D_Solver PRIVATE  -Wall -Wextra -Wpedantic)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(VERB4D_Solver PRIVATE /W4)
+endif()
+
 target_link_libraries(VERB4D_Solver ${DEPLIBS})
 
 # Flag compile type feedback
