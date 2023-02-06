@@ -279,7 +279,7 @@ int main(int argc, char* argv[]) {
 
     #ifdef DATA_ASSIMILATION
     da::DataAssimilationManagerConvection daManagerConvection {
-        "parameters_da.ini", time_first, time_first + time_total, V.wxSlice(0,0), K.wxSlice(0,0), P_size, R_size
+        "parameters_da.ini", time_first, time_first + time_total, V.wxSlice(0,0), K.wxSlice(0,0), P_size, R_size, outputFolder
     };
     #endif
 

@@ -103,6 +103,11 @@ if(DATA_ASSIMILATION)
         src/CustomDate.cpp
         src/DataAssimilationHelper.cpp
         src/DataAssimilation.cpp)
+    
+    if(DATA_ASSIMILATION_DEBUG)
+        add_definitions(-DDATA_ASSIMILATION_DEBUG)
+    endif(DATA_ASSIMILATION_DEBUG)
+
 endif(DATA_ASSIMILATION)
 
 # Build and link 
