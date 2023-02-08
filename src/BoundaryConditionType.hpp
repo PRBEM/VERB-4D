@@ -4,7 +4,7 @@
 #include <string>
 #include <stdexcept>
 
-enum BoundaryConditionType { Periodic, ConstantValue, ConstantDerivative };
+enum class BoundaryConditionType { Periodic, ConstantValue, ConstantDerivative };
 constexpr char PERIODIC_STR[]         = "BCT_PERIODIC";
 constexpr char CONST_VALUE_STR[]      = "BCT_CONSTANT_VALUE";
 constexpr char CONST_DERIVATIVE_STR[] = "BCT_CONSTANT_DERIVATIVE";
