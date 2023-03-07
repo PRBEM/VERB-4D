@@ -144,10 +144,10 @@ double internal::conditionalMean(
     const Matrix1D<double>& a,
     const Matrix1D<bool>& flag) {
     if (a.size_q1 != flag.size_q1) {
-        cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
-        cout << "Matrix sizes are different. ";
-        cout << "a.size_q1 = " << a.size_q1 << ", ";
-        cout << "flag.size_q1 = " << flag.size_q1 << endl;
+        std::cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        std::cout << "Matrix sizes are different. ";
+        std::cout << "a.size_q1 = " << a.size_q1 << ", ";
+        std::cout << "flag.size_q1 = " << flag.size_q1 << std::endl;
         ;
         exit(EXIT_FAILURE);
     }
@@ -155,7 +155,7 @@ double internal::conditionalMean(
     double result{0.};
     int counter{0};
     for (auto i = 0; i < a.size_q1; ++i) {
-        if (flag[i] && !isnan(a[i])) {
+        if (flag[i] && !std::isnan(a[i])) {
             result += a[i];
             ++counter;
         }
@@ -176,41 +176,41 @@ Matrix2D<double> internal::bin(
     const Matrix2D<double>& P,
     const Matrix2D<double>& R,
     const string& type) {
-    int P_size = P.size_q1;
-    int R_size = R.size_q2;
+    size_t P_size = P.size_q1;
+    size_t R_size = R.size_q2;
 
-    auto dP = P[1][0] - P[0][0];
-    auto dR = R[0][1] - R[0][0];
+    double dP = P[1][0] - P[0][0];
+    double dR = R[0][1] - R[0][0];
 
-    vector<Matrix1D<bool>> P_flags(P_size);
-    for (auto iP = 1; iP < P_size - 1; ++iP) {
-        auto P_c = P[iP][0];
+    std::vector<Matrix1D<bool>> P_flags(P_size);
+    for (size_t iP = 1; iP < P_size - 1; ++iP) {
+        double P_c = P[iP][0];
         P_flags[iP] = (data.P <= P_c + dP * 0.5) && (data.P >= P_c - dP * 0.5);
     }
     P_flags[0] = (data.P <= dP * 0.5) || (data.P >= P[P_size - 1][0] - dP * 0.5);
     P_flags[P_size - 1] = P_flags[0];
 
     // maybe? - replace boolean vectors with 1.0 - 0.0 vectors and perform dot product instead of conditional mean
-    vector<Matrix1D<bool>> R_flags(R_size);
-    for (auto iR = 0; iR < R_size; ++iR) {
-        auto R_c = R[0][iR];
+    std::vector<Matrix1D<bool>> R_flags(R_size);
+    for (size_t iR = 0; iR < R_size; ++iR) {
+        double R_c = R[0][iR];
         R_flags[iR] = (data.R <= R_c + dR * 0.5) && (data.R >= R_c - dR * 0.5);
     }
 
     Matrix2D<double> result{P_size, R_size};
     if (type == "linear") {
-        for (auto iP = 0; iP < P_size; ++iP) {
-            const auto& P_flag = P_flags[iP];
-            for (auto iR = 0; iR < R_size; ++iR) {
-                const auto& R_flag = R_flags[iR];
+        for (size_t iP = 0; iP < P_size; ++iP) {
+            const Matrix1D<bool>& P_flag = P_flags[iP];
+            for (size_t iR = 0; iR < R_size; ++iR) {
+                const Matrix1D<bool>& R_flag = R_flags[iR];
                 result[iP][iR] = conditionalMean(data.PSD, P_flag && R_flag);
             }
         }
     } else if (type == "log10") {
-        for (auto iP = 0; iP < P_size; ++iP) {
-            const auto& P_flag = P_flags[iP];
-            for (auto iR = 0; iR < R_size; ++iR) {
-                const auto& R_flag = R_flags[iR];
+        for (size_t iP = 0; iP < P_size; ++iP) {
+            const Matrix1D<bool>& P_flag = P_flags[iP];
+            for (size_t iR = 0; iR < R_size; ++iR) {
+                const Matrix1D<bool>& R_flag = R_flags[iR];
                 result[iP][iR] = std::pow(10.,
                                           conditionalMean(log10(data.PSD), P_flag && R_flag));
             }
@@ -224,10 +224,10 @@ Matrix2D<double> internal::bin(
 
 data_assimilation::ObservationSpace internal::convertToObservationSpace(
     const Matrix2D<double>& data) {
-    int size{0};
-    for (auto iP = 0; iP < data.size_q1; ++iP) {
-        for (auto iR = 0; iR < data.size_q2; ++iR) {
-            if (data[iP][iR] != FILLVAL && !isnan(data[iP][iR])) {
+    size_t size{0};
+    for (size_t iP = 0; iP < data.size_q1; ++iP) {
+        for (size_t iR = 0; iR < data.size_q2; ++iR) {
+            if (data[iP][iR] != FILLVAL && !std::isnan(data[iP][iR])) {
                 ++size;
             }
         }
@@ -250,10 +250,10 @@ data_assimilation::ObservationSpace internal::convertToObservationSpace(
     result.H = 0.;
 
     int counter{0};
-    for (auto iP = 0; iP < data.size_q1; ++iP) {
-        for (auto iR = 0; iR < data.size_q2; ++iR) {
+    for (size_t iP = 0; iP < data.size_q1; ++iP) {
+        for (size_t iR = 0; iR < data.size_q2; ++iR) {
             int H_idx = iR + iP * data.size_q2;
-            if (data[iP][iR] != FILLVAL && !isnan(data[iP][iR])) {
+            if (data[iP][iR] != FILLVAL && !std::isnan(data[iP][iR])) {
                 result.data[counter] = data[iP][iR];
                 result.H[counter][H_idx] = 1.0;
                 ++counter;
@@ -308,9 +308,9 @@ data_assimilation::ProcessedMatFileData internal::readData(
     }
     result.V.AllocateMemory(invMu.size_q1, invMu.size_q2, invMu.size_q3);
 
-    for (auto it = 0; it < invMu.size_q1; ++it) {
-        for (auto ie = 0; ie < invMu.size_q2; ++ie) {
-            for (auto ia = 0; ia < invMu.size_q3; ++ia) {
+    for (size_t it = 0; it < invMu.size_q1; ++it) {
+        for (size_t ie = 0; ie < invMu.size_q2; ++ie) {
+            for (size_t ia = 0; ia < invMu.size_q3; ++ia) {
                 result.V[it][ie][ia] = invMu[it][ie][ia] * std::pow(result.K[it][ia] + 0.5, 2.);
                 // replace all zeros with nan's
                 if (result.PSD[it][ie][ia] < 1e-21) result.PSD[it][ie][ia] = std::log10(-1.0);
@@ -324,13 +324,13 @@ data_assimilation::ProcessedMatFileData internal::readData(
     return result;
 }
 
-data_assimilation::ProcessedMatFileData internal::cat(const vector<ProcessedMatFileData>& pmfDataSplit) {
+data_assimilation::ProcessedMatFileData internal::cat(const std::vector<ProcessedMatFileData>& pmfDataSplit) {
     if (pmfDataSplit.size() == 0) {
         return {};
     }
 
     ProcessedMatFileData result = pmfDataSplit[0];
-    for (auto it = 1; it < pmfDataSplit.size(); ++it) {
+    for (size_t it = 1; it < pmfDataSplit.size(); ++it) {
         result.MLT = cat(result.MLT, pmfDataSplit[it].MLT);
         result.R = cat(result.R, pmfDataSplit[it].R);
         result.K = cat(result.K, pmfDataSplit[it].K);
@@ -358,13 +358,13 @@ Matrix1D<double> internal::interp1d_linear(
         exit(EXIT_FAILURE);
     }
 
-    int sz = x_in.size_q1;
-    int sz2 = x_out.size_q1;
+    size_t sz = x_in.size_q1;
+    size_t sz2 = x_out.size_q1;
 
     int notnan = 0;
-    for (int i = 0; i < sz; ++i) {
+    for (size_t i = 0; i < sz; ++i) {
         // check for FILLVAL?  && x_in[i] != FILLVAL && f_in[i]!= FILLVAL
-        if (!isnan(x_in[i]) && !isnan(f_in[i])) {
+        if (!std::isnan(x_in[i]) && !std::isnan(f_in[i])) {
             ++notnan;
         }
     }
@@ -380,8 +380,8 @@ Matrix1D<double> internal::interp1d_linear(
         Matrix1D<double> f_in_new(notnan);
 
         int ind = 0;
-        for (int i = 0; i < sz; ++i) {
-            if (!isnan(x_in[i]) && !isnan(f_in[i])) {
+        for (size_t i = 0; i < sz; ++i) {
+            if (!std::isnan(x_in[i]) && !std::isnan(f_in[i])) {
                 x_in_new[ind] = x_in[i];
                 f_in_new[ind] = f_in[i];
                 ++ind;
@@ -394,7 +394,7 @@ Matrix1D<double> internal::interp1d_linear(
         double x1, x2, y1, y2;
 
         if (dx > 0) {
-            for (int i = 1; i < sz - 1; ++i) {
+            for (size_t i = 1; i < sz - 1; ++i) {
                 if (x_in_new[i + 1] - x_in_new[i] <= 0.) {
                     std::cout << "In " << __func__ << ": input grid is not strictly monotonic.\n";
                     exit(EXIT_FAILURE);
@@ -402,7 +402,7 @@ Matrix1D<double> internal::interp1d_linear(
             }
 
             Matrix1D<double> f_out(sz2);
-            for (int j = 0; j < sz2; ++j) {
+            for (size_t j = 0; j < sz2; ++j) {
                 x_t = x_out[j];
 
                 if ((x_t > x_in_new[sz - 1]) || (x_t < x_in_new[0])) {
@@ -414,15 +414,15 @@ Matrix1D<double> internal::interp1d_linear(
                     continue;
                 }
 
-                for (int i = sz - 1; i >= 0; --i) {
-                    if (x_t >= x_in_new[i]) {
-                        x1 = x_in_new[i];
-                        y1 = f_in_new[i];
+                for (size_t i = sz; i >= 1; --i) {
+                    if (x_t >= x_in_new[i - 1]) {
+                        x1 = x_in_new[i - 1];
+                        y1 = f_in_new[i - 1];
                         break;
                     }
                 }
 
-                for (int i = 0; i < sz; ++i) {
+                for (size_t i = 0; i < sz; ++i) {
                     if (x_t <= x_in_new[i]) {
                         x2 = x_in_new[i];
                         y2 = f_in_new[i];
@@ -439,14 +439,14 @@ Matrix1D<double> internal::interp1d_linear(
             }
             return f_out;
         } else if (dx < 0) {
-            for (int i = 1; i < sz - 1; ++i)
+            for (size_t i = 1; i < sz - 1; ++i)
                 if (x_in_new[i + 1] - x_in_new[i] >= 0.) {
                     std::cout << "In " << __func__ << ": input grid is not strictly monotonic.\n";
                     exit(EXIT_FAILURE);
                 }
 
             Matrix1D<double> f_out(sz2);
-            for (int j = 0; j < sz2; ++j) {
+            for (size_t j = 0; j < sz2; ++j) {
                 x_t = x_out[j];
 
                 if ((x_t < x_in_new[sz - 1]) || (x_t > x_in_new[0])) {
@@ -458,7 +458,7 @@ Matrix1D<double> internal::interp1d_linear(
                     continue;
                 }
 
-                for (int i = 0; i < sz; ++i) {
+                for (size_t i = 0; i < sz; ++i) {
                     if (x_t >= x_in_new[i]) {
                         x2 = x_in_new[i];
                         y2 = f_in_new[i];
@@ -466,10 +466,10 @@ Matrix1D<double> internal::interp1d_linear(
                     }
                 }
 
-                for (int i = sz - 1; i >= 0; --i) {
-                    if (x_t <= x_in_new[i]) {
-                        x1 = x_in_new[i];
-                        y1 = f_in_new[i];
+                for (size_t i = sz; i >= 1; --i) {
+                    if (x_t <= x_in_new[i - 1]) {
+                        x1 = x_in_new[i - 1];
+                        y1 = f_in_new[i - 1];
                         break;
                     }
                 }
@@ -520,23 +520,23 @@ Matrix2D<double> internal::interp2d_linear_dependent(
         std::cout << "In " << __func__ << ": target array sizes are not consistent." << std::endl;
         exit(EXIT_FAILURE);
     }
-    int nv_in = V_in.size_q1;
-    int nk_in = K_in.size_q2;
-    int nv_out = V_out.size_q1;
-    int nk_out = K_out.size_q2;
+    size_t nv_in = V_in.size_q1;
+    size_t nk_in = K_in.size_q2;
+    size_t nv_out = V_out.size_q1;
+    size_t nk_out = K_out.size_q2;
 
     Matrix2D<double> PSD_out(nv_out, nk_out);
 
     Matrix3D<double> V_tmp(nv_in, nv_out, nk_out);
     Matrix3D<double> PSD_tmp(nv_in, nv_out, nk_out);
 
-    for (int iV = 0; iV < nv_in; ++iV) {
+    for (size_t iV = 0; iV < nv_in; ++iV) {
         Matrix1D<double> K_1d_tmp = K_in.xSlice(iV);
         Matrix1D<double> V_1d_tmp = V_in.xSlice(iV);
         Matrix1D<double> PSD_1d_tmp = PSD_in.xSlice(iV);
 
-        for (int iV2 = 0; iV2 < nv_out; ++iV2) {
-            for (int iK2 = 0; iK2 < nk_out; ++iK2) {
+        for (size_t iV2 = 0; iV2 < nv_out; ++iV2) {
+            for (size_t iK2 = 0; iK2 < nk_out; ++iK2) {
                 double K_1d_t_tmp = K_out[iV2][iK2];
                 V_tmp[iV][iV2][iK2] = interp1d_linear(K_1d_tmp, V_1d_tmp, K_1d_t_tmp, use_badval);
                 PSD_tmp[iV][iV2][iK2] = interp1d_linear(K_1d_tmp, PSD_1d_tmp, K_1d_t_tmp, use_badval);
@@ -544,8 +544,8 @@ Matrix2D<double> internal::interp2d_linear_dependent(
         }
     }
 
-    for (int iV2 = 0; iV2 < nv_out; ++iV2) {
-        for (int iK2 = 0; iK2 < nk_out; ++iK2) {
+    for (size_t iV2 = 0; iV2 < nv_out; ++iV2) {
+        for (size_t iK2 = 0; iK2 < nk_out; ++iK2) {
             Matrix1D<double> V_1d_tmp2 = V_tmp.yzSlice(iV2, iK2);
             Matrix1D<double> PSD_1d_tmp2 = PSD_tmp.yzSlice(iV2, iK2);
 
@@ -572,7 +572,7 @@ double internal::interp2d_linear_dependent(
     Matrix2D<double> K_out_matrix{1, 1};
     V_out_matrix[0][0] = V_out;
     K_out_matrix[0][0] = K_out;
-    auto result = interp2d_linear_dependent(V_in, K_in, PSD_in,
+    Matrix2D<double> result = interp2d_linear_dependent(V_in, K_in, PSD_in,
                                             V_out_matrix, K_out_matrix, use_badval);
 
     return result[0][0];
@@ -603,12 +603,12 @@ double internal::interp2d_four_corners(
     double maxK = K_in.max();
     if (K_out < minK || K_out > maxK) return std::log(-1.0);
 
-    int nV = V_in.size_q1;
-    int nK = K_in.size_q2;
+    size_t nV = V_in.size_q1;
+    size_t nK = K_in.size_q2;
     int non_nan_k = 0;
 
-    for (int iK = 0; iK < nK; iK++)
-        if (!isnan(K_in[0][iK])) {
+    for (size_t iK = 0; iK < nK; iK++)
+        if (!std::isnan(K_in[0][iK])) {
             non_nan_k++;
         }
     if (non_nan_k < 2) {
@@ -619,10 +619,10 @@ double internal::interp2d_four_corners(
     Matrix2D<double> PSD_arr(PSD_in.size_q1, non_nan_k);
 
     int counter = 0;
-    for (int iK = 0; iK < nK; iK++) {
-        if (!isnan(K_in[0][iK])) {
+    for (size_t iK = 0; iK < nK; iK++) {
+        if (!std::isnan(K_in[0][iK])) {
             K_arr[counter] = K_in[0][iK];
-            for (int iV = 0; iV < nV; iV++) {
+            for (size_t iV = 0; iV < nV; iV++) {
                 V_arr[iV][counter] = V_in[iV][counter];
                 PSD_arr[iV][counter] = PSD_in[iV][counter];
             }
@@ -639,7 +639,7 @@ double internal::interp2d_four_corners(
     double k_lower = -std::numeric_limits<double>::infinity();
     double k_upper = std::numeric_limits<double>::infinity();
 
-    for (int iK = 0; iK < non_nan_k; iK++) {
+    for (size_t iK = 0; iK < non_nan_k; iK++) {
         if (K_arr[iK] <= K_out && K_arr[iK] > k_lower) {
             k_lower = K_arr[iK];
             lower_k_neighbour = iK;
@@ -690,9 +690,9 @@ double internal::interp2d_four_corners(
     */
     int non_nan_v_for_lower_k = 0;
     int non_nan_v_for_upper_k = 0;
-    for (int iV = 0; iV < nV; iV++) {
-        if (!isnan(V_arr[iV][lower_k_neighbour]) && !isnan(PSD_arr[iV][lower_k_neighbour])) non_nan_v_for_lower_k++;
-        if (!isnan(V_arr[iV][upper_k_neighbour]) && !isnan(PSD_arr[iV][upper_k_neighbour])) non_nan_v_for_upper_k++;
+    for (size_t iV = 0; iV < nV; iV++) {
+        if (!std::isnan(V_arr[iV][lower_k_neighbour]) && !std::isnan(PSD_arr[iV][lower_k_neighbour])) non_nan_v_for_lower_k++;
+        if (!std::isnan(V_arr[iV][upper_k_neighbour]) && !std::isnan(PSD_arr[iV][upper_k_neighbour])) non_nan_v_for_upper_k++;
     }
     if (non_nan_v_for_lower_k < 2 || non_nan_v_for_upper_k < 2) return std::log(-1);
 
@@ -703,13 +703,13 @@ double internal::interp2d_four_corners(
 
     int counter_lower_k = 0;
     int counter_upper_k = 0;
-    for (int iV = 0; iV < nV; iV++) {
-        if (!isnan(V_arr[iV][lower_k_neighbour]) && !isnan(PSD_arr[iV][lower_k_neighbour])) {
+    for (size_t iV = 0; iV < nV; iV++) {
+        if (!std::isnan(V_arr[iV][lower_k_neighbour]) && !std::isnan(PSD_arr[iV][lower_k_neighbour])) {
             V_for_lower_K[counter_lower_k] = V_arr[iV][lower_k_neighbour];
             PSD_for_lower_K[counter_lower_k] = PSD_arr[iV][lower_k_neighbour];
             counter_lower_k++;
         }
-        if (!isnan(V_arr[iV][upper_k_neighbour]) && !isnan(PSD_arr[iV][upper_k_neighbour])) {
+        if (!std::isnan(V_arr[iV][upper_k_neighbour]) && !std::isnan(PSD_arr[iV][upper_k_neighbour])) {
             V_for_upper_K[counter_upper_k] = V_arr[iV][upper_k_neighbour];
             PSD_for_upper_K[counter_upper_k] = PSD_arr[iV][upper_k_neighbour];
             counter_upper_k++;
@@ -816,7 +816,7 @@ double internal::interp2d_four_corners(
     lower_v_neighbour = -1;
     upper_v_neighbour = -1;
 
-    for (int iV = 0; iV < non_nan_v_for_upper_k; iV++) {
+    for (size_t iV = 0; iV < non_nan_v_for_upper_k; iV++) {
         if (V_for_upper_K[iV] <= V_out && V_for_upper_K[iV] > v_lower) {
             v_lower = V_for_upper_K[iV];
             lower_v_neighbour = iV;
@@ -845,34 +845,34 @@ double internal::interp2d_four_corners(
 
     return interpolation_lambda(x1, y1, x2, y2, K_out);
 }
-vector<vector<data_assimilation::Observations>> internal::interpolate_old(
+std::vector<std::vector<data_assimilation::Observations>> internal::interpolate_old(
     const ProcessedMatFileData& data,
     const Matrix2D<double>& V_grid,
     const Matrix2D<double>& K_grid) {
-    int nT = data.MLT.size_q1;
+    size_t nT = data.MLT.size_q1;
 
     Matrix1D<double> P{nT};
-    for (auto it = 0; it < nT; ++it) {
+    for (size_t it = 0; it < nT; ++it) {
         P[it] = fmod(data.MLT[it] + 12., 24.) * M_PI / 12.;
     }
 
-    int V_size = V_grid.size_q1;
-    int K_size = K_grid.size_q2;
+    size_t V_size = V_grid.size_q1;
+    size_t K_size = K_grid.size_q2;
 
     Matrix3D<double> K_in(nT, data.V.size_q2, data.K.size_q2);
-    for (auto it = 0; it < nT; ++it) {
-        for (auto iV = 0; iV < K_in.size_q2; ++iV) {
-            for (auto iK = 0; iK < K_in.size_q3; ++iK) {
+    for (size_t it = 0; it < nT; ++it) {
+        for (size_t iV = 0; iV < K_in.size_q2; ++iV) {
+            for (size_t iK = 0; iK < K_in.size_q3; ++iK) {
                 K_in[it][iV][iK] = data.K[it][iK];
             }
         }
     }
 
-    vector<vector<Observations>> result(V_size, vector<Observations>(K_size));
+    std::vector<std::vector<Observations>> result(V_size, std::vector<Observations>(K_size));
     // int counter = 0;
 #pragma omp parallel for schedule(dynamic, 1) collapse(2)
-    for (int iV = 0; iV < V_size; ++iV) {
-        for (int iK = 0; iK < K_size; ++iK) {
+    for (size_t iV = 0; iV < V_size; ++iV) {
+        for (size_t iK = 0; iK < K_size; ++iK) {
             Observations& obs = result[iV][iK];
             obs.R = data.R;
             obs.P = P;
@@ -901,23 +901,23 @@ vector<vector<data_assimilation::Observations>> internal::interpolate_old(
     return result;
 }
 
-vector<vector<data_assimilation::Observations>> internal::interpolate(
+std::vector<std::vector<data_assimilation::Observations>> internal::interpolate(
     const std::vector<ProcessedMatFileData>& data,
     const Matrix2D<double>& V_grid,
     const Matrix2D<double>& K_grid) {
-    int V_size = V_grid.size_q1;
-    int K_size = K_grid.size_q2;
+    size_t V_size = V_grid.size_q1;
+    size_t K_size = K_grid.size_q2;
 
     int nT = 0;
     for (auto& instrumentData : data) nT += instrumentData.MLT.size_q1;
     Matrix1D<double> R(nT);
     Matrix1D<double> P(nT);
-    vector<Matrix3D<double>> K_in;
+    std::vector<Matrix3D<double>> K_in;
     K_in.reserve(data.size());
     int counter = 0;
     for (auto& instrumentData : data) {
         K_in.emplace_back(instrumentData.MLT.size_q1, instrumentData.V.size_q2, instrumentData.K.size_q2);
-        for (auto it = 0; it < instrumentData.MLT.size_q1; ++it) {
+        for (size_t it = 0; it < instrumentData.MLT.size_q1; ++it) {
             R[counter] = instrumentData.R[it];
             P[counter] = fmod(instrumentData.MLT[it] + 12., 24.) * M_PI / 12.;
             counter++;
@@ -928,17 +928,17 @@ vector<vector<data_assimilation::Observations>> internal::interpolate(
             }
         }
     }
-    vector<vector<Observations>> result(V_size, vector<Observations>(K_size));
+    std::vector<std::vector<Observations>> result(V_size, std::vector<Observations>(K_size));
     // int counter = 0;
 #pragma omp parallel for schedule(dynamic, 1) collapse(2)
-    for (int iV = 0; iV < V_size; ++iV) {
-        for (int iK = 0; iK < K_size; ++iK) {
+    for (size_t iV = 0; iV < V_size; ++iV) {
+        for (size_t iK = 0; iK < K_size; ++iK) {
             Observations& obs = result[iV][iK];
             obs.R = R;
             obs.P = P;
             obs.PSD.AllocateMemory(nT);
             int counter = 0;
-            for (int instrumentIndex = 0; instrumentIndex < data.size(); instrumentIndex++) {
+            for (size_t instrumentIndex = 0; instrumentIndex < data.size(); instrumentIndex++) {
                 auto& instrumentData = data[instrumentIndex];
                 for (auto it = 0; it < instrumentData.MLT.size_q1; ++it) {
                     auto PSD_in = instrumentData.PSD.xSlice(it);

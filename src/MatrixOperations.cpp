@@ -373,8 +373,8 @@ Matrix1D<double> operator*(
 
     //transpose matrix A as lapack expects column major matrices 
     char trans {'T'};
-    long m {A.size_q2};
-    long n {A.size_q1};
+    long m = static_cast<long>(A.size_q2);
+    long n = static_cast<long>(A.size_q1);
     double alpha {1.};
     double *a {A[0]};
     long lda {m};
@@ -411,14 +411,14 @@ Matrix2D<double> operator*(
     //transpose matrices A and B as lapack expects column major matrices 
     char transa {'N'};
     char transb {'N'};
-    long m {B.size_q2};
-    long n {A.size_q1};
-    long k {B.size_q1};
+    long m = static_cast<long>(B.size_q2);
+    long n = static_cast<long>(A.size_q1);
+    long k = static_cast<long>(B.size_q1);
     double alpha {1.0};
     double *a {A[0]};
-    long lda {A.size_q2};
+    long lda = static_cast<long>(A.size_q2);
     double *b {B[0]};
-    long ldb {B.size_q2};
+    long ldb = static_cast<long>(B.size_q2);
     double beta {0.};
     double *c {answer[0]};
     long ldc {m};
@@ -445,14 +445,14 @@ Matrix2D<double> abtrans(
     //transpose matrices A and B as lapack expects column major matrices 
     char transa {'N'};
     char transb {'T'};
-    long m {B.size_q1};
-    long n {A.size_q1};
-    long k {B.size_q2};
+    long m = static_cast<long>(B.size_q1);
+    long n = static_cast<long>(A.size_q1);
+    long k = static_cast<long>(B.size_q2);
     double alpha {1.0};
     double *a {A[0]};
     long lda {k};
     double *b {B[0]};
-    long ldb {B.size_q2};
+    long ldb = static_cast<long>(B.size_q2);
     double beta {0.};
     double *c {answer[0]};
     long ldc {m};
@@ -477,8 +477,8 @@ Matrix2D<double> operator+(
     }
 
     Matrix2D<double> result {A.size_q1, A.size_q2};
-    for (auto i = 0; i < result.size_q1; ++i) {
-        for (auto j = 0; j < result.size_q2; ++j) {
+    for (size_t i = 0; i < result.size_q1; ++i) {
+        for (size_t j = 0; j < result.size_q2; ++j) {
             result[i][j] = A[i][j] + B[i][j];
         }
     }
@@ -501,8 +501,8 @@ Matrix2D<double> operator-(
 
     Matrix2D<double> result {A.size_q1, A.size_q2};
 
-    for (auto i = 0; i < result.size_q1; ++i) {
-        for (auto j = 0; j < result.size_q2; ++j) {
+    for (size_t i = 0; i < result.size_q1; ++i) {
+        for (size_t j = 0; j < result.size_q2; ++j) {
             result[i][j] = A[i][j] - B[i][j];
         }
     }
@@ -522,8 +522,8 @@ Matrix2D<double> inv(Matrix2D<double> A) {
     }
 
 
-    long m {A.size_q1};
-    long n {A.size_q1};   
+    long m = static_cast<long>(A.size_q1);
+    long n = static_cast<long>(A.size_q1);   
     double *a {A[0]};
     long lda {m};
     std::unique_ptr<long[]> ipiv {new long[m]};
@@ -544,13 +544,13 @@ Matrix2D<double> inv(Matrix2D<double> A) {
 }
 // solve the system of transposed matrices A^T * X^T = B^T equivalent to X * A = B
 Matrix2D<double> trans_solve(const Matrix2D<double>& A, Matrix2D<double> B) {
-    long nrhs {B.size_q1};
-    long n {A.size_q1};   
-    long m {A.size_q2};   
+    long nrhs = static_cast<long>(B.size_q1);
+    long n = static_cast<long>(A.size_q1);   
+    long m = static_cast<long>(A.size_q2);   
     double *a {A[0]};
     double *b {B[0]};
     long lda {n};
-    long ldb {B.size_q2};
+    long ldb = static_cast<long>(B.size_q2);
     std::unique_ptr<long[]> ipiv {new long[m]};
     long info {0};
     long lwork {n};
@@ -566,8 +566,8 @@ Matrix2D<double> trans_solve(const Matrix2D<double>& A, Matrix2D<double> B) {
 
 Matrix1D<double> toMatrix1D(const Matrix2D<double>& A) {
     Matrix1D<double> result(A.size_q1 * A.size_q2);
-    for (auto i = 0; i < A.size_q1; ++i) {
-        for (auto j = 0; j < A.size_q2; ++j) {
+    for (size_t i = 0; i < A.size_q1; ++i) {
+        for (size_t j = 0; j < A.size_q2; ++j) {
             result[i * A.size_q2 + j] = A[i][j];
         }
     } 
