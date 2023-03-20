@@ -54,36 +54,11 @@ namespace data_assimilation::internal {
     data_assimilation::ProcessedMatFileData readData(double timeStart, double timeEnd, const pmf::Parameters& parameters);
 
     data_assimilation::ProcessedMatFileData cat(const std::vector<ProcessedMatFileData>& pmfDataSplit);
-    
-    Matrix1D<double> interp1d_linear(
-        const Matrix1D<double>& x_in, 
-        const Matrix1D<double>& f_in,
-        const Matrix1D<double>& x_out, bool use_fillval
-    );
-    double interp1d_linear(
-        const Matrix1D<double>& x_in, 
-        const Matrix1D<double>& f_in,
-        double x_out, bool use_badval
-    );
-    Matrix2D<double> interp2d_linear_dependent(
-        const Matrix2D<double>& V_in, const Matrix2D<double>& K_in, 
-        const Matrix2D<double>& PSD_in,const Matrix2D<double>& V_out,
-        const Matrix2D<double>& K_out, bool use_badval
-    );
-    double interp2d_linear_dependent(
-        const Matrix2D<double>& V_in, const Matrix2D<double>& K_in,
-        const Matrix2D<double>& PSD_in, double V_out, double K_out,
-        bool use_badval
-    );
+
     double interp2d_four_corners(
         const Matrix2D<double>& V_in, const Matrix2D<double>& K_in,
         const Matrix2D<double>& PSD_in, double V_out, double K_out,
         bool use_badval
-    );
-   std::vector<std::vector<data_assimilation::Observations>> interpolate_old(
-        const data_assimilation::ProcessedMatFileData& data,
-        const Matrix2D<double>& V_grid,
-        const Matrix2D<double>& K_grid 
     );
 
    std::vector<std::vector<data_assimilation::Observations>> interpolate(

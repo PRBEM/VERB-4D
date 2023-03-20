@@ -111,6 +111,7 @@ Matrix1D<double> MatArray::to_Matrix1D() const {
     if (dims.size() != 1){
         for (int i = 1; i < dims.size(); ++i){
             if (dims[i] != 1) {
+                std::cout << this->name << std::endl;
                 std::cout << "Cannot convert " << dims.size() << "D Matlab array to Matrix1D\n";
                 exit(EXIT_FAILURE);
             }
@@ -193,7 +194,7 @@ namespace pmf::internal {
 
 string generateProcessedMatFileMissionFolder (const string& mission) {
     string missionUpper = toupper(mission);
-    if (missionUpper == "RBSP") {
+    if (missionUpper == "RBSP" || missionUpper == "ARASE") {
         return missionUpper;
     } else {
         std::cout << "Mission " << mission << " is not supported\n";
@@ -208,6 +209,8 @@ string generateProcessedMatFileSatelliteFolder(const string& satellite) {
         return "rbspa";
     } else if (satellite_upper == "RBSPB") {
         return "rbspb";
+    } else if (satellite_upper == "ARASE") {
+        return "arase";
     } else if (satellite_upper == "") {
         std::cout << "Empty satellite name!\n";
         exit(EXIT_FAILURE);
@@ -224,7 +227,9 @@ string generateProcessedMatFileSatelliteName(const string& satellite) {
         return "rbspa";
     } else if (satellite_upper == "RBSPB") {
         return "rbspb";
-    } else if (satellite_upper == "") {
+    } else if (satellite_upper == "ARASE") {
+        return "arase";
+    }  else if (satellite_upper == "") {
         std::cout << "Empty satellite name!\n";
         exit(EXIT_FAILURE);
     } else {
@@ -243,6 +248,8 @@ string generateProcessedMatFileInstrumentName(const string& instrument) {
         return "mageis";
     } else if (instrument_upper == "REPT") {
         return "rept";
+    } else if (instrument_upper == "MEPE-L3") {
+        return "mepe-l3";
     } else if (instrument_upper == "") {
         cout << "Empty instrument name!\n";
         exit(EXIT_FAILURE);
@@ -258,6 +265,8 @@ string generateProcessedMatFileVariableSuffix(const string& name) {
         return "xGEO";
     } else if (name_upper == "MLT") {
         return "mlt";
+    } else if (name_upper == "R0") {
+        return "R0";
     } else if (name_upper == "XGEO") {
         return "xGEO";
     } else if (name_upper == "INVMU") {            
@@ -359,6 +368,8 @@ string generateProcessedMatFileVariableName(const string& name) {
         return "time";
     } else if (name_upper == "MLT") {
         return "MLT";
+    } else if (name_upper == "R0") {
+        return "R0";
     } else if (name_upper == "XGEO") {
         return "xGEO";
     } else if (name_upper == "INVMU") {            

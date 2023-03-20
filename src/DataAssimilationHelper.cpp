@@ -285,8 +285,10 @@ data_assimilation::ProcessedMatFileData internal::readData(
     ProcessedMatFileData result;
     std::cout << "\tMLT ";
     result.MLT = readProcessedMatFiles1D("MLT", timeStart, timeEnd, parameters);
-    std::cout << "xGEO ";
-    auto xGEO = readProcessedMatFiles2D("xGEO", timeStart, timeEnd, parameters);
+    // std::cout << "xGEO ";
+    // auto xGEO = readProcessedMatFiles2D("xGEO", timeStart, timeEnd, parameters);
+    std::cout << "R0 ";
+    result.R = readProcessedMatFiles1D("R0", timeStart, timeEnd, parameters);
     std::cout << "InvMu ";
     auto invMu = readProcessedMatFiles3D("InvMu", timeStart, timeEnd, parameters);
     std::cout << "InvK ";
@@ -294,18 +296,18 @@ data_assimilation::ProcessedMatFileData internal::readData(
     std::cout << "PSD\n";
     result.PSD = readProcessedMatFiles3D("PSD", timeStart, timeEnd, parameters);
 
-    if (!result.MLT.initialized || !xGEO.initialized || !invMu.initialized || !result.K.initialized || !result.PSD.initialized) {
+    if (!result.MLT.initialized || !result.R.initialized || !invMu.initialized || !result.K.initialized || !result.PSD.initialized) {
         // return an empty mat file if any necessary file was missing
         return ProcessedMatFileData();
     }
 
-    result.R.AllocateMemory(xGEO.size_q1);
-    for (auto it = 0; it < xGEO.size_q1; ++it) {
-        result.R[it] = std::sqrt(
-            xGEO[it][0] * xGEO[it][0] +
-            xGEO[it][1] * xGEO[it][1] +
-            xGEO[it][2] * xGEO[it][2]);
-    }
+    // result.R.AllocateMemory(xGEO.size_q1);
+    // for (auto it = 0; it < xGEO.size_q1; ++it) {
+    //     result.R[it] = std::sqrt(
+    //         xGEO[it][0] * xGEO[it][0] +
+    //         xGEO[it][1] * xGEO[it][1] +
+    //         xGEO[it][2] * xGEO[it][2]);
+    // }
     result.V.AllocateMemory(invMu.size_q1, invMu.size_q2, invMu.size_q3);
 
     for (size_t it = 0; it < invMu.size_q1; ++it) {
@@ -340,243 +342,6 @@ data_assimilation::ProcessedMatFileData internal::cat(const std::vector<Processe
     return result;
 }
 
-Matrix1D<double> internal::interp1d_linear(
-    const Matrix1D<double>& x_in,
-    const Matrix1D<double>& f_in,
-    const Matrix1D<double>& x_out,
-    bool use_fillval) {
-    if (!x_out.initialized)
-        return x_out;
-
-    if (x_in.size_q1 < 2) {
-        std::cout << "In " << __func__ << ": at least 2 points are required for interpolation.\n";
-        exit(EXIT_FAILURE);
-    }
-
-    if (x_in.size_q1 != f_in.size_q1) {
-        std::cout << "In " << __func__ << ": input array sizes are not consistent.\n";
-        exit(EXIT_FAILURE);
-    }
-
-    size_t sz = x_in.size_q1;
-    size_t sz2 = x_out.size_q1;
-
-    int notnan = 0;
-    for (size_t i = 0; i < sz; ++i) {
-        // check for FILLVAL?  && x_in[i] != FILLVAL && f_in[i]!= FILLVAL
-        if (!std::isnan(x_in[i]) && !std::isnan(f_in[i])) {
-            ++notnan;
-        }
-    }
-
-    if (notnan <= 1) {
-        Matrix1D<double> f_out(sz2);
-
-        // f_out = FILLVAL;
-        f_out = std::log10(-1.0);
-        return f_out;
-    } else {
-        Matrix1D<double> x_in_new(notnan);
-        Matrix1D<double> f_in_new(notnan);
-
-        int ind = 0;
-        for (size_t i = 0; i < sz; ++i) {
-            if (!std::isnan(x_in[i]) && !std::isnan(f_in[i])) {
-                x_in_new[ind] = x_in[i];
-                f_in_new[ind] = f_in[i];
-                ++ind;
-            }
-        }
-
-        sz = notnan;
-        double dx = x_in_new[1] - x_in_new[0];
-        double x_t;
-        double x1, x2, y1, y2;
-
-        if (dx > 0) {
-            for (size_t i = 1; i < sz - 1; ++i) {
-                if (x_in_new[i + 1] - x_in_new[i] <= 0.) {
-                    std::cout << "In " << __func__ << ": input grid is not strictly monotonic.\n";
-                    exit(EXIT_FAILURE);
-                }
-            }
-
-            Matrix1D<double> f_out(sz2);
-            for (size_t j = 0; j < sz2; ++j) {
-                x_t = x_out[j];
-
-                if ((x_t > x_in_new[sz - 1]) || (x_t < x_in_new[0])) {
-                    if (use_fillval)
-                        f_out[j] = log10(-1.0);
-                    else {
-                        f_out[j] = (x_t > x_in_new[sz - 1]) ? f_in_new[sz - 1] : f_in_new[0];
-                    }
-                    continue;
-                }
-
-                for (size_t i = sz; i >= 1; --i) {
-                    if (x_t >= x_in_new[i - 1]) {
-                        x1 = x_in_new[i - 1];
-                        y1 = f_in_new[i - 1];
-                        break;
-                    }
-                }
-
-                for (size_t i = 0; i < sz; ++i) {
-                    if (x_t <= x_in_new[i]) {
-                        x2 = x_in_new[i];
-                        y2 = f_in_new[i];
-                        break;
-                    }
-                }
-                if (y1 == -1 / 0.0 || y2 == -1 / 0.0)
-                    f_out[j] = y1;
-                else if (x1 == x2)
-                    f_out[j] = y1;
-                else {
-                    f_out[j] = ((y2 - y1) * x_t + (y1 * x2 - y2 * x1)) / (x2 - x1);
-                }
-            }
-            return f_out;
-        } else if (dx < 0) {
-            for (size_t i = 1; i < sz - 1; ++i)
-                if (x_in_new[i + 1] - x_in_new[i] >= 0.) {
-                    std::cout << "In " << __func__ << ": input grid is not strictly monotonic.\n";
-                    exit(EXIT_FAILURE);
-                }
-
-            Matrix1D<double> f_out(sz2);
-            for (size_t j = 0; j < sz2; ++j) {
-                x_t = x_out[j];
-
-                if ((x_t < x_in_new[sz - 1]) || (x_t > x_in_new[0])) {
-                    if (use_fillval)
-                        f_out[j] = log10(-1.0);
-                    else {
-                        f_out[j] = (x_t < x_in_new[sz - 1]) ? f_in_new[sz - 1] : f_in_new[0];
-                    }
-                    continue;
-                }
-
-                for (size_t i = 0; i < sz; ++i) {
-                    if (x_t >= x_in_new[i]) {
-                        x2 = x_in_new[i];
-                        y2 = f_in_new[i];
-                        break;
-                    }
-                }
-
-                for (size_t i = sz; i >= 1; --i) {
-                    if (x_t <= x_in_new[i - 1]) {
-                        x1 = x_in_new[i - 1];
-                        y1 = f_in_new[i - 1];
-                        break;
-                    }
-                }
-
-                if (y1 == -1.0 / 0.0 || y2 == -1.0 / 0.0)
-                    f_out[j] = y1;
-                else if (x1 == x2)
-                    f_out[j] = y1;
-                else {
-                    f_out[j] = ((y2 - y1) * x_t + (y1 * x2 - y2 * x1)) / (x2 - x1);
-                }
-            }
-
-            return f_out;
-        } else {
-            std::cout << "In " << __func__ << ": input grid should not contain repeated elements.\n";
-            exit(EXIT_FAILURE);
-        }
-    }
-}
-
-double internal::interp1d_linear(
-    const Matrix1D<double>& x_in,
-    const Matrix1D<double>& f_in,
-    double x_out,
-    bool use_badval) {
-    Matrix1D<double> x_out_tmp(1), f_out_tmp(1);
-    x_out_tmp[0] = x_out;
-
-    f_out_tmp = interp1d_linear(x_in, f_in, x_out_tmp, use_badval);
-    return f_out_tmp[0];
-}
-
-Matrix2D<double> internal::interp2d_linear_dependent(
-    const Matrix2D<double>& V_in,
-    const Matrix2D<double>& K_in,
-    const Matrix2D<double>& PSD_in,
-    const Matrix2D<double>& V_out,
-    const Matrix2D<double>& K_out,
-    bool use_badval) {
-    if ((V_in.size_q1 != K_in.size_q1) || (K_in.size_q1 != PSD_in.size_q1) ||
-        (V_in.size_q2 != K_in.size_q2) || (K_in.size_q2 != PSD_in.size_q2)) {
-        std::cout << "In " << __func__ << ": input array sizes are not consistent." << std::endl;
-        exit(EXIT_FAILURE);
-    }
-
-    if ((V_out.size_q1 != K_out.size_q1) || (V_out.size_q2 != K_out.size_q2)) {
-        std::cout << "In " << __func__ << ": target array sizes are not consistent." << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    size_t nv_in = V_in.size_q1;
-    size_t nk_in = K_in.size_q2;
-    size_t nv_out = V_out.size_q1;
-    size_t nk_out = K_out.size_q2;
-
-    Matrix2D<double> PSD_out(nv_out, nk_out);
-
-    Matrix3D<double> V_tmp(nv_in, nv_out, nk_out);
-    Matrix3D<double> PSD_tmp(nv_in, nv_out, nk_out);
-
-    for (size_t iV = 0; iV < nv_in; ++iV) {
-        Matrix1D<double> K_1d_tmp = K_in.xSlice(iV);
-        Matrix1D<double> V_1d_tmp = V_in.xSlice(iV);
-        Matrix1D<double> PSD_1d_tmp = PSD_in.xSlice(iV);
-
-        for (size_t iV2 = 0; iV2 < nv_out; ++iV2) {
-            for (size_t iK2 = 0; iK2 < nk_out; ++iK2) {
-                double K_1d_t_tmp = K_out[iV2][iK2];
-                V_tmp[iV][iV2][iK2] = interp1d_linear(K_1d_tmp, V_1d_tmp, K_1d_t_tmp, use_badval);
-                PSD_tmp[iV][iV2][iK2] = interp1d_linear(K_1d_tmp, PSD_1d_tmp, K_1d_t_tmp, use_badval);
-            }
-        }
-    }
-
-    for (size_t iV2 = 0; iV2 < nv_out; ++iV2) {
-        for (size_t iK2 = 0; iK2 < nk_out; ++iK2) {
-            Matrix1D<double> V_1d_tmp2 = V_tmp.yzSlice(iV2, iK2);
-            Matrix1D<double> PSD_1d_tmp2 = PSD_tmp.yzSlice(iV2, iK2);
-
-            PSD_out[iV2][iK2] = interp1d_linear(V_1d_tmp2, PSD_1d_tmp2, V_out[iV2][iK2], use_badval);
-        }
-    }
-    // for (auto j = 0; j < nv_out; j++){
-    //     for( auto k = 0; k < nk_out; k++){
-    //             cout << PSD_out[j][k] << " ";
-    //     }
-    //     cout << endl;
-    // }
-    return PSD_out;
-}
-
-double internal::interp2d_linear_dependent(
-    const Matrix2D<double>& V_in,
-    const Matrix2D<double>& K_in,
-    const Matrix2D<double>& PSD_in,
-    double V_out,
-    double K_out,
-    bool use_badval) {
-    Matrix2D<double> V_out_matrix{1, 1};
-    Matrix2D<double> K_out_matrix{1, 1};
-    V_out_matrix[0][0] = V_out;
-    K_out_matrix[0][0] = K_out;
-    Matrix2D<double> result = interp2d_linear_dependent(V_in, K_in, PSD_in,
-                                            V_out_matrix, K_out_matrix, use_badval);
-
-    return result[0][0];
-}
 double internal::interp2d_four_corners(
     const Matrix2D<double>& V_in, const Matrix2D<double>& K_in,
     const Matrix2D<double>& PSD_in, double V_out, double K_out,
@@ -605,300 +370,100 @@ double internal::interp2d_four_corners(
 
     size_t nV = V_in.size_q1;
     size_t nK = K_in.size_q2;
-    int non_nan_k = 0;
 
-    for (size_t iK = 0; iK < nK; iK++)
-        if (!std::isnan(K_in[0][iK])) {
-            non_nan_k++;
-        }
-    if (non_nan_k < 2) {
-        return std::log(-1);
-    }
-    Matrix1D<double> K_arr(non_nan_k);
-    Matrix2D<double> V_arr(V_in.size_q1, non_nan_k);
-    Matrix2D<double> PSD_arr(PSD_in.size_q1, non_nan_k);
-
-    int counter = 0;
-    for (size_t iK = 0; iK < nK; iK++) {
-        if (!std::isnan(K_in[0][iK])) {
-            K_arr[counter] = K_in[0][iK];
-            for (size_t iV = 0; iV < nV; iV++) {
-                V_arr[iV][counter] = V_in[iV][counter];
-                PSD_arr[iV][counter] = PSD_in[iV][counter];
-            }
-            counter++;
-        }
-    }
-    // double k_max = K_arr.max();
-    // double k_min = K_arr.min();
-    // if (K_out < k_min || K_out > k_max) return std::log(-1);
-
-    // double dK = K_arr[1] - K_arr[0];
     int lower_k_neighbour = -1;
     int upper_k_neighbour = -1;
     double k_lower = -std::numeric_limits<double>::infinity();
     double k_upper = std::numeric_limits<double>::infinity();
 
-    for (size_t iK = 0; iK < non_nan_k; iK++) {
-        if (K_arr[iK] <= K_out && K_arr[iK] > k_lower) {
-            k_lower = K_arr[iK];
-            lower_k_neighbour = iK;
+    for (size_t iK = 0; iK < nK; iK++) 
+    {
+        // we check all V channels altough K is independent of V
+        // in case of missing data in the first V channel K_in[0][iK]
+        for(size_t iV = 0; iV < nV; iV++)
+        {
+            if (K_in[iV][iK] <= K_out && K_in[iV][iK] > k_lower) {
+                k_lower = K_in[iV][iK];
+                lower_k_neighbour = iK;
+                break;
+            }
         }
-        if (K_arr[iK] >= K_out && K_arr[iK] < k_upper) {
-            k_upper = K_arr[iK];
-            upper_k_neighbour = iK;
+        for(size_t iV = 0; iV < nV; iV++)
+        {
+            if (K_in[iV][iK] >= K_out && K_in[iV][iK] < k_upper) {
+                k_upper = K_in[iV][iK];
+                upper_k_neighbour = iK;
+                break;
+            }
         }
     }
     if (lower_k_neighbour < 0 || upper_k_neighbour < 0) return std::log(-1);
-    // if(dK > 0){
-    //     for(int iK = 1; iK < non_nan_k; iK++){
-    //         // if(K_arr[iK + 1] <= K_arr[iK]){
-    //         //     exit(EXIT_FAILURE);
-    //         // }
-    //         if(K_arr[iK] >= K_out){
-    //             lower_k_neighbour = iK - 1;
-    //             upper_k_neighbour = iK;
-    //             break;
-    //         }
-    //     }
-    // }
-    // else if(dK < 0){
-    //     for(int iK = 1; iK < non_nan_k; iK++){
-    //         // if(K_arr[iK + 1] >= K_arr[iK]){
-    //         //     std::cout << "K_in must be monotonic!\n";
-    //         //     for(int iK = 0; iK < nK - 1; iK++){
-    //         //         std::cout << K_arr[iK] << ' ';
-    //         //     }
-    //         //     std::cout << std::endl;
-    //         //     exit(EXIT_FAILURE);
-    //         // }
-    //         if(K_arr[iK] <= K_out){
-    //             upper_k_neighbour = iK - 1;
-    //             lower_k_neighbour = iK;
-    //             break;
-    //         }
-    //     }
-    // }
-    // else{
-    //     std::cout << "K_in must be monotonic!\n";
-    //     exit(EXIT_FAILURE);
-    // }
 
     /*
     Now we know the K-index of the lower and upper neighbour of the K_out grid point. For both indices
-    filter nan's from the corresponding V and PSD arrays.
+    check if there are at least two non-nans in the corresponding V and PSD arrays.
     */
     int non_nan_v_for_lower_k = 0;
     int non_nan_v_for_upper_k = 0;
     for (size_t iV = 0; iV < nV; iV++) {
-        if (!std::isnan(V_arr[iV][lower_k_neighbour]) && !std::isnan(PSD_arr[iV][lower_k_neighbour])) non_nan_v_for_lower_k++;
-        if (!std::isnan(V_arr[iV][upper_k_neighbour]) && !std::isnan(PSD_arr[iV][upper_k_neighbour])) non_nan_v_for_upper_k++;
+        if (!std::isnan(V_in[iV][lower_k_neighbour]) && !std::isnan(PSD_in[iV][lower_k_neighbour])) non_nan_v_for_lower_k++;
+        if (!std::isnan(V_in[iV][upper_k_neighbour]) && !std::isnan(PSD_in[iV][upper_k_neighbour])) non_nan_v_for_upper_k++;
     }
     if (non_nan_v_for_lower_k < 2 || non_nan_v_for_upper_k < 2) return std::log(-1);
-
-    Matrix1D<double> V_for_lower_K(non_nan_v_for_lower_k);
-    Matrix1D<double> V_for_upper_K(non_nan_v_for_upper_k);
-    Matrix1D<double> PSD_for_lower_K(non_nan_v_for_lower_k);
-    Matrix1D<double> PSD_for_upper_K(non_nan_v_for_upper_k);
-
-    int counter_lower_k = 0;
-    int counter_upper_k = 0;
-    for (size_t iV = 0; iV < nV; iV++) {
-        if (!std::isnan(V_arr[iV][lower_k_neighbour]) && !std::isnan(PSD_arr[iV][lower_k_neighbour])) {
-            V_for_lower_K[counter_lower_k] = V_arr[iV][lower_k_neighbour];
-            PSD_for_lower_K[counter_lower_k] = PSD_arr[iV][lower_k_neighbour];
-            counter_lower_k++;
-        }
-        if (!std::isnan(V_arr[iV][upper_k_neighbour]) && !std::isnan(PSD_arr[iV][upper_k_neighbour])) {
-            V_for_upper_K[counter_upper_k] = V_arr[iV][upper_k_neighbour];
-            PSD_for_upper_K[counter_upper_k] = PSD_arr[iV][upper_k_neighbour];
-            counter_upper_k++;
-        }
-    }
 
     int lower_v_neighbour = -1;
     int upper_v_neighbour = -1;
     double v_lower = -std::numeric_limits<double>::infinity();
     double v_upper = std::numeric_limits<double>::infinity();
-    // double dV_lower = V_for_lower_K[1] - V_for_lower_K[0];
-    // double dV_upper = V_for_upper_K[1] - V_for_upper_K[0];
-
-    // double v_min = V_for_lower_K.min();
-    // double v_max = V_for_lower_K.max();
-    // if( V_out < v_min || V_out > v_max) return std::log(-1.0);
-    // if(dV_lower > 0){
-    //     for(int iV = 1; iV < non_nan_v_for_lower_k; iV++){
-    //         // if(V_for_lower_K[iV] < V_for_lower_K[iV-1]){
-    //         //     std::cout << "V_in must be monotonic!\n";
-    //         //     exit(EXIT_FAILURE);
-    //         // }
-    //         if(V_for_lower_K[iV] >= V_out){
-    //             lower_v_neighbour = iV - 1;
-    //             upper_v_neighbour = iV;
-    //             break;
-    //         }
-    //     }
-    // }
-    // else if(dV_lower < 0){
-    //     for(int iV = 1; iV < non_nan_v_for_lower_k; iV++){
-    //         // if(V_for_lower_K[iV] > V_for_lower_K[iV-1]){
-    //         //     std::cout << "V_in must be monotonic!\n";
-    //         //     exit(EXIT_FAILURE);
-    //         // }
-    //         if(V_for_lower_K[iV] <= V_out){
-    //             upper_v_neighbour = iV - 1;
-    //             lower_v_neighbour = iV;
-    //             break;
-    //         }
-    //     }
-    // }
-    // else{
-    //     std::cout << "V_in must be monotonic!\n";
-    //     exit(EXIT_FAILURE);
-    // }
-
-    for (int iV = 0; iV < non_nan_v_for_lower_k; iV++) {
-        if (V_for_lower_K[iV] <= V_out && V_for_lower_K[iV] > v_lower) {
-            v_lower = V_for_lower_K[iV];
+  
+    for (int iV = 0; iV < nV; iV++) {
+        if (V_in[iV][lower_k_neighbour] <= V_out && V_in[iV][lower_k_neighbour] > v_lower) {
+            v_lower = V_in[iV][lower_k_neighbour];
             lower_v_neighbour = iV;
         }
-        if (V_for_lower_K[iV] >= V_out && V_for_lower_K[iV] < v_upper) {
-            v_upper = V_for_lower_K[iV];
+        if (V_in[iV][lower_k_neighbour] >= V_out && V_in[iV][lower_k_neighbour] < v_upper) {
+            v_upper = V_in[iV][lower_k_neighbour];
             upper_v_neighbour = iV;
         }
     }
     if (lower_v_neighbour < 0 || upper_v_neighbour < 0) return std::log(-1);
 
     // We know the V neighbours for the lower K value. Interpolate PSD for the lower K wrt V
-    double x1 = V_for_lower_K[lower_v_neighbour];
-    double x2 = V_for_lower_K[upper_v_neighbour];
+    double y1 = PSD_in[lower_v_neighbour][lower_k_neighbour];
+    double y2 = PSD_in[upper_v_neighbour][lower_k_neighbour];
 
-    double y1 = PSD_for_lower_K[lower_v_neighbour];
-    double y2 = PSD_for_lower_K[upper_v_neighbour];
-
-    double PSD_lower = interpolation_lambda(x1, y1, x2, y2, V_out);
+    double PSD_lower = interpolation_lambda(v_lower, y1, v_upper, y2, V_out);
+  
     // Now repeat for the upper K neighbour
-    // v_min = V_for_upper_K.min();
-    // v_max = V_for_upper_K.max();
-    // if( V_out < v_min || V_out > v_max) return std::log10(-1.0);
-    // if(dV_upper > 0){
-    //     for(int iV = 1; iV < non_nan_v_for_upper_k; iV++){
-    //         // if(V_for_upper_K[iV] <= V_for_upper_K[iV-1]){
-    //         //     std::cout << "V_in must be monotonic!\n";
-    //         //     exit(EXIT_FAILURE);
-    //         // }
-    //         if(V_for_upper_K[iV] >= V_out){
-    //             lower_v_neighbour = iV - 1;
-    //             upper_v_neighbour = iV;
-    //             break;
-    //         }
-    //     }
-    // }
-    // else if(dV_upper < 0){
-    //     for(int iV = 1; iV < non_nan_v_for_upper_k; iV++){
-    //         // if(V_for_upper_K[iV] >= V_for_upper_K[iV-1]){
-    //         //     std::cout << "V_in must be monotonic!\n";
-    //         //     exit(EXIT_FAILURE);
-    //         // }
-    //         if(V_for_upper_K[iV] <= V_out){
-    //             upper_v_neighbour = iV;
-    //             lower_v_neighbour = iV-1;
-    //             break;
-    //         }
-    //     }
-    // }
-    // else{
-    //     std::cout << "V_in must be monotonic!\n";
-    //     exit(EXIT_FAILURE);
-    // }
     v_lower = -std::numeric_limits<double>::infinity();
     v_upper = std::numeric_limits<double>::infinity();
     lower_v_neighbour = -1;
     upper_v_neighbour = -1;
 
-    for (size_t iV = 0; iV < non_nan_v_for_upper_k; iV++) {
-        if (V_for_upper_K[iV] <= V_out && V_for_upper_K[iV] > v_lower) {
-            v_lower = V_for_upper_K[iV];
+    for (size_t iV = 0; iV < nV; iV++) {
+        if (V_in[iV][upper_k_neighbour] <= V_out && V_in[iV][upper_k_neighbour] > v_lower) {
+            v_lower = V_in[iV][upper_k_neighbour];
             lower_v_neighbour = iV;
         }
-        if (V_for_upper_K[iV] >= V_out && V_for_upper_K[iV] < v_upper) {
-            v_upper = V_for_upper_K[iV];
+        if (V_in[iV][upper_k_neighbour] >= V_out && V_in[iV][upper_k_neighbour] < v_upper) {
+            v_upper = V_in[iV][upper_k_neighbour];
             upper_v_neighbour = iV;
         }
     }
     if (lower_v_neighbour < 0 || upper_v_neighbour < 0) return std::log(-1);
 
-    x1 = V_for_upper_K[lower_v_neighbour];
-    x2 = V_for_upper_K[upper_v_neighbour];
-    y1 = PSD_for_upper_K[lower_v_neighbour];
-    y2 = PSD_for_upper_K[upper_v_neighbour];
+    y1 = PSD_in[lower_v_neighbour][upper_k_neighbour];
+    y2 = PSD_in[upper_v_neighbour][upper_k_neighbour];
 
-    double PSD_upper = interpolation_lambda(x1, y1, x2, y2, V_out);
+    double PSD_upper = interpolation_lambda(v_lower, y1, v_upper, y2, V_out);
 
     // Knowing PSD at V_out for the lower and upper K neighbours, we can now do one final
     // interpolation between them wrt K
 
-    x1 = K_arr[lower_k_neighbour];
-    x2 = K_arr[upper_k_neighbour];
     y1 = PSD_lower;
     y2 = PSD_upper;
 
-    return interpolation_lambda(x1, y1, x2, y2, K_out);
-}
-std::vector<std::vector<data_assimilation::Observations>> internal::interpolate_old(
-    const ProcessedMatFileData& data,
-    const Matrix2D<double>& V_grid,
-    const Matrix2D<double>& K_grid) {
-    size_t nT = data.MLT.size_q1;
-
-    Matrix1D<double> P{nT};
-    for (size_t it = 0; it < nT; ++it) {
-        P[it] = fmod(data.MLT[it] + 12., 24.) * M_PI / 12.;
-    }
-
-    size_t V_size = V_grid.size_q1;
-    size_t K_size = K_grid.size_q2;
-
-    Matrix3D<double> K_in(nT, data.V.size_q2, data.K.size_q2);
-    for (size_t it = 0; it < nT; ++it) {
-        for (size_t iV = 0; iV < K_in.size_q2; ++iV) {
-            for (size_t iK = 0; iK < K_in.size_q3; ++iK) {
-                K_in[it][iV][iK] = data.K[it][iK];
-            }
-        }
-    }
-
-    std::vector<std::vector<Observations>> result(V_size, std::vector<Observations>(K_size));
-    // int counter = 0;
-#pragma omp parallel for schedule(dynamic, 1) collapse(2)
-    for (size_t iV = 0; iV < V_size; ++iV) {
-        for (size_t iK = 0; iK < K_size; ++iK) {
-            Observations& obs = result[iV][iK];
-            obs.R = data.R;
-            obs.P = P;
-            obs.PSD.AllocateMemory(nT);
-            for (auto it = 0; it < nT; ++it) {
-                auto PSD_in = data.PSD.xSlice(it);
-                // Matrix2D<double> K_in (data.V.size_q2, data.K.size_q2);
-                // for (auto iV2 = 0; iV2 < K_in.size_q1; ++iV2) {
-                //     for (auto iK2 = 0; iK2 < K_in.size_q2; ++iK2){
-                //         K_in[iV2][iK2] = data.K[it][iK2];
-                //     }
-                // }
-                // obs.PSD[it] = pow(10., interp2d_linear_dependent(
-                //     log10(data.V.xSlice(it)), K_in, log10(PSD_in),
-                //     V_grid[iV][iK], K_grid[iV][iK], false));
-
-                obs.PSD[it] = pow(10., interp2d_linear_dependent(
-                                           log10(data.V.xSlice(it)), K_in.xSlice(it), log10(PSD_in),
-                                           log10(V_grid[iV][iK]), K_grid[iV][iK], true));
-                // obs.PSD[it] = interp2d_linear_dependent(
-                //     data.V.xSlice(it), K_in.xSlice(it), PSD_in,
-                //     V_grid[iV][iK], K_grid[iV][iK], false);
-            }
-        }
-    }
-    return result;
+    return interpolation_lambda(k_lower, y1, k_upper, y2, K_out);
 }
 
 std::vector<std::vector<data_assimilation::Observations>> internal::interpolate(
@@ -942,21 +507,13 @@ std::vector<std::vector<data_assimilation::Observations>> internal::interpolate(
                 auto& instrumentData = data[instrumentIndex];
                 for (auto it = 0; it < instrumentData.MLT.size_q1; ++it) {
                     auto PSD_in = instrumentData.PSD.xSlice(it);
-                    // obs.PSD[counter++] = pow(10., interp2d_linear_dependent(
-                    //     log10(instrumentData.V.xSlice(it)),
-                    //     K_in[instrumentIndex].xSlice(it),
-                    //     log10(PSD_in),
-                    //     log10(V_grid[iV][iK]),
-                    //     K_grid[iV][iK], true));
                     obs.PSD[counter++] = pow(10., interp2d_four_corners(
-                                                      log10(instrumentData.V.xSlice(it)),
-                                                      K_in[instrumentIndex].xSlice(it),
-                                                      log10(PSD_in),
-                                                      log10(V_grid[iV][iK]),
-                                                      K_grid[iV][iK], true));
-                    // obs.PSD[it] = interp2d_linear_dependent(
-                    //     data.V.xSlice(it), K_in.xSlice(it), PSD_in,
-                    //     V_grid[iV][iK], K_grid[iV][iK], false);
+                        log10(instrumentData.V.xSlice(it)),
+                        K_in[instrumentIndex].xSlice(it),
+                        log10(PSD_in),
+                        log10(V_grid[iV][iK]),
+                        K_grid[iV][iK], true
+                    ));
                 }
             }
         }

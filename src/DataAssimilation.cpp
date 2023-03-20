@@ -97,24 +97,6 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
     }
 }
 
-std::vector<std::vector<data_assimilation::Observations>> data_assimilation::getObservations_old(
-    double timeStart,
-    double timeEnd,
-    const Matrix2D<double>& V,
-    const Matrix2D<double>& K,
-    const std::vector<pmf::Parameters>& parameters) {
-    std::vector<ProcessedMatFileData> pmfDataSplit;
-    for (auto par : parameters) {
-        pmfDataSplit.push_back(internal::readData(timeStart, timeEnd, par));
-    }
-
-    ProcessedMatFileData data = internal::cat(pmfDataSplit);
-    std::cout << "Done reading Data. Interpolating...\n";
-    auto result = internal::interpolate_old(data, V, K);
-
-    return result;
-}
-
 std::vector<std::vector<data_assimilation::Observations>> data_assimilation::getObservations(
     double timeStart,
     double timeEnd,

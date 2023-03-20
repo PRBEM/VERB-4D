@@ -71,13 +71,6 @@ class DataAssimilationManagerConvection {
 
 Parameters readParameters(const std::string& filename);
 
-std::vector<std::vector<Observations>> getObservations_old(
-    double timeStart,
-    double timeEnd,
-    const Matrix2D<double>& V,
-    const Matrix2D<double>& K,
-    const std::vector<pmf::Parameters>& parameters);
-
 std::vector<std::vector<Observations>> getObservations(
     double timeStart,
     double timeEnd,
