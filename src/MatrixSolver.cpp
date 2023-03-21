@@ -1018,19 +1018,19 @@ bool MakeModelMatrix_2D_ADI3_y(CalculationMatrix &matr_A, CalculationMatrix &mat
  *
  * LAPACK - Linear Algebra PACKage. For linear algebra methods. Using the lapack library from http://www.netlib.org/lapack/
  */
-void Lapack(DiagMatrix &A, Matrix1D<double> &B) {
+void Lapack(const DiagMatrix &A, Matrix1D<double> &B) {
 
 	// Save A and B to check the solution at the end
 	Matrix1D<double> B_res;
 	B_res = B;
 
 	// iterator for diagonals of the diagonal matrix
-	DiagMatrix::iterator it;
+	DiagMatrix::const_iterator it;
 
-	long m_size = static_cast<long>(A[0].size_q1);
-	it = A.begin();
+	long m_size = static_cast<long>(A.at(0).size_q1);
+	it = A.cbegin();
 	long kl = -it->first; // first diagonal
-	it = A.end();
+	it = A.cend();
 	it--;
 	long ku = it->first; // last diagonal
 	long int NRHS{ 1 }, LDAB{ 2 * kl + ku + 1 }, * IPIV{ new long[m_size] }, LDB{ static_cast<long>(B.size_q1) }, INFO{ 1 };
@@ -1040,15 +1040,13 @@ void Lapack(DiagMatrix &A, Matrix1D<double> &B) {
 	for(int i=0; i<m_size; i++){ newmat[i] = &Array[i*(kl+ku+kl+1)]; }
 	for (int i = 0; i < (kl+ku+kl+1)*m_size; i++) Array[i] = 0;
 
-	int in, j;
-	for (in = 0; in < m_size; in++) {
-		for (it = A.begin(); it != A.end(); it++) {
+	for (int in = 0; in < m_size; in++) {
+		for (const auto& [idx, diagonal] : A) {
 			// Check if the element at line (in) and diagonal (it->first) is inside the matrix.
-			j = in + it->first; // column number
-			//if (in + it->first >= 0 && in + it->first < m_size) {
-			if (j >= 0 && j < m_size) {
+			int col = in + idx; // column number
+			if (col >= 0 && col < m_size) {
 				// converting matrix, stored as diagonals, into lapack matrix (also diagonal)
-				newmat[j][ku+kl-j+in] = it->second[in];
+				newmat[col][ku+kl-idx] = diagonal[in];
 			}
 		}
 	}

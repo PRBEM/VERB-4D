@@ -58,7 +58,7 @@ bool MakeModelMatrix_2D(
 	Matrix2D<double> &G, Matrix2D<double> Sources, Matrix2D<double> Losses, double dt
 );
 
-void Lapack(DiagMatrix &A, Matrix1D<double> &B);
+void Lapack(const DiagMatrix &A, Matrix1D<double> &B);
 
 void SecondDerivativeApproximation_1D(
 	CalculationMatrix &matr_A, int ix,
