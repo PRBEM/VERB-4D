@@ -58,29 +58,14 @@ bool Diffusion_2D(
 		const Matrix2D<double>& Dxx, const Matrix2D<double>& Dyy, const Matrix2D<double>& Dxy, const Matrix2D<double>& Dyx,
 		const Matrix2D<double>& G, const Matrix2D<double>& Sources, const Matrix2D<double>& Losses, double dt) 
 {
-	CalculationMatrix
-		matr_A(x_size, y_size, 1, 1),
-		matr_B(x_size, y_size, 1, 0),
-		matr_C(x_size, y_size, 1, 0);
+	
+	// diagonals are zero-initialized on construction
+	CalculationMatrix matr_A(x_size, y_size, 1, 1);
 
-/*	MakeModelMatrix_2D(
-					  matr_A, matr_B, matr_C,
-					  x, y,
-					  x_size, y_size,
-					  x_LBC, x_UBC,
-					  y_LBC, y_UBC,
-					  x_LBC_type, x_UBC_type,
-					  y_LBC_type, y_UBC_type,
-					  Dxx, Dyy, Dxy, Dyx,
-					  G, Sources, Losses, dt);*/
+ 	// only main diagonal non-zero, can be replaced with Matrix1D(x_size * y_size)
+	CalculationMatrix matr_B(x_size, y_size, 1, 0);
+	CalculationMatrix matr_C(x_size, y_size, 1, 0);
 
-	// Make diagonals to be equal to zero
-	DiagMatrix::iterator it;
-	for (it = matr_A.begin(); it != matr_A.end(); it++)	it->second = 0;
-	for (it = matr_B.begin(); it != matr_B.end(); it++)	it->second = 0;
-	for (it = matr_C.begin(); it != matr_C.end(); it++)	it->second = 0;
-
-	//
 	// Create matrix form of the Fokker-Planck equation: matr_A * PSD(t+1) = matr_B * PSD(t) + matr_C
 	//
 	// Calculation matr_A, matr_B, and matr_C, i.e. numerical approximation of the derivatives
@@ -88,19 +73,15 @@ bool Diffusion_2D(
 	// (f^{t+1} - f^{t})/dt = L1(f^{t+1}) + L2(f^{t+1}) + L3(f^{t+1})[main equation, losses are calculated separately]
 	// L1, L2, L3 - diffusion operators
 	//  + need to add there the equations for boundary conditions also
-	int ix, iy, in;
-	for (ix = 0; ix < x_size; ix++) {
-		for (iy = 0; iy < y_size; iy++) {
+	for (int ix = 0; ix < x_size; ix++) {
+		for (int iy = 0; iy < y_size; iy++) {
 			// calculating current line number (in)
-			in = matr_A.index1d(ix, iy);
+			int in = matr_A.index1d(ix, iy);
 
-			if((ix == 0 && x_size >= 3)
-				|| (ix == x_size - 1 && x_size >= 3)
-				|| (iy == 0 		 && y_size >= 3)
-				|| (iy == y_size - 1 && y_size >= 3)) {
-
-				// if at the boundary
-				// add boundary conditions
+			if((ix == 0 && x_size >= 3)	|| (ix == x_size - 1 && x_size >= 3)
+			|| (iy == 0 && y_size >= 3) || (iy == y_size - 1 && y_size >= 3)) 
+			{
+				// if at the boundary add boundary conditions
 				AddBoundaries_2D(
 					matr_A, matr_C,
 					x, y, x_size, y_size,
@@ -155,9 +136,9 @@ bool Diffusion_2D(
 	// Output::echo("recalculated.\n");
 
 	// save the time of matrix change
-	matr_A.change_ind = clock();
-	matr_B.change_ind = clock();
-	matr_C.change_ind = clock();
+	// matr_A.change_ind = clock();
+	// matr_B.change_ind = clock();
+	// matr_C.change_ind = clock();
 
 
 	//matr_A.writeToFile("./Debug_output/matr_A.dat");
@@ -165,39 +146,29 @@ bool Diffusion_2D(
 	//matr_C.writeToFile("./Debug_output/matr_C.dat");
 
 
-	// make RHS = B*f + C
-	DiagMatrix::iterator it_B;
-	Matrix1D<double> RHS(matr_A.total_size);
-	Matrix1D<double> psd_1d(matr_A.total_size); ///< Rearranged PSD into one vector of unknown variables
-	for (ix = 0; ix < x_size; ix++) {
-		for (iy = 0; iy < y_size; iy++) {
-			in = matr_B.index1d(ix, iy);
-			psd_1d[in] = psd[ix][iy];
-		}
-	}
-	for (ix = 0; ix < x_size; ix++) {
-		for (iy = 0; iy < y_size; iy++) {
-			in = matr_B.index1d(ix, iy);
-			RHS[in] = matr_C[0][in];
-			for (it_B = matr_B.begin(); it_B != matr_B.end(); it_B++)
-				// multiplication B * f
-				if (in + it_B->first >= 0 && in + it_B->first < matr_B.total_size)
-					RHS[in] += it_B->second[in] * psd_1d[in + it_B->first];
+	// rearranged PSD into one 1d vector in column major form
+	Matrix1D<double> rhs(matr_A.total_size);
+	for (int ix = 0; ix < x_size; ix++) {
+		for (int iy = 0; iy < y_size; iy++) {
+			int in = matr_B.index1d(ix, iy);
+			rhs[in] = psd[ix][iy];
 		}
 	}
 
+	// make rhs = B*f + C
+	rhs.times_equal(matr_B[0]);
+	rhs += matr_C[0];
 
-	//RHS.writeToFile("RHS.dat");
-	Lapack(matr_A, RHS);
-	//RHS.writeToFile("result.dat");
+	//rhs.writeToFile("rhs.dat");
+	Lapack(matr_A, rhs);
+	//rhs.writeToFile("result.dat");
 
 
-	// copy back
-	for (ix = 0; ix < x_size; ix++) {
-		for (iy = 0; iy < y_size; iy++) {
-			in = matr_B.index1d(ix, iy);
-			psd[ix][iy] = RHS[in];
-			//psd[ix][iy] = psd_1d[in];
+	// copy back from column major form
+	for (int ix = 0; ix < x_size; ix++) {
+		for (int iy = 0; iy < y_size; iy++) {
+			int in = matr_B.index1d(ix, iy);
+			psd[ix][iy] = rhs[in];
 		}
 	}
 

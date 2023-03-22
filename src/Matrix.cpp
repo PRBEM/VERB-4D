@@ -442,6 +442,12 @@ inline Matrix1D<T> Matrix1D<T>::times (const Matrix1D<T> &M) const {
 	return Tmp;
 }
 
+template<class T>
+Matrix1D<T>& Matrix1D<T>::times_equal (const Matrix1D<T> &M) {
+	for (size_t i = 0; i < num_elements; i++)
+		plane_array[i] *= M.plane_array[i];
+	return *this;
+}
 /**
 * Divide all values of matrix to values of matrix M.
 *
