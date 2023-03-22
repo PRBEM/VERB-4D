@@ -1018,27 +1018,30 @@ bool MakeModelMatrix_2D_ADI3_y(CalculationMatrix &matr_A, CalculationMatrix &mat
  *
  * LAPACK - Linear Algebra PACKage. For linear algebra methods. Using the lapack library from http://www.netlib.org/lapack/
  */
-void Lapack(const DiagMatrix &A, Matrix1D<double> &B) {
+void Lapack(const DiagMatrix &A, Matrix1D<double> &rhs) {
 
-	// Save A and B to check the solution at the end
-	Matrix1D<double> B_res;
-	B_res = B;
+	// Save A and rhs to check the solution at the end
+	// Matrix1D<double> B_res;
+	// B_res = rhs;
 
 	// iterator for diagonals of the diagonal matrix
-	DiagMatrix::const_iterator it;
-
 	long m_size = static_cast<long>(A.at(0).size_q1);
-	it = A.cbegin();
+
+	DiagMatrix::const_iterator it = A.cbegin();
 	long kl = -it->first; // first diagonal
 	it = A.cend();
 	it--;
 	long ku = it->first; // last diagonal
-	long int NRHS{ 1 }, LDAB{ 2 * kl + ku + 1 }, * IPIV{ new long[m_size] }, LDB{ static_cast<long>(B.size_q1) }, INFO{ 1 };
+	long cols_rhs = 1;
+	long ldab = 2 * kl + ku + 1;
+	long* ipiv = new long[m_size];
+	long ldb = static_cast<long>(rhs.size_q1);
+	long info = 1;
 
-	double *Array = new double[(kl+ku+kl+1)*m_size];
+	double *flat_matrix = new double[(kl+ku+kl+1)*m_size];
 	double **newmat = new double*[m_size];
-	for(int i=0; i<m_size; i++){ newmat[i] = &Array[i*(kl+ku+kl+1)]; }
-	for (int i = 0; i < (kl+ku+kl+1)*m_size; i++) Array[i] = 0;
+	for(int i=0; i<m_size; i++){ newmat[i] = &flat_matrix[i*(kl+ku+kl+1)]; }
+	for (int i = 0; i < (kl+ku+kl+1)*m_size; i++) flat_matrix[i] = 0;
 
 	for (int in = 0; in < m_size; in++) {
 		for (const auto& [idx, diagonal] : A) {
@@ -1060,23 +1063,23 @@ void Lapack(const DiagMatrix &A, Matrix1D<double> &B) {
 	}
 	output.close();*/
 
-	dgbsv_(&m_size, &kl, &ku, &NRHS, Array, &LDAB, IPIV, &B[0], &LDB, &INFO);
+	dgbsv_(&m_size, &kl, &ku, &cols_rhs, flat_matrix, &ldab, ipiv, &rhs[0], &ldb, &info);
 
-	if (INFO != 0) {
-		printf("Lapack inversion Error!!! INFO = %ld.\n", INFO);
+	if (info != 0) {
+		printf("Lapack inversion Error!!! INFO = %ld.\n", info);
 		exit(EXIT_FAILURE);
 	}
 
 	// check
-	// "A*X - B" should be zero
-	// X is stored in B after Lapack solution
-	// and we stored B in B_res previousely
-	// So, it's "B_res - A*B" should be zero
+	// "A*X - rhs" should be zero
+	// X is stored in rhs after Lapack solution
+	// and we stored rhs in B_res previousely
+	// So, it's "B_res - A*rhs" should be zero
 	// for (in = 0; in < m_size; in++) {
 	// 	for (it = A.begin(); it != A.end(); it++) {
 	// 		if (in + it->first >= 0 && in + it->first < m_size) {
-	// 			//cout << B_res[in] << "-=" << it->second[in] << "*" << B[in] << endl;
-	// 			B_res[in] -= it->second[in] * B[in + it->first];
+	// 			//cout << B_res[in] << "-=" << it->second[in] << "*" << rhs[in] << endl;
+	// 			B_res[in] -= it->second[in] * rhs[in + it->first];
 	// 		}
 	// 	}
 	// }
@@ -1092,9 +1095,9 @@ void Lapack(const DiagMatrix &A, Matrix1D<double> &B) {
 		exit(EXIT_FAILURE);
 	}*/
 
-	delete IPIV;
-	delete Array;
-	delete newmat;
+	delete[] ipiv;
+	delete[] flat_matrix;
+	delete[] newmat;
 }
 
 /**
