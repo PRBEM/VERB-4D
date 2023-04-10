@@ -3,7 +3,7 @@
 #
 # Author: Anthony Miyaguchi (acmiyaguchi@gmail.com)
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.7)
 project(VERB4D C CXX)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -18,17 +18,16 @@ if(OPENMP_FOUND)
 endif(OPENMP_FOUND)
 
 # Find Matlab, Lapack, and BLAS
-find_package(MATLAB)
-if(MATLAB_FOUND)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MATLAB_CXXFLAGS}")
-    include_directories(${MATLAB_INCLUDE_DIR})
+find_package(Matlab COMPONENTS ENG_LIBRARY MAT_LIBRARY)
+if(Matlab_FOUND)
+    include_directories(${Matlab_INCLUDE_DIRS})
     list(APPEND DEPLIBS
-        ${MATLAB_MAT_LIBRARY}
-        ${MATLAB_MX_LIBRARY}
-        ${MATLAB_ENG_LIBRARY})
+        ${Matlab_MAT_LIBRARY}
+        ${Matlab_MX_LIBRARY}
+        ${Matlab_ENG_LIBRARY})
     # Set the definition for MATLAB_CAPABLE
     add_definitions(-DMATLAB_CAPABLE=true)
-endif(MATLAB_FOUND)
+endif()
 
 if(WIN32)
     # The libraries for lapack and BLAS for windows are in the lib folder
