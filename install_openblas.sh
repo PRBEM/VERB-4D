@@ -6,7 +6,7 @@ local_lib="$HOME/.local/lib"
 if [ ! -d $local_lib ]
 then
 	echo "creating folder $local_lib"
-	mkdir $local_lib
+	mkdir -p $local_lib
 fi
 
 # create a build folder inside OpenBLAS if it does not exist
