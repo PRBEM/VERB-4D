@@ -136,7 +136,10 @@
 #include "UpdatableMatrix.h"
 #include "Interpolation.h"
 #include "BoundaryConditionType.hpp"
+
+#ifdef MKL_FOUND
 #include "mkl_sparse_qr.h"
+#endif
 #include <omp.h>
 
 using namespace std;
@@ -371,7 +374,8 @@ int main(int argc, char* argv[]) {
     Matrix3D<double> P_upperK = P.zSlice(K.size_z - 1);
     Matrix3D<double> R_upperK = R.zSlice(K.size_z - 1);
     Matrix3D<double> V_upperK = V.zSlice(K.size_z - 1);
-    
+
+#ifdef MKL_FOUND  
     // initiliaze sparse column indices, row indices and matrix handles
     // for MKL sparse solver for local diffusion
     std::vector<sparse_matrix_t*> sparse_matrix_handles;
@@ -416,6 +420,7 @@ int main(int argc, char* argv[]) {
             }
         }
     }
+#endif
     
     
     // Main loop
@@ -800,6 +805,7 @@ int main(int argc, char* argv[]) {
                         DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
                         Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
                 }
+#ifdef MKL_FOUND
                 else if (inversion_method == "MKL")
                 {
                     Diffusion_2D_MKL(
@@ -811,6 +817,7 @@ int main(int argc, char* argv[]) {
                         sparse_matrix_handles[omp_get_thread_num()]
                     );
                 }
+#endif
                 // Currently setup to calculate 2d Diffusion using Diffusion_2D_ADI3
                 // Can change to Diffusion_2D_ADI1 or Diffusion_2D_ADI2 for different methods of inversion
                 else if (inversion_method == "ADI") {
@@ -888,13 +895,14 @@ int main(int argc, char* argv[]) {
             output_writer = std::async(std::launch::async, write_PSD_output, outputFolder, io_method, PSD_filename.str(), PSD);
         }
     }
-
-    // logger records if everything went correctly
+#ifdef MKL_FOUND
     for(auto& csr_handle : sparse_matrix_handles)
     {
         mkl_sparse_destroy(*csr_handle);
         // delete csr_handle; //mkl_sparse_destroy seems to delete the pointer
     }
+#endif
+    // logger records if everything went correctly
     Logger::message << "Program was terminated correctly." << endl;
     Logger::message << "Wall-clock time: " << (omp_get_wtime() - wall_timer) << " sec; ";
     Logger::message << "CPU time: " << (double)((clock() - start_time) / CLOCKS_PER_SEC) << " sec." << endl;

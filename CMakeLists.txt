@@ -9,31 +9,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
-# Check if interprocedural optimization (link time optimization) is supported by the compiler
-include(CheckIPOSupported)
-check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error)
-
-# Find OpenMP
-find_package(OpenMP REQUIRED)
-if(OPENMP_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-endif(OPENMP_FOUND)
-
-# Find Matlab, Lapack, and BLAS
-find_package(MATLAB)
-if(MATLAB_FOUND)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MATLAB_CXXFLAGS}")
-    include_directories(${MATLAB_INCLUDE_DIR})
-    list(APPEND DEPLIBS
-        ${MATLAB_MAT_LIBRARY}
-        ${MATLAB_MX_LIBRARY}
-        ${MATLAB_ENG_LIBRARY})
-    # Set the definition for MATLAB_CAPABLE
-    add_definitions(-DMATLAB_CAPABLE=true)
-endif(MATLAB_FOUND)
-
 # Add directories for include files
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
@@ -64,6 +39,78 @@ set(VERB4D_SOURCES
 # the target executable
 add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
 
+# Check if interprocedural optimization (link time optimization) is supported by the compiler
+include(CheckIPOSupported)
+check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error)
+
+if(NOT DEFINED BLAS_TYPE)
+    message("No BLAS_TYPE specified, choosing LAPACK")
+    set(BLAS_TYPE LAPACK)
+endif()
+string(TOUPPER ${BLAS_TYPE} BLAS_TYPE)
+if(${BLAS_TYPE} STREQUAL "LAPACK")
+    if(WIN32)
+        # The libraries for lapack and BLAS for windows are in the lib folder
+        set(LAPACK_LIBRARIES ${CMAKE_SOURCE_DIR}/lib/clapack.lib)
+        set(BLAS_LIBRARIES   ${CMAKE_SOURCE_DIR}/lib/blas.lib)
+        set(F2C_LIBRARIES    ${CMAKE_SOURCE_DIR}/lib/libf2c.lib)
+        list(APPEND DEPLIBS ${F2C_LIBRARIES})
+    else(WIN32)
+        # Installed by distribution's package manager
+        find_package(LAPACK REQUIRED)
+    endif(WIN32)
+    list(APPEND DEPLIBS ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
+elseif(${BLAS_TYPE} STREQUAL "OPENBLAS")
+    add_library(openblas  SHARED IMPORTED)
+    if(WIN32)
+        if(NOT DEFINED OPENBLAS_LIBPATH)
+            set(OPENBLAS_LIBPATH $ENV{HOMEPATH}/AppData/Local/OpenBLAS/openblas.lib)
+            message("No OPENBLAS_LIBPATH specified, chhosing ${OPENBLAS_LIBPATH}")
+        endif()
+        set_target_properties(openblas PROPERTIES IMPORTED_IMPLIB ${OPENBLAS_LIBPATH})
+    else()
+        if(NOT DEFINED OPENBLAS_LIBPATH)
+            set(OPENBLAS_LIBPATH $ENV{HOME}/.local/lib/libopenblas.so)
+            message("No OPENBLAS_LIBPATH specified, chhosing ${OPENBLAS_LIBPATH}")
+        endif()
+        set_target_properties(openblas PROPERTIES IMPORTED_LOCATION ${OPENBLAS_LIBPATH})
+    endif()
+    list(APPEND DEPLIBS openblas)
+elseif(${BLAS_TYPE} STREQUAL "MKL")
+    set(MKL_THREADING sequential)
+    set(MKL_INTERFACE lp64)
+    find_package(MKL CONFIG REQUIRED)
+    list(APPEND DEPLIBS ${MKL_IMPORTED_TARGETS})
+    target_include_directories(VERB4D_Solver PUBLIC ${MKL_INCLUDE})
+
+    if(DEFINED ${MKL_FOUND})
+        add_definitions(-DMKL_FOUND)
+    endif()
+else()
+    message( FATAL_ERROR "Unknown BLAS_TYPE. Choose either LAPACK, OPENBLAS or MKL" )
+endif()
+
+# Find OpenMP
+find_package(OpenMP REQUIRED)
+if(OPENMP_FOUND)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif(OPENMP_FOUND)
+
+# Find Matlab, Lapack, and BLAS
+find_package(MATLAB)
+if(MATLAB_FOUND)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MATLAB_CXXFLAGS}")
+    include_directories(${MATLAB_INCLUDE_DIR})
+    list(APPEND DEPLIBS
+        ${MATLAB_MAT_LIBRARY}
+        ${MATLAB_MX_LIBRARY}
+        ${MATLAB_ENG_LIBRARY})
+    # Set the definition for MATLAB_CAPABLE
+    add_definitions(-DMATLAB_CAPABLE=true)
+endif(MATLAB_FOUND)
+
 # use interprocidural optimization if supported
 if( ipo_supported )
     message(STATUS "IPO enabled")
@@ -72,24 +119,6 @@ else()
     message(STATUS "IPO not supported: <${ipo_error}>")
 endif()
 
-if(WIN32)
-    set_target_properties(openblas PROPERTIES IMPORTED_IMPLIB $ENV{HOMEPATH}/AppData/Local/OpenBLAS/openblas.lib)
-else(WIN32)
-    add_library(openblas  SHARED IMPORTED)
-    set_target_properties(openblas PROPERTIES IMPORTED_LOCATION $ENV{HOME}/.local/lib/libopenblas.so)
-    set_target_properties(VERB4D_Solver PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-    set(MKL_THREADING sequential)
-    set(MKL_INTERFACE lp64)
-    find_package(MKL CONFIG REQUIRED)
-    target_include_directories(VERB4D_Solver PUBLIC ${MKL_INCLUDE})
-    
-    list(APPEND DEPLIBS openblas ${MKL_IMPORTED_TARGETS})
-    
-    set_target_properties(VERB4D_Solver PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
-    install(TARGETS VERB4D_Solver DESTINATION bin)
-endif(WIN32)
-list(APPEND DEPLIBS openblas)
 target_link_libraries(VERB4D_Solver ${DEPLIBS})
 
 # Flag compile type feedback

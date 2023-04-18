@@ -1,8 +1,9 @@
+#pragma once
+#ifdef MKL_FOUND
 #include "Matrix.h"
 #include "BoundaryConditionType.hpp"
 #include <vector>
 #include "mkl_sparse_qr.h"
-
 typedef Matrix2D<double> mat2d;
 typedef Matrix1D<double> mat1d;
 
@@ -26,3 +27,4 @@ void Diffusion_2D_MKL(
     const mat2d& jacobian, const mat2d& loss, const mat2d& source, double dt,
     sparse_matrix_t* csrA
 );
+#endif

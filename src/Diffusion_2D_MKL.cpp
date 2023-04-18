@@ -1,3 +1,4 @@
+#ifdef MKL_FOUND
 #include "Matrix.h"
 #include "MatrixSolver.h"
 #include "BoundaryConditionType.hpp"
@@ -336,3 +337,4 @@ void Diffusion_2D_MKL(mat2d& psd, const mat2d& v_grid, const mat2d& k_grid,
         }
     }
 }
+#endif
