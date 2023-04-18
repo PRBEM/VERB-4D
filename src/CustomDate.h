@@ -1,46 +1,32 @@
 #pragma once
-
+#include <ctime>
 #include <string>
 
 class CustomDate {
    public:
     static const double matlabd_epoch;
-
-    CustomDate(int y = 0, int m = 1, int d = 1)
-        : year(y), month(m), day(d) {}
+    CustomDate() {}
     CustomDate(double matlabd);
     CustomDate(const CustomDate& rhs);
     CustomDate& operator=(const CustomDate& rhs);
+    CustomDate operator+(uint32_t delta_seconds);
+    CustomDate operator-(uint32_t delta_seconds);
+    CustomDate add_month() const;
 
-    int get_second() const { return second; }
-    int get_minute() const { return minute; }
-    int get_hour() const { return hour; }
-    int get_day() const { return day; }
-    int get_month() const { return month; }
-    int get_year() const { return year; }
-
-    CustomDate add_month(int add = 1) const;
-
+    std::string to_date_string() const;
     std::string to_string() const;
-    std::string to_full_string() const;
     CustomDate to_bom() const;  // to beginning of month
     CustomDate to_eom() const;  // to end of month
+    bool operator==(const CustomDate& rhs);
+    bool operator!=(const CustomDate& rhs);
+    bool operator<(const CustomDate& rhs);
+    bool operator<=(const CustomDate& rhs);
+    bool operator>(const CustomDate& rhs);
+    bool operator>=(const CustomDate& rhs);
    private:
-    int year;
-    int month;
-    int day;
-    int hour, minute, second;
-
+    std::tm datetime;
+    std::time_t unix_seconds = 0;
     static const int max_days[12];
-
-    static bool is_leap_year(int year);
-
+    bool is_leap_year() const;
     int eom() const;
 };
-
-bool operator==(const CustomDate& rhs, const CustomDate& lhs);
-bool operator!=(const CustomDate& rhs, const CustomDate& lhs);
-bool operator<(const CustomDate& rhs, const CustomDate& lhs);
-bool operator<=(const CustomDate& rhs, const CustomDate& lhs);
-bool operator>(const CustomDate& rhs, const CustomDate& lhs);
-bool operator>=(const CustomDate& rhs, const CustomDate& lhs);

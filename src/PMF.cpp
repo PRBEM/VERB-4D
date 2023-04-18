@@ -250,6 +250,8 @@ string generateProcessedMatFileInstrumentName(const string& instrument) {
         return "rept";
     } else if (instrument_upper == "MEPE-L3") {
         return "mepe-l3";
+    } else if (instrument_upper == "HEP-L3L") {
+        return "hep-l3l";
     } else if (instrument_upper == "") {
         cout << "Empty instrument name!\n";
         exit(EXIT_FAILURE);
@@ -338,8 +340,8 @@ string generateProcessedMatFileName(
     string instrumentName = generateProcessedMatFileInstrumentName(
         parameters.instrument
     );
-    string dateStringBegin = timeStart.to_string();
-    string dateStringEnd = timeEnd.to_string();
+    string dateStringBegin = timeStart.to_date_string();
+    string dateStringEnd = timeEnd.to_date_string();
     string variableSuffix = generateProcessedMatFileVariableSuffix(
         name
     );
@@ -459,12 +461,12 @@ namespace pmf::internal {
 template<typename MatrixType>
 MatrixType limitWithTime(
     const MatrixType& array, const Matrix1D<double>& time,
-    CustomDate timeStart, CustomDate timeEnd);              
+    CustomDate timeStart, CustomDate timeEnd, uint32_t memory_seconds = 0);              
 
 template<>
 Matrix1D<double> limitWithTime<Matrix1D<double>>(
     const Matrix1D<double>& array, const Matrix1D<double>& time,
-    CustomDate timeStart, CustomDate timeEnd) {               
+    CustomDate timeStart, CustomDate timeEnd, uint32_t memory_seconds) {               
         
     if (array.size_q1 != time.size_q1) {
         cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
@@ -498,7 +500,7 @@ Matrix1D<double> limitWithTime<Matrix1D<double>>(
 template<>
 Matrix2D<double> limitWithTime<Matrix2D<double>>(
     const Matrix2D<double>& array, const Matrix1D<double>& time,
-    CustomDate timeStart, CustomDate timeEnd) {               
+    CustomDate timeStart, CustomDate timeEnd, uint32_t memory_seconds) {               
         
     if (array.size_q1 != time.size_q1) {
         cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
@@ -533,9 +535,10 @@ Matrix2D<double> limitWithTime<Matrix2D<double>>(
 
 template<>
 Matrix3D<double> limitWithTime<Matrix3D<double>>(
-    const Matrix3D<double>& array, const Matrix1D<double>& time,
-    CustomDate timeStart, CustomDate timeEnd) {               
-        
+        const Matrix3D<double>& array, const Matrix1D<double>& time,
+        CustomDate timeStart, CustomDate timeEnd, uint32_t memory_seconds) {               
+    timeStart = timeStart + memory_seconds;
+    timeEnd   = timeEnd   - memory_seconds;
     if (array.size_q1 != time.size_q1) {
         cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
         cout << "Sizes mismatch:";
@@ -557,15 +560,14 @@ Matrix3D<double> limitWithTime<Matrix3D<double>>(
     for (auto it = 0; it < time.size_q1; ++it) {
         CustomDate cd {time[it]};
         if (cd >= timeStart && cd <= timeEnd) {
-           for (auto i = 0; i < result.size_q2; ++i) {
-               for (auto j = 0; j < result.size_q3; ++j) {
+           for (int i = 0; i < result.size_q2; ++i) {
+               for (int j = 0; j < result.size_q3; ++j) {
                 result[counter][i][j] = array[it][i][j]; 
                }
            }
            ++counter;
         }
     }
-
     return result;
 }
 
@@ -594,20 +596,19 @@ MatrixType readProcessedMatFiles(
 
     MatrixType result;
     while(sd < ed) {
+        CustomDate end_current_month = sd.to_eom();
         MatrixType matrix_1m = readOneProcessedMatFile<MatrixType>(
-            name, sd, sd.to_eom(), parameters);
+            name, sd, end_current_month, parameters);
 
-        if (sd < timeStart || sd.to_eom() > timeEnd) {
+        if (sd < timeStart || end_current_month > timeEnd) {
             Matrix1D<double> time = readOneProcessedMatFile<Matrix1D<double>>(                   
-                "time", sd, sd.to_eom(), parameters);
+                "time", sd, end_current_month, parameters);
             matrix_1m = limitWithTime<MatrixType>(matrix_1m, time, 
                 timeStart, timeEnd);
-            // matrix_1m = limitWithTime<MatrixType>(matrix_1m, time, 
-            //     sd, sd.to_eom());
         }
 
         result = cat(result, matrix_1m);
-        sd = sd.add_month(1);
+        sd = sd.add_month();
     }
     return result;
 }
@@ -618,7 +619,7 @@ Matrix1D<double> pmf::readProcessedMatFiles1D(
     const string& name, 
     CustomDate timeStart, CustomDate timeEnd, const pmf::Parameters& parameters
 ) {
-    auto result = readProcessedMatFiles<Matrix1D<double>>(
+    Matrix1D<double> result = readProcessedMatFiles<Matrix1D<double>>(
             name, timeStart, timeEnd, parameters);
     return result;
 }

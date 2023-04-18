@@ -543,7 +543,7 @@ Matrix2D<double> inv(Matrix2D<double> A) {
     return A;
 }
 // solve the system of transposed matrices A^T * X^T = B^T equivalent to X * A = B
-Matrix2D<double> trans_solve(const Matrix2D<double>& A, Matrix2D<double> B) {
+Matrix2D<double>& trans_solve(const Matrix2D<double>& A, Matrix2D<double>& B) {
     long nrhs = static_cast<long>(B.size_q1);
     long n = static_cast<long>(A.size_q1);   
     long m = static_cast<long>(A.size_q2);   

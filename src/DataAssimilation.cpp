@@ -98,11 +98,11 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
 }
 
 std::vector<std::vector<data_assimilation::Observations>> data_assimilation::getObservations(
-    double timeStart,
-    double timeEnd,
-    const Matrix2D<double>& V,
-    const Matrix2D<double>& K,
-    const std::vector<pmf::Parameters>& parameters) {
+        double timeStart,
+        double timeEnd,
+        const Matrix2D<double>& V,
+        const Matrix2D<double>& K,
+        const std::vector<pmf::Parameters>& parameters) {
     std::vector<ProcessedMatFileData> pmfDataSplit;
     for (auto par : parameters) {
         ProcessedMatFileData one_instrument = internal::readData(timeStart, timeEnd, par);
@@ -225,14 +225,15 @@ void data_assimilation::runKalmanFilter(
     // auto Pf = M * Pa * transpose(M) + Q;
 
     // forecast error covariance matrix [n x n]
-    auto Pf = abtrans(M * Pa, M) + Q;
+    Matrix2D<double> Pf = abtrans(M * Pa, M);
+    Pf += Q;
     // auto HT = transpose(H);    //transforms observations to model space [n x m]
 
     // auto Pf_times_HT = Pf * HT;
-    auto Pf_times_HT = abtrans(Pf, H);
+    Matrix2D<double> Pf_times_HT = abtrans(Pf, H);
 
-    // Kalman matrix [n x m]
-    auto K = trans_solve(H * Pf_times_HT + R, Pf_times_HT);
+    // Kalman matrix [n x m], Pf_times_HT will be overwritten and referenced now as K
+    Matrix2D<double>& K = trans_solve(H * Pf_times_HT + R, Pf_times_HT);
 
     forecast += K * (obs - H * forecast);
     Pa = Pf - K * H * Pf;

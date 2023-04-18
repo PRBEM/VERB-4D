@@ -130,8 +130,8 @@ void TestPMFFullNameGeneration() {
     };
 
     string variableName = "invk";
-    const CustomDate timeStart {2013, 3, 1};
-    const CustomDate timeEnd {2013, 3, 31};
+    const CustomDate timeStart {735294};
+    const CustomDate timeEnd {735323};
 
     string expected = "/home/wutzig/mnt/data/RBSP/rbspa/Processed_Mat_Files/"
                   "rbspa_mageis_20130301to20130331_invmu_and_invk_n4_4_T89_ver4.mat";
@@ -239,8 +239,8 @@ void TestPMFReading() {
         .version = pmf::DataVersion::v4
     };
 
-    CustomDate timeStart {2013, 3, 1};
-    CustomDate timeEnd {2013, 3, 31};
+    CustomDate timeStart {735294};
+    CustomDate timeEnd {735323};
 
     Matrix3D<double> mu = readOneProcessedMatFile<Matrix3D<double>>(
          "InvMu", timeStart, timeEnd, parameters); 
