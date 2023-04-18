@@ -3,11 +3,15 @@
 #
 # Author: Anthony Miyaguchi (acmiyaguchi@gmail.com)
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.9)
 project(VERB4D C CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
+# Check if interprocedural optimization (link time optimization) is supported by the compiler
+include(CheckIPOSupported)
+check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error)
 
 # Find OpenMP
 find_package(OpenMP REQUIRED)
@@ -43,6 +47,7 @@ set(VERB4D_SOURCES
     src/Convection_2D.cpp
     src/Diffusion_1D.cpp
     src/Diffusion_2D.cpp
+    src/Diffusion_2D_MKL.cpp
     src/Diffusion_ADI1.cpp
     src/Diffusion_ADI2.cpp
     src/Diffusion_ADI3.cpp
@@ -56,16 +61,33 @@ set(VERB4D_SOURCES
     src/UpdatableMatrix.cpp
     src/VERB4D_Solver.cpp)
 
-# add source files to executable
+# the target executable
 add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
 
-# Set path to openblas library and link to executable
-add_library(openblas SHARED IMPORTED)
+# use interprocidural optimization if supported
+if( ipo_supported )
+    message(STATUS "IPO enabled")
+    set_property(TARGET VERB4D_Solver PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+else()
+    message(STATUS "IPO not supported: <${ipo_error}>")
+endif()
+
 if(WIN32)
     set_target_properties(openblas PROPERTIES IMPORTED_IMPLIB $ENV{HOMEPATH}/AppData/Local/OpenBLAS/openblas.lib)
 else(WIN32)
+    add_library(openblas  SHARED IMPORTED)
     set_target_properties(openblas PROPERTIES IMPORTED_LOCATION $ENV{HOME}/.local/lib/libopenblas.so)
     set_target_properties(VERB4D_Solver PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+    set(MKL_THREADING sequential)
+    set(MKL_INTERFACE lp64)
+    find_package(MKL CONFIG REQUIRED)
+    target_include_directories(VERB4D_Solver PUBLIC ${MKL_INCLUDE})
+    
+    list(APPEND DEPLIBS openblas ${MKL_IMPORTED_TARGETS})
+    
+    set_target_properties(VERB4D_Solver PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
+    install(TARGETS VERB4D_Solver DESTINATION bin)
 endif(WIN32)
 list(APPEND DEPLIBS openblas)
 target_link_libraries(VERB4D_Solver ${DEPLIBS})

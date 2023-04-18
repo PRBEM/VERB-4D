@@ -125,6 +125,7 @@
 #include "Convection_2D.h"
 #include "Diffusion_1D.h"
 #include "Diffusion_2D.h"    // Different solution methods for 2D diffusion
+#include "Diffusion_2D_MKL.hpp"    // Intel MKL sparse solve 
 #include "Diffusion_ADI1.h"  // Straightforward ADI
 #include "Diffusion_ADI2.h"  // Fuliang Xiao's ADI
 #include "Diffusion_ADI3.h"  // Jihye Shin and Sungsoo S. Kim (2008)'s ADI - most stable
@@ -135,7 +136,7 @@
 #include "UpdatableMatrix.h"
 #include "Interpolation.h"
 #include "BoundaryConditionType.hpp"
-
+#include "mkl_sparse_qr.h"
 #include <omp.h>
 
 using namespace std;
@@ -321,10 +322,12 @@ int main(int argc, char* argv[]) {
 
     // Setting up parellization
     omp_set_num_threads(max_threads);
+    int num_threads;
 #pragma omp parallel
     {
+        num_threads = omp_get_num_threads();
 #pragma omp master
-        Logger::message << "Number of threads: " << omp_get_num_threads() << endl;
+        Logger::message << "Number of threads: " << num_threads << endl;
     }
 
     // Check time-step for ADI method - the stable time step is completely empirical (i.e. made-up)
@@ -368,6 +371,53 @@ int main(int argc, char* argv[]) {
     Matrix3D<double> P_upperK = P.zSlice(K.size_z - 1);
     Matrix3D<double> R_upperK = R.zSlice(K.size_z - 1);
     Matrix3D<double> V_upperK = V.zSlice(K.size_z - 1);
+    
+    // initiliaze sparse column indices, row indices and matrix handles
+    // for MKL sparse solver for local diffusion
+    std::vector<sparse_matrix_t*> sparse_matrix_handles;
+    std::vector<std::vector<int>> column_indices;
+    std::vector<std::vector<int>> rows_csr;
+    if( inversion_method == "MKL" && run_local_diffusion == "true")
+    {
+        std::vector<double> dummy_values;
+        initialize_sparse_values(
+            V.wxSlice(0,0), K.wxSlice(0,0), Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type,
+            DVV.wxSlice(0,0), DVK.wxSlice(0,0), DVK.wxSlice(0,0), DKK.wxSlice(0,0), 
+            G_local.wxSlice(0,0), Losses.wxSlice(0,0), dt, dummy_values
+        );
+        matrix_descr descr{
+            SPARSE_MATRIX_TYPE_GENERAL, // mkl sparse solve only avaible for general matrices; 
+            SPARSE_FILL_MODE_UPPER, // fill mode and unit diagonal have to be set but 
+            SPARSE_DIAG_NON_UNIT // are not important for non-triangular matrix types
+        };
+        for(int j = 0; j < num_threads; j++)
+        {
+            column_indices.push_back(std::vector<int>());
+            rows_csr.push_back(std::vector<int>());
+            initialize_sparse_indices(V_size, K_size, column_indices[j], rows_csr[j]);
+
+            sparse_matrix_handles.push_back(new sparse_matrix_t);
+            sparse_status_t status = mkl_sparse_d_create_csr(
+                sparse_matrix_handles[j], SPARSE_INDEX_BASE_ZERO,
+                V_size * K_size, V_size * K_size,
+                rows_csr[j].data(), rows_csr[j].data() + 1,
+                column_indices[j].data(), dummy_values.data()
+            );
+            if(status != SPARSE_STATUS_SUCCESS)
+            {
+                std::cout << "MKL create csr error " << status << '\n';
+                exit(EXIT_FAILURE);
+            }
+            status = mkl_sparse_qr_reorder(*sparse_matrix_handles[j], descr);
+            if(status != SPARSE_STATUS_SUCCESS)
+            {
+                std::cout << "MKL reorder error " << status << '\n';
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
+    
+    
     // Main loop
     // Start time
     for (long int it = it_first; it < it_total; it++) {
@@ -750,6 +800,17 @@ int main(int argc, char* argv[]) {
                         DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
                         Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
                 }
+                else if (inversion_method == "MKL")
+                {
+                    Diffusion_2D_MKL(
+                        PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type,
+                        Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+                        Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+                        DVV.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DKK.wxSlice(iP, iR),
+                        G_local.wxSlice(iP, iR), Losses.wxSlice(iP, iR) * local_losses, Sources.wxSlice(iP, iR) * local_losses, dt,
+                        sparse_matrix_handles[omp_get_thread_num()]
+                    );
+                }
                 // Currently setup to calculate 2d Diffusion using Diffusion_2D_ADI3
                 // Can change to Diffusion_2D_ADI1 or Diffusion_2D_ADI2 for different methods of inversion
                 else if (inversion_method == "ADI") {
@@ -829,7 +890,11 @@ int main(int argc, char* argv[]) {
     }
 
     // logger records if everything went correctly
-
+    for(auto& csr_handle : sparse_matrix_handles)
+    {
+        mkl_sparse_destroy(*csr_handle);
+        // delete csr_handle; //mkl_sparse_destroy seems to delete the pointer
+    }
     Logger::message << "Program was terminated correctly." << endl;
     Logger::message << "Wall-clock time: " << (omp_get_wtime() - wall_timer) << " sec; ";
     Logger::message << "CPU time: " << (double)((clock() - start_time) / CLOCKS_PER_SEC) << " sec." << endl;
