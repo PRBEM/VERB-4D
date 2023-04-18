@@ -541,8 +541,6 @@ int main(int argc, char *argv[])
             Logger::message << "Convection:" << std::endl;
             std::cout << "           ";
 
-            Matrix2D<double> PSD_PR(P_size, R_size);
-
 #pragma omp parallel shared(progress_total, progress_count)
             {
                 // define the slices needed for convection
