@@ -62,14 +62,14 @@ bool Diffusion_2D(
 	// diagonals are zero-initialized on construction
 	CalculationMatrix matr_A(x_size, y_size, 1, 1);
 
- 	// only main diagonal non-zero, can be replaced with Matrix1D(x_size * y_size)
-	CalculationMatrix matr_B(x_size, y_size, 1, 0);
-	CalculationMatrix matr_C(x_size, y_size, 1, 0);
-
-	// Create matrix form of the Fokker-Planck equation: matr_A * PSD(t+1) = matr_B * PSD(t) + matr_C
+	Matrix1D<double> vec_B(x_size * y_size);
+	vec_B = 0;
+	Matrix1D<double> vec_C(x_size * y_size);
+	vec_C = 0;
+	// Create matrix form of the Fokker-Planck equation: matr_A * PSD(t+1) = vec_B * PSD(t) + vec_C
 	//
-	// Calculation matr_A, matr_B, and matr_C, i.e. numerical approximation of the derivatives
-	//
+	// Calculation matr_A, i.e. numerical approximation of the derivatives
+	// right hand side Matrix1D vec_B and vec_C, 
 	// (f^{t+1} - f^{t})/dt = L1(f^{t+1}) + L2(f^{t+1}) + L3(f^{t+1})[main equation, losses are calculated separately]
 	// L1, L2, L3 - diffusion operators
 	//  + need to add there the equations for boundary conditions also
@@ -83,7 +83,7 @@ bool Diffusion_2D(
 			{
 				// if at the boundary add boundary conditions
 				AddBoundaries_2D(
-					matr_A, matr_C,
+					matr_A, vec_C,
 					x, y, x_size, y_size,
 					x_LBC, x_UBC, y_LBC, y_UBC,
 					x_LBC_type, x_UBC_type, y_LBC_type, y_UBC_type,
@@ -96,11 +96,11 @@ bool Diffusion_2D(
 				// f^{t+1}/dt
 				matr_A[0][in] += 1.0 / dt;
 				// f^{t}/dt
-				matr_B[0][in] += 1.0 / dt;
+				vec_B[in] += 1.0 / dt;
 
 				// Sources and losses
 				// + Sources - Losses * f(t+1)
-				matr_C[0][in] += Sources[ix][iy];
+				vec_C[in] += Sources[ix][iy];
 				matr_A[0][in] -= Losses[ix][iy];
 
 				// Dxx
@@ -150,14 +150,14 @@ bool Diffusion_2D(
 	Matrix1D<double> rhs(matr_A.total_size);
 	for (int ix = 0; ix < x_size; ix++) {
 		for (int iy = 0; iy < y_size; iy++) {
-			int in = matr_B.index1d(ix, iy);
+			int in = matr_A.index1d(ix, iy);
 			rhs[in] = psd[ix][iy];
 		}
 	}
 
 	// make rhs = B*f + C
-	rhs.times_equal(matr_B[0]);
-	rhs += matr_C[0];
+	rhs.times_equal(vec_B);
+	rhs += vec_C;
 
 	//rhs.writeToFile("rhs.dat");
 	Lapack(matr_A, rhs);
@@ -167,7 +167,7 @@ bool Diffusion_2D(
 	// copy back from column major form
 	for (int ix = 0; ix < x_size; ix++) {
 		for (int iy = 0; iy < y_size; iy++) {
-			int in = matr_B.index1d(ix, iy);
+			int in = matr_A.index1d(ix, iy);
 			psd[ix][iy] = rhs[in];
 		}
 	}

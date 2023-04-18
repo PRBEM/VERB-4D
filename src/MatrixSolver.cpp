@@ -122,7 +122,7 @@ bool AddBoundaries_1D(
 * \param LBC, UBC for x and y - predefined 2D boundaries/types
 */
 bool AddBoundaries_2D(
-		CalculationMatrix &matr_A, CalculationMatrix &matr_C,
+		CalculationMatrix &matr_A, Matrix1D<double> &vec_C,
 		const Matrix2D<double> &x, const Matrix2D<double> &y,
 		int x_size, int y_size,
 		const Matrix1D<double>& x_LBC, const Matrix1D<double>& x_UBC,
@@ -137,7 +137,7 @@ bool AddBoundaries_2D(
 	// Boundary conditions
 	if (ix == 0 && x_size >= 3) {
 
-		matr_C[0][in] = x_LBC[iy];
+		vec_C[in] = x_LBC[iy];
 		id1 = matr_A.index1d(ix + 1, iy) - in;
 		dh = x[ix + 1][iy] - x[ix][iy];
 		//AddBoundary(matr_A, x_LBC_type, in, id, dh);
@@ -156,7 +156,7 @@ bool AddBoundaries_2D(
 
 	} else if (ix == x_size - 1 && x_size >= 3) {
 
-		matr_C[0][in] = x_UBC[iy];
+		vec_C[in] = x_UBC[iy];
 		id1 = matr_A.index1d(ix - 1, iy) - in;
 		dh = x[ix][iy] - x[ix - 1][iy];
 		//AddBoundary(matr_A, x_UBC_type, in, id, dh);
@@ -175,7 +175,7 @@ bool AddBoundaries_2D(
 
 	} else if (iy == 0 && y_size >= 3) {
 
-		matr_C[0][in] = y_LBC[ix];
+		vec_C[in] = y_LBC[ix];
 		id1 = matr_A.index1d(ix, iy + 1) - in;
 		dh = y[ix][iy + 1] - y[ix][iy];
 		//AddBoundary(matr_A, y_LBC_type, in, id, dh);
@@ -194,7 +194,7 @@ bool AddBoundaries_2D(
 
 	} else if (iy == y_size - 1 && y_size >= 3) {
 
-		matr_C[0][in] = y_UBC[ix];
+		vec_C[in] = y_UBC[ix];
 		id1 = matr_A.index1d(ix, iy - 1) - in;
 		dh = y[ix][iy] - y[ix][iy - 1];
 		//AddBoundary(matr_A, y_UBC_type, in, id, dh);
@@ -823,7 +823,7 @@ bool MakeModelMatrix_2D_ADI3_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 				// if at the boundary
 				// add boundary conditions
 				AddBoundaries_2D(
-					matr_A, matr_C,
+					matr_A, matr_C.at(0),
 					x, y,
 					x_size, y_size,
 					x_LBC, x_UBC,
@@ -956,7 +956,7 @@ bool MakeModelMatrix_2D_ADI3_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 				// if at the boundary
 				// add boundary conditions
 				AddBoundaries_2D(
-					matr_A, matr_C,
+					matr_A, matr_C.at(0),
 					x, y,
 					x_size, y_size,
 					//psd.xSlice(0), psd.xSlice(x.size_x-1),	//x_LBC, x_UBC,

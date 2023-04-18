@@ -35,7 +35,7 @@ bool AddBoundaries_1D(
 	int ix);
 
 bool AddBoundaries_2D(
-	CalculationMatrix &matr_A, CalculationMatrix &matr_C,
+	CalculationMatrix &matr_A, Matrix1D<double> &vec_C,
 	const Matrix2D<double> &x, const Matrix2D<double> &y,
 	int x_size, int y_size,
 	const Matrix1D<double>& x_LBC, const Matrix1D<double>& x_UBC,
