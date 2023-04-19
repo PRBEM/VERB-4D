@@ -3,15 +3,16 @@ Source code for the VERB-4D solver. Need to be used together with Matlab or Pyth
 create all necessary input. The main file is in `./src/VERB4D_Solver.cpp`
 
 ## Requirements
-Download cmake 3.1 and above. Note that any new source files should be added to
+Download cmake 3.7 and above. Note that any new source files should be added to
 the VERB4D_SOURCES line in CMakeLists.txt, and the build files must be
 regenerated with the below commands.
 
 The following dependencies are required and will be automatically searched via
 cmake. Use homebrew or the package manager of your choice to install them:
 
+* OpenMP
+* Lapack, OpenBLAS (added as a submodule) or Intel's MKL
 * MatLab (optional)
-* OpenBLAS (added as a submodule)
 
 A C++ compiler is necessary, a Fortran compiler (only for OpenBLAS) recomended.
 If no Fortran compiler is installed, OpenBLAS will compile from C code instead.
@@ -20,10 +21,12 @@ If no Fortran compiler is installed, OpenBLAS will compile from C code instead.
 The gcc and gfortran compilers can easily be installed if not already available.
 
 #### Windows
+##### Visual Studio
 The MSVC C++ compiler can be installed using [Visual Studio](https://visualstudio.microsoft.com/downloads/).
-This build of OpenBLAS compiles from C code and might be less optimized than
-building from the Fortran source code.
+When choosing OpenBLAS, the only option in Visual Studio is to compile OpenBLAS from C code,
+which might be less optimized than building from the Fortran source code.
 
+##### MinGW and Ninja
 The recommended way of building OpenBLAS on Windows is by using the [Ninja](https://ninja-build.org/)
 build system instead of Visual Studio. Additionally [MSYS2](https://www.msys2.org/) is necessary
 to install MinGW's gcc and gfortran compiler. To install both compilers, open 
@@ -33,7 +36,7 @@ pacman -S mingw-w64-x86_64-gcc
 pacman -S mingw-w64-x86_64-gcc-fortran
 pacman -Syu
 ```
-Make sure that the location of `ninja.exe` and the MinGW binary folder, e.g. `C:\msys64\mingw64\bin\`, is on your PATH.
+Make sure that the location of `ninja.exe` and the MinGW binary folder, e.g. `C:\msys64\mingw64\bin\`, are on your PATH.
 #### OSX
 You will need to install gcc or g++ in order to support compilation
 with OpenMP. The version of gcc on OSX 10.10 is actually linked to clang. You
@@ -61,7 +64,7 @@ git checkout openblas
 git submodule update --init
 ```
 
-### Compile and install the OpenBLAS library
+### Compile and install the OpenBLAS library (optional)
 #### Linux / OSX
 Build the shared OpenBLAS library and install it to `~/.local/lib` by calling
 ```
@@ -82,16 +85,39 @@ This location is automatically appended to the user's PATH environment variable,
 
 ### Compile the VERB-4D solver
 #### Linux / OSX
-
-Compile VERB-4D by calling
+##### CMake
+Manually compile the VERB-4D solver by creating a build folder
+```
+mkdir build && cd build
+```
+and call CMake for a release built and the BLAS library of your choice, either Lapack (default), OpenBLAS or MKL.
+```
+cmake .. -DCMAKE_BUILD_TYPE=Release -DBLAS_TYPE=OpenBLAS
+make -j
+```
+For the cmake call, when choosing OpenBLAS, an additional paramter `-DOPENBLAS_LIBPATH=<path to libopenblas.so>` can be specified (default `~/.local/lib/libopenblas.so`)
+##### Shell script
+Automatically compile the VERB-4D solver (using OpenBLAS) by calling
 ```
 ./install_verb.sh
 ```
 The executable `VERB4D_Solver` can be found in `./build`.
 
 #### Windows
-
-Compile VERB-4D by calling
+##### CMake (PowerShell)
+Manually compile the VERB-4D solver by creating a build folder
+```
+mkdir build && cd build
+```
+and call CMake for a release built and the BLAS library of your choice, either Lapack (default), OpenBLAS or MKL.
+```
+cmake .. -DBLAS_TYPE=OpenBLAS
+cmake --build . -j --config Release
+```
+For the first cmake call, when choosing OpenBLAS, an additional paramter `-DOPENBLAS_LIBPATH=<path to openblas.lib>` can be specified <br>
+ (default `<drive>:\Users\<user>\AppData\Local\OpenBLAS\openblas.lib`)
+##### PowerShell script
+Automatically compile the VERB-4D solver (using OpenBLAS) by calling
 ```
 install_verb.ps1
 ```
