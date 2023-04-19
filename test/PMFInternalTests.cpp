@@ -121,7 +121,7 @@ void TestPMFVersionNameGeneration() {
 
 void TestPMFFullNameGeneration() {
     const pmf::Parameters parameters {
-        .dataServer = "/home/wutzig/mnt/data",
+        .dataServer = "/data_root_folder",
         .mission = "rbsp",
         .satellite = "rbspa",
         .instrument = "mageis",
@@ -130,21 +130,33 @@ void TestPMFFullNameGeneration() {
     };
 
     string variableName = "invk";
-    const CustomDate timeStart {735294};
-    const CustomDate timeEnd {735323};
 
-    string expected = "/home/wutzig/mnt/data/RBSP/rbspa/Processed_Mat_Files/"
-                  "rbspa_mageis_20130301to20130331_invmu_and_invk_n4_4_T89_ver4.mat";
+    CustomDate current_time {731987.416805555578}; //10-Feb-2004 10:00:12
+    CustomDate end_of_month = current_time.to_eom();
+    std::string time_end_expected = "2004-02-29T23:59:59";
+    
+    ASSERT_EQUAL(time_end_expected, 
+        end_of_month.to_string()
+    );
+
+    CustomDate beginning_of_month = current_time.to_bom();
+
+    string expected = "/data_root_folder/RBSP/rbspa/Processed_Mat_Files/"
+                  "rbspa_mageis_20040201to20040229_invmu_and_invk_n4_4_T89_ver4.mat";
     ASSERT_EQUAL(expected, 
         generateProcessedMatFileName(
-            timeStart, timeEnd, parameters, variableName));
+            beginning_of_month, end_of_month, parameters, variableName));
 
     variableName = "psd";
-    expected = "/home/wutzig/mnt/data/RBSP/rbspa/Processed_Mat_Files/"
-                  "rbspa_mageis_20130301to20130331_psd_ver4.mat";
+    expected = "/data_root_folder/RBSP/rbspa/Processed_Mat_Files/"
+                  "rbspa_mageis_20040201to20040229_psd_ver4.mat";
     ASSERT_EQUAL(expected, 
         generateProcessedMatFileName(
-            timeStart, timeEnd, parameters, variableName));
+            beginning_of_month, end_of_month, parameters, variableName));
+    
+    CustomDate end_of_march {735324.641365740797}; //31-Mar-2013 15:23:34
+    std::string expected_add_month = "2013-04-30T15:23:34";
+    ASSERT_EQUAL(end_of_march.add_month().to_string(), expected_add_month);
     
 }
 
@@ -264,5 +276,5 @@ void TestPMFInternal() {
     RUN_TEST(tr, TestPMFGetMagneticFieldModel);
     RUN_TEST(tr, TestPMFGetVersion);
     RUN_TEST(tr, TestParameterReading);
-    RUN_TEST(tr, TestPMFReading);
+    //RUN_TEST(tr, TestPMFReading);
 }

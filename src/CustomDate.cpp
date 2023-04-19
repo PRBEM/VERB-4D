@@ -47,11 +47,20 @@ CustomDate CustomDate::operator-(uint32_t delta_seconds)
 
 CustomDate CustomDate::add_month() const {
     CustomDate answer;
-    int days_in_month = max_days[datetime.tm_mon];
-    if (this->is_leap_year() && datetime.tm_mon == 1) {
-        days_in_month += 1;
+    int delta_days         = max_days[datetime.tm_mon];
+    int days_in_next_month = max_days[(datetime.tm_mon + 1) % 12];
+    
+    if(this->is_leap_year()){
+        if(datetime.tm_mon == 0){
+            days_in_next_month += 1;
+        }
+        else if(datetime.tm_mon == 1){
+            delta_days += 1;
+        }
     }
-    answer.unix_seconds = unix_seconds + days_in_month * 24 * 3600;
+
+    delta_days -= std::max(0, datetime.tm_mday - days_in_next_month);
+    answer.unix_seconds = unix_seconds + delta_days * 24 * 3600;
     gmtime_r(&answer.unix_seconds, &answer.datetime);
 
     return answer;
@@ -69,8 +78,8 @@ std::string CustomDate::to_date_string() const {
 std::string CustomDate::to_string() const {
     std::stringstream str_stream;
     str_stream << std::setfill('0')
-        << datetime.tm_year + 1900 
-        << std::setw(2) << datetime.tm_mon + 1
+        << datetime.tm_year + 1900 << '-'
+        << std::setw(2) << datetime.tm_mon + 1 << '-'
         << std::setw(2) << datetime.tm_mday << 'T'
         << std::setw(2) << datetime.tm_hour << ':'
         << std::setw(2) << datetime.tm_min << ':'

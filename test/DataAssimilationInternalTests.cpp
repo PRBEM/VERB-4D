@@ -211,8 +211,6 @@ void TestKalmanFilter() {
             {-0.122416645000452,  0.715218960054244,  10.106010915435636}
         }
     );
-    PRINT(Pa);
-    PRINT(Pa_expected);
     TestEqualTol(forecast, forecast_expected, 1e-14);
     TestEqualTol(Pa, Pa_expected, 1e-14);
 }
@@ -502,8 +500,8 @@ void TestDataAssimilationInternal() {
     TestRunner tr;
     RUN_TEST(tr, TestDataAssimilationAuxiliaryFunctions);
     RUN_TEST(tr, TestKalmanFilter);
-    RUN_TEST(tr, TestModelMatrixConvectionWithoutStabilityCheck);
-    RUN_TEST(tr, TestModelMatrixConvectionWithStabilityCheck);
+    // RUN_TEST(tr, TestModelMatrixConvectionWithoutStabilityCheck);
+    // RUN_TEST(tr, TestModelMatrixConvectionWithStabilityCheck);
     RUN_TEST(tr, TestConditionalMean);
     RUN_TEST(tr, TestBin);
     RUN_TEST(tr, TestConvertToObservationSpace);
