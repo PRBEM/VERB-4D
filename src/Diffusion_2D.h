@@ -29,5 +29,4 @@ bool Diffusion_2D(
 	const Matrix2D<double>& G, const Matrix2D<double>& Sources, const Matrix2D<double>& Losses, double dt
 );
 
-
 #endif /* DIFFUSION_2D_H_ */

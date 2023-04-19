@@ -32,7 +32,8 @@ bool AddBoundaries_1D(
 	int x_size,
 	double x_LBC, double x_UBC,
 	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
-	int ix);
+	int ix
+);
 
 bool AddBoundaries_2D(
 	CalculationMatrix &matr_A, Matrix1D<double> &vec_C,
@@ -43,19 +44,6 @@ bool AddBoundaries_2D(
 	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
 	int ix, int iy, int in
-);
-
-/// FUNCITON NOT IMPLEMENTED
-bool MakeModelMatrix_2D(
-	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-	Matrix2D<double> &x, Matrix2D<double> &y,
-	int x_size, int y_size,
-	Matrix1D<double> &x_LBC, Matrix1D<double> &x_UBC,
-	Matrix1D<double> &y_LBC, Matrix1D<double> &y_UBC,
-	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
-	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-	Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-	Matrix2D<double> &G, Matrix2D<double> Sources, Matrix2D<double> Losses, double dt
 );
 
 void Lapack(const DiagMatrix &A, Matrix1D<double> &B);
@@ -126,79 +114,6 @@ extern "C" {
 	//extern void sgesv_(int *,int *,float *,int *,int*, float *,int*,int*);
 	extern void dgbsv_(long int *n, long int *kl, long int *ku, long int *nrhs, double *ab, long int *ldab, long int *ipiv, double *b, long int *ldb, long int *info);
 };
-
-
-bool MakeModelMatrix_2D_ADI1_x(
-	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-	Matrix2D<double> &x, Matrix2D<double> &y,
-	int x_size, int y_size,
-	Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-	Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
-	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-	Matrix2D<double> &Dxx, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-	Matrix2D<double> &G, double dt
-);
-
-bool MakeModelMatrix_2D_ADI1_y(
-	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-	Matrix2D<double> &x, Matrix2D<double> &y,
-	int x_size, int y_size,
-	Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-	Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
-	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-	Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-	Matrix2D<double> &G, double dt
-);
-
-bool MakeModelMatrix_2D_ADI2_x(
-	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-	Matrix2D<double> &x, Matrix2D<double> &y,
-	int x_size, int y_size,
-	Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-	Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
-	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-	Matrix2D<double> &Dxx, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-	Matrix2D<double> &G, double dt
-);
-
-bool MakeModelMatrix_2D_ADI2_y(
-	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-	Matrix2D<double> &x, Matrix2D<double> &y,
-	int x_size, int y_size,
-	Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-	Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
-	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-	Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-	Matrix2D<double> &G, double dt
-);
-
-bool MakeModelMatrix_2D_ADI3_y(
-	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-	Matrix2D<double> &x, Matrix2D<double> &y,
-	int x_size, int y_size,
-	Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-	Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
-	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-	Matrix2D<double> &Dyy,
-	Matrix2D<double> &G, double dt
-);
-
-bool MakeModelMatrix_2D_ADI3_x(
-	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-	Matrix2D<double> &x, Matrix2D<double> &y,
-	int x_size, int y_size,
-	Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-	Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
-	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-	Matrix2D<double> &Dxx, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-	Matrix2D<double> &G, double dt
-);
 
 #endif
 

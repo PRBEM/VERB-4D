@@ -58,10 +58,8 @@ bool Diffusion_2D(
 		const Matrix2D<double>& Dxx, const Matrix2D<double>& Dyy, const Matrix2D<double>& Dxy, const Matrix2D<double>& Dyx,
 		const Matrix2D<double>& G, const Matrix2D<double>& Sources, const Matrix2D<double>& Losses, double dt) 
 {
-	
 	// diagonals are zero-initialized on construction
 	CalculationMatrix matr_A(x_size, y_size, 1, 1);
-
 	Matrix1D<double> vec_B(x_size * y_size);
 	vec_B = 0;
 	Matrix1D<double> vec_C(x_size * y_size);
@@ -75,12 +73,11 @@ bool Diffusion_2D(
 	//  + need to add there the equations for boundary conditions also
 	for (int ix = 0; ix < x_size; ix++) {
 		for (int iy = 0; iy < y_size; iy++) {
-			// calculating current line number (in)
+			// current line number (in)
 			int in = matr_A.index1d(ix, iy);
 
 			if((ix == 0 && x_size >= 3)	|| (ix == x_size - 1 && x_size >= 3)
-			|| (iy == 0 && y_size >= 3) || (iy == y_size - 1 && y_size >= 3)) 
-			{
+			|| (iy == 0 && y_size >= 3) || (iy == y_size - 1 && y_size >= 3)) {
 				// if at the boundary add boundary conditions
 				AddBoundaries_2D(
 					matr_A, vec_C,
@@ -90,7 +87,6 @@ bool Diffusion_2D(
 					ix, iy, in);
 
 			} else {
-
 				// now we are sure we are not on a boundary, can do the Fokker-Planck equation approximation in the inner area
 
 				// f^{t+1}/dt
@@ -98,7 +94,6 @@ bool Diffusion_2D(
 				// f^{t}/dt
 				vec_B[in] += 1.0 / dt;
 
-				// Sources and losses
 				// + Sources - Losses * f(t+1)
 				vec_C[in] += Sources[ix][iy];
 				matr_A[0][in] -= Losses[ix][iy];
@@ -129,22 +124,12 @@ bool Diffusion_2D(
 					SecondDerivativeApproximation_2D(matr_A, ix, iy, "x_left", "y_left", x, y, Dyx, G, -0.25);
 					SecondDerivativeApproximation_2D(matr_A, ix, iy, "x_right", "y_right", x, y, Dyx, G, -0.25);
 				}
-
 			}
 		}
 	}
-	// Output::echo("recalculated.\n");
-
-	// save the time of matrix change
-	// matr_A.change_ind = clock();
-	// matr_B.change_ind = clock();
-	// matr_C.change_ind = clock();
-
-
 	//matr_A.writeToFile("./Debug_output/matr_A.dat");
 	//matr_B.writeToFile("./Debug_output/matr_B.dat");
 	//matr_C.writeToFile("./Debug_output/matr_C.dat");
-
 
 	// rearranged PSD into one 1d vector in column major form
 	Matrix1D<double> rhs(matr_A.total_size);
@@ -163,7 +148,6 @@ bool Diffusion_2D(
 	Lapack(matr_A, rhs);
 	//rhs.writeToFile("result.dat");
 
-
 	// copy back from column major form
 	for (int ix = 0; ix < x_size; ix++) {
 		for (int iy = 0; iy < y_size; iy++) {
@@ -174,4 +158,3 @@ bool Diffusion_2D(
 
 	return true;
 }
-
