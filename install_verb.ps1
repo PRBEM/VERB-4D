@@ -3,6 +3,6 @@ if (!(Test-Path build)) {
     New-Item build -ItemType Directory
 }
 Set-Location build
-cmake ..
+cmake .. -DBLAS_TYPE=OpenBLAS
 cmake --build . --target VERB4D_Solver -j --config Release
 Set-Location ..
