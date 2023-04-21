@@ -3,7 +3,7 @@ Source code for the VERB-4D solver. Need to be used together with Matlab or Pyth
 create all necessary input. The main file is in `./src/VERB4D_Solver.cpp`
 
 ## Requirements
-Download cmake 3.7 and above. Note that any new source files should be added to
+Download cmake 3.7 or above. Note that any new source files should be added to
 the VERB4D_SOURCES line in CMakeLists.txt, and the build files must be
 regenerated with the below commands.
 
@@ -19,6 +19,10 @@ If no Fortran compiler is installed, OpenBLAS will compile from C code instead.
 
 #### Linux
 The gcc and gfortran compilers can easily be installed if not already available.
+If you have a compilation problem, install the latest gcc (minimum 10.2.0).
+If CMAKE cannot find the correct g++ version, you can setup environmental variable CXX:
+
+export CXX=/u/local/compilers/gcc/10.2.0/bin/c++
 
 #### Windows
 ##### Visual Studio
@@ -57,7 +61,7 @@ git clone git@rbm9.gfz-potsdam.de:verb/verb4d_solver.git
 git clone https://rbm9.gfz-potsdam.de/verb/verb4d_solver.git
 ```
 Enter the verb4d_solver directory, checkout the openblas branch and update the
-OpenBLAS submodule.
+OpenBLAS submodule (this option is currently possible for verb4d_solver openblas branch).
 ```
 cd verb4d_solver
 git checkout openblas
