@@ -1,8 +1,8 @@
 # create a build folder and compile OpenBLAS
-$openblas_branch = "release-0.3.0"
+#$openblas_branch = "release-0.3.0"
 
 Set-Location OpenBLAS
-git checkout $openblas_branch
+#git checkout $openblas_branch
 if (!(Test-Path build)) {
     New-Item build -ItemType Directory
 }

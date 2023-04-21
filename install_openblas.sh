@@ -1,5 +1,5 @@
 #!/bin/bash
-openblas_branch="release-0.3.0"
+#openblas_branch="release-0.3.0"
 
 # create ~/.local/lib if it does not exist
 local_lib="$HOME/.local/lib"
@@ -11,7 +11,7 @@ fi
 
 # create a build folder inside OpenBLAS if it does not exist
 cd ./OpenBLAS
-git checkout $openblas_branch
+#git checkout $openblas_branch
 if [ ! -d ./build ]
 then
     mkdir ./build

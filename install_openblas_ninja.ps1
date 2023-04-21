@@ -6,9 +6,9 @@ catch {
     throw "Ninja build system not found on PATH. Download Ninja binary from https://github.com/ninja-build/ninja/releases and add the location of ninja.exe to your PATH environmental variable."
 }
 # create a build folder and compile OpenBLAS
-$openblas_branch = "release-0.3.0"
+#$openblas_branch = "release-0.3.0"
 Set-Location OpenBLAS
-git checkout $openblas_branch
+#git checkout $openblas_branch
 
 if (!(Test-Path build)) {
     New-Item build -ItemType Directory
