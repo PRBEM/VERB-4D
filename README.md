@@ -22,7 +22,7 @@ The gcc and gfortran compilers can easily be installed if not already available.
 If you have a compilation problem, install the latest gcc (minimum 10.2.0).
 If CMAKE cannot find the correct g++ version, you can setup environmental variable CXX:
 
-export CXX=/u/local/compilers/gcc/10.2.0/bin/c++
+`export CXX=/u/local/compilers/gcc/10.2.0/bin/c++`
 
 #### Windows
 ##### Visual Studio
