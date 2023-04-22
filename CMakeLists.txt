@@ -3,11 +3,92 @@
 #
 # Author: Anthony Miyaguchi (acmiyaguchi@gmail.com)
 
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.9)
 project(VERB4D C CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 # set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
+# Add directories for include files
+include_directories(${PROJECT_SOURCE_DIR}/src)
+
+# Recursively search for header files to include for project files.  This isn't
+# necessary to compile, but its nice to have in Visual Studio solutions.
+file(GLOB_RECURSE VERB4D_HEADERS *.h)
+
+# Add new source files here and re-run cmake
+set(VERB4D_SOURCES
+    src/Convection_1D_ULTIMATE_QUICKEST6.cpp
+    src/Convection_2D.cpp
+    src/Diffusion_1D.cpp
+    src/Diffusion_2D.cpp
+    src/Diffusion_2D_MKL.cpp
+    src/Diffusion_ADI1.cpp
+    src/Diffusion_ADI2.cpp
+    src/Diffusion_ADI3.cpp
+    src/Interpolation.cpp
+    src/Logger.cpp
+    src/Matrix.cpp
+    src/MatrixSolver.cpp
+    src/MonotCubicInterpolator.cpp
+    src/Parameters.cpp
+    src/ReadInitialData.cpp
+    src/UpdatableMatrix.cpp
+    src/VERB4D_Solver.cpp)
+
+# the target executable
+add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
+
+# Check if interprocedural optimization (link time optimization) is supported by the compiler
+include(CheckIPOSupported)
+check_ipo_supported(RESULT ipo_supported OUTPUT ipo_error)
+
+if(NOT DEFINED BLAS_TYPE)
+    message("No BLAS_TYPE specified, choosing LAPACK")
+    set(BLAS_TYPE LAPACK)
+endif()
+string(TOUPPER ${BLAS_TYPE} BLAS_TYPE)
+if(${BLAS_TYPE} STREQUAL "LAPACK")
+    if(WIN32)
+        # The libraries for lapack and BLAS for windows are in the lib folder
+        set(LAPACK_LIBRARIES ${CMAKE_SOURCE_DIR}/lib/clapack.lib)
+        set(BLAS_LIBRARIES   ${CMAKE_SOURCE_DIR}/lib/blas.lib)
+        set(F2C_LIBRARIES    ${CMAKE_SOURCE_DIR}/lib/libf2c.lib)
+        list(APPEND DEPLIBS ${F2C_LIBRARIES})
+    else(WIN32)
+        # Installed by distribution's package manager
+        find_package(LAPACK REQUIRED)
+    endif(WIN32)
+    list(APPEND DEPLIBS ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
+elseif(${BLAS_TYPE} STREQUAL "OPENBLAS")
+    add_library(openblas  SHARED IMPORTED)
+    if(WIN32)
+        if(NOT DEFINED OPENBLAS_LIBPATH)
+            set(OPENBLAS_LIBPATH $ENV{HOMEPATH}/AppData/Local/OpenBLAS/openblas.lib)
+            message("No OPENBLAS_LIBPATH specified, chhosing ${OPENBLAS_LIBPATH}")
+        endif()
+        set_target_properties(openblas PROPERTIES IMPORTED_IMPLIB ${OPENBLAS_LIBPATH})
+    else()
+        if(NOT DEFINED OPENBLAS_LIBPATH)
+            set(OPENBLAS_LIBPATH $ENV{HOME}/.local/lib/libopenblas.so)
+            message("No OPENBLAS_LIBPATH specified, chhosing ${OPENBLAS_LIBPATH}")
+        endif()
+        set_target_properties(openblas PROPERTIES IMPORTED_LOCATION ${OPENBLAS_LIBPATH})
+    endif()
+    list(APPEND DEPLIBS openblas)
+elseif(${BLAS_TYPE} STREQUAL "MKL")
+    set(MKL_THREADING sequential)
+    set(MKL_INTERFACE lp64)
+    find_package(MKL CONFIG REQUIRED)
+    list(APPEND DEPLIBS ${MKL_IMPORTED_TARGETS})
+    target_include_directories(VERB4D_Solver PUBLIC ${MKL_INCLUDE})
+
+    if(DEFINED ${MKL_FOUND})
+        add_definitions(-DMKL_FOUND)
+    endif()
+else()
+    message( FATAL_ERROR "Unknown BLAS_TYPE. Choose either LAPACK, OPENBLAS or MKL" )
+endif()
 
 # Find OpenMP
 find_package(OpenMP REQUIRED)
@@ -29,59 +110,12 @@ if(Matlab_FOUND)
     add_definitions(-DMATLAB_CAPABLE=true)
 endif()
 
-if(WIN32)
-    # The libraries for lapack and BLAS for windows are in the lib folder
-    set(LAPACK_LIBRARIES ${CMAKE_SOURCE_DIR}/lib/clapack.lib)
-    set(BLAS_LIBRARIES   ${CMAKE_SOURCE_DIR}/lib/blas.lib)
-    set(F2C_LIBRARIES    ${CMAKE_SOURCE_DIR}/lib/libf2c.lib)
-else(WIN32)
-    # Installed by distribution's package manager
-    find_package(LAPACK REQUIRED)
-    find_package(BLAS REQUIRED)
-endif(WIN32)
-
-# Libraries to link against
-list(APPEND DEPLIBS
-    ${LAPACK_LIBRARIES}
-    ${BLAS_LIBRARIES})
-
-# Fortran to C library for windows, needed by lapack
-if(WIN32)
-    list(APPEND DEPLIBS ${F2C_LIBRARIES})
-endif(WIN32)
-
-# Add directories for include files
-include_directories(${PROJECT_SOURCE_DIR}/src)
-
-# Recursively search for header files to include for project files.  This isn't
-# necessary to compile, but its nice to have in Visual Studio solutions.
-file(GLOB_RECURSE VERB4D_HEADERS *.h)
-
-# Add new source files here and re-run cmake
-set(VERB4D_SOURCES
-    src/Convection_1D_ULTIMATE_QUICKEST6.cpp
-    src/Convection_2D.cpp
-    src/Diffusion_1D.cpp
-    src/Diffusion_2D.cpp
-    src/Diffusion_ADI1.cpp
-    src/Diffusion_ADI2.cpp
-    src/Diffusion_ADI3.cpp
-    src/Interpolation.cpp
-    src/Logger.cpp
-    src/Matrix.cpp
-    src/MatrixSolver.cpp
-    src/MonotCubicInterpolator.cpp
-    src/Parameters.cpp
-    src/ReadInitialData.cpp
-    src/UpdatableMatrix.cpp
-    src/VERB4D_Solver.cpp)
-
-# Build and link
-add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Gnu")
-    target_compile_options(VERB4D_Solver PRIVATE  -Wall -Wextra -Wpedantic)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(VERB4D_Solver PRIVATE /W4)
+# use interprocidural optimization if supported
+if( ipo_supported )
+    message(STATUS "IPO enabled")
+    set_property(TARGET VERB4D_Solver PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+else()
+    message(STATUS "IPO not supported: <${ipo_error}>")
 endif()
 
 target_link_libraries(VERB4D_Solver ${DEPLIBS})
