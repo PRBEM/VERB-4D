@@ -20,9 +20,9 @@ If no Fortran compiler is installed, OpenBLAS will compile from C code instead.
 #### Linux
 The gcc and gfortran compilers can easily be installed if not already available.
 If you have a compilation problem, install the latest gcc (minimum 10.2.0).
-If CMAKE cannot find the correct g++ version, you can setup environmental variable CXX:
+If CMAKE cannot find the correct g++ version, you can set the environmental variable CXX to the correct binary, e.g.
 
-`export CXX=/u/local/compilers/gcc/10.2.0/bin/c++`
+`export CXX=/u/local/compilers/gcc/10.2.0/bin/g++`
 
 #### Windows
 ##### Visual Studio
@@ -60,13 +60,7 @@ git clone git@rbm9.gfz-potsdam.de:verb/verb4d_solver.git
 ```
 git clone https://rbm9.gfz-potsdam.de/verb/verb4d_solver.git
 ```
-Enter the verb4d_solver directory, checkout the openblas branch and update the
-OpenBLAS submodule (this option is currently possible for verb4d_solver openblas branch).
-```
-cd verb4d_solver
-git checkout openblas
-git submodule update --init
-```
+Add the `--recursive` flag to also clone the OpenBLAS submodule. Enter the verb4d_solver directory with `cd verb4d_solver`. If you cloned verb4d_solver non-recursively, you can update the OpenBLAS submodule by executing `git submodule update --init`.
 
 ### Compile and install the OpenBLAS library (optional)
 #### Linux / OSX
