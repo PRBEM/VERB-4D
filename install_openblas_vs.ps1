@@ -23,7 +23,10 @@ Write-Output "copied OpenBLAS library files to $blas_dir"
 Set-Location ..\..
 
 $oldPath = (Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name PATH).path
-if (!$oldPath.split(';').contains($blas_dir)){
-    $newPath = ($oldPath + $blas_dir) -join ';'
+[System.Collections.ArrayList]$path_list = $oldPath.split(';')
+if (!$path_list.contains($blas_dir)){
+    $Env:Path += ';' + $blas_dir
+    [void]$path_list.Add($blas_dir)
+    $newPath = $path_list -join ';'
     Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name PATH -Value $newPath
 }

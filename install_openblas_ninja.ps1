@@ -6,10 +6,7 @@ catch {
     throw "Ninja build system not found on PATH. Download Ninja binary from https://github.com/ninja-build/ninja/releases and add the location of ninja.exe to your PATH environmental variable."
 }
 # create a build folder and compile OpenBLAS
-#$openblas_branch = "release-0.3.0"
 Set-Location OpenBLAS
-#git checkout $openblas_branch
-
 if (!(Test-Path build)) {
     New-Item build -ItemType Directory
 }
@@ -24,13 +21,16 @@ if (!(Test-Path $blas_dir)) {
     New-Item $blas_dir -ItemType Directory
 }
 
-Copy-Item lib\RELEASE\libopenblas.dll.a $blas_dir\openblas.lib
-Copy-Item lib\RELEASE\libopenblas.dll $blas_dir\openblas.dll
+Copy-Item lib\libopenblas.dll.a $blas_dir\openblas.lib
+Copy-Item lib\libopenblas.dll $blas_dir\openblas.dll
 Write-Output "copied OpenBLAS library files to $blas_dir"
 Set-Location ..\..
 
 $oldPath = (Get-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name PATH).path
-if (!$oldPath.split(';').contains($blas_dir)){
-    $newPath = ($oldPath + $blas_dir) -join ';'
+[System.Collections.ArrayList]$path_list = $oldPath.split(';')
+if (!$path_list.contains($blas_dir)){
+    $Env:Path += ';' + $blas_dir
+    [void]$path_list.Add($blas_dir)
+    $newPath = $path_list -join ';'
     Set-ItemProperty -Path 'Registry::HKEY_CURRENT_USER\Environment' -Name PATH -Value $newPath
 }
