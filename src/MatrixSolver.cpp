@@ -29,10 +29,10 @@
 
 #include "MatrixSolver.h"
 #include <cmath>
-//#include <malloc.h>
 #include <stdlib.h>
 #include <string>
 #include <ctime>
+#include <cmath>
 #include <iostream>
 #include <stdlib.h>
 
@@ -219,89 +219,61 @@ bool AddBoundaries_2D(
 }
 
 /**
- * Lapack inversion.
- *
- * A * X = B - equation
- *
- * LAPACK - Linear Algebra PACKage. For linear algebra methods. Using the lapack library from http://www.netlib.org/lapack/
+ * Lapack solver for general banded matrix equations A * x = rhs
+ * \param A Matrix A as DiagMatrix
+ * \param rhs right-hand side vector, overwritten with solution
  */
 void Lapack(const DiagMatrix &A, Matrix1D<double> &rhs) {
 
-	// Save A and rhs to check the solution at the end
-	// Matrix1D<double> B_res;
-	// B_res = rhs;
+	long mat_rows = (long)A.at(0).size_q1;
+	long rhs_rows = (long)rhs.size_q1;
+	if(mat_rows != rhs_rows) {
+		std::cerr << "Number of rows in matrix A must be equal to elements of rhs, but was " << mat_rows << " and " << rhs_rows << "!\n";
+		exit(EXIT_FAILURE);
+	}
 
-	// iterator for diagonals of the diagonal matrix
-	long m_size = static_cast<long>(A.at(0).size_q1);
+	long kl = (long)(-A.cbegin()->first); // (absolute value of) lowest off-diagonal index
+	long ku = (long)(A.crbegin()->first); // highest off-diagonal index
+	long mat_cols = 2 * kl + ku + 1;
+	long rhs_cols = 1;
+	
+	long* ipiv = new long[mat_rows]; // lapack array to store permutation indices
+	long info = 1; // lapack error code
 
-	long kl = -A.cbegin()->first; // first diagonal
-	long ku = A.crbegin()->first; // last diagonal
-	long cols_rhs = 1;
-	long ldab = 2 * kl + ku + 1;
-	long* ipiv = new long[m_size];
-	long ldb = static_cast<long>(rhs.size_q1);
-	long info = 1;
+	double *flat_matrix = new double[mat_cols * mat_rows];
+	for (int i = 0; i < mat_cols * mat_rows; i++) {
+		flat_matrix[i] = 0;
+	}
 
-	double *flat_matrix = new double[(kl+ku+kl+1)*m_size];
-	double **newmat = new double*[m_size];
-	for(int i=0; i<m_size; i++){ newmat[i] = &flat_matrix[i*(kl+ku+kl+1)]; }
-	for (int i = 0; i < (kl+ku+kl+1)*m_size; i++) flat_matrix[i] = 0;
-
-	for (int in = 0; in < m_size; in++) {
-		for (const auto& [idx, diagonal] : A) {
-			// Check if the element at line (in) and diagonal (it->first) is inside the matrix.
-			int col = in + idx; // column number
-			if (col >= 0 && col < m_size) {
-				// converting matrix, stored as diagonals, into lapack matrix (also diagonal)
-				newmat[col][ku+kl-idx] = diagonal[in];
-			}
+	// rearrange CalculationMatrix A to Lapack's general banded matrix format 
+	for (const auto& [idx, diagonal] : A) {
+		int diag_start = std::max(0, -idx);
+		int diag_end = std::min(mat_rows, mat_rows - idx);
+		int offset = ku + kl + idx * (mat_cols - 1);
+		for (int in = diag_start; in < diag_end; in++) {
+			flat_matrix[in * mat_cols + offset] = diagonal[in];
 		}
 	}
 
-	/*ofstream output("Lap_mat.dat");
-	for (i = 0; i < m_size; i++) {
-		for (j = 0; j < (kl+ku+kl+1); j++) {
-			output << newmat[i][j] << "\t";
-		}
-		output << endl;
-	}
-	output.close();*/
-
-	dgbsv_(&m_size, &kl, &ku, &cols_rhs, flat_matrix, &ldab, ipiv, &rhs[0], &ldb, &info);
+	// std::ofstream output("Lap_mat.dat");
+	// for (int i = 0; i < mat_rows; i++) {
+	// 	for (int j = 0; j < mat_cols; j++) {
+	// 		output << flat_matrix[i * mat_cols + j] << '\t';
+	// 	}
+	// 	output << std::endl;
+	// }
+	// output.close();
+	
+	// Lapack's double-precision general banded (dgb) matrix solver
+	dgbsv_(&mat_rows, &kl, &ku, &rhs_cols, flat_matrix, &mat_cols, ipiv, &rhs[0], &rhs_rows, &info);
 
 	if (info != 0) {
-		printf("Lapack inversion Error!!! INFO = %ld.\n", info);
+		printf("Lapack inversion Error! INFO = %ld.\n", info);
 		exit(EXIT_FAILURE);
 	}
-
-	// check
-	// "A*X - rhs" should be zero
-	// X is stored in rhs after Lapack solution
-	// and we stored rhs in B_res previousely
-	// So, it's "B_res - A*rhs" should be zero
-	// for (in = 0; in < m_size; in++) {
-	// 	for (it = A.begin(); it != A.end(); it++) {
-	// 		if (in + it->first >= 0 && in + it->first < m_size) {
-	// 			//cout << B_res[in] << "-=" << it->second[in] << "*" << rhs[in] << endl;
-	// 			B_res[in] -= it->second[in] * rhs[in + it->first];
-	// 		}
-	// 	}
-	// }
-
-	// // calculate max error
-	// double max = 0;
-	// for (int i = 0; i < m_size; i++) {
-	// 	max = (max > fabs(B_res(i))) ? max : B_res(i);
-	// }
-
-/*	if(max>1) {
-		printf(" Max error: %e.\n", max);
-		exit(EXIT_FAILURE);
-	}*/
 
 	delete[] ipiv;
 	delete[] flat_matrix;
-	delete[] newmat;
 }
 
 /**
