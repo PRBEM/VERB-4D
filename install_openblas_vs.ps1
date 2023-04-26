@@ -2,7 +2,6 @@
 #$openblas_branch = "release-0.3.0"
 
 Set-Location OpenBLAS
-#git checkout $openblas_branch
 if (!(Test-Path build)) {
     New-Item build -ItemType Directory
 }
