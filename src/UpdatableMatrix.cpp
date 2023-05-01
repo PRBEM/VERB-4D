@@ -294,7 +294,7 @@ void MatrixLimit(UpdatableMatrix< Matrix4D<double> > &M, const Matrix4D<double> 
  * @return True if success, False if failure
  */
 template <typename MatrixND>
-bool UpdatableMatrix<MatrixND>::readFromIniFile(string ini_filename, const MatrixND& q1, const MatrixND& q2, const MatrixND& q3, const MatrixND& q4) {
+bool UpdatableMatrix<MatrixND>::readFromIniFile(const string& ini_filename, const MatrixND& q1, const MatrixND& q2, const MatrixND& q3, const MatrixND& q4) {
 	fstream input;
 
 	// Open the ini-file for read
@@ -348,7 +348,7 @@ bool UpdatableMatrix<MatrixND>::readFromIniFile(string ini_filename, const Matri
  * @return True if success, False if failure
  */
 template <typename MatrixND>
-bool UpdatableMatrix<MatrixND>::readFromString(string file_line_string, const MatrixND &q1, const MatrixND &q2, const MatrixND &q3, const MatrixND &q4) {
+bool UpdatableMatrix<MatrixND>::readFromString(const string& file_line_string, const MatrixND &q1, const MatrixND &q2, const MatrixND &q3, const MatrixND &q4) {
 	// This defines an "empty marker" - it indicates that we need to skip that parameter.
 	const string empty_marker = "-";
 
