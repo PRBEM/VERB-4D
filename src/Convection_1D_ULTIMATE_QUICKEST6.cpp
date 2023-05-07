@@ -32,7 +32,6 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
 		double x_LBC, double x_UBC,
 		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 		const Matrix1D<double>& Ux,
-		const Matrix1D<double>& Sources, const Matrix1D<double>& Losses,
 		double dt_total)
 {
     constexpr bool use_limiting      = true;

@@ -46,7 +46,7 @@ template<class T>inline T* matrix(size_t Rows)
 	T *m=new T[Rows];
 	//	assert(m!=NULL);
 	if (m == NULL) {
-		printf("MEMORY_ERRROR: Memory can't be initialized: %lu size", Rows*sizeof(T));
+		printf("MEMORY_ERRROR: Memory can't be initialized: %zu size", Rows*sizeof(T));
 		exit(EXIT_FAILURE);
 	}
 	return m;
@@ -59,14 +59,14 @@ template<class T>inline T** matrix(size_t Rows, size_t Columns)
 	T **m=new T*[Rows];
 	//	assert(m!=NULL);
 	if (m == NULL) {
-		printf("MEMORY_ERRROR: Memory can't be initialized: %lu size", Rows * sizeof(T));
+		printf("MEMORY_ERRROR: Memory can't be initialized: %zu size", Rows * sizeof(T));
 		exit(EXIT_FAILURE);
 	}
 	// allocating memory for data array
 	m[0] = new T[Rows * Columns];
 	//	assert(m[0]!=NULL);
 	if (m[0] == NULL) {
-		printf("MEMORY_ERRROR: Memory can't be initialized: %lu size", Rows * Columns * sizeof(T));
+		printf("MEMORY_ERRROR: Memory can't be initialized: %zu size", Rows * Columns * sizeof(T));
 		exit(EXIT_FAILURE);
 	}
 	// assign pointers to data ranges
@@ -81,7 +81,7 @@ template<class T>inline T*** matrix(size_t size_x, size_t size_y, size_t size_z)
 	T ***m=new T**[size_x];
 	//	assert(m!=NULL);
 	if (m == NULL) {
-		printf("MEMORY_ERRROR: Memory can't be initialized: %lu size", size_x * sizeof(T));
+		printf("MEMORY_ERRROR: Memory can't be initialized: %zu size", size_x * sizeof(T));
 		exit(EXIT_FAILURE);
 	}
 	for (size_t x = 0; x < size_x; x++) {
@@ -89,7 +89,7 @@ template<class T>inline T*** matrix(size_t size_x, size_t size_y, size_t size_z)
 		m[x] = new T*[size_y];
 		//		assert(m[x]!=NULL);
 		if (m[x] == NULL) {
-			printf("MEMORY_ERRROR: Memory can't be initialized: %lu size", size_y * sizeof(T));
+			printf("MEMORY_ERRROR: Memory can't be initialized: %zu size", size_y * sizeof(T));
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -97,7 +97,7 @@ template<class T>inline T*** matrix(size_t size_x, size_t size_y, size_t size_z)
 	m[0][0] = new T[size_x * size_y * size_z];
 	//	assert(m[0][0]!=NULL);
 	if (m[0][0] == NULL) {
-		printf("MEMORY_ERRROR: Memory can't be initialized: %lu size", size_x * size_y * size_z * sizeof(T));
+		printf("MEMORY_ERRROR: Memory can't be initialized: %zu size", size_x * size_y * size_z * sizeof(T));
 		exit(EXIT_FAILURE);
 	}
 	for (size_t x = 0; x < size_x; x++) {
@@ -118,7 +118,7 @@ template<class T>inline T**** matrix(size_t size_w, size_t size_x, size_t size_y
 	//	assert(m!=NULL);
 
 	if (m == NULL) {
-		printf("MEMORY_ERRROR: Memory can't be initialized: %lu size", size_w * sizeof(T));
+		printf("MEMORY_ERRROR: Memory can't be initialized: %zu size", size_w * sizeof(T));
 		exit(EXIT_FAILURE);
 	}
 
@@ -127,7 +127,7 @@ template<class T>inline T**** matrix(size_t size_w, size_t size_x, size_t size_y
 		m[w] = new T**[size_x];
 		//		assert(m[x]!=NULL);
 		if (m[w] == NULL) {
-			printf("MEMORY_ERRROR: Memory can't be initialized: %lu size", size_x * sizeof(T));
+			printf("MEMORY_ERRROR: Memory can't be initialized: %zu size", size_x * sizeof(T));
 			exit(EXIT_FAILURE);
 		}
 
@@ -136,7 +136,7 @@ template<class T>inline T**** matrix(size_t size_w, size_t size_x, size_t size_y
 			m[w][x] = new T*[size_y];
 			//		assert(m[x]!=NULL);
 			if (m[w][x] == NULL) {
-				printf("MEMORY_ERRROR: Memory can't be initialized: %lu size", size_y * sizeof(T));
+				printf("MEMORY_ERRROR: Memory can't be initialized: %zu size", size_y * sizeof(T));
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -146,7 +146,7 @@ template<class T>inline T**** matrix(size_t size_w, size_t size_x, size_t size_y
 	m[0][0][0] = new T[size_w * size_x * size_y * size_z];
 	//	assert(m[0][0]!=NULL);
 	if (m[0][0][0] == NULL) {
-		printf("MEMORY_ERRROR: Memory can't be initialized: %lu size", size_w * size_x * size_y * size_z * sizeof(T));
+		printf("MEMORY_ERRROR: Memory can't be initialized: %zu size", size_w * size_x * size_y * size_z * sizeof(T));
 		exit(EXIT_FAILURE);
 	}
 	for (size_t w = 0; w < size_w; w++) {
@@ -174,7 +174,7 @@ template<class T>inline void free_matrix(T** m) {
 }
 
 /// Freeing memory for 3D matrix
-template<class T>inline void free_matrix(T*** m, size_t size_x, size_t size_y) {
+template<class T>inline void free_matrix(T*** m, size_t size_x) {
 	delete[](m[0][0]);
 	for (size_t x = 0; x < size_x; x++) {
 		delete[](m[x]);
@@ -184,7 +184,7 @@ template<class T>inline void free_matrix(T*** m, size_t size_x, size_t size_y) {
 
 
 /// Freeing memory for 4D matrix
-template<class T>inline void free_matrix(T**** m, size_t size_w, size_t size_x, size_t size_y) {
+template<class T>inline void free_matrix(T**** m, size_t size_w, size_t size_x) {
 	delete[](m[0][0][0]);
 	for (size_t w = 0; w < size_w; w++) {
 		for (size_t x = 0; x < size_x; x++) {
@@ -212,9 +212,7 @@ template<class T>inline void free_matrix(T**** m, size_t size_w, size_t size_x, 
 *
 */
 template<class T>
-Matrix1D<T>::Matrix1D( size_t size_t , const std::string& name) {
-	initialized = false;
-	// !!! this->name = name;
+Matrix1D<T>::Matrix1D( size_t size_t) {
 	// allocating memory
 	AllocateMemory(size_t);
 }
@@ -264,7 +262,7 @@ void Matrix1D<T>::AllocateMemory(size_t size_q1) {
 * \param i - number of element to return
 */
 template<class T>
-inline T& Matrix1D<T>::operator[](int i1) {
+inline T& Matrix1D<T>::operator[](size_t i1) {
 #ifdef DEBUG_MODE
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
@@ -282,7 +280,7 @@ inline T& Matrix1D<T>::operator[](int i1) {
 * \param i - number of element to return
 */
 template<class T>
-inline T& Matrix1D<T>::operator[](int i1) const {
+inline T& Matrix1D<T>::operator[](size_t i1) const {
 #ifdef DEBUG_MODE
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
@@ -444,6 +442,12 @@ inline Matrix1D<T> Matrix1D<T>::times (const Matrix1D<T> &M) const {
 	return Tmp;
 }
 
+template<class T>
+Matrix1D<T>& Matrix1D<T>::times_equal (const Matrix1D<T> &M) {
+	for (size_t i = 0; i < num_elements; i++)
+		plane_array[i] *= M.plane_array[i];
+	return *this;
+}
 /**
 * Divide all values of matrix to values of matrix M.
 *
@@ -576,13 +580,12 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 
 	MATFile *mfPtr; /* MAT-file pointer */
     mxArray *aPtr;  /* mxArray pointer */
-    [[maybe_unused]] double *realPtr = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrW = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrX = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrY = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrZ = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrFinal = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrReturn = nullptr; /* pointer to data */
+	double *PtrW = nullptr; /* pointer to data */
+	double *PtrX = nullptr; /* pointer to data */
+    double *PtrY = nullptr; /* pointer to data */
+    double *PtrZ = nullptr; /* pointer to data */
+	double *PtrFinal = nullptr; /* pointer to data */
+	double *PtrReturn = nullptr; /* pointer to data */
 	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
@@ -593,14 +596,14 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 	const mxArray *fPtrX;    /* field pointer */
 	const mxArray *fPtrY;    /* field pointer */
 	const mxArray *fPtrZ;    /* field pointer */
-    [[maybe_unused]] size_t w,x,y,z; 			/* for index*/
+    size_t x; 			/* for index*/
 	const char* name;		/* for getting variable names */
-	const char* nameTemp;		/* for getting variable names */
-	[[maybe_unused]] bool wReached = false;
-	[[maybe_unused]] bool xReached = false;
-	[[maybe_unused]] bool yReached = false;
-	[[maybe_unused]] bool zReached = false;
-	[[maybe_unused]] bool defaultReached = false;
+	char nameTemp;		/* for getting variable names */
+	bool wReached = false;
+	bool xReached = false;
+	bool yReached = false;
+	bool zReached = false;
+	bool defaultReached = false;
 
 	mfPtr = matOpen(file.c_str(), "r");
    	if (mfPtr == NULL) {
@@ -609,33 +612,32 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 
 	for (int i= 0; i < 3; i++)
 	{
-
 		aPtr = matGetNextVariableInfo(mfPtr, &name);
 		std::string temp = name;
 		if (temp.length() == 1)
-		    {
-		        nameTemp = (temp.substr(0,1)).c_str();
-		    }
-		    else
-		    {
-		        if (temp.substr(1,1) == "_")
-				{
-					nameTemp = (temp.substr(0,1)).c_str();
-				}
-				else if ((temp.substr(0,2) == "pc"))
-				{
-					nameTemp = "V";
-				}
-				else if ((temp.substr(0,2) == "al"))
-				{
-					nameTemp = "K";
-				}
-				else
-				{
-					nameTemp = "!";
-				}
-		    }
-		switch (*nameTemp)
+		{
+			nameTemp = temp[0];
+		}
+		else
+		{
+			if (temp.substr(1, 1) == "_")
+			{
+				nameTemp = temp[0];
+			}
+			else if ((temp.substr(0, 2) == "pc"))
+			{
+				nameTemp = 'V';
+			}
+			else if ((temp.substr(0, 2) == "al"))
+			{
+				nameTemp = 'K';
+			}
+			else
+			{
+				nameTemp = '!';
+			}
+		}
+		switch (nameTemp)
 		{
 			case 'P':
 				wReached = true;
@@ -947,12 +949,11 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 
 	MATFile *mfPtr; /* MAT-file pointer */
     mxArray *aPtr;  /* mxArray pointer */
-    [[maybe_unused]] double *realPtr = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrW = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrX = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrY = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrZ = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrFinal = nullptr; /* pointer to data */
+	double *PtrW = nullptr; /* pointer to data */
+	double *PtrX = nullptr; /* pointer to data */
+	double *PtrY = nullptr; /* pointer to data */
+	double *PtrZ = nullptr; /* pointer to data */
+	double *PtrFinal = nullptr; /* pointer to data */
 	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
@@ -963,13 +964,13 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 	const mxArray *fPtrX;    /* field pointer */
 	const mxArray *fPtrY;    /* field pointer */
 	const mxArray *fPtrZ;    /* field pointer */
-    [[maybe_unused]] size_t w,x,y,z; 			/* for index*/
+	size_t x;
 	const char* name;		/* for getting variable names */
-	const char* nameTemp;		/* for getting variable names */
-	[[maybe_unused]] bool wReached = false;
+	char nameTemp;		/* for getting variable names */
+	bool wReached = false;
 	[[maybe_unused]] bool xReached = false;
-	[[maybe_unused]] bool yReached = false;
-	[[maybe_unused]] bool zReached = false;
+	bool yReached = false;
+	bool zReached = false;
 	[[maybe_unused]] bool defaultReached = false;
 
 	mfPtr = matOpen(file.c_str(), "r");
@@ -983,29 +984,29 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 		aPtr = matGetNextVariableInfo(mfPtr, &name);
 		std::string temp = name;
 		if (temp.length() == 1)
-		    {
-		        nameTemp = (temp.substr(0,1)).c_str();
-		    }
-		    else
-		    {
-		        if (temp.substr(1,1) == "_")
-				{
-					nameTemp = (temp.substr(0,1)).c_str();
-				}
-				else if ((temp.substr(0,2) == "pc"))
-				{
-					nameTemp = "V";
-				}
-				else if ((temp.substr(0,2) == "al"))
-				{
-					nameTemp = "K";
-				}
-				else
-				{
-					nameTemp = "!";
-				}
-		    }
-		switch (*nameTemp)
+		{
+			nameTemp = temp[0];
+		}
+		else
+		{
+			if (temp.substr(1, 1) == "_")
+			{
+				nameTemp = temp[0];
+			}
+			else if ((temp.substr(0, 2) == "pc"))
+			{
+				nameTemp = 'V';
+			}
+			else if ((temp.substr(0, 2) == "al"))
+			{
+				nameTemp = 'K';
+			}
+			else
+			{
+				nameTemp = '!';
+			}
+		}
+		switch (nameTemp)
 		{
 			case 'P':
 				wReached = true;
@@ -1199,7 +1200,7 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 	//sets the matrix array to be equal to an array of doubles
 	for (x = 0; x < size_q1; x++) {
 		if (fabs(log10(PtrX[x]) - log10(grid_x[x])) > err ) {
-		 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%lu].\nLoaded: %e\nGrid: %e\n", file.c_str(), x, PtrX[x], grid_x[x]);
+		 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu].\nLoaded: %e\nGrid: %e\n", file.c_str(), x, PtrX[x], grid_x[x]);
 					//printf("grid error \n");
 					exit(EXIT_FAILURE);
 		}
@@ -1644,7 +1645,7 @@ Matrix2D<T>& Matrix2D<T>::max_of(T val) {
 * \param x,y - index of element in every dimension for the 2d matrix
 */
 template<class T>
-inline int Matrix2D<T>::index1d(int x, int y) const {
+inline size_t Matrix2D<T>::index1d(size_t x, size_t y) const {
 	return x*size_q2 + y;
 }
 
@@ -1774,13 +1775,12 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file ,  int columnNumber
 
 	MATFile *mfPtr; /* MAT-file pointer */
     mxArray *aPtr;  /* mxArray pointer */
-    [[maybe_unused]] double *realPtr = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrW = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrX = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrY = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrZ = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrFinal = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrReturn = nullptr; /* pointer to data */
+	double *PtrW = nullptr; /* pointer to data */
+	double *PtrX = nullptr; /* pointer to data */
+    double *PtrY = nullptr; /* pointer to data */
+    double *PtrZ = nullptr; /* pointer to data */
+	double *PtrFinal = nullptr; /* pointer to data */
+	double *PtrReturn = nullptr; /* pointer to data */
 	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
@@ -1791,14 +1791,15 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file ,  int columnNumber
 	const mxArray *fPtrX;    /* field pointer */
 	const mxArray *fPtrY;    /* field pointer */
 	const mxArray *fPtrZ;    /* field pointer */
-    [[maybe_unused]] size_t w,x,y,z; 			/* for index*/
+	size_t x, y;
 	const char* name;		/* for getting variable names */
-	const char* nameTemp;		/* for getting variable names */
-	[[maybe_unused]] bool wReached = false;
-	[[maybe_unused]] bool xReached = false;
-	[[maybe_unused]] bool yReached = false;
-	[[maybe_unused]] bool zReached = false;
-	[[maybe_unused]] bool defaultReached = false;
+	char nameTemp;		/* for getting variable names */
+
+	bool wReached = false;
+	bool xReached = false;
+	bool yReached = false;
+	bool zReached = false;
+	bool defaultReached = false;
 
 	mfPtr = matOpen(file.c_str(), "r");
    	if (mfPtr == NULL) {
@@ -1807,33 +1808,32 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file ,  int columnNumber
 
 	for (int i= 0; i < 3; i++)
 	{
-
 		aPtr = matGetNextVariableInfo(mfPtr, &name);
 		std::string temp = name;
 		if (temp.length() == 1)
-		    {
-		        nameTemp = (temp.substr(0,1)).c_str();
-		    }
-		    else
-		    {
-		        if (temp.substr(1,1) == "_")
-				{
-					nameTemp = (temp.substr(0,1)).c_str();
-				}
-				else if ((temp.substr(0,2) == "pc"))
-				{
-					nameTemp = "V";
-				}
-				else if ((temp.substr(0,2) == "al"))
-				{
-					nameTemp = "K";
-				}
-				else
-				{
-					nameTemp = "!";
-				}
-		    }
-		switch (*nameTemp)
+		{
+			nameTemp = temp[0];
+		}
+		else
+		{
+			if (temp.substr(1, 1) == "_")
+			{
+				nameTemp = temp[0];
+			}
+			else if ((temp.substr(0, 2) == "pc"))
+			{
+				nameTemp = 'V';
+			}
+			else if ((temp.substr(0, 2) == "al"))
+			{
+				nameTemp = 'K';
+			}
+			else
+			{
+				nameTemp = '!';
+			}
+		}
+		switch (nameTemp)
 		{
 			case 'P':
 				wReached = true;
@@ -2147,12 +2147,11 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 
 	MATFile *mfPtr; /* MAT-file pointer */
     mxArray *aPtr;  /* mxArray pointer */
-    [[maybe_unused]] double *realPtr = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrW = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrX = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrY = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrZ = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrFinal = nullptr; /* pointer to data */
+	double *PtrW = nullptr; /* pointer to data */
+	double *PtrX = nullptr; /* pointer to data */
+    double *PtrY = nullptr; /* pointer to data */
+    double *PtrZ = nullptr; /* pointer to data */
+	double *PtrFinal = nullptr; /* pointer to data */
 	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
@@ -2163,13 +2162,14 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 	const mxArray *fPtrX;    /* field pointer */
 	const mxArray *fPtrY;    /* field pointer */
 	const mxArray *fPtrZ;    /* field pointer */
-    [[maybe_unused]] size_t w,x,y,z; 			/* for index*/
+	size_t x, y;
 	const char* name;		/* for getting variable names */
-	const char* nameTemp;		/* for getting variable names */
-	[[maybe_unused]] bool wReached = false;
-	[[maybe_unused]] bool xReached = false;
-	[[maybe_unused]] bool yReached = false;
-	[[maybe_unused]] bool zReached = false;
+	char nameTemp;		/* for getting variable names */
+
+	bool wReached = false;
+	bool xReached = false;
+	bool yReached = false;
+	bool zReached = false;
 	[[maybe_unused]] bool defaultReached = false;
 
 	mfPtr = matOpen(file.c_str(), "r");
@@ -2183,29 +2183,29 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 		aPtr = matGetNextVariableInfo(mfPtr, &name);
 		std::string temp = name;
 		if (temp.length() == 1)
-		    {
-		        nameTemp = (temp.substr(0,1)).c_str();
-		    }
-		    else
-		    {
-		        if (temp.substr(1,1) == "_")
-				{
-					nameTemp = (temp.substr(0,1)).c_str();
-				}
-				else if ((temp.substr(0,2) == "pc"))
-				{
-					nameTemp = "V";
-				}
-				else if ((temp.substr(0,2) == "al"))
-				{
-					nameTemp = "K";
-				}
-				else
-				{
-					nameTemp = "!";
-				}
-		    }
-		switch (*nameTemp)
+		{
+			nameTemp = temp[0];
+		}
+		else
+		{
+			if (temp.substr(1, 1) == "_")
+			{
+				nameTemp = temp[0];
+			}
+			else if ((temp.substr(0, 2) == "pc"))
+			{
+				nameTemp = 'V';
+			}
+			else if ((temp.substr(0, 2) == "al"))
+			{
+				nameTemp = 'K';
+			}
+			else
+			{
+				nameTemp = '!';
+			}
+		}
+		switch (nameTemp)
 		{
 			case 'P':
 				wReached = true;
@@ -2416,7 +2416,7 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 	for (x = 0; x < size_q1; x++) {
 		for (y = 0; y < size_q2; y++) {
 			if (fabs(log10(PtrX[y*(size_q1) +  x]) - log10(grid_x[x][y])) > err || fabs(log10(PtrY[ y*(size_q1) +  x]) - log10(grid_y[x][y])) > err) {
-			 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%lu, %lu].\nLoaded: %e, %e\nGrid: %e, %e\n", file.c_str(), x, y, PtrX[y*(size_q1) +  x],PtrY[ y*(size_q1) +  x], grid_x[x][y], grid_y[x][y]);
+			 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu].\nLoaded: %e, %e\nGrid: %e, %e\n", file.c_str(), x, y, PtrX[y*(size_q1) +  x],PtrY[ y*(size_q1) +  x], grid_x[x][y], grid_y[x][y]);
 						//printf("grid error \n");
 						exit(EXIT_FAILURE);
 			}
@@ -2443,7 +2443,7 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 template<class T>
 Matrix1D<T> Matrix2D<T>::xSlice(size_t p_x) const {
 	if (p_x > this->size_q1) {
-		printf("MATRIX_ERROR: xSlice outside or array boundary: %lu > %lu", p_x, this->size_q1);
+		printf("MATRIX_ERROR: xSlice outside or array boundary: %zu > %zu", p_x, this->size_q1);
 		exit(EXIT_FAILURE);
 	}
 
@@ -2461,7 +2461,7 @@ Matrix1D<T> Matrix2D<T>::xSlice(size_t p_x) const {
 template<class T>
 void Matrix2D<T>::xSlice(Matrix1D<T>& out, size_t p_x) const {
 	if (p_x > this->size_q1) {
-		printf("MATRIX_ERROR: xSlice outside or array boundary: %lu > %lu", p_x, this->size_q1);
+		printf("MATRIX_ERROR: xSlice outside or array boundary: %zu > %zu", p_x, this->size_q1);
 		exit(EXIT_FAILURE);
 	}
 
@@ -2476,7 +2476,7 @@ void Matrix2D<T>::xSlice(Matrix1D<T>& out, size_t p_x) const {
 template<class T>
 Matrix1D<T> Matrix2D<T>::ySlice(size_t p_y) const {
 	if (p_y > this->size_q2) {
-		printf("MATRIX_ERROR: ySlice outside or array boundary: %lu > %lu", p_y, this->size_q2);
+		printf("MATRIX_ERROR: ySlice outside or array boundary: %zu > %zu", p_y, this->size_q2);
 		exit(EXIT_FAILURE);
 	}
 
@@ -2494,7 +2494,7 @@ Matrix1D<T> Matrix2D<T>::ySlice(size_t p_y) const {
 template<class T>
 void Matrix2D<T>::ySlice(Matrix1D<T>& out, size_t p_y) const {
 	if (p_y > this->size_q2) {
-		printf("MATRIX_ERROR: ySlice outside or array boundary: %lu > %lu", p_y, this->size_q2);
+		printf("MATRIX_ERROR: ySlice outside or array boundary: %zu > %zu", p_y, this->size_q2);
 		exit(EXIT_FAILURE);
 	}
 
@@ -2536,7 +2536,7 @@ Matrix3D<T>::Matrix3D( const Matrix3D<T> &M ) {
 */
 template<class T>
 Matrix3D<T>::~Matrix3D() {
-	if (initialized) free_matrix<T>(matrix_array, size_q1, size_q2);
+	if (initialized) free_matrix<T>(matrix_array, size_q1);
 }
 
 /**
@@ -2567,7 +2567,7 @@ void Matrix3D<T>::AllocateMemory(size_t size_q1, size_t size_q2, size_t size_q3)
 * \param i - number of element to return
 */
 template<class T>
-inline T** Matrix3D<T>::operator[] (int i1) {
+inline T** Matrix3D<T>::operator[] (size_t i1) {
 #ifdef DEBUG_MODE
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
@@ -2612,7 +2612,7 @@ inline Matrix3D<T>& Matrix3D<T>::operator= (const Matrix3D<T> &M) {
 		if (M.initialized) {
 			// free LHS matrix, if it is initialized
 			if (initialized && (size_q1 != M.size_q1 || size_q2 != M.size_q2 || size_q3 != M.size_q3)) {
-				free_matrix<T>(matrix_array, this->size_q1, this->size_q2);
+				free_matrix<T>(matrix_array, this->size_q1);
 				initialized = false;
 			}
 			if (!initialized) {
@@ -2962,13 +2962,12 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 
 	MATFile *mfPtr; /* MAT-file pointer */
     mxArray *aPtr;  /* mxArray pointer */
-    [[maybe_unused]] double *realPtr = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrW = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrX = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrY = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrZ = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrFinal = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrReturn = nullptr; /* pointer to data */
+	double *PtrW = nullptr; /* pointer to data */
+	double *PtrX = nullptr; /* pointer to data */
+    double *PtrY = nullptr; /* pointer to data */
+    double *PtrZ = nullptr; /* pointer to data */
+	double *PtrFinal = nullptr; /* pointer to data */
+	double *PtrReturn = nullptr; /* pointer to data */
 	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
@@ -2979,9 +2978,9 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 	const mxArray *fPtrX;    /* field pointer */
 	const mxArray *fPtrY;    /* field pointer */
 	const mxArray *fPtrZ;    /* field pointer */
-    [[maybe_unused]] size_t w,x,y,z; 			/* for index*/
+    size_t x,y,z; 			/* for index*/
 	const char* name;		/* for getting variable names */
-	const char* nameTemp;		/* for getting variable names */
+	char nameTemp;		/* for getting variable names */
 	bool wReached = false;
 	bool xReached = false;
 	bool yReached = false;
@@ -2995,33 +2994,32 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 
 	for (int i= 0; i < 4; i++)
 	{
-
 		aPtr = matGetNextVariableInfo(mfPtr, &name);
 		std::string temp = name;
 		if (temp.length() == 1)
-		    {
-		        nameTemp = (temp.substr(0,1)).c_str();
-		    }
-		    else
-		    {
-		        if (temp.substr(1,1) == "_")
-				{
-					nameTemp = (temp.substr(0,1)).c_str();
-				}
-				else if ((temp.substr(0,2) == "pc"))
-				{
-					nameTemp = "V";
-				}
-				else if ((temp.substr(0,2) == "al"))
-				{
-					nameTemp = "K";
-				}
-				else
-				{
-					nameTemp = "!";
-				}
-		    }
-		switch (*nameTemp)
+		{
+			nameTemp = temp[0];
+		}
+		else
+		{
+			if (temp.substr(1, 1) == "_")
+			{
+				nameTemp = temp[0];
+			}
+			else if ((temp.substr(0, 2) == "pc"))
+			{
+				nameTemp = 'V';
+			}
+			else if ((temp.substr(0, 2) == "al"))
+			{
+				nameTemp = 'K';
+			}
+			else
+			{
+				nameTemp = '!';
+			}
+		}
+		switch (nameTemp)
 		{
 			case 'P':
 				wReached = true;
@@ -3308,7 +3306,7 @@ void Matrix3D<T>::readFromFile(const std::string& filename, const Matrix3D<T>& g
 						 input >> loaded_x >> loaded_y >> loaded_z;
 						 // check if grid is the same
 						 if (fabs(log10(loaded_x) - log10(grid_x[i1][i2][i3])) > err || fabs(log10(loaded_y) - log10(grid_y[i1][i2][i3])) > err || fabs(log10(loaded_z) - log10(grid_z[i1][i2][i3])) > err) {
-							printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%lu, %lu, %lu].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", filename.c_str(), i1, i2, i3, loaded_x, loaded_y, loaded_z, grid_x[i1][i2][i3], grid_y[i1][i2][i3], grid_z[i1][i2][i3]);
+							printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", filename.c_str(), i1, i2, i3, loaded_x, loaded_y, loaded_z, grid_x[i1][i2][i3], grid_y[i1][i2][i3], grid_z[i1][i2][i3]);
 							exit(EXIT_FAILURE);
 						} else {
 							input >> matrix_array[i1][i2][i3];
@@ -3348,12 +3346,11 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 
 	MATFile *mfPtr; /* MAT-file pointer */
     mxArray *aPtr;  /* mxArray pointer */
-    [[maybe_unused]] double *realPtr = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrW = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrX = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrY = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrZ = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrFinal = nullptr; /* pointer to data */
+	double *PtrW = nullptr; /* pointer to data */
+	double *PtrX = nullptr; /* pointer to data */
+    double *PtrY = nullptr; /* pointer to data */
+    double *PtrZ = nullptr; /* pointer to data */
+	double *PtrFinal = nullptr; /* pointer to data */
 	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
@@ -3364,13 +3361,13 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 	const mxArray *fPtrX;    /* field pointer */
 	const mxArray *fPtrY;    /* field pointer */
 	const mxArray *fPtrZ;    /* field pointer */
-    [[maybe_unused]] size_t w,x,y,z; 			/* for index*/
+    size_t x,y,z; 			/* for index*/
 	const char* name;		/* for getting variable names */
-	const char* nameTemp;		/* for getting variable names */
+	char nameTemp;		/* for getting variable names */
 	[[maybe_unused]] bool wReached = false;
-	[[maybe_unused]] bool xReached = false;
-	[[maybe_unused]] bool yReached = false;
-	[[maybe_unused]] bool zReached = false;
+	bool xReached = false;
+	bool yReached = false;
+	bool zReached = false;
 	[[maybe_unused]] bool defaultReached = false;
 
 	mfPtr = matOpen(file.c_str(), "r");
@@ -3384,29 +3381,29 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 		aPtr = matGetNextVariableInfo(mfPtr, &name);
 		std::string temp = name;
 		if (temp.length() == 1)
-		    {
-		        nameTemp = (temp.substr(0,1)).c_str();
-		    }
-		    else
-		    {
-		        if (temp.substr(1,1) == "_")
-				{
-					nameTemp = (temp.substr(0,1)).c_str();
-				}
-				else if ((temp.substr(0,2) == "pc"))
-				{
-					nameTemp = "V";
-				}
-				else if ((temp.substr(0,2) == "al"))
-				{
-					nameTemp = "K";
-				}
-				else
-				{
-					nameTemp = "!";
-				}
-		    }
-		switch (*nameTemp)
+		{
+			nameTemp = temp[0];
+		}
+		else
+		{
+			if (temp.substr(1, 1) == "_")
+			{
+				nameTemp = temp[0];
+			}
+			else if ((temp.substr(0, 2) == "pc"))
+			{
+				nameTemp = 'V';
+			}
+			else if ((temp.substr(0, 2) == "al"))
+			{
+				nameTemp = 'K';
+			}
+			else
+			{
+				nameTemp = '!';
+			}
+		}
+		switch (nameTemp)
 		{
 			case 'P':
 				wReached = true;
@@ -3602,7 +3599,7 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 		for (y = 0; y < size_q2; y++) {
 			for (z = 0; z < size_q3; z++) {
 				if (fabs(log10(PtrX[z*(size_q1 * size_q2) + y*(size_q1) +  x]) - log10(grid_x[x][y][z])) > err || fabs(log10(PtrY[z*(size_q1 * size_q2) + y*(size_q1) +  x]) - log10(grid_y[x][y][z])) > err || fabs(log10(PtrZ[z*(size_q1 * size_q2) + y*(size_q1) +  x]) - log10(grid_z[x][y][z])) > err) {
-				 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%lu, %lu, %lu].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", file.c_str(), x, y, z, PtrX[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrY[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrZ[z*(size_q1 * size_q2) + y*(size_q1) +  x], grid_x[x][y][z], grid_y[x][y][z], grid_z[x][y][z]);
+				 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", file.c_str(), x, y, z, PtrX[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrY[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrZ[z*(size_q1 * size_q2) + y*(size_q1) +  x], grid_x[x][y][z], grid_y[x][y][z], grid_z[x][y][z]);
 							//printf("grid error \n");
 							exit(EXIT_FAILURE);
 				}
@@ -3760,7 +3757,7 @@ void Matrix3D<T>::readFromAnyFile(const std::string& filename, const std::string
 * \param x,y,z - index of element in every dimension for the 3d matrix
 */
 template<class T>
-inline int Matrix3D<T>::index1d(int x, int y, int z) {
+inline size_t Matrix3D<T>::index1d(size_t x, size_t y, size_t z) {
 	return (x*size_q2 + y)*size_q3 + z;
 }
 
@@ -4037,7 +4034,7 @@ Matrix4D<T>::Matrix4D( const Matrix4D<T> &M ) {
 */
 template<class T>
 Matrix4D<T>::~Matrix4D() {
-	if (initialized) free_matrix<T>(matrix_array, size_w, size_x, size_y);
+	if (initialized) free_matrix<T>(matrix_array, size_w, size_x);
 	//		delete[] plane_array; - it's get deleted with matrix_array[0][0][0] or something?
 }
 
@@ -4071,7 +4068,7 @@ void Matrix4D<T>::AllocateMemory(size_t w_size, size_t x_size, size_t y_size, si
 * \param i - number of element to return
 */
 template<class T>
-inline T*** Matrix4D<T>::operator[] (int i) {
+inline T*** Matrix4D<T>::operator[] (size_t i) {
 #ifdef DEBUG_MODE
 	if (!initialized) {
 		printf("MATRIX_ERROR: Using unitialized matrix");
@@ -4116,7 +4113,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator= (const Matrix4D<T> &M) {
 		if (M.initialized) {
 			// free LHS matrix, if it is initialized
 			if (initialized && (size_w != M.size_w || size_x != M.size_x || size_y != M.size_y || size_z != M.size_z)) {
-				free_matrix<T>(matrix_array, this->size_w, this->size_x, this->size_y);
+				free_matrix<T>(matrix_array, this->size_w, this->size_x);
 				initialized = false;
 			}
 			if (!initialized) {
@@ -4364,11 +4361,10 @@ void Matrix4D<T>::writeToFile(const std::string& filename, const std::string& in
 * Used in conjunction with writeToMatlabFile() to save the 4 grid variables and val into a single .mat file
 */
 template<class T>
-mxArray* Matrix4D<T>::createStructMatrix(const std::string& filename, const std::string& info) const
+mxArray* Matrix4D<T>::createStructMatrix(const std::string& info) const
 {
 
 	size_t w,x,y,z;
-	[[maybe_unused]] int status;
     // create a struct array with 7 fields
     const char *fieldnames[7] = {"arr", "time", "size", "size1", "size2" , "size3" , "size4"};
 	// create a 1x1 struct that will hold the array of values and the time info, as well as the size of the dimensions
@@ -4436,7 +4432,7 @@ mxArray* Matrix4D<T>::createStructMatrix(const std::string& filename, const std:
 		{
 			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
 			double *data = mxGetPr(aPtr);
-			data[0] = size_w;
+			data[0] = static_cast<double>(size_w);
 			mxSetField(s, 0, fieldnames[i], aPtr);
 		}
 
@@ -4445,7 +4441,7 @@ mxArray* Matrix4D<T>::createStructMatrix(const std::string& filename, const std:
 		{
 			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
 			double *data = mxGetPr(aPtr);
-			data[0] = size_x;
+			data[0] = static_cast<double>(size_x);
 			mxSetField(s, 0, fieldnames[i], aPtr);
 		}
 
@@ -4454,7 +4450,7 @@ mxArray* Matrix4D<T>::createStructMatrix(const std::string& filename, const std:
 		{
 			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
 			double *data = mxGetPr(aPtr);
-			data[0] = size_y;
+			data[0] = static_cast<double>(size_y);
 			mxSetField(s, 0, fieldnames[i], aPtr);
 		}
 
@@ -4463,7 +4459,7 @@ mxArray* Matrix4D<T>::createStructMatrix(const std::string& filename, const std:
 		{
 			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
 			double *data = mxGetPr(aPtr);
-			data[0] = size_z;
+			data[0] = static_cast<double>(size_z);
 			mxSetField(s, 0, fieldnames[i], aPtr);
 		}
     }
@@ -4499,7 +4495,7 @@ void Matrix4D<T>::writeToMatlabFile(const std::string& filename, const std::stri
 	mwSize size_X = size_x;
 	mwSize size_Y = size_y;
 	mwSize size_Z = size_z;
-	[[maybe_unused]] size_t w,x,y,z;
+	size_t w,x,y,z;
 	int status;
     // create a struct array with two fields
     const char *fieldnames[7] = {"arr", "time", "size", "size1", "size2" , "size3" , "size4"};
@@ -4559,7 +4555,7 @@ void Matrix4D<T>::writeToMatlabFile(const std::string& filename, const std::stri
 			// Create a std::string that has the inputted time
 			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
 			double *data = mxGetPr(aPtr);
-			data[0] = size_w;
+			data[0] = static_cast<double>(size_w);
 			mxSetField(s, 0, fieldnames[i], aPtr);
 		}
 		if ( i == 4 )
@@ -4567,7 +4563,7 @@ void Matrix4D<T>::writeToMatlabFile(const std::string& filename, const std::stri
 			// Create a std::string that has the inputted time
 			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
 			double *data = mxGetPr(aPtr);
-			data[0] = size_x;
+			data[0] = static_cast<double>(size_x);
 			mxSetField(s, 0, fieldnames[i], aPtr);
 		}
 		if ( i == 5 )
@@ -4575,7 +4571,7 @@ void Matrix4D<T>::writeToMatlabFile(const std::string& filename, const std::stri
 			// Create a std::string that has the inputted time
 			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
 			double *data = mxGetPr(aPtr);
-			data[0] = size_y;
+			data[0] = static_cast<double>(size_y);
 			mxSetField(s, 0, fieldnames[i], aPtr);
 		}
 		if ( i == 6 )
@@ -4583,13 +4579,13 @@ void Matrix4D<T>::writeToMatlabFile(const std::string& filename, const std::stri
 			// Create a std::string that has the inputted time
 			mxArray *aPtr = mxCreateDoubleMatrix(1,1,mxREAL);
 			double *data = mxGetPr(aPtr);
-			data[0] = size_z;
+			data[0] = static_cast<double>(size_z);
 			mxSetField(s, 0, fieldnames[i], aPtr);
 		}
     }
 	// Save the struct into the .mat file
 	// hardcoded to get rid of the "./output_folder/" and only get PSD_XXXXX
-    int str_idx = filename.rfind("PSD_");
+    size_t str_idx = filename.rfind("PSD_");
     status = matPutVariable(pmat, filename.substr(str_idx,9).c_str(), s);
     if (status != 0) {
     	printf("error matputvariable");
@@ -4763,13 +4759,12 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 
 	MATFile *mfPtr; /* MAT-file pointer */
     mxArray *aPtr;  /* mxArray pointer */
-    [[maybe_unused]] double *realPtr = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrW = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrX = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrY = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrZ = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrFinal = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrReturn = nullptr; /* pointer to data */
+	double *PtrW = nullptr; /* pointer to data */
+	double *PtrX = nullptr; /* pointer to data */
+    double *PtrY = nullptr; /* pointer to data */
+    double *PtrZ = nullptr; /* pointer to data */
+	double *PtrFinal = nullptr; /* pointer to data */
+	double *PtrReturn = nullptr; /* pointer to data */
 	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
@@ -4781,9 +4776,9 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 	const mxArray *fPtrX;    /* field pointer */
 	const mxArray *fPtrY;    /* field pointer */
 	const mxArray *fPtrZ;    /* field pointer */
-    [[maybe_unused]] size_t w,x,y,z; 			/* for index*/
+    size_t w,x,y,z; 			/* for index*/
 	const char* name;		/* for getting variable names */
-	const char* nameTemp;	/* for getting variable names */
+	char nameTemp;	/* for getting variable names */
 	bool wReached = false;	/* for checking which variables go to which coordinates */
 	bool xReached = false;	/* for checking which variables go to which coordinates */
 	bool yReached = false;	/* for checking which variables go to which coordinates */
@@ -4806,33 +4801,33 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 		// If the name is one char long - match on that char
 		if (temp.length() == 1)
 	    {
-	        nameTemp = (temp.substr(0,1)).c_str();
+	        nameTemp = temp[0];
 	    }
-	    else
-	    {
-	        // if the second char is underscore '_' then match on first char example V_BC
-			if (temp.substr(1,1) == "_")
+		else
+		{
+			// if the second char is underscore '_' then match on first char example V_BC
+			if (temp.substr(1, 1) == "_")
 			{
-				nameTemp = (temp.substr(0,1)).c_str();
+				nameTemp = temp[0];
 			}
-			else if ((temp.substr(0,2) == "pc"))
+			else if ((temp.substr(0, 2) == "pc"))
 			{
-				nameTemp = "V";
+				nameTemp = 'V';
 			}
-			else if ((temp.substr(0,2) == "al"))
+			else if ((temp.substr(0, 2) == "al"))
 			{
-				nameTemp = "K";
+				nameTemp = 'K';
 			}
 			// If length is more than 1 and second char is not underscore will go to default
 			else
 			{
-				nameTemp = "!";
+				nameTemp = '!';
 			}
-	    }
+		}
 
 		// switch on name to get P R(or L) V K Value in that order
 		// The code is nearly the same for all switch statements - comments are found only for case 'P'
-		switch (*nameTemp)
+		switch (nameTemp)
 		{
 			// If variable is the array for 'P'
 			case 'P':
@@ -5174,7 +5169,7 @@ void Matrix4D<T>::readFromFile(const std::string& filename, const Matrix4D<T>& g
 							 input >> loaded_w >> loaded_x >> loaded_y >> loaded_z;
 							 // check if grid is the same
 							 if (fabs(log10(loaded_w) - log10(grid_w[w][x][y][z])) > err || fabs(log10(loaded_x) - log10(grid_x[w][x][y][z])) > err || fabs(log10(loaded_y) - log10(grid_y[w][x][y][z])) > err || fabs(log10(loaded_z) - log10(grid_z[w][x][y][z])) > err) {
-								printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%lu, %lu, %lu, %lu].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", filename.c_str(), w, x, y, z, loaded_w, loaded_x, loaded_y, loaded_z, grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
+								printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu, %zu].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", filename.c_str(), w, x, y, z, loaded_w, loaded_x, loaded_y, loaded_z, grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
 								exit(EXIT_FAILURE);
 							} else {
 								input >> matrix_array[w][x][y][z];
@@ -5208,19 +5203,17 @@ void Matrix4D<T>::readFromFile(const std::string& filename, const Matrix4D<T>& g
 template<class T>
 void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z)
 {
-
 #if (MATLAB_CAPABLE)
 
 	Logger::message << "Reading " << file << ": " << endl;
 
 	MATFile *mfPtr; /* MAT-file pointer */
     mxArray *aPtr;  /* mxArray pointer */
-    [[maybe_unused]] double *realPtr = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrW = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrX = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrY = nullptr; /* pointer to data */
-    [[maybe_unused]] double *PtrZ = nullptr; /* pointer to data */
-	[[maybe_unused]] double *PtrFinal = nullptr; /* pointer to data */
+	double *PtrW = nullptr; /* pointer to data */
+	double *PtrX = nullptr; /* pointer to data */
+    double *PtrY = nullptr; /* pointer to data */
+    double *PtrZ = nullptr; /* pointer to data */
+	double *PtrFinal = nullptr; /* pointer to data */
 	[[maybe_unused]] double *PtrL = nullptr; /* pointer to data */
 	std::string arr; /*name of variable*/
 	std::string field = "arr"; // name of field
@@ -5234,7 +5227,7 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>
 	const mxArray *fPtrZ;    /* field pointer */
     size_t w,x,y,z; 			/* for index*/
 	const char* name;		/* for getting variable names */
-	const char* nameTemp;	/* for getting variable names */
+	char nameTemp;	/* for getting variable names */
 	bool defaultReached = false;
 	bool rReached = false;
 	bool lReached = false;
@@ -5251,28 +5244,28 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>
 		std::string temp = name;
 		if (temp.length() == 1)
 	    {
-	        nameTemp = (temp.substr(0,1)).c_str();
+	        nameTemp = temp[0];
 	    }
-	    else
-	    {
-	        if (temp.substr(1,1) == "_")
+		else
+		{
+			if (temp.substr(1, 1) == "_")
 			{
-				nameTemp = (temp.substr(0,1)).c_str();
+				nameTemp = temp[0];
 			}
-			else if ((temp.substr(0,2) == "pc"))
+			else if ((temp.substr(0, 2) == "pc"))
 			{
-				nameTemp = "V";
+				nameTemp = 'V';
 			}
-			else if ((temp.substr(0,2) == "al"))
+			else if ((temp.substr(0, 2) == "al"))
 			{
-				nameTemp = "K";
+				nameTemp = 'K';
 			}
 			else
 			{
-				nameTemp = "!";
+				nameTemp = '!';
 			}
-	    }
-		switch (*nameTemp)
+		}
+		switch (nameTemp)
 		{
 			case 'P':
 				aPtr = matGetVariable(mfPtr, name);
@@ -5459,7 +5452,7 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>
 
 
 					if (fabs(log10(PtrW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_w[w][x][y][z])) > err || fabs(log10(PtrX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_x[w][x][y][z])) > err || fabs(log10(PtrY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_y[w][x][y][z])) > err || fabs(log10(PtrZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_z[w][x][y][z])) > err) {
-					 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%lu, %lu, %lu, %lu].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", file.c_str(), w, x, y, z, PtrW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], PtrX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
+					 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu, %zu].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", file.c_str(), w, x, y, z, PtrW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], PtrX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
 								exit(EXIT_FAILURE);
 					}
 					matrix_array[w][x][y][z] = PtrFinal[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w];
@@ -5615,7 +5608,7 @@ void Matrix4D<T>::readFromAnyFile(const std::string& filename, const std::string
 * \param w,x,y,z - index of element in every dimension for the 4d matrix
 */
 template<class T>
-inline int Matrix4D<T>::index1d(int w, int x, int y, int z) {
+inline size_t Matrix4D<T>::index1d(size_t w, size_t x, size_t y) {
 	return ((w*size_x + x)*size_y + y)*size_z;
 }
 
@@ -6131,6 +6124,15 @@ void Matrix4D<T>::xyzSlice(Matrix1D<T>& out, size_t p_x, size_t p_y, size_t p_z)
 	for (size_t w = 0; w < size_w; w++) {
 		out[w] = matrix_array[w][p_x][p_y][p_z];
 	}
+}
+
+CalculationMatrix::CalculationMatrix()
+{
+	initialized = false;
+	change_ind = 0;
+	total_size = 0;
+	x_size = 0;
+	y_size = 0;
 }
 
 /**

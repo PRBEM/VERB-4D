@@ -40,13 +40,25 @@ void Logger::writeError(const std::string& message)
 		const char *type = "[Error] ";
 		std::string str = type + message;
 		// write out message
-		writeMessage(str, MessageType::MESSAGE_ERROR); // Add [Error] //message = message.append("[Error]: ");....
+		writeMessage(str); // Add [Error] //message = message.append("[Error]: ");....
+		exit(EXIT_FAILURE);
 	}
-#ifdef _DEBUG
-	assert(0);
-#endif	
-	// exits/fails upon error
-	exit(EXIT_FAILURE);
+	else if (mDebugLevel >= DEBUG_LEVEL_WARNING) {
+		// type out [Warning]
+		const char *type = "[Warning] ";
+		std::string str = type + message;
+		// write out message
+		writeMessage(str);
+	}
+	else if (mDebugLevel >= DEBUG_LEVEL_MESSAGE) {
+
+		writeMessage(message);
+	}
+}
+
+/// Add message directly to the end of a file
+void Logger::appendToFile(const std::string& message){
+	logFile << message << std::flush;
 }
 
 /// can signify warning while writing message
@@ -58,26 +70,12 @@ void Logger::writeWarning(const std::string& message)
 		const char *type = "[Warning] ";
 		std::string str = type + message;
 		// write out message
-		writeMessage(str, MessageType::MESSAGE_WARNING);
+		writeMessage(str);
 	}
-}
-
-/// Write out message to logger of type MESSAGE_INFO if debug level allows it
-void Logger::writeMessage(const std::string& message)
-{
-	if (mDebugLevel >= DEBUG_LEVEL_MESSAGE) {
-
-		writeMessage(message, MessageType::MESSAGE_INFO);
-	}
-}
-
-/// Add message directly to the end of a file
-void Logger::appendToFile(const std::string& message){
-	logFile << message << std::flush;
 }
 
 /// Write out message to logger with the inputted message type 
-void Logger::writeMessage(const std::string& message, MessageType type)
+void Logger::writeMessage(const std::string& message)
 {
 	std::string text(message);
 			//std::replace(text.begin(), text.end(), '\n', ' '); // Fix it later
@@ -85,15 +83,6 @@ void Logger::writeMessage(const std::string& message, MessageType type)
 	std::cout << message;
 	// add message to end of file
 	appendToFile(text);
-#ifdef _DEBUG
-	writeIDEDebugString(text, type);
-#endif
-}
-
-//void Log_Windows::writeIDEDebugString(const std::string& message, MessageType type)
-void Logger::writeIDEDebugString(const std::string& message, MessageType type) 
-{
-	//cerr << message.c_str() << endl;
 }
 
 /// Constructor - must send in message type

@@ -33,7 +33,6 @@
 * \param x_LBC, x_UBC, _type - The upper and lower boundary conditions including the type of boundary condition
 * \param Ux - diffusion matrix
 * \param Sources - Sources matrix
-* \param Losses - Losses (loss cone)
 */
 bool Convection_1D_ULTIMATE_QUICKEST6 (
 	Matrix1D<double> &PSD, 
@@ -42,7 +41,6 @@ bool Convection_1D_ULTIMATE_QUICKEST6 (
 	double x_LBC, double x_UBC,
 	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 	const Matrix1D<double>& Ux,
-	const Matrix1D<double>& Sources, const Matrix1D<double>& Losses,
 	double dt_total
 );
 

@@ -439,7 +439,7 @@ class MonotCubicInterpolator {
    /**
      @return Number of datapoint pairs in this object
    */
-   int getSize() const {
+   size_t getSize() const {
        return data.size();
    }
 
