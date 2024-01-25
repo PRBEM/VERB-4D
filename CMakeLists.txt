@@ -22,6 +22,9 @@ if(OPENMP_FOUND)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif(OPENMP_FOUND)
 
+# Math Constants are not defined in Standard C++. To use them, we must first define _USE_MATH_DEFINES
+add_compile_definitions(_USE_MATH_DEFINES)
+
 # Recursively search for header files to include for project files.  This isn't
 # necessary to compile, but its nice to have in Visual Studio solutions.
 file(GLOB_RECURSE VERB4D_HEADERS *.h)
@@ -100,13 +103,13 @@ elseif(${BLAS_TYPE} STREQUAL "OPENBLAS")
     if(WIN32)
         if(NOT DEFINED OPENBLAS_LIBPATH)
             set(OPENBLAS_LIBPATH $ENV{HOMEPATH}/AppData/Local/OpenBLAS/openblas.lib)
-            message("No OPENBLAS_LIBPATH specified, chhosing ${OPENBLAS_LIBPATH}")
+            message("No OPENBLAS_LIBPATH specified, choosing ${OPENBLAS_LIBPATH}")
         endif()
         set_target_properties(openblas PROPERTIES IMPORTED_IMPLIB ${OPENBLAS_LIBPATH})
     else()
         if(NOT DEFINED OPENBLAS_LIBPATH)
             set(OPENBLAS_LIBPATH $ENV{HOME}/.local/lib/libopenblas.so)
-            message("No OPENBLAS_LIBPATH specified, chhosing ${OPENBLAS_LIBPATH}")
+            message("No OPENBLAS_LIBPATH specified, choosing ${OPENBLAS_LIBPATH}")
         endif()
         set_target_properties(openblas PROPERTIES IMPORTED_LOCATION ${OPENBLAS_LIBPATH})
     endif()

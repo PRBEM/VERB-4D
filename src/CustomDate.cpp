@@ -8,6 +8,11 @@
 #include <tuple>
 #include <iomanip>
 
+#ifdef _MSC_VER
+#define gmtime_r( ARG1, ARG2 ) do{ *ARG2 = *gmtime( ARG1 ); }while(0)
+#endif
+
+
 const double CustomDate::matlabd_epoch = 719529.0;
 const int CustomDate::max_days[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 

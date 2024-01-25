@@ -360,7 +360,9 @@ double internal::interp2d_four_corners(
     // linear interpolation as a lambda
     // as we're interpolating log values we can sometimes expect -infinity
     auto interpolation_lambda = [](double x1, double y1, double x2, double y2, double x_out) {
-        if (y1 == -1.0 / 0.0 || y2 == -1.0 / 0.0 || x1 == x2) return y1;
+        // if (y1 == -1.0 / 0.0 || y2 == -1.0 / 0.0 || x1 == x2) return y1;
+        // Explisitly define -infinity, otherwise it results in the compilation error
+        if (y1 == -std::numeric_limits<double>::infinity() || y2 == -std::numeric_limits<double>::infinity() || x1 == x2) return y1;                
         return ((y2 - y1) * x_out + (y1 * x2 - y2 * x1)) / (x2 - x1);
     };
 
@@ -496,8 +498,8 @@ std::vector<std::vector<data_assimilation::Observations>> internal::interpolate(
     std::vector<std::vector<Observations>> result(V_size, std::vector<Observations>(K_size));
     // int counter = 0;
 #pragma omp parallel for schedule(dynamic, 1) collapse(2)
-    for (size_t iV = 0; iV < V_size; ++iV) {
-        for (size_t iK = 0; iK < K_size; ++iK) {
+    for (auto iV = 0; iV < V_size; ++iV) {
+        for (auto iK = 0; iK < K_size; ++iK) {
             Observations& obs = result[iV][iK];
             obs.R = R;
             obs.P = P;
