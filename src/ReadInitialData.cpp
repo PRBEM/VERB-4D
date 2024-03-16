@@ -144,6 +144,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
 		string &inversion_method, string &include_boundary, string &Vl_BC_from_convection, string &Vu_BC_from_convection, string &io_method,
 		string &run_remapping, string &run_convection, string &run_radial_diffusion, string &run_local_diffusion, string &positive_PSD,
+		std::string &PSD0_io_method,
 		Matrix4D<double> &PSD, Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V, Matrix4D<double> &K, 
 		UpdatableMatrix<Matrix4D<double>> &L, int &P_size, int &R_size, int &V_size, int &K_size, int &L_size,
 		Matrix3D<double> &PSD_l_P, Matrix3D<double> &PSD_u_P, 
@@ -190,6 +191,8 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	parameters.getParameter("run_radial_diffusion", run_radial_diffusion);
 	parameters.getParameter("run_local_diffusion", run_local_diffusion);
     parameters.getParameter("positive_PSD", positive_PSD);
+
+	parameters.getParameter("PSD0_io_method", PSD0_io_method);	
 
     string initial_PSD = "PSD0";
     parameters.findParameter("initial_PSD", "PSD0") >> initial_PSD;
