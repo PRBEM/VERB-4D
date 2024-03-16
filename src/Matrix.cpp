@@ -5522,6 +5522,44 @@ void Matrix4D<T>::writeToAnyFile(const std::string& filename, const std::string&
     }
 }
 
+template<class T>
+std::string Matrix4D<T>::getExtByIoMethod(const std::string& io_method) const {
+	std::string ext;
+    if (io_method.compare("ascii") == 0){
+        ext = ".plt";
+    } else if (io_method.compare("binary") == 0) {
+        ext = ".pltb";
+    } else if (io_method.compare("matlab") == 0) {
+        ext = ".mat";
+    } else {
+        printf("IO error: unknown io_method");
+        exit(EXIT_FAILURE);
+    }	
+	return ext;
+}
+
+template<class T>
+void Matrix4D<T>::writeToLstFile(const std::string& filename, const std::string& io_method, const std::string& info, const std::string& output_folder) const {
+	
+	std::string ext = getExtByIoMethod(io_method);
+	std::string full_filename = filename + ext;
+	std::string lst_filename = output_folder + "PSD.lst";
+
+	// Remove output folder becaues lst file is in output folder
+	size_t pos = full_filename.find(output_folder);
+    if (pos != std::string::npos) {
+        full_filename.erase(pos, output_folder.length());
+    }
+
+	ofstream output(lst_filename.c_str(), std::ios_base::app);
+	
+	if (!output.is_open()) {
+		printf("FILE: Unable to output file: %s", lst_filename.c_str());
+		exit(EXIT_FAILURE);
+	}	
+	output << info << '\t' << full_filename << std::endl;
+	output.close();
+}
 
 /**
 * Read matrix data from binary file
