@@ -152,7 +152,7 @@ void runKalmanFilter(
             forecast_init.writeToBinaryFile(debug_output_folder + "/forecast_init_" + std::to_string(time_step) + ".pltb");
             forecast_result.writeToBinaryFile(debug_output_folder + "/forecast_result_" + std::to_string(time_step) + ".pltb");
             error_covariance.writeToBinaryFile(debug_output_folder + "/error_covariance_" + std::to_string(time_step) + ".pltb");
-            model.writeToBinaryFile(debug_output_folder + "/model_" + std::to_string(time_step) + ".pltb");
+            //model.writeToBinaryFile(debug_output_folder + "/model_" + std::to_string(time_step) + ".pltb");
         };
     };
 #endif

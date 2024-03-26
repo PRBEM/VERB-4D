@@ -16,6 +16,7 @@ data_assimilation::DataAssimilationManagerConvection::DataAssimilationManagerCon
     : _timeStart(timeStart), _timeEnd(timeEnd), _V(V), _K(K), _analysisCovarianceConvection(P_size, R_size, V.size_q1, K.size_q2) {
     _assimilationParameters = readParameters(parametersFile);
     _runDataAssimilation = _assimilationParameters.runDataAssimilation;
+    _debug_output_folder = debug_output_folder;
 
     if (_runDataAssimilation) {
         _dataParameters = pmf::readParameters("satellite_data.list");
@@ -49,16 +50,16 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
             int progress_count = 0;
             int progress_total = _V.size_q1 * _K.size_q2;
 
-            #ifdef DATA_ASSIMILATION_DEBUG
-                data_assimilation::DebugOuput4D debug_output_4d(P.size_w, P.size_x, P.size_y, P.size_z);
-            #endif
+#ifdef DATA_ASSIMILATION_DEBUG
+            data_assimilation::DebugOuput4D debug_output_4d(P.size_w, P.size_x, P.size_y, P.size_z);
+#endif
 
 #pragma omp parallel for shared(progress_total, progress_count) schedule(dynamic, 1) collapse(2)
             for (int iV = _V.size_q1 - 1; iV >= 0; --iV) {
                 for (int iK = 0; iK < _K.size_q2; ++iK) {
                     if (omp_get_thread_num() == 0) {
                         std::cout << "\b\b\b\b\b\b\b\b\b" << '\t'
-                             << (int)((double)progress_count / progress_total * 100) << "%" << std::flush;
+                                  << (int)((double)progress_count / progress_total * 100) << "%" << std::flush;
                     }
                     // int numnan = 0;
                     // set all observations to zero for testing
@@ -74,9 +75,9 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
                                                                     Loss.yzSlice(iV, iK),
                                                                     observations[iV][iK], dt, _assimilationParameters);
 
-                    #ifdef DATA_ASSIMILATION_DEBUG
-                        debug_output_4d.insert_output_2d(debug_output, iV, iK);
-                    #endif
+#ifdef DATA_ASSIMILATION_DEBUG
+                    debug_output_4d.insert_output_2d(debug_output, iV, iK);
+#endif
 
                     for (auto iP = 0; iP < P_size; iP++) {
                         for (auto iR = 0; iR < R_size; iR++) {
@@ -87,9 +88,10 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
                 }
             }
 
-            #ifdef DATA_ASSIMILATION_DEBUG
-                debug_output_4d.write_files(_timePrev, _debug_output_folder);
-            #endif
+#ifdef DATA_ASSIMILATION_DEBUG
+            std::cout << _debug_output_folder << std::endl;
+            debug_output_4d.write_files(_timePrev, _debug_output_folder);
+#endif
         }
         std::cout << '\n';
         _timePrev = _timeNext;
@@ -98,11 +100,11 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
 }
 
 std::vector<std::vector<data_assimilation::Observations>> data_assimilation::getObservations(
-        double timeStart,
-        double timeEnd,
-        const Matrix2D<double>& V,
-        const Matrix2D<double>& K,
-        const std::vector<pmf::Parameters>& parameters) {
+    double timeStart,
+    double timeEnd,
+    const Matrix2D<double>& V,
+    const Matrix2D<double>& K,
+    const std::vector<pmf::Parameters>& parameters) {
     std::vector<ProcessedMatFileData> pmfDataSplit;
     for (auto par : parameters) {
         ProcessedMatFileData one_instrument = internal::readData(timeStart, timeEnd, par);
@@ -141,12 +143,12 @@ data_assimilation::DebugOuput2D data_assimilation::runKalmanFilterConvection2D(
 
     auto observationsBinned = internal::bin(observations, P, R, "log10");
 
-    #ifdef DATA_ASSIMILATION_DEBUG
-        debug_output.binned_observations = observationsBinned;
-        debug_output.forecast_init = Matrix2D<double>(forecast);
-        debug_output.error_covariance = Matrix2D<double>(analysisErrorCovariance);
-        debug_output.model = Matrix2D<double>(modelMatrix);
-    #endif
+#ifdef DATA_ASSIMILATION_DEBUG
+    debug_output.binned_observations = observationsBinned;
+    debug_output.forecast_init = Matrix2D<double>(forecast);
+    debug_output.error_covariance = Matrix2D<double>(analysisErrorCovariance);
+    debug_output.model = Matrix2D<double>(modelMatrix);
+#endif
 
     auto observationSpace = internal::convertToObservationSpace(observationsBinned);
 
@@ -182,9 +184,9 @@ data_assimilation::DebugOuput2D data_assimilation::runKalmanFilterConvection2D(
 
     forecast = toMatrix2D(forecast1D, P.size_q1, R.size_q2);
 
-    #ifdef DATA_ASSIMILATION_DEBUG
-        debug_output.forecast_result = Matrix2D<double>(forecast);
-    #endif
+#ifdef DATA_ASSIMILATION_DEBUG
+    debug_output.forecast_result = Matrix2D<double>(forecast);
+#endif
     return debug_output;
 }
 
@@ -224,6 +226,8 @@ void data_assimilation::runKalmanFilter(
     const Matrix2D<double>& R) {
     // auto Pf = M * Pa * transpose(M) + Q;
 
+    // if (H.maxabs() > 0) {
+
     // forecast error covariance matrix [n x n]
     Matrix2D<double> Pf = abtrans(M * Pa, M);
     Pf += Q;
@@ -236,7 +240,11 @@ void data_assimilation::runKalmanFilter(
     Matrix2D<double>& K = trans_solve(H * Pf_times_HT + R, Pf_times_HT);
 
     forecast += K * (obs - H * forecast);
+
+    // std::cout << std::endl << "size 1: " << H.size_q1 << "    size 2: " << H.size_q2 << "       max: " << H.maxabs() << std::endl;
+
     Pa = Pf - K * H * Pf;
+    //}
 }
 
 data_assimilation::Parameters data_assimilation::readParameters(const std::string& filename) {

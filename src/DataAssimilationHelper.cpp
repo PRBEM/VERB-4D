@@ -132,10 +132,12 @@ Matrix2D<double> internal::getModelMatrixConvection2D(
 
     Matrix2D<double> result_1step = getModelMatrixConvection2DNoStabilityCheck(
         VP, VR, Loss, timeStep_new, dP, dR);
-    Matrix2D<double> result = result_1step;
-    for (auto it = 1; it < nt; ++it) {
-         result = result * result_1step;
-    }
+
+    // Matrix2D<double> result = result_1step;
+    // for (auto it = 1; it < nt; ++it) {
+    //      result = result * result_1step;
+    // }
+    Matrix2D<double> result = result_1step^nt;
 
     return result;
 }

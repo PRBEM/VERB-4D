@@ -427,7 +427,166 @@ Matrix2D<double> operator*(
             c, &ldc);
 
     return answer;
-} 
+}
+
+
+Matrix2D<double> operator^(Matrix2D<double> A, const int power) {
+    if (A.size_q1 != A.size_q2) {
+        std::cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        std::cout << "Matrix/matrix size mismatch. ";
+        std::cout << "A.size_q1 = " << A.size_q2 << ", ";
+        std::cout << "A.size_q2 = " << A.size_q2 << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    if (power == 1) {
+        // nothing to do
+        return A;
+    }
+
+    // we precalculate powers of 2 for efficiency (A^2, A^4, A^16, ...)
+    std::bitset<32> power_bitset(power);
+    //std::cout << "power: " << power << std::endl;
+    //std::cout << "bitset: " << power_bitset << std::endl;
+    //std::cout << "bitset count: " << power_bitset.count() << std::endl;
+    int cache_size = power_bitset[0] ? power_bitset.count()-1 : power_bitset.count();
+
+    std::vector<Matrix2D<double>> cache_matrixes(cache_size);
+    for (int i = 0; i < cache_matrixes.size(); i++) {
+        cache_matrixes[i] = Matrix2D<double>(A.size_q1, A.size_q2);
+    }
+
+    char transa{'N'};
+    char transb{'N'};
+    long m{A.size_q2};
+    long n{A.size_q1};
+    long k{A.size_q1};
+    double alpha{1.0};
+    long lda{A.size_q2};
+    long ldb{A.size_q2};
+    double beta{0.};
+    long ldc{m};
+
+    double* a;
+    double* b;
+    double* c;
+
+    Matrix2D<double> A_copy = A; // A acts as a temporary
+    int cache_matrix_cursor = 0;
+
+    for (int i = 1; i < power_bitset.size(); i++) {
+        //std::cout << "Iteration: " << i << std::endl;
+
+        if (i == 1) {
+            a = A[0];
+            c = cache_matrixes[cache_matrix_cursor][0];
+        } else {
+            a = cache_matrixes[cache_matrix_cursor-1][0];
+            c = cache_matrixes[cache_matrix_cursor][0];
+        }
+
+        dgemm_(&transb, &transa, &m, &n, &k, &alpha, a, &ldb, a, &lda, &beta,
+            c, &ldc);
+
+        // preparation for while loop
+        if (power_bitset[i] == false and i > 1) { // use A as temporary; is already done for i == 1
+            //std::cout << "A as temporary" << std::endl;
+            A = cache_matrixes[cache_matrix_cursor];
+
+            c = A[0];
+            a = cache_matrixes[cache_matrix_cursor][0];
+        }
+
+        while(power_bitset[i] == false) {
+            //std::cout << "bit false: " << i << std::endl;
+
+            // switch a and c
+            double* tmp = a;
+            a = c;
+            c = tmp;
+
+            dgemm_(&transb, &transa, &m, &n, &k, &alpha, a, &ldb, a, &lda, &beta,
+                c, &ldc);
+
+            i++;
+        }
+
+        // if result ended up being in A, copy it back to the cache matrix
+        if (c != cache_matrixes[cache_matrix_cursor][0]) {
+            //std::cout << "Result in A, copying" << std::endl;
+            cache_matrixes[cache_matrix_cursor] = A;
+        }
+
+        cache_matrix_cursor++;
+        if (cache_matrix_cursor == cache_matrixes.size()) {
+            break; // all filled
+        }
+
+    }
+
+    Matrix2D<double> answer{A.size_q1, A.size_q2};
+
+    if (cache_matrixes.size() == 1) {
+        answer = cache_matrixes[0];
+        c = answer[0]; // mark that answer is holding the result
+    } else {
+        for (int i = 1; i < cache_matrixes.size(); i++) {
+            //std::cout << "Iteration: " << i << std::endl;
+
+            if (i == 1) {
+                a = cache_matrixes[i-1][0];
+                b = cache_matrixes[i][0];
+                c = answer[0];
+            } else if (i % 2 == 0) {
+                a = answer[0];
+                b = cache_matrixes[i][0];
+                c = A[0]; // we can safely reuse A here; it's data is not important
+            } else {
+                a = A[0];
+                b = cache_matrixes[i][0];
+                c = answer[0];
+            }
+
+            dgemm_(&transb, &transa, &m, &n, &k, &alpha, a, &ldb, b, &lda, &beta,
+                c, &ldc);
+
+        }
+    }
+
+    if (c == A[0]) { // result in A
+        //std::cout << "result in A" << std::endl;
+        if (power % 2 == 1) {
+            a = A[0];
+            b = A_copy[0];
+            c = answer[0];
+
+            dgemm_(&transb, &transa, &m, &n, &k, &alpha, a, &ldb, b, &lda, &beta,
+            c, &ldc);
+
+            return answer;
+        }
+
+        return A;
+
+    } else { // result in answer
+        //std::cout << "result in answer" << std::endl;
+        if (power % 2 == 1) {
+            a = answer[0];
+            b = A_copy[0];
+            c = A[0];
+
+            dgemm_(&transb, &transa, &m, &n, &k, &alpha, a, &ldb, b, &lda, &beta,
+            c, &ldc);
+
+            return A;
+        }
+
+        return answer;
+
+    }
+}
+
+
 Matrix2D<double> abtrans(
     const Matrix2D<double>& A, const Matrix2D<double>& B
 ) {

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Matrix.h"
+#include <bitset>
+#include <vector>
 
 Matrix1D<double> cat(const Matrix1D<double>& a, const Matrix1D<double>& b);
 Matrix2D<double> cat(const Matrix2D<double>& a, const Matrix2D<double>& b);
@@ -50,6 +52,7 @@ Matrix1D<double> operator*(const Matrix2D<double>& A, const Matrix1D<double>& b)
  * @return Product of A and B 
  */ 
 Matrix2D<double> operator*(const Matrix2D<double>& A, const Matrix2D<double>& B); 
+Matrix2D<double> operator^(Matrix2D<double> A, const int power); 
 Matrix2D<double> operator+(const Matrix2D<double>& a, const Matrix2D<double>& b); 
 Matrix2D<double> operator-(const Matrix2D<double>& a, const Matrix2D<double>& b); 
 Matrix2D<double> inv(Matrix2D<double> A); 

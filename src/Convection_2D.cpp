@@ -109,6 +109,8 @@ bool Convection_2D(
     Matrix1D<double> zero_r(R_size);
     zero_r = 0;
 
+    Matrix2D<double> PSD_PR_G;
+
     // precompute losses
     Matrix2D<double> losses_exp = Losses.exp(dt);
     for (int it = 0; it < num_steps; it++) {
@@ -119,7 +121,8 @@ bool Convection_2D(
                 P.ySlice(P_P, iR);
                 VP.ySlice(VP_P, iR);
                 // Speedup: if PSD~=0 or V~=0, skip the thing
-                if (PSD_P.max() < min_PSD || VP_P.maxabs() < min_V)
+                //if (PSD_P.max() < min_PSD || VP_P.maxabs() < min_V)
+                if (PSD_P.max() < min_PSD)
                     continue;
 
                 Convection_1D_ULTIMATE_QUICKEST6(
@@ -135,28 +138,36 @@ bool Convection_2D(
             }
         }
 
+        PSD_PR_G = PSD_PR.divide(R).divide(R);
+        //PSD_PR_G = PSD_PR;
+
         if (R_size >= 3) {
             for (iP = 0; iP < P_size; iP++) {
                 // 2d slice
-                PSD_PR.xSlice(PSD_R, iP);
+                PSD_PR_G.xSlice(PSD_R, iP);
                 R.xSlice(R_R, iP);
                 VR.xSlice(VR_R, iP);
 
                 // Speedup: if PSD~=0 or V~=0, skip the thing
-                if (PSD_R.max() < min_PSD || VR_R.maxabs() < min_V)  // XXX: 1e-21 should be a parameter, based on the minimum of the initial PSD or something
+                //if (PSD_R.max() < min_PSD || VR_R.maxabs() < min_V)  // XXX: 1e-21 should be a parameter, based on the minimum of the initial PSD or something
+                if (PSD_R.max() < min_PSD)
                     continue;
 
                 Convection_1D_ULTIMATE_QUICKEST6(
                     PSD_R, R_R, R_size,
-                    R_LBC[iP], R_UBC[iP],  // P, I, K
+                    //R_LBC[iP], 
+                    R_LBC[iP] / R_R[0] / R_R[0], 
+                    //R_UBC[iP], 
+                    R_UBC[iP] / R_R[R_size-1] / R_R[R_size-1],  
                     R_LBC_type, R_UBC_type,
                     VR_R,
                     zero_r, zero_r, dt);
 
                 // copy results back
                 for (iR = 0; iR < R_size; iR++)
-                    PSD_PR[iP][iR] = PSD_R[iR];
-            }
+                    //PSD_PR[iP][iR] = PSD_R[iR];
+                    PSD_PR[iP][iR] = PSD_R[iR] * R_R[iR] * R_R[iR];
+            } 
         }
         for (iP = 0; iP < P_size; iP++) {
             for (iR = 0; iR < R_size; iR++) {
