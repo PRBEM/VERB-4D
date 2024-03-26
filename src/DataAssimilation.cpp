@@ -12,8 +12,10 @@
 data_assimilation::DataAssimilationManagerConvection::DataAssimilationManagerConvection(
     const std::string& parametersFile,
     double timeStart, double timeEnd, const Matrix2D<double>& V,
-    const Matrix2D<double>& K, int P_size, int R_size, std::string debug_output_folder)
-    : _timeStart(timeStart), _timeEnd(timeEnd), _V(V), _K(K), _analysisCovarianceConvection(P_size, R_size, V.size_q1, K.size_q2) {
+    const Matrix2D<double>& K, int P_size, int R_size, const std::string& debug_output_folder)
+    : _timeStart(timeStart), _timeEnd(timeEnd), _V(V), _K(K),
+    _analysisCovarianceConvection(P_size, R_size, V.size_q1, K.size_q2), _debug_output_folder(debug_output_folder)
+{
     _assimilationParameters = readParameters(parametersFile);
     _runDataAssimilation = _assimilationParameters.runDataAssimilation;
     _debug_output_folder = debug_output_folder;

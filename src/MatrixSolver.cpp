@@ -29,10 +29,10 @@
 
 #include "MatrixSolver.h"
 #include <cmath>
-//#include <malloc.h>
 #include <stdlib.h>
 #include <string>
 #include <ctime>
+#include <cmath>
 #include <iostream>
 #include <stdlib.h>
 
@@ -62,7 +62,7 @@ void AddBoundary(DiagMatrix &matr_A, BoundaryConditionType type, int in, int id1
 * \param x_LBC, x_UBC, x_LBC_type, x_UBC_type  - predefined 1D boundaries/types
 */
 bool AddBoundaries_1D(
-	CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
+	CalculationMatrix &matr_A, CalculationMatrix &matr_C,
 	const Matrix1D<double> &x,
 	int x_size,
 	double x_LBC, double x_UBC,
@@ -122,7 +122,7 @@ bool AddBoundaries_1D(
 * \param LBC, UBC for x and y - predefined 2D boundaries/types
 */
 bool AddBoundaries_2D(
-		CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
+		CalculationMatrix &matr_A, Matrix1D<double> &vec_C,
 		const Matrix2D<double> &x, const Matrix2D<double> &y,
 		int x_size, int y_size,
 		const Matrix1D<double>& x_LBC, const Matrix1D<double>& x_UBC,
@@ -137,7 +137,7 @@ bool AddBoundaries_2D(
 	// Boundary conditions
 	if (ix == 0 && x_size >= 3) {
 
-		matr_C[0][in] = x_LBC[iy];
+		vec_C[in] = x_LBC[iy];
 		id1 = matr_A.index1d(ix + 1, iy) - in;
 		dh = x[ix + 1][iy] - x[ix][iy];
 		//AddBoundary(matr_A, x_LBC_type, in, id, dh);
@@ -156,7 +156,7 @@ bool AddBoundaries_2D(
 
 	} else if (ix == x_size - 1 && x_size >= 3) {
 
-		matr_C[0][in] = x_UBC[iy];
+		vec_C[in] = x_UBC[iy];
 		id1 = matr_A.index1d(ix - 1, iy) - in;
 		dh = x[ix][iy] - x[ix - 1][iy];
 		//AddBoundary(matr_A, x_UBC_type, in, id, dh);
@@ -175,7 +175,7 @@ bool AddBoundaries_2D(
 
 	} else if (iy == 0 && y_size >= 3) {
 
-		matr_C[0][in] = y_LBC[ix];
+		vec_C[in] = y_LBC[ix];
 		id1 = matr_A.index1d(ix, iy + 1) - in;
 		dh = y[ix][iy + 1] - y[ix][iy];
 		//AddBoundary(matr_A, y_LBC_type, in, id, dh);
@@ -194,7 +194,7 @@ bool AddBoundaries_2D(
 
 	} else if (iy == y_size - 1 && y_size >= 3) {
 
-		matr_C[0][in] = y_UBC[ix];
+		vec_C[in] = y_UBC[ix];
 		id1 = matr_A.index1d(ix, iy - 1) - in;
 		dh = y[ix][iy] - y[ix][iy - 1];
 		//AddBoundary(matr_A, y_UBC_type, in, id, dh);
@@ -218,885 +218,62 @@ bool AddBoundaries_2D(
 	return true;
 }
 
-
-// Implicit diagonals, explicit mixed
 /**
-* \brief THIS FUNCTION IS CURRENTLY NOT BEING USED
-*/
-bool MakeModelMatrix_2D_ADI1_x(CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-		Matrix2D<double> &x, Matrix2D<double> &y,
-		int x_size, int y_size,
-		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
-		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-		Matrix2D<double> &G, double dt) 
-{
-	// Make diagonals to be equal to zero
-	DiagMatrix::iterator it;
-	for (it = matr_A.begin(); it != matr_A.end(); it++)	it->second = 0;
-	for (it = matr_B.begin(); it != matr_B.end(); it++)	it->second = 0;
-	for (it = matr_C.begin(); it != matr_C.end(); it++)	it->second = 0;
-
-	// create a new model matrix
-	// (f^{t+1} - f^{t})/dt = L1(f^{t+1}) + L2(f^{t+1}) + L3(f^{t+1})[main equation, losses are calculated separately]
-	// L1, L2, L3 - diffusion operators
-	//  + need to add there the equations for boundary conditions also
-	double dh;
-	int ix, iy, in, id;
-	for (ix = 0; ix < x_size; ix++) {
-		for (iy = 0; iy < y_size; iy++) {
-			// calculating current line number (in)
-			in = matr_A.index1d(ix, iy);
-
-			// Boundary conditions
-			if (ix == 0 && x_size >= 3) {
-
-				matr_C[0][in] = x_LBC[iy];
-				id = matr_A.index1d(ix + 1, iy) - in;
-				dh = x[ix + 1][iy] - x[ix][iy];
-				AddBoundary(matr_A, x_LBC_type, in, id, dh);
-
-			} else if (ix == x_size - 1 && x_size >= 3) {
-
-				matr_C[0][in] = x_UBC[iy];
-				id = matr_A.index1d(ix - 1, iy) - in;
-				dh = x[ix][iy] - x[ix - 1][iy];
-				AddBoundary(matr_A, x_UBC_type, in, id, dh);
-
-			} else if (iy == 0 && y_size >= 3) {
-
-				matr_C[0][in] = y_LBC[ix];
-				id = matr_A.index1d(ix, iy + 1) - in;
-				dh = y[ix][iy + 1] - y[ix][iy];
-				AddBoundary(matr_A, y_LBC_type, in, id, dh);
-
-			} else if (iy == y_size - 1 && y_size >= 3) {
-
-				matr_C[0][in] = y_UBC[ix];
-				id = matr_A.index1d(ix, iy - 1) - in;
-				dh = y[ix][iy] - y[ix][iy - 1];
-				AddBoundary(matr_A, y_UBC_type, in, id, dh);
-
-			} else {
-
-				// now we are sure we are not on a boundary, can do the Fokker-Planck equation approximation in the inner area
-
-				// f^{t+1}/dt
-				matr_A[0][in] += 1.0 / dt;
-				// f^{t}/dt
-				matr_B[0][in] += 1.0 / dt;
-
-				// Dxx
-				if (x_size >= 3) {
-					SecondDerivativeApproximation_2D(matr_A, ix, iy, "x_left", "x_right", x, y, Dxx, G, -0.5);
-					SecondDerivativeApproximation_2D(matr_A, ix, iy, "x_right", "x_left", x, y, Dxx, G, -0.5);
-				}
-
-				// Dyy
-				if (y_size >= 3) {
-					//SecondDerivativeApproximation_2D(matr_B, ix, iy, "y_left", "y_right", x, y, Dyy, G, 0.5);
-					//SecondDerivativeApproximation_2D(matr_B, ix, iy, "y_right", "y_left", x, y, Dyy, G, 0.5);
-				}
-
-				// mixed
-				if (x_size >= 3 && y_size >= 3) {
-
-					// d/dx Dxy d/dy f
-					// Multiplicatior = 0.125 because we approximate each term 4 times (0.25) and do it for each direction (/2)
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "y_left", "x_right", x, y, Dxy, G, 0.125);
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "y_right", "x_left", x, y, Dxy, G, 0.125);
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "y_left", "x_left", x, y, Dxy, G, 0.125);
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "y_right", "x_right", x, y, Dxy, G, 0.125);
-
-					// d/dy Dyx d/dx f
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "x_left", "y_right", x, y, Dyx, G, 0.125);
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "x_right", "y_left", x, y, Dyx, G, 0.125);
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "x_left", "y_left", x, y, Dyx, G, 0.125);
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "x_right", "y_right", x, y, Dyx, G, 0.125);
-
-				}
-
-			}
-		}
-	}
-	// Output::echo("recalculated.\n");
-
-	// save the time of matrix change
-	matr_A.change_ind = clock();
-	matr_B.change_ind = clock();
-	matr_C.change_ind = clock();
-
-	return true;
-}
-/**
-* \brief THIS FUNCTION IS CURRENTLY NOT BEING USED
-*/
-bool MakeModelMatrix_2D_ADI1_y(CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-		Matrix2D<double> &x, Matrix2D<double> &y,
-		int x_size, int y_size,
-		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
-		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-		Matrix2D<double> &G, double dt) 
-{
-	// Make diagonals to be equal to zero
-	DiagMatrix::iterator it;
-	for (it = matr_A.begin(); it != matr_A.end(); it++)	it->second = 0;
-	for (it = matr_B.begin(); it != matr_B.end(); it++)	it->second = 0;
-	for (it = matr_C.begin(); it != matr_C.end(); it++)	it->second = 0;
-
-	// create a new model matrix
-	// (f^{t+1} - f^{t})/dt = L1(f^{t+1}) + L2(f^{t+1}) + L3(f^{t+1})[main equation, losses are calculated separately]
-	// L1, L2, L3 - diffusion operators
-	//  + need to add there the equations for boundary conditions also
-	double dh;
-	int ix, iy, in, id;
-	for (ix = 0; ix < x_size; ix++) {
-		for (iy = 0; iy < y_size; iy++) {
-			// calculating current line number (in)
-			in = matr_A.index1d(iy, ix);
-
-			// Bboundary conditions
-			if (ix == 0 && x_size >= 3) {
-
-				matr_C[0][in] = x_LBC[iy];
-				id = matr_A.index1d(iy, ix + 1) - in;
-				dh = x[ix + 1][iy] - x[ix][iy];
-				AddBoundary(matr_A, x_LBC_type, in, id, dh);
-
-			} else if (ix == x_size - 1 && x_size >= 3) {
-
-				matr_C[0][in] = x_UBC[iy];
-				id = matr_A.index1d(iy, ix - 1) - in;
-				dh = x[ix][iy] - x[ix - 1][iy];
-				AddBoundary(matr_A, x_UBC_type, in, id, dh);
-
-			} else if (iy == 0 && y_size >= 3) {
-
-				matr_C[0][in] = y_LBC[ix];
-				id = matr_A.index1d(iy + 1, ix) - in;
-				dh = y[ix][iy + 1] - y[ix][iy];
-				AddBoundary(matr_A, y_LBC_type, in, id, dh);
-
-			} else if (iy == y_size - 1 && y_size >= 3) {
-
-				matr_C[0][in] = y_UBC[ix];
-				id = matr_A.index1d(iy - 1, ix) - in;
-				dh = y[ix][iy] - y[ix][iy - 1];
-				AddBoundary(matr_A, y_UBC_type, in, id, dh);
-
-			} else {
-
-				// now we are sure we are not on a boundary, can do the Fokker-Planck equation approximation in the inner area
-
-				// f^{t+1}/dt
-				matr_A[0][in] += 1.0 / dt;
-				// f^{t}/dt
-				matr_B[0][in] += 1.0 / dt;
-
-				// Dxx
-				if (x_size >= 3) {
-					//SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "x_left", "x_right", x, y, Dxx, G, 0.5);
-					//SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "x_right", "x_left", x, y, Dxx, G, 0.5);
-				}
-
-				// Dyy
-				if (y_size >= 3) {
-					SecondDerivativeApproximation_2D_y(matr_A, ix, iy, "y_left", "y_right", x, y, Dyy, G, -0.5);
-					SecondDerivativeApproximation_2D_y(matr_A, ix, iy, "y_right", "y_left", x, y, Dyy, G, -0.5);
-				}
-
-				// mixed
-				if (x_size >= 3 && y_size >= 3) {
-
-
-					// Multiplicatior = 0.125 because we approximate each term 4 times (0.25) and do it for each direction (/2)
-					// d/dx Dxy d/dy f
-					SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "y_left", "x_right", x, y, Dxy, G, 0.125);
-					SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "y_right", "x_left", x, y, Dxy, G, 0.125);
-					SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "y_left", "x_left", x, y, Dxy, G, 0.125);
-					SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "y_right", "x_right", x, y, Dxy, G, 0.125);
-					// d/dy Dyx d/dx f
-					SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "x_left", "y_right", x, y, Dyx, G, 0.125);
-					SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "x_right", "y_left", x, y, Dyx, G, 0.125);
-					SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "x_left", "y_left", x, y, Dyx, G, 0.125);
-					SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "x_right", "y_right", x, y, Dyx, G, 0.125);
-
-				}
-
-			}
-		}
-	}
-	// Output::echo("recalculated.\n");
-
-	// save the time of matrix change
-	matr_A.change_ind = clock();
-	matr_B.change_ind = clock();
-	matr_C.change_ind = clock();
-
-	return true;
-}
-
-
-
-/**
-* \brief THIS FUNCTION IS CURRENTLY NOT BEING USED
-*/
-bool MakeModelMatrix_2D_ADI2_x(CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-		Matrix2D<double> &x, Matrix2D<double> &y,
-		int x_size, int y_size,
-		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
-		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-		Matrix2D<double> &G, double dt) 
-{
-	// Make diagonals to be equal to zero
-	DiagMatrix::iterator it;
-	for (it = matr_A.begin(); it != matr_A.end(); it++)	it->second = 0;
-	for (it = matr_B.begin(); it != matr_B.end(); it++)	it->second = 0;
-	for (it = matr_C.begin(); it != matr_C.end(); it++)	it->second = 0;
-
-	Matrix2D<double> Coef1(x_size, y_size), Coef2(x_size, y_size);
-	Coef1 = 1; Coef2 = 1;
-
-	// create a new model matrix
-	// (f^{t+1} - f^{t})/dt = L1(f^{t+1}) + L2(f^{t+1}) + L3(f^{t+1})[main equation, losses are calculated separately]
-	// L1, L2, L3 - diffusion operators
-	//  + need to add there the equations for boundary conditions also
-	double dh;
-	int ix, iy, in, id;
-	double coef;
-	for (ix = 0; ix < x_size; ix++) {
-		for (iy = 0; iy < y_size; iy++) {
-			// calculating current line number (in)
-			in = matr_A.index1d(ix, iy);
-
-			// Boundary conditions
-			if (ix == 0 && x_size >= 3) {
-
-				matr_C[0][in] = x_LBC[iy];
-				id = matr_A.index1d(ix + 1, iy) - in;
-				dh = x[ix + 1][iy] - x[ix][iy];
-				AddBoundary(matr_A, x_LBC_type, in, id, dh);
-
-			} else if (ix == x_size - 1 && x_size >= 3) {
-
-				matr_C[0][in] = x_UBC[iy];
-				id = matr_A.index1d(ix - 1, iy) - in;
-				dh = x[ix][iy] - x[ix - 1][iy];
-				AddBoundary(matr_A, x_UBC_type, in, id, dh);
-
-			} else if (iy == 0 && y_size >= 3) {
-
-				matr_C[0][in] = y_LBC[ix];
-				id = matr_A.index1d(ix, iy + 1) - in;
-				dh = y[ix][iy + 1] - y[ix][iy];
-				AddBoundary(matr_A, y_LBC_type, in, id, dh);
-
-			} else if (iy == y_size - 1 && y_size >= 3) {
-
-				matr_C[0][in] = y_UBC[ix];
-				id = matr_A.index1d(ix, iy - 1) - in;
-				dh = y[ix][iy] - y[ix][iy - 1];
-				AddBoundary(matr_A, y_UBC_type, in, id, dh);
-
-			} else {
-
-				// now we are sure we are not on a boundary, can do the Fokker-Planck equation approximation in the inner area
-
-				// f^{t+1}/dt
-				matr_A[0][in] += 1.0 / dt;
-				// f^{t}/dt
-				matr_B[0][in] += 1.0 / dt;
-
-				// Dxx
-				if (x_size >= 3) {
-					SecondDerivativeApproximation_2D(matr_A, ix, iy, "x_left", "x_right", x, y, Dxx, G, -0.5);
-					SecondDerivativeApproximation_2D(matr_A, ix, iy, "x_right", "x_left", x, y, Dxx, G, -0.5);
-				}
-
-				// Dyy
-				if (y_size >= 3) {
-					//SecondDerivativeApproximation_2D(matr_B, ix, iy, "y_left", "y_right", x, y, Dyy, G, 0.5);
-					//SecondDerivativeApproximation_2D(matr_B, ix, iy, "y_right", "y_left", x, y, Dyy, G, 0.5);
-				}
-
-				// mixed
-				if (x_size >= 3 && y_size >= 3) {
-
-
-					// mixed terms half implicit-half explicit
-					//explicit part
-					// Dxy d2f/dxy
-					AnySecondDerivativeApproximation_2D(matr_B, ix, iy, "y_left", "x_right", x, y, Dxy, Coef2, 0.125);
-					AnySecondDerivativeApproximation_2D(matr_B, ix, iy, "y_right", "x_left", x, y, Dxy, Coef2, 0.125);
-					AnySecondDerivativeApproximation_2D(matr_B, ix, iy, "y_left", "x_left", x, y, Dxy, Coef2, 0.125);
-					AnySecondDerivativeApproximation_2D(matr_B, ix, iy, "y_right", "x_right", x, y, Dxy, Coef2, 0.125);
-					// Dyx d2f/dyx
-					AnySecondDerivativeApproximation_2D(matr_B, ix, iy, "x_left", "y_right", x, y, Dyx, Coef2, 0.125);
-					AnySecondDerivativeApproximation_2D(matr_B, ix, iy, "x_right", "y_left", x, y, Dyx, Coef2, 0.125);
-					AnySecondDerivativeApproximation_2D(matr_B, ix, iy, "x_left", "y_left", x, y, Dyx, Coef2, 0.125);
-					AnySecondDerivativeApproximation_2D(matr_B, ix, iy, "x_right", "y_right", x, y, Dyx, Coef2, 0.125);
-
-
-					// Implicit part (first derivatives)
-					// -1/G * d(G Dxy)/dx * df/dy
-					coef = -1 / G[ix][iy] * (
-							(Dxy[ix+1][iy] * G[ix+1][iy] - Dxy[ix][iy] * G[ix][iy]) / (x[ix+1][iy] - x[ix][iy]) +
-							(Dxy[ix][iy] * G[ix][iy] - Dxy[ix-1][iy] * G[ix-1][iy]) / (x[ix][iy] - x[ix-1][iy]))/2;
-
-					coef = coef / 2;
-					//if (coef < 0) {
-						id = matr_A.index1d(ix, iy+1) - in;
-						matr_A[id][in] += +coef / (y[ix][iy+1] - y[ix][iy]);
-
-						id = matr_A.index1d(ix, iy) - in;
-						matr_A[id][in] += -coef / (y[ix][iy+1] - y[ix][iy]);
-					//} else {
-						id = matr_A.index1d(ix, iy) - in;
-						matr_A[id][in] += +coef / (y[ix][iy] - y[ix][iy-1]);
-
-						id = matr_A.index1d(ix, iy-1) - in;
-						matr_A[id][in] += -coef / (y[ix][iy] - y[ix][iy-1]);
-					//}
-
-					// -1/G * d(G Dyx)/dy * df/dx
-					coef = -1 / G[ix][iy] * (
-							(Dyx[ix][iy+1] * G[ix][iy+1] - Dyx[ix][iy] * G[ix][iy]) / (y[ix][iy+1] - y[ix][iy]) +
-							(Dyx[ix][iy] * G[ix][iy] - Dyx[ix][iy-1] * G[ix][iy-1]) / (y[ix][iy] - y[ix][iy-1]))/2;
-
-					coef = coef / 2;
-					//if (coef < 0) {
-						id = matr_A.index1d(ix+1, iy) - in;
-						matr_A[id][in] += +coef / (x[ix+1][iy] - x[ix][iy]);
-
-						id = matr_A.index1d(ix, iy) - in;
-						matr_A[id][in] += -coef / (x[ix+1][iy] - x[ix][iy]);
-					//} else {
-						id = matr_A.index1d(ix, iy) - in;
-						matr_A[id][in] += +coef / (x[ix][iy] - x[ix-1][iy]);
-
-						id = matr_A.index1d(ix-1, iy) - in;
-						matr_A[id][in] += -coef / (x[ix][iy] - x[ix-1][iy]);
-					//}
-
-				}
-			}
-		}
-	}
-	// Output::echo("recalculated.\n");
-
-	// save the time of matrix change
-	matr_A.change_ind = clock();
-	matr_B.change_ind = clock();
-	matr_C.change_ind = clock();
-
-	return true;
-}
-/**
-* \brief THIS FUNCTION IS CURRENTLY NOT BEING USED
-*/
-bool MakeModelMatrix_2D_ADI2_y(CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-		Matrix2D<double> &x, Matrix2D<double> &y,
-		int x_size, int y_size,
-		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
-		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-		Matrix2D<double> &G, double dt) 
-{
-	// Make diagonals to be equal to zero
-	DiagMatrix::iterator it;
-	for (it = matr_A.begin(); it != matr_A.end(); it++)	it->second = 0;
-	for (it = matr_B.begin(); it != matr_B.end(); it++)	it->second = 0;
-	for (it = matr_C.begin(); it != matr_C.end(); it++)	it->second = 0;
-
-	Matrix2D<double> Coef1(x_size, y_size), Coef2(x_size, y_size);
-	Coef1 = 1; Coef2 = 1;
-
-	// create a new model matrix
-	// (f^{t+1} - f^{t})/dt = L1(f^{t+1}) + L2(f^{t+1}) + L3(f^{t+1})[main equation, losses are calculated separately]
-	// L1, L2, L3 - diffusion operators
-	//  + need to add there the equations for boundary conditions also
-	double dh;
-	int ix, iy, in, id;
-	double coef;
-	for (ix = 0; ix < x_size; ix++) {
-		for (iy = 0; iy < y_size; iy++) {
-			// calculating current line number (in)
-			in = matr_A.index1d(iy, ix);
-
-			// Bboundary conditions
-			if (ix == 0 && x_size >= 3) {
-
-				matr_C[0][in] = x_LBC[iy];
-				id = matr_A.index1d(iy, ix + 1) - in;
-				dh = x[ix + 1][iy] - x[ix][iy];
-				AddBoundary(matr_A, x_LBC_type, in, id, dh);
-
-			} else if (ix == x_size - 1 && x_size >= 3) {
-
-				matr_C[0][in] = x_UBC[iy];
-				id = matr_A.index1d(iy, ix - 1) - in;
-				dh = x[ix][iy] - x[ix - 1][iy];
-				AddBoundary(matr_A, x_UBC_type, in, id, dh);
-
-			} else if (iy == 0 && y_size >= 3) {
-
-				matr_C[0][in] = y_LBC[ix];
-				id = matr_A.index1d(iy + 1, ix) - in;
-				dh = y[ix][iy + 1] - y[ix][iy];
-				AddBoundary(matr_A, y_LBC_type, in, id, dh);
-
-			} else if (iy == y_size - 1 && y_size >= 3) {
-
-				matr_C[0][in] = y_UBC[ix];
-				id = matr_A.index1d(iy - 1, ix) - in;
-				dh = y[ix][iy] - y[ix][iy - 1];
-				AddBoundary(matr_A, y_UBC_type, in, id, dh);
-
-			} else {
-
-				// now we are sure we are not on a boundary, can do the Fokker-Planck equation approximation in the inner area
-
-				// f^{t+1}/dt
-				matr_A[0][in] += 1.0 / dt;
-				// f^{t}/dt
-				matr_B[0][in] += 1.0 / dt;
-
-				// Dxx
-				if (x_size >= 3) {
-					//SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "x_left", "x_right", x, y, Dxx, G, 0.5);
-					//SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "x_right", "x_left", x, y, Dxx, G, 0.5);
-				}
-
-				// Dyy
-				if (y_size >= 3) {
-					SecondDerivativeApproximation_2D_y(matr_A, ix, iy, "y_left", "y_right", x, y, Dyy, G, -0.5);
-					SecondDerivativeApproximation_2D_y(matr_A, ix, iy, "y_right", "y_left", x, y, Dyy, G, -0.5);
-				}
-
-				// mixed
-				if (x_size >= 3 && y_size >= 3) {
-
-					// mixed terms half implicit-half explicit
-					//explicit part
-					// Dxy d2f/dxy
-					AnySecondDerivativeApproximation_2D_y(matr_B, ix, iy, "y_left", "x_right", x, y, Dxy, Coef2, 0.125);
-					AnySecondDerivativeApproximation_2D_y(matr_B, ix, iy, "y_right", "x_left", x, y, Dxy, Coef2, 0.125);
-					AnySecondDerivativeApproximation_2D_y(matr_B, ix, iy, "y_left", "x_left", x, y, Dxy, Coef2, 0.125);
-					AnySecondDerivativeApproximation_2D_y(matr_B, ix, iy, "y_right", "x_right", x, y, Dxy, Coef2, 0.125);
-					// Dyx d2f/dyx
-					AnySecondDerivativeApproximation_2D_y(matr_B, ix, iy, "x_left", "y_right", x, y, Dyx, Coef2, 0.125);
-					AnySecondDerivativeApproximation_2D_y(matr_B, ix, iy, "x_right", "y_left", x, y, Dyx, Coef2, 0.125);
-					AnySecondDerivativeApproximation_2D_y(matr_B, ix, iy, "x_left", "y_left", x, y, Dyx, Coef2, 0.125);
-					AnySecondDerivativeApproximation_2D_y(matr_B, ix, iy, "x_right", "y_right", x, y, Dyx, Coef2, 0.125);
-
-
-					// Implicit part (first derivatives)
-					// -1/G * d(G Dxy)/dx * df/dy
-					coef = -1 / G[ix][iy] * (
-							(Dxy[ix+1][iy] * G[ix+1][iy] - Dxy[ix][iy] * G[ix][iy]) / (x[ix+1][iy] - x[ix][iy]) +
-							(Dxy[ix][iy] * G[ix][iy] - Dxy[ix-1][iy] * G[ix-1][iy]) / (x[ix][iy] - x[ix-1][iy]))/2;
-
-					coef = coef / 2;
-					//if (coef < 0) {
-						id = matr_A.index1d(iy+1, ix) - in;
-						matr_A[id][in] += +coef / (y[ix][iy+1] - y[ix][iy]);
-
-						id = matr_A.index1d(iy, ix) - in;
-						matr_A[id][in] += -coef / (y[ix][iy+1] - y[ix][iy]);
-					//} else {
-						id = matr_A.index1d(iy, ix) - in;
-						matr_A[id][in] += +coef / (y[ix][iy] - y[ix][iy-1]);
-
-						id = matr_A.index1d(iy-1, ix) - in;
-						matr_A[id][in] += -coef / (y[ix][iy] - y[ix][iy-1]);
-					//}
-
-					// -1/G * d(G Dyx)/dy * df/dx
-					coef = -1 / G[ix][iy] * (
-							(Dyx[ix][iy+1] * G[ix][iy+1] - Dyx[ix][iy] * G[ix][iy]) / (y[ix][iy+1] - y[ix][iy]) +
-							(Dyx[ix][iy] * G[ix][iy] - Dyx[ix][iy-1] * G[ix][iy-1]) / (y[ix][iy] - y[ix][iy-1]))/2;
-
-					coef = coef / 2;
-					//if (coef < 0) {
-						id = matr_A.index1d(iy, ix+1) - in;
-						matr_A[id][in] += +coef / (x[ix+1][iy] - x[ix][iy]);
-
-						id = matr_A.index1d(iy, ix) - in;
-						matr_A[id][in] += -coef / (x[ix+1][iy] - x[ix][iy]);
-					//} else {
-						id = matr_A.index1d(iy, ix) - in;
-						matr_A[id][in] += +coef / (x[ix][iy] - x[ix-1][iy]);
-
-						id = matr_A.index1d(iy, ix-1) - in;
-						matr_A[id][in] += -coef / (x[ix][iy] - x[ix-1][iy]);
-					//}
-
-				}
-			}
-		}
-	}
-	// Output::echo("recalculated.\n");
-
-	// save the time of matrix change
-	matr_A.change_ind = clock();
-	matr_B.change_ind = clock();
-	matr_C.change_ind = clock();
-
-	return true;
-}
-
-/**
-* \brief THIS FUNCTION IS CURRENTLY NOT BEING USED
-*/
-bool MakeModelMatrix_2D_ADI3_x(CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-		Matrix2D<double> &x, Matrix2D<double> &y,
-		int x_size, int y_size,
-		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
-		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-		Matrix2D<double> &G, double dt) {
-
-	// Make diagonals to be equal to zero
-	DiagMatrix::iterator it;
-	for (it = matr_A.begin(); it != matr_A.end(); it++)	it->second = 0;
-	for (it = matr_B.begin(); it != matr_B.end(); it++)	it->second = 0;
-	for (it = matr_C.begin(); it != matr_C.end(); it++)	it->second = 0;
-
-	// create a new model matrix
-	// (f^{t+1} - f^{t})/dt = L1(f^{t+1}) + L2(f^{t+1}) + L3(f^{t+1})[main equation, losses are calculated separately]
-	// L1, L2, L3 - diffusion operators
-	//  + need to add there the equations for boundary conditions also
-	// double dh;
-	// int id;
-	int ix, iy, in;
-	for (ix = 0; ix < x_size; ix++) {
-		for (iy = 0; iy < y_size; iy++) {
-			// calculating current line number (in)
-			in = matr_A.index1d(ix, iy);
-
-			// Bboundary conditions
-/*			if (ix == 0 && x_size >= 3) {
-
-				matr_C[0][in] = x_LBC[iy];
-				id = matr_A.index1d(ix + 1, iy) - in;
-				dh = x[ix + 1][iy] - x[ix][iy];
-				AddBoundary(matr_A, x_LBC_type, in, id, dh);
-
-			} else if (ix == x_size - 1 && x_size >= 3) {
-
-				matr_C[0][in] = x_UBC[iy];
-				id = matr_A.index1d(ix - 1, iy) - in;
-				dh = x[ix][iy] - x[ix - 1][iy];
-				AddBoundary(matr_A, x_UBC_type, in, id, dh);
-
-			} else if (iy == 0 && y_size >= 3) {
-
-				matr_C[0][in] = y_LBC[ix];
-				id = matr_A.index1d(ix, iy + 1) - in;
-				dh = y[ix][iy + 1] - y[ix][iy];
-				AddBoundary(matr_A, y_LBC_type, in, id, dh);
-
-			} else if (iy == y_size - 1 && y_size >= 3) {
-
-				matr_C[0][in] = y_UBC[ix];
-				id = matr_A.index1d(ix, iy - 1) - in;
-				dh = y[ix][iy] - y[ix][iy - 1];
-				AddBoundary(matr_A, y_UBC_type, in, id, dh);
-*/
-			if ( (ix == 0 && x_size >= 3)
-					|| (ix == x_size - 1 && x_size >= 3)
-					|| (iy == 0 && y_size >= 3)
-					|| (iy == y_size - 1 && y_size >= 3)) {
-
-				// if at the boundary
-				// add boundary conditions
-				AddBoundaries_2D(
-					matr_A, matr_B, matr_C,
-					x, y,
-					x_size, y_size,
-					x_LBC, x_UBC,
-					//psd.ySlice(0), psd.ySlice(y.size_y-1), //y_LBC, y_UBC,
-					y_LBC, y_UBC,
-					x_LBC_type, x_UBC_type,
-					//"BCT_CONSTANT_VALUE", "BCT_CONSTANT_VALUE", //y_LBC_type, y_UBC_type,
-					y_LBC_type, y_UBC_type,
-					ix, iy, in);
-
-			} else {
-
-				// now we are sure we are not on a boundary, can do the Fokker-Planck equation approximation in the inner area
-
-				// f^{t+1}/dt
-				matr_A[0][in] += 1.0 / dt;
-				// f^{t}/dt
-				matr_B[0][in] += 1.0 / dt;
-
-				// Dxx
-				if (x_size >= 3) {
-					SecondDerivativeApproximation_2D(matr_A, ix, iy, "x_left", "x_right", x, y, Dxx, G, -0.25);
-					SecondDerivativeApproximation_2D(matr_A, ix, iy, "x_right", "x_left", x, y, Dxx, G, -0.25);
-
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "x_left", "x_right", x, y, Dxx, G, 0.25);
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "x_right", "x_left", x, y, Dxx, G, 0.25);
-				}
-
-				// Dyy
-				if (y_size >= 3) {
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "y_left", "y_right", x, y, Dyy, G, 0.5);
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "y_right", "y_left", x, y, Dyy, G, 0.5);
-				}
-
-				// mixed
-				if (x_size >= 3 && y_size >= 3) {
-
-					// d/dx Dxy d/dy f
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "y_left", "x_right", x, y, Dxy, G, 0.25);
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "y_right", "x_left", x, y, Dxy, G, 0.25);
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "y_left", "x_left", x, y, Dxy, G, 0.25);
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "y_right", "x_right", x, y, Dxy, G, 0.25);
-
-					// d/dy Dyx d/dx f
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "x_left", "y_right", x, y, Dyx, G, 0.25);
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "x_right", "y_left", x, y, Dyx, G, 0.25);
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "x_left", "y_left", x, y, Dyx, G, 0.25);
-					SecondDerivativeApproximation_2D(matr_B, ix, iy, "x_right", "y_right", x, y, Dyx, G, 0.25);
-
-				}
-
-			}
-		}
-	}
-	// Output::echo("recalculated.\n");
-
-	// save the time of matrix change
-	matr_A.change_ind = clock();
-	matr_B.change_ind = clock();
-	matr_C.change_ind = clock();
-
-	return true;
-}
-/**
-* \brief THIS FUNCTION IS CURRENTLY NOT BEING USED
-*/
-bool MakeModelMatrix_2D_ADI3_y(CalculationMatrix &matr_A, CalculationMatrix &matr_B, CalculationMatrix &matr_C,
-		Matrix2D<double> &x, Matrix2D<double> &y,
-		int x_size, int y_size,
-		Matrix1D<double> x_LBC, Matrix1D<double> x_UBC,
-		Matrix1D<double> y_LBC, Matrix1D<double> y_UBC,
-		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
-		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
-		Matrix2D<double> &Dxx, Matrix2D<double> &Dyy, Matrix2D<double> &Dxy, Matrix2D<double> &Dyx,
-		Matrix2D<double> &G, double dt) {
-
-	// Make diagonals to be equal to zero
-	DiagMatrix::iterator it;
-	for (it = matr_A.begin(); it != matr_A.end(); it++)	it->second = 0;
-	for (it = matr_B.begin(); it != matr_B.end(); it++)	it->second = 0;
-	for (it = matr_C.begin(); it != matr_C.end(); it++)	it->second = 0;
-
-	// create a new model matrix
-	// (f^{t+1} - f^{t})/dt = L1(f^{t+1}) + L2(f^{t+1}) + L3(f^{t+1})[main equation, losses are calculated separately]
-	// L1, L2, L3 - diffusion operators
-	//  + need to add there the equations for boundary conditions also
-	// double dh;
-	// int id;
-	int ix, iy, in;
-	for (ix = 0; ix < x_size; ix++) {
-		for (iy = 0; iy < y_size; iy++) {
-			// calculating current line number (in)
-			in = matr_A.index1d(iy, ix);
-
-			// Bboundary conditions
-/*			if (ix == 0 && x_size >= 3) {
-
-				matr_C[0][in] = x_LBC[iy];
-				id = matr_A.index1d(iy, ix + 1) - in;
-				dh = x[ix + 1][iy] - x[ix][iy];
-				AddBoundary(matr_A, x_LBC_type, in, id, dh);
-
-			} else if (ix == x_size - 1 && x_size >= 3) {
-
-				matr_C[0][in] = x_UBC[iy];
-				id = matr_A.index1d(iy, ix - 1) - in;
-				dh = x[ix][iy] - x[ix - 1][iy];
-				AddBoundary(matr_A, x_UBC_type, in, id, dh);
-
-			} else if (iy == 0 && y_size >= 3) {
-
-				matr_C[0][in] = y_LBC[ix];
-				id = matr_A.index1d(iy + 1, ix) - in;
-				dh = y[ix][iy + 1] - y[ix][iy];
-				AddBoundary(matr_A, y_LBC_type, in, id, dh);
-
-			} else if (iy == y_size - 1 && y_size >= 3) {
-
-				matr_C[0][in] = y_UBC[ix];
-				id = matr_A.index1d(iy - 1, ix) - in;
-				dh = y[ix][iy] - y[ix][iy - 1];
-				AddBoundary(matr_A, y_UBC_type, in, id, dh);
-				*/
-
-			if ( (ix == 0 && x_size >= 3)
-					|| (ix == x_size - 1 && x_size >= 3)
-					|| (iy == 0 && y_size >= 3)
-					|| (iy == y_size - 1 && y_size >= 3)) {
-
-				// if at the boundary
-				// add boundary conditions
-				AddBoundaries_2D(
-					matr_A, matr_B, matr_C,
-					x, y,
-					x_size, y_size,
-					//psd.xSlice(0), psd.xSlice(x.size_x-1),	//x_LBC, x_UBC,
-					x_LBC, x_UBC,
-					y_LBC, y_UBC,
-					//"BCT_CONSTANT_VALUE", "BCT_CONSTANT_VALUE", //x_LBC_type, x_UBC_type,
-					x_LBC_type, x_UBC_type,
-					y_LBC_type, y_UBC_type,
-					ix, iy, in);
-
-
-			} else {
-
-				// now we are sure we are not on a boundary, can do the Fokker-Planck equation approximation in the inner area
-
-				// f^{t+1}/dt
-				matr_A[0][in] += 1.0 / dt;
-				// f^{t}/dt
-				// !!!!!!!!!!!!!!! matr_B[0][in] += 1.0 / dt;
-
-				// Dxx
-				if (x_size >= 3) {
-					//SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "x_left", "x_right", x, y, Dxx, G, 0.5);
-					//SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "x_right", "x_left", x, y, Dxx, G, 0.5);
-				}
-
-				// Dyy
-				if (y_size >= 3) {
-					SecondDerivativeApproximation_2D_y(matr_A, ix, iy, "y_left", "y_right", x, y, Dyy, G, -0.25);
-					SecondDerivativeApproximation_2D_y(matr_A, ix, iy, "y_right", "y_left", x, y, Dyy, G, -0.25);
-
-					SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "y_left", "y_right", x, y, Dyy, G, -0.25);
-					SecondDerivativeApproximation_2D_y(matr_B, ix, iy, "y_right", "y_left", x, y, Dyy, G, -0.25);
-				}
-
-				// mixed
-				if (x_size >= 3 && y_size >= 3) {
-
-				}
-
-			}
-		}
-	}
-	// Output::echo("recalculated.\n");
-
-	// save the time of matrix change
-	matr_A.change_ind = clock();
-	matr_B.change_ind = clock();
-	matr_C.change_ind = clock();
-
-	return true;
-}
-
-
-/**
- * Lapack inversion.
- *
- * A * X = B - equation
- *
- * LAPACK - Linear Algebra PACKage. For linear algebra methods. Using the lapack library from http://www.netlib.org/lapack/
+ * Lapack solver for general banded matrix equations A * x = rhs
+ * \param A Matrix A as DiagMatrix
+ * \param rhs right-hand side vector, overwritten with solution
  */
-void Lapack(DiagMatrix &A, Matrix1D<double> &B, Matrix1D<double> &X) {
+void Lapack(const DiagMatrix &A, Matrix1D<double> &rhs) {
 
-	// Save A and B to check the solution at the end
-	Matrix1D<double> B_res;
-	B_res = B;
-
-	// iterator for diagonals of the diagonal matrix
-	DiagMatrix::iterator it;
-
-	long m_size = A[0].size_q1;
-	it = A.begin();
-	long kl = -it->first; // first diagonal
-	it = A.end();
-	it--;
-	long ku = it->first; // last diagonal
-	long int NRHS(1), LDAB(2 * kl + ku + 1), *IPIV(new long[m_size]), LDB(B.size_q1), INFO(1);
-
-	double *Array = new double[(kl+ku+kl+1)*m_size];
-	double **newmat = new double*[m_size];
-	for(int i=0; i<m_size; i++){ newmat[i] = &Array[i*(kl+ku+kl+1)]; }
-	for (int i = 0; i < (kl+ku+kl+1)*m_size; i++) Array[i] = 0;
-
-	int in, j;
-	for (in = 0; in < m_size; in++) {
-		for (it = A.begin(); it != A.end(); it++) {
-			// Check if the element at line (in) and diagonal (it->first) is inside the matrix.
-			j = in + it->first; // column number
-			//if (in + it->first >= 0 && in + it->first < m_size) {
-			if (j >= 0 && j < m_size) {
-				// converting matrix, stored as diagonals, into lapack matrix (also diagonal)
-				newmat[j][ku+kl-j+in] = it->second[in];
-			}
-		}
-	}
-
-	/*ofstream output("Lap_mat.dat");
-	for (i = 0; i < m_size; i++) {
-		for (j = 0; j < (kl+ku+kl+1); j++) {
-			output << newmat[i][j] << "\t";
-		}
-		output << endl;
-	}
-	output.close();*/
-
-	dgbsv_(&m_size, &kl, &ku, &NRHS, Array, &LDAB, IPIV, &B[0], &LDB, &INFO);
-
-	if (INFO != 0) {
-		printf("Lapack inversion Error!!! INFO = %ld.\n", INFO);
+	long mat_rows = (long)A.at(0).size_q1;
+	long rhs_rows = (long)rhs.size_q1;
+	if(mat_rows != rhs_rows) {
+		std::cerr << "Number of rows in matrix A must be equal to elements of rhs, but was " << mat_rows << " and " << rhs_rows << "!\n";
 		exit(EXIT_FAILURE);
 	}
 
-	// check
-	// "A*X - B" should be zero
-	// X is stored in B after Lapack solution
-	// and we stored B in B_res previousely
-	// So, it's "B_res - A*B" should be zero
-	// for (in = 0; in < m_size; in++) {
-	// 	for (it = A.begin(); it != A.end(); it++) {
-	// 		if (in + it->first >= 0 && in + it->first < m_size) {
-	// 			//cout << B_res[in] << "-=" << it->second[in] << "*" << B[in] << endl;
-	// 			B_res[in] -= it->second[in] * B[in + it->first];
-	// 		}
+	long kl = (long)(-A.cbegin()->first); // (absolute value of) lowest off-diagonal index
+	long ku = (long)(A.crbegin()->first); // highest off-diagonal index
+	long mat_cols = 2 * kl + ku + 1;
+	long rhs_cols = 1;
+	
+	long* ipiv = new long[mat_rows]; // lapack array to store permutation indices
+	long info = 1; // lapack error code
+
+	double *flat_matrix = new double[mat_cols * mat_rows];
+	for (int i = 0; i < mat_cols * mat_rows; i++) {
+		flat_matrix[i] = 0;
+	}
+
+	// rearrange CalculationMatrix A to Lapack's general banded matrix format 
+	for (const auto& [idx, diagonal] : A) {
+		int diag_start = std::max(0, -idx);
+		int diag_end = std::min(mat_rows, mat_rows - idx);
+		int offset = ku + kl + idx * (mat_cols - 1);
+		for (int in = diag_start; in < diag_end; in++) {
+			flat_matrix[in * mat_cols + offset] = diagonal[in];
+		}
+	}
+
+	// std::ofstream output("Lap_mat.dat");
+	// for (int i = 0; i < mat_rows; i++) {
+	// 	for (int j = 0; j < mat_cols; j++) {
+	// 		output << flat_matrix[i * mat_cols + j] << '\t';
 	// 	}
+	// 	output << std::endl;
 	// }
+	// output.close();
+	
+	// Lapack's double-precision general banded (dgb) matrix solver
+	dgbsv_(&mat_rows, &kl, &ku, &rhs_cols, flat_matrix, &mat_cols, ipiv, &rhs[0], &rhs_rows, &info);
 
-	// // calculate max error
-	// double max = 0;
-	// for (int i = 0; i < m_size; i++) {
-	// 	max = (max > fabs(B_res(i))) ? max : B_res(i);
-	// }
-
-/*	if(max>1) {
-		printf(" Max error: %e.\n", max);
+	if (info != 0) {
+		printf("Lapack inversion Error! INFO = %ld.\n", info);
 		exit(EXIT_FAILURE);
-	}*/
+	}
 
-	delete IPIV;
-	delete Array;
-	delete newmat;
+	delete[] ipiv;
+	delete[] flat_matrix;
 }
 
 /**
@@ -1445,8 +622,7 @@ void AnySecondDerivativeApproximation_2D_y(CalculationMatrix &matr_A,
 * \param u[]	- array, result
 * \param n	- size of the matrix
 */
-bool tridag(double a[], double b[], double c[], double r[], double u[], long n) {
-	long j;
+bool tridag(double a[], double b[], double c[], double r[], double u[], size_t n) {
 	double bet, *gam;
 	gam = new double[n];
 
@@ -1458,9 +634,9 @@ bool tridag(double a[], double b[], double c[], double r[], double u[], long n) 
 
 	u[0]=r[0]/(bet=b[0]);
 
-	for (j=1;j<=n-1;j++) {
-		gam[j]=c[j-1]/bet;
-		bet=b[j]-a[j]*gam[j];
+	for (size_t j = 1; j <= n - 1; j++) {
+		gam[j] = c[j - 1] / bet;
+		bet = b[j] - a[j] * gam[j];
 
 		if (bet == 0.0) {
 			printf("TRIDAG_MATRIX_ERROR: tridag: error, bet = 0");
@@ -1468,13 +644,13 @@ bool tridag(double a[], double b[], double c[], double r[], double u[], long n) 
 			//return -1;
 		}
 
-		u[j]=(r[j]-a[j]*u[j-1])/bet;
+		u[j] = (r[j] - a[j] * u[j - 1]) / bet;
 	}
 
-	for (j=(n-2);j>=0;j--)
-		u[j] -= gam[j+1]*u[j+1];
-
-	delete gam;
+	for (size_t j = (n - 1); j >= 1; j--) {
+		u[j - 1] -= gam[j] * u[j];
+	}
+	delete[] gam;
 
 	return true;
 }

@@ -79,8 +79,8 @@ public:
 	//void readFromFile(std::string filename, const MatrixND grid_w, const MatrixND grid_x, const MatrixND grid_y); ///< Load matrix to a file
 	//void readFromFile(std::string filename, const MatrixND grid_w, const MatrixND grid_x, const MatrixND grid_y, const MatrixND grid_z); ///< Load matrix to a file
 
-	bool readFromIniFile(std::string ini_filename, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
-	bool readFromString(std::string file_line_string, const MatrixND &Q1, const MatrixND &Q2, const MatrixND &Q3, const MatrixND &Q4);
+	bool readFromIniFile(const std::string& ini_filename, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
+	bool readFromString(const std::string& file_line_string, const MatrixND &Q1, const MatrixND &Q2, const MatrixND &Q3, const MatrixND &Q4);
 	bool update(double time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
 
 };

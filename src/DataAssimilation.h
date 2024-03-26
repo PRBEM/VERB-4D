@@ -43,15 +43,19 @@ class Convection2DAnalysisCovariances {
 };
 class DataAssimilationManagerConvection {
    public:
-    DataAssimilationManagerConvection(const std::string& parametersFile,
-                                      double time_start, double time_end, const Matrix2D<double>& V,
-                                      const Matrix2D<double>& K, int P_size, int R_size, std::string debug_output_folder);
+    DataAssimilationManagerConvection(
+        const std::string& parametersFile,
+        double time_start, double time_end, const Matrix2D<double>& V,
+        const Matrix2D<double>& K, int P_size, int R_size, const std::string& debug_output_folder
+    );
 
-    void assimilate(double time, Matrix4D<double>& PSD,
-                    const Matrix4D<double>& P, const Matrix4D<double>& R,
-                    const Matrix4D<double>& VP, const Matrix4D<double>& VR,
-                    const Matrix4D<double>& Loss,
-                    double dt);
+    void assimilate(
+        double time, Matrix4D<double>& PSD,
+        const Matrix4D<double>& P, const Matrix4D<double>& R,
+        const Matrix4D<double>& VP, const Matrix4D<double>& VR,
+        const Matrix4D<double>& Loss,
+        double dt
+    );
 
     Convection2DAnalysisCovariances _analysisCovarianceConvection;
 
