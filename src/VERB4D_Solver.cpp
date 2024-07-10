@@ -164,7 +164,7 @@ using namespace std;
 #define min_V 1e-10
 #define min_Dxx 1e-10
 
-void write_PSD_output(const std::string &io_method, const std::string &PSD_filename, const double &time, const Matrix4D<double> PSD)
+void write_PSD_output(const std::string &io_method, const std::string &PSD_filename, const double &time, const Matrix4D<double> PSD, const std::string &PSD_time_to_lst, const std::string &output_folder)
 {
     std::ostringstream time_string;
     time_string.precision(5);
@@ -173,6 +173,11 @@ void write_PSD_output(const std::string &io_method, const std::string &PSD_filen
     time_string << time;
 
     PSD.writeToAnyFile(PSD_filename, io_method, time_string.str());
+    if (PSD_time_to_lst == "true")
+    {        
+        PSD.writeToLstFile(PSD_filename, io_method, time_string.str(), output_folder);
+    }
+
 };
 
 int main(int argc, char *argv[])
@@ -262,6 +267,8 @@ int main(int argc, char *argv[])
     std::string run_radial_diffusion = "true";
     std::string run_local_diffusion = "true";
     std::string positive_PSD = "false";
+    std::string PSD0_io_method = "ascii";
+    std::string PSD_time_to_lst = "false";
 
     bool initialLoad = false; // Check the load of the initial files
 
@@ -270,7 +277,7 @@ int main(int argc, char *argv[])
     initialLoad = ReadInitialData(
         inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
         inversion_method, include_boundary, Vl_BC_from_convection, Vu_BC_from_convection, io_method, run_remapping, run_convection,
-        run_radial_diffusion, run_local_diffusion, positive_PSD,
+        run_radial_diffusion, run_local_diffusion, positive_PSD, PSD0_io_method, PSD_time_to_lst,
         PSD, P, R, V, K, L,
         P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
         Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
@@ -305,7 +312,10 @@ int main(int argc, char *argv[])
     Logger::message << "Total time " << time_total << ". Time step " << dt << " (" << it_total << " steps)." << std::endl;
     Logger::message << "Output each " << output_step << " step. " << std::endl;
 
-    PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
+    if (PSD0_io_method == "ascii")
+        PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
+    else if (PSD0_io_method == "binary")
+        PSD.writeToBinaryFile(outputFolder + "PSD0.pltb");
 
     // Output zero step - writing PSD_0 file
     std::future<void> output_writer;
@@ -316,7 +326,7 @@ int main(int argc, char *argv[])
 
     PSD_filename << outputFolder << "PSD_" << std::setw(5) << std::setfill('0') << 0;
     Logger::message << "Writing results: " << PSD_filename.str() << std::endl;
-    output_writer = std::async(std::launch::async, write_PSD_output, io_method, PSD_filename.str(), time_first, PSD);
+    output_writer = std::async(std::launch::async, write_PSD_output, io_method, PSD_filename.str(), time_first, PSD, PSD_time_to_lst, outputFolder);
 
     // When to apply loss term:
     // It's better to apply it during pitch-angle diffusion, unless we don't have any pitch-angle diffusion
@@ -938,7 +948,7 @@ int main(int argc, char *argv[])
             Logger::message << std::endl
                             << "Writing results: " << PSD_filename.str() << std::endl;
 
-            output_writer = std::async(std::launch::async, write_PSD_output, io_method, PSD_filename.str(), time_current, PSD);
+            output_writer = std::async(std::launch::async, write_PSD_output, io_method, PSD_filename.str(), time_current, PSD, PSD_time_to_lst, outputFolder);
         }
     }
 #ifdef MKL_FOUND

@@ -453,6 +453,9 @@ public:
     virtual void readFromAnyFile(const std::string& filename, const std::string& io_method);
     virtual void readFromAnyFile(const std::string& filename, const std::string& io_method, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z);
 
+	virtual std::string getExtByIoMethod(const std::string& io_method) const;
+	virtual void writeToLstFile(const std::string& filename, const std::string& io_method, const std::string& info, const std::string& output_folder) const;
+
 	// Some other stuff
 	std::string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
 
