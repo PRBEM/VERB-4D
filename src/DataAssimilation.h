@@ -60,9 +60,9 @@ class DataAssimilationManagerConvection {
     Convection2DAnalysisCovariances _analysisCovarianceConvection;
 
    private:
+    std::string _debug_output_folder;
     double _timeStart;
     double _timeEnd;
-    std::string _debug_output_folder;
     Matrix2D<double> _V;
     Matrix2D<double> _K;
 

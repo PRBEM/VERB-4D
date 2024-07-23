@@ -57,8 +57,7 @@ namespace data_assimilation::internal {
 
     double interp2d_four_corners(
         const Matrix2D<double>& V_in, const Matrix2D<double>& K_in,
-        const Matrix2D<double>& PSD_in, double V_out, double K_out,
-        bool use_badval
+        const Matrix2D<double>& PSD_in, double V_out, double K_out
     );
 
    std::vector<std::vector<data_assimilation::Observations>> interpolate(

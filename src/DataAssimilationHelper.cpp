@@ -20,7 +20,7 @@ namespace internal = data_assimilation::internal;
 Matrix2D<double> internal::getModelMatrixConvection2DNoStabilityCheck(
     const Matrix2D<double>& VP,
     const Matrix2D<double>& VR,
-    const Matrix2D<double>& Loss,
+    [[maybe_unused]] const Matrix2D<double>& Loss,
     double timeStep,
     double dP,
     double dR) {
@@ -97,9 +97,6 @@ std::pair<int, double> internal::splitTimeStepCourantCondition(
     const Matrix2D<double>& VR,
     double dP,
     double dR) {
-    auto compareAbs = [](double a, double b) {
-        return std::abs(a) < std::abs(b);
-    };
 
     Matrix2D<double> c_p = VP * timeStep / dP;
     Matrix2D<double> c_r = VR * timeStep / dR;
@@ -156,7 +153,7 @@ double internal::conditionalMean(
 
     double result{0.};
     int counter{0};
-    for (auto i = 0; i < a.size_q1; ++i) {
+    for (size_t i = 0; i < a.size_q1; ++i) {
         if (flag[i] && !std::isnan(a[i])) {
             result += a[i];
             ++counter;
@@ -346,8 +343,7 @@ data_assimilation::ProcessedMatFileData internal::cat(const std::vector<Processe
 
 double internal::interp2d_four_corners(
     const Matrix2D<double>& V_in, const Matrix2D<double>& K_in,
-    const Matrix2D<double>& PSD_in, double V_out, double K_out,
-    bool use_badval) {
+    const Matrix2D<double>& PSD_in, double V_out, double K_out) {
     /*
     We assume K_in to vary only in the the second dimension. Find the two K values in K_in that neighbour
     the requested K_out value. For each of those two K values find the two V values that neighbour the
@@ -420,7 +416,7 @@ double internal::interp2d_four_corners(
     double v_lower = -std::numeric_limits<double>::infinity();
     double v_upper = std::numeric_limits<double>::infinity();
   
-    for (int iV = 0; iV < nV; iV++) {
+    for (size_t iV = 0; iV < nV; iV++) {
         if (V_in[iV][lower_k_neighbour] <= V_out && V_in[iV][lower_k_neighbour] > v_lower) {
             v_lower = V_in[iV][lower_k_neighbour];
             lower_v_neighbour = iV;
@@ -490,8 +486,8 @@ std::vector<std::vector<data_assimilation::Observations>> internal::interpolate(
             R[counter] = instrumentData.R[it];
             P[counter] = fmod(instrumentData.MLT[it] + 12., 24.) * M_PI / 12.;
             counter++;
-            for (auto iV = 0; iV < instrumentData.V.size_q2; ++iV) {
-                for (auto iK = 0; iK < instrumentData.K.size_q2; ++iK) {
+            for (size_t iV = 0; iV < instrumentData.V.size_q2; ++iV) {
+                for (size_t iK = 0; iK < instrumentData.K.size_q2; ++iK) {
                     K_in.back()[it][iV][iK] = instrumentData.K[it][iK];
                 }
             }
@@ -500,8 +496,8 @@ std::vector<std::vector<data_assimilation::Observations>> internal::interpolate(
     std::vector<std::vector<Observations>> result(V_size, std::vector<Observations>(K_size));
     // int counter = 0;
 #pragma omp parallel for schedule(dynamic, 1) collapse(2)
-    for (auto iV = 0; iV < V_size; ++iV) {
-        for (auto iK = 0; iK < K_size; ++iK) {
+    for (size_t iV = 0; iV < V_size; ++iV) {
+        for (size_t iK = 0; iK < K_size; ++iK) {
             Observations& obs = result[iV][iK];
             obs.R = R;
             obs.P = P;
@@ -509,14 +505,14 @@ std::vector<std::vector<data_assimilation::Observations>> internal::interpolate(
             int counter = 0;
             for (size_t instrumentIndex = 0; instrumentIndex < data.size(); instrumentIndex++) {
                 auto& instrumentData = data[instrumentIndex];
-                for (auto it = 0; it < instrumentData.MLT.size_q1; ++it) {
+                for (size_t it = 0; it < instrumentData.MLT.size_q1; ++it) {
                     auto PSD_in = instrumentData.PSD.xSlice(it);
                     obs.PSD[counter++] = pow(10., interp2d_four_corners(
                         log10(instrumentData.V.xSlice(it)),
                         K_in[instrumentIndex].xSlice(it),
                         log10(PSD_in),
                         log10(V_grid[iV][iK]),
-                        K_grid[iV][iK], true
+                        K_grid[iV][iK]
                     ));
                 }
             }

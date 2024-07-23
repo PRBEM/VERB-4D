@@ -376,6 +376,13 @@ inline Matrix1D<T>& Matrix1D<T>::operator*= (const T Val) {
 	return *this;
 }
 
+template<>
+inline Matrix1D<bool>& Matrix1D<bool>::operator*= (const bool Val) {
+	for (size_t i1 = 0; i1 < size_q1; i1++)
+		matrix_array[i1] = matrix_array[i1] && Val;
+	return *this;
+}
+
 /**
 * Division by a value. Result is stored into applied matrix (left hand side matrix)
 */
@@ -415,6 +422,14 @@ inline Matrix1D<T> Matrix1D<T>::operator* (const T Val) const {
 	return Tmp;
 }
 
+template<>
+inline Matrix1D<bool> Matrix1D<bool>::operator* (const bool Val) const {
+	Matrix1D<bool> Tmp(*this);
+	for (size_t i1 = 0; i1 < size_q1; i1++)
+		Tmp[i1] = matrix_array[i1] && Val;
+	return Tmp;
+}
+
 /**
 * Divide a matrix to a value Val.
 * Return new instance of class Matrix.#define DEBUG_MODE
@@ -442,10 +457,25 @@ inline Matrix1D<T> Matrix1D<T>::times (const Matrix1D<T> &M) const {
 	return Tmp;
 }
 
+template<>
+inline Matrix1D<bool> Matrix1D<bool>::times (const Matrix1D<bool> &M) const {
+	Matrix1D<bool> Tmp(size_q1);
+	for (size_t i1 = 0; i1 < size_q1; i1++)
+		Tmp[i1] = matrix_array[i1] && M.matrix_array[i1];
+	return Tmp;
+}
+
 template<class T>
 Matrix1D<T>& Matrix1D<T>::times_equal (const Matrix1D<T> &M) {
 	for (size_t i = 0; i < num_elements; i++)
 		plane_array[i] *= M.plane_array[i];
+	return *this;
+}
+
+template<>
+Matrix1D<bool>& Matrix1D<bool>::times_equal (const Matrix1D<bool> &M) {
+	for (size_t i = 0; i < num_elements; i++)
+		plane_array[i] = plane_array[i] && M.plane_array[i];
 	return *this;
 }
 /**
@@ -912,7 +942,7 @@ void Matrix1D<T>::readFromFile(const std::string& filename, const Matrix1D<T>& g
 				input >> loaded_q1;
 				// check if grid is the same
 				if (fabs(log10(loaded_q1) - log10(grid_q1[i1])) > err) {
-					printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch.\nLoaded: %e\nGrid: %e\n", filename.c_str(), loaded_q1, grid_q1[i1]);
+					printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch.\nLoaded: %e\nGrid: %e\n", filename.c_str(), loaded_q1, (double) grid_q1[i1]);
 					exit(EXIT_FAILURE);
 				} else {
 					input >> matrix_array[i1];
@@ -1200,7 +1230,7 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 	//sets the matrix array to be equal to an array of doubles
 	for (x = 0; x < size_q1; x++) {
 		if (fabs(log10(PtrX[x]) - log10(grid_x[x])) > err ) {
-		 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu].\nLoaded: %e\nGrid: %e\n", file.c_str(), x, PtrX[x], grid_x[x]);
+		 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu].\nLoaded: %e\nGrid: %e\n", file.c_str(), x, PtrX[x], (double) grid_x[x]);
 					//printf("grid error \n");
 					exit(EXIT_FAILURE);
 		}
@@ -1493,6 +1523,14 @@ inline Matrix2D<T>& Matrix2D<T>::operator*= (const T Val) {
 	return *this;
 }
 
+template<>
+inline Matrix2D<bool>& Matrix2D<bool>::operator*= (const bool Val) {
+	for(size_t i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = plane_array[i] && Val;
+	}
+	return *this;
+}
 
 /**
 * Multiply matrix to Val.
@@ -1505,6 +1543,16 @@ inline Matrix2D<T> Matrix2D<T>::operator* (const T Val) const {
 	for (size_t i = 0; i < num_elements; i++)
 	{
 		Tmp.plane_array[i] = plane_array[i] * Val;
+	}
+	return Tmp;
+}
+
+template<>
+inline Matrix2D<bool> Matrix2D<bool>::operator* (const bool Val) const {
+	Matrix2D<bool> Tmp(size_q1, size_q2);
+	for (size_t i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] && Val;
 	}
 	return Tmp;
 }
@@ -1554,6 +1602,15 @@ inline Matrix2D<T> Matrix2D<T>::times (const Matrix2D<T> &M) const {
 	return Tmp;
 }
 
+template<>
+inline Matrix2D<bool> Matrix2D<bool>::times (const Matrix2D<bool> &M) const {
+	Matrix2D<bool> Tmp(size_q1, size_q2);
+	for (size_t i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] && M.plane_array[i];
+	}
+	return Tmp;
+}
 
 /**
 * Return maximum value of the 2d matrix.
@@ -2111,7 +2168,7 @@ void Matrix2D<T>::readFromFile(const std::string& filename, const Matrix2D<T>& g
 					input >> loaded_x >> loaded_y;
 					// check if grid is the same
 					if (fabs(log10(loaded_x) - log10(grid_x[i1][i2])) > err || fabs(log10(loaded_y) - log10(grid_y[i1][i2])) > err) {
-						printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch.\nLoaded: %e, %e\nGrid: %e, %e\n", filename.c_str(), loaded_x, loaded_y, grid_x[i1][i2], grid_y[i1][i2]);
+						printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch.\nLoaded: %e, %e\nGrid: %e, %e\n", filename.c_str(), loaded_x, loaded_y, (double) grid_x[i1][i2], (double) grid_y[i1][i2]);
 						exit(EXIT_FAILURE);
 					} else {
 						input >> matrix_array[i1][i2];
@@ -2416,7 +2473,7 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 	for (x = 0; x < size_q1; x++) {
 		for (y = 0; y < size_q2; y++) {
 			if (fabs(log10(PtrX[y*(size_q1) +  x]) - log10(grid_x[x][y])) > err || fabs(log10(PtrY[ y*(size_q1) +  x]) - log10(grid_y[x][y])) > err) {
-			 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu].\nLoaded: %e, %e\nGrid: %e, %e\n", file.c_str(), x, y, PtrX[y*(size_q1) +  x],PtrY[ y*(size_q1) +  x], grid_x[x][y], grid_y[x][y]);
+			 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu].\nLoaded: %e, %e\nGrid: %e, %e\n", file.c_str(), x, y, PtrX[y*(size_q1) +  x],PtrY[ y*(size_q1) +  x], (double) grid_x[x][y], (double) grid_y[x][y]);
 						//printf("grid error \n");
 						exit(EXIT_FAILURE);
 			}

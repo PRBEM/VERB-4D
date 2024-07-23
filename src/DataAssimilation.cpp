@@ -13,8 +13,8 @@ data_assimilation::DataAssimilationManagerConvection::DataAssimilationManagerCon
     const std::string& parametersFile,
     double timeStart, double timeEnd, const Matrix2D<double>& V,
     const Matrix2D<double>& K, int P_size, int R_size, const std::string& debug_output_folder)
-    : _timeStart(timeStart), _timeEnd(timeEnd), _V(V), _K(K),
-    _analysisCovarianceConvection(P_size, R_size, V.size_q1, K.size_q2), _debug_output_folder(debug_output_folder)
+    : _analysisCovarianceConvection(P_size, R_size, V.size_q1, K.size_q2), _debug_output_folder(debug_output_folder), 
+    _timeStart(timeStart), _timeEnd(timeEnd), _V(V), _K(K)
 {
     _assimilationParameters = readParameters(parametersFile);
     _runDataAssimilation = _assimilationParameters.runDataAssimilation;
@@ -58,7 +58,7 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
 
 #pragma omp parallel for shared(progress_total, progress_count) schedule(dynamic, 1) collapse(2)
             for (int iV = _V.size_q1 - 1; iV >= 0; --iV) {
-                for (int iK = 0; iK < _K.size_q2; ++iK) {
+                for (size_t iK = 0; iK < _K.size_q2; ++iK) {
                     if (omp_get_thread_num() == 0) {
                         std::cout << "\b\b\b\b\b\b\b\b\b" << '\t'
                                   << (int)((double)progress_count / progress_total * 100) << "%" << std::flush;
@@ -81,8 +81,8 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
                     debug_output_4d.insert_output_2d(debug_output, iV, iK);
 #endif
 
-                    for (auto iP = 0; iP < P_size; iP++) {
-                        for (auto iR = 0; iR < R_size; iR++) {
+                    for (size_t iP = 0; iP < P_size; iP++) {
+                        for (size_t iR = 0; iR < R_size; iR++) {
                             PSD[iP][iR][iV][iK] = PSD_PR[iP][iR];
                         }
                     }
@@ -204,8 +204,8 @@ private:
 data_assimilation::Convection2DAnalysisCovariances::Convection2DAnalysisCovariances(
     size_t P_size, size_t R_size, size_t V_size, size_t K_size)
     : _data(V_size, std::vector<Matrix2D<double>>(K_size)) {
-    for (auto i = 0; i < V_size; ++i) {
-        for (auto j = 0; j < K_size; ++j) {
+    for (size_t i = 0; i < V_size; ++i) {
+        for (size_t j = 0; j < K_size; ++j) {
             _data[i][j].AllocateMemory(P_size * R_size, P_size * R_size);
             _data[i][j] = 0.;
         }

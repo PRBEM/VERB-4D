@@ -34,14 +34,14 @@ Matrix1D<double> cat(const Matrix1D<double>& a, const Matrix1D<double>& b)
     } else if (a.initialized && !b.initialized) {
         return a;
     } else {
-        int size_total = a.size_q1 + b.size_q1;
+        size_t size_total = a.size_q1 + b.size_q1;
 
         Matrix1D<double> result (size_total);
 
-        for (int i = 0; i < a.size_q1; ++i)
+        for (size_t i = 0; i < a.size_q1; ++i)
             result[i] = a[i];
 
-        for (int i = a.size_q1; i < size_total; ++i)
+        for (size_t i = a.size_q1; i < size_total; ++i)
             result[i] = b[i - a.size_q1];
 
         return result;
@@ -62,18 +62,18 @@ Matrix2D<double> cat(const Matrix2D<double>& a, const Matrix2D<double>& b)
             exit(EXIT_FAILURE);
         }
 
-        int size_q2 = a.size_q2;
+        size_t size_q2 = a.size_q2;
 
-        int size_total = a.size_q1 + b.size_q1;
+        size_t size_total = a.size_q1 + b.size_q1;
 
         Matrix2D<double> result (size_total, size_q2);
 
-        for (int i = 0; i < a.size_q1; ++i)
-            for (int j = 0; j < size_q2; ++j)
+        for (size_t i = 0; i < a.size_q1; ++i)
+            for (size_t j = 0; j < size_q2; ++j)
                     result[i][j] = a[i][j];
 
-        for (int i = a.size_q1; i < size_total; ++i)
-            for (int j = 0; j < size_q2; ++j)
+        for (size_t i = a.size_q1; i < size_total; ++i)
+            for (size_t j = 0; j < size_q2; ++j)
                     result[i][j] = b[i - a.size_q1][j];
 
         return result;
@@ -94,21 +94,21 @@ Matrix3D<double> cat(const Matrix3D<double>& a, const Matrix3D<double>& b)
             exit(EXIT_FAILURE);
         }
 
-        int size_q2 = a.size_q2;
-        int size_q3 = a.size_q3;
+        size_t size_q2 = a.size_q2;
+        size_t size_q3 = a.size_q3;
 
-        int size_total = a.size_q1 + b.size_q1;
+        size_t size_total = a.size_q1 + b.size_q1;
 
         Matrix3D<double> result (size_total, size_q2, size_q3);
 
-        for (int i = 0; i < a.size_q1; ++i)
-            for (int j = 0; j < size_q2; ++j)
-                for (int k = 0; k < size_q3; ++k)
+        for (size_t i = 0; i < a.size_q1; ++i)
+            for (size_t j = 0; j < size_q2; ++j)
+                for (size_t k = 0; k < size_q3; ++k)
                     result[i][j][k] = a[i][j][k];
 
-        for (int i = a.size_q1; i < size_total; ++i)
-            for (int j = 0; j < size_q2; ++j)
-                for (int k = 0; k < size_q3; ++k)
+        for (size_t i = a.size_q1; i < size_total; ++i)
+            for (size_t j = 0; j < size_q2; ++j)
+                for (size_t k = 0; k < size_q3; ++k)
                     result[i][j][k] = b[i - a.size_q1][j][k];
 
         return result;
@@ -117,8 +117,8 @@ Matrix3D<double> cat(const Matrix3D<double>& a, const Matrix3D<double>& b)
 
 Matrix2D<double> transpose(const Matrix2D<double>& A) {
     Matrix2D<double> result(A.size_q2, A.size_q1);
-    for (auto i = 0; i < result.size_q1; ++i) {
-        for (auto j = 0; j < result.size_q2; ++j) {
+    for (size_t i = 0; i < result.size_q1; ++i) {
+        for (size_t j = 0; j < result.size_q2; ++j) {
             result[i][j] = A[j][i];
         }
     }
@@ -127,7 +127,7 @@ Matrix2D<double> transpose(const Matrix2D<double>& A) {
 
 Matrix1D<double> log10(const Matrix1D<double>& A) {
    Matrix1D<double> result {A.size_q1};
-   for (auto i = 0; i < result.size_q1; ++i) {
+   for (size_t i = 0; i < result.size_q1; ++i) {
        if (A[i] < 1e-31) result[i] = -31;
        else result[i] = std::log10(A[i]);
    }
@@ -136,8 +136,8 @@ Matrix1D<double> log10(const Matrix1D<double>& A) {
 
 Matrix2D<double> log10(const Matrix2D<double>& A) {
    Matrix2D<double> result {A.size_q1, A.size_q2};
-    for (auto i = 0; i < result.size_q1; ++i) {
-        for (auto j = 0; j < result.size_q2; ++j) {
+    for (size_t i = 0; i < result.size_q1; ++i) {
+        for (size_t j = 0; j < result.size_q2; ++j) {
             if (A[i][j] < 1e-31) result[i][j] = -31;
             else result[i][j] = std::log10(A[i][j]);
         }
@@ -147,7 +147,7 @@ Matrix2D<double> log10(const Matrix2D<double>& A) {
 
 Matrix1D<double> pow(double base, const Matrix1D<double>& A) {
     Matrix1D<double> result {A.size_q1};
-    for (auto i = 0; i < result.size_q1; ++i) {
+    for (size_t i = 0; i < result.size_q1; ++i) {
         result[i] = std::pow(base, A[i]); 
     }
     return result;
@@ -155,8 +155,8 @@ Matrix1D<double> pow(double base, const Matrix1D<double>& A) {
 
 Matrix2D<double> diag(const Matrix1D<double>& d) {
     Matrix2D<double> result {d.size_q1, d.size_q1};   
-    for (auto i = 0; i < result.size_q1; ++i) {
-        for (auto j = 0; j < result.size_q2; ++j) {
+    for (size_t i = 0; i < result.size_q1; ++i) {
+        for (size_t j = 0; j < result.size_q2; ++j) {
             result[i][j] = (i == j) ? d[i] : 0.;
         }
     }
@@ -170,7 +170,7 @@ Matrix1D<bool> compare(
     Comparator comparator
 ) {        
     Matrix1D<bool> result {A.size_q1};
-    for(auto i = 0; i < A.size_q1; ++i) {
+    for(size_t i = 0; i < A.size_q1; ++i) {
         result[i] = comparator(A[i], number);
     }
     return result;
@@ -231,7 +231,7 @@ Matrix1D<bool> logicalOperation(
     
     Matrix1D<bool> result {a.size_q1};
 
-    for (auto i = 0; i < a.size_q1; ++i) {
+    for (size_t i = 0; i < a.size_q1; ++i) {
         result[i] = operation(a[i], b[i]);
     }
 
@@ -269,8 +269,8 @@ Matrix2D<bool> compare(
     const Matrix2D<double>& A, double number, Comparator comparator
 ) {        
     Matrix2D<bool> result {A.size_q1, A.size_q2};
-    for(auto i = 0; i < A.size_q1; ++i) {
-        for (auto j = 0; j < A.size_q2; ++j) {
+    for(size_t i = 0; i < A.size_q1; ++i) {
+        for (size_t j = 0; j < A.size_q2; ++j) {
             result[i][j] = comparator(A[i][j], number);
         }
     }
@@ -330,8 +330,8 @@ Matrix2D<bool> operator&&(const Matrix2D<bool>& A, const Matrix2D<bool>& B) {
     
     Matrix2D<bool> result {A.size_q1, A.size_q2};
 
-    for (auto i = 0; i < A.size_q1; ++i) {
-        for (auto j = 0; j < A.size_q2; ++j) {                
+    for (size_t i = 0; i < A.size_q1; ++i) {
+        for (size_t j = 0; j < A.size_q2; ++j) {                
             result[i][j] = (A[i][j] && B[i][j]);
         }
     }
@@ -351,7 +351,7 @@ Matrix1D<double> operator-(
     }
 
     Matrix1D<double> result {a.size_q1};
-    for (auto i = 0; i < result.size_q1; ++i) {
+    for (size_t i = 0; i < result.size_q1; ++i) {
         result[i] = a[i] - b[i];
     } 
 
@@ -449,21 +449,21 @@ Matrix2D<double> operator^(Matrix2D<double> A, const int power) {
     //std::cout << "power: " << power << std::endl;
     //std::cout << "bitset: " << power_bitset << std::endl;
     //std::cout << "bitset count: " << power_bitset.count() << std::endl;
-    int cache_size = power_bitset[0] ? power_bitset.count()-1 : power_bitset.count();
+    size_t cache_size = power_bitset[0] ? power_bitset.count()-1 : power_bitset.count();
 
     std::vector<Matrix2D<double>> cache_matrixes(cache_size);
-    for (int i = 0; i < cache_matrixes.size(); i++) {
+    for (size_t i = 0; i < cache_matrixes.size(); i++) {
         cache_matrixes[i] = Matrix2D<double>(A.size_q1, A.size_q2);
     }
 
     char transa{'N'};
     char transb{'N'};
-    long m{A.size_q2};
-    long n{A.size_q1};
-    long k{A.size_q1};
+    long m = static_cast<long>(A.size_q2);
+    long n = static_cast<long>(A.size_q1);
+    long k = static_cast<long>(A.size_q1);
     double alpha{1.0};
-    long lda{A.size_q2};
-    long ldb{A.size_q2};
+    long lda = static_cast<long>(A.size_q2);
+    long ldb = static_cast<long>(A.size_q2);
     double beta{0.};
     long ldc{m};
 
@@ -472,9 +472,9 @@ Matrix2D<double> operator^(Matrix2D<double> A, const int power) {
     double* c;
 
     Matrix2D<double> A_copy = A; // A acts as a temporary
-    int cache_matrix_cursor = 0;
+    size_t cache_matrix_cursor = 0;
 
-    for (int i = 1; i < power_bitset.size(); i++) {
+    for (size_t i = 1; i < power_bitset.size(); i++) {
         //std::cout << "Iteration: " << i << std::endl;
 
         if (i == 1) {
@@ -530,7 +530,7 @@ Matrix2D<double> operator^(Matrix2D<double> A, const int power) {
         answer = cache_matrixes[0];
         c = answer[0]; // mark that answer is holding the result
     } else {
-        for (int i = 1; i < cache_matrixes.size(); i++) {
+        for (size_t i = 1; i < cache_matrixes.size(); i++) {
             //std::cout << "Iteration: " << i << std::endl;
 
             if (i == 1) {
@@ -712,7 +712,7 @@ Matrix2D<double>& trans_solve(const Matrix2D<double>& A, Matrix2D<double>& B) {
     long ldb = static_cast<long>(B.size_q2);
     std::unique_ptr<long[]> ipiv {new long[m]};
     long info {0};
-    long lwork {n};
+//    long lwork {n};
 
 /*     int dgetrf_(long *m, long *n, double *a, long * lda, 
                 long *ipiv, long *info);
@@ -746,8 +746,8 @@ Matrix2D<double> toMatrix2D(
     }
 
     Matrix2D<double> result(size_q1, size_q2);
-    for (auto i = 0; i < size_q1; ++i) {
-        for (auto j = 0; j < size_q2; ++j) {
+    for (size_t i = 0; i < size_q1; ++i) {
+        for (size_t j = 0; j < size_q2; ++j) {
             result[i][j] = A[i * size_q2 + j];
         }
     }

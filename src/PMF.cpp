@@ -107,7 +107,7 @@ std::vector<int> MatArray::size() const {
 
 int MatArray::length() const {
     int len = 1;
-    for (auto i = 0; i < dims.size(); ++i)
+    for (size_t i = 0; i < dims.size(); ++i)
         len *= static_cast<int>(dims[i]);
 
     return len;
@@ -115,7 +115,7 @@ int MatArray::length() const {
 
 Matrix1D<double> MatArray::to_Matrix1D() const {
     if (dims.size() != 1) {
-        for (int i = 1; i < dims.size(); ++i) {
+        for (size_t i = 1; i < dims.size(); ++i) {
             if (dims[i] != 1) {
                 std::cout << this->name << std::endl;
                 std::cout << "Cannot convert " << dims.size() << "D Matlab array to Matrix1D\n";
@@ -128,7 +128,7 @@ Matrix1D<double> MatArray::to_Matrix1D() const {
 
     matrix.AllocateMemory(this->length());
 
-    for (int i = 0; i < matrix.size_q1; ++i) {
+    for (size_t i = 0; i < matrix.size_q1; ++i) {
         matrix[i] = *(elem + i);
     }
 
@@ -145,8 +145,8 @@ Matrix2D<double> MatArray::to_Matrix2D() const {
         matrix.AllocateMemory(dims[0], dims[1]);
 
         int lin_idx;
-        for (int ix = 0; ix < dims[0]; ++ix)
-            for (int iy = 0; iy < dims[1]; ++iy) {
+        for (size_t ix = 0; ix < dims[0]; ++ix)
+            for (size_t iy = 0; iy < dims[1]; ++iy) {
                 lin_idx = ix + iy * dims[0];
                 matrix[ix][iy] = *(elem + lin_idx);
             }
@@ -165,9 +165,9 @@ Matrix3D<double> MatArray::to_Matrix3D() const {
         matrix.AllocateMemory(dims[0], dims[1], dims[2]);
 
         int lin_idx;
-        for (int ix = 0; ix < dims[0]; ++ix)
-            for (int iy = 0; iy < dims[1]; ++iy)
-                for (int iz = 0; iz < dims[2]; ++iz) {
+        for (size_t ix = 0; ix < dims[0]; ++ix)
+            for (size_t iy = 0; iy < dims[1]; ++iy)
+                for (size_t iz = 0; iz < dims[2]; ++iz) {
                     lin_idx = ix + iy * dims[0] + iz * dims[0] * dims[1];
                     matrix[ix][iy][iz] = *(elem + lin_idx);
                 }
@@ -467,7 +467,7 @@ Matrix1D<double> limitWithTime<Matrix1D<double>>(
     }
 
     int size = {0};
-    for (auto it = 0; it < time.size_q1; ++it) {
+    for (size_t it = 0; it < time.size_q1; ++it) {
         CustomDate cd{time[it]};
         if (cd >= timeStart && cd <= timeEnd) {
             ++size;
@@ -476,7 +476,7 @@ Matrix1D<double> limitWithTime<Matrix1D<double>>(
 
     Matrix1D<double> result(size);
     int counter{0};
-    for (auto it = 0; it < time.size_q1; ++it) {
+    for (size_t it = 0; it < time.size_q1; ++it) {
         CustomDate cd{time[it]};
         if (cd >= timeStart && cd <= timeEnd) {
             result[counter] = array[it];
@@ -501,7 +501,7 @@ Matrix2D<double> limitWithTime<Matrix2D<double>>(
     }
 
     int size = {0};
-    for (auto it = 0; it < time.size_q1; ++it) {
+    for (size_t it = 0; it < time.size_q1; ++it) {
         CustomDate cd{time[it]};
         if (cd >= timeStart && cd <= timeEnd) {
             ++size;
@@ -510,10 +510,10 @@ Matrix2D<double> limitWithTime<Matrix2D<double>>(
 
     Matrix2D<double> result(size, array.size_q2);
     int counter{0};
-    for (auto it = 0; it < time.size_q1; ++it) {
+    for (size_t it = 0; it < time.size_q1; ++it) {
         CustomDate cd{time[it]};
         if (cd >= timeStart && cd <= timeEnd) {
-            for (auto i = 0; i < result.size_q2; ++i) {
+            for (size_t i = 0; i < result.size_q2; ++i) {
                 result[counter][i] = array[it][i];
             }
             ++counter;
@@ -537,7 +537,7 @@ Matrix3D<double> limitWithTime<Matrix3D<double>>(
     }
 
     int size = {0};
-    for (auto it = 0; it < time.size_q1; ++it) {
+    for (size_t it = 0; it < time.size_q1; ++it) {
         CustomDate cd{time[it]};
         if (cd >= timeStart && cd <= timeEnd) {
             ++size;
@@ -546,11 +546,11 @@ Matrix3D<double> limitWithTime<Matrix3D<double>>(
 
     Matrix3D<double> result(size, array.size_q2, array.size_q3);
     int counter{0};
-    for (auto it = 0; it < time.size_q1; ++it) {
+    for (size_t it = 0; it < time.size_q1; ++it) {
         CustomDate cd{time[it]};
         if (cd >= timeStart && cd <= timeEnd) {
-            for (int i = 0; i < result.size_q2; ++i) {
-                for (int j = 0; j < result.size_q3; ++j) {
+            for (size_t i = 0; i < result.size_q2; ++i) {
+                for (size_t j = 0; j < result.size_q3; ++j) {
                     result[counter][i][j] = array[it][i][j];
                 }
             }
