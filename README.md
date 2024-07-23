@@ -121,6 +121,17 @@ install_verb.ps1
 ```
 The executable `VERB4D_Solver.exe` can be found in `.\build\Release`.
 
+#### List of compilation flags
+
+| Command line argument | Description | Possible values
+| --------------------- | ----------- | -------------- |
+| -DCMAKE_BUILD_TYPE | Standard cmake option enabling debugging symbols or optimization flags | Release, Debug |
+| -DBLAS_TYPE | Library type of LAPACK and BLAS routines | LAPACK, OpenBLAS, MKL |
+| -OPENBLAS_LIBPATH | Path towards compiled openblas.lib |  |
+| -DDATA_ASSIMILATION | Bool whether the data assimilation routines will be compiled | True, False |
+| -DATA_ASSIMILATION_DEBUG | Bool whether the data assimilation debug output will be saved (!huge file sizes!) | True, False |
+| -DFAST_CONVECTION | Bool to decide convection step size in Convection_2D | True, False |
+
 ### Use the VERB-4D solver
 
 Copy the executable to a simulation folder that contains a `parameters.ini` file and run it to start a simulation.
