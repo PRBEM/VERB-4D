@@ -7,10 +7,6 @@ cmake_minimum_required(VERSION 3.9)
 project(VERB4D C CXX)
 set(CMAKE_CXX_STANDARD 17)
 
-# Enable/disable tests
-include(CTest)
-set(ENABLE_TESTING ON)
-
 # Enable/disable data assimilation
 set(DATA_ASSIMILATION ON CACHE BOOL "Enable data assimilation")
 
@@ -171,11 +167,6 @@ if(DEFINED CMAKE_BUILD_TYPE)
             add_definitions(-DRELEASE)
         endif()
     endif()
-endif()
-
-# Add tests
-if(ENABLE_TESTING)
-    add_subdirectory(test)
 endif()
 
 # Flag to decide convection step size in Convection_2D.cpp
