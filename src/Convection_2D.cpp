@@ -55,7 +55,7 @@ bool Convection_2D(
     BoundaryConditionType R_LBC_type, BoundaryConditionType R_UBC_type,
     const Matrix2D<double>& VP, const Matrix2D<double>& VR,
     const Matrix2D<double>& Losses,
-    double dt_total, double min_PSD, double min_V) {
+    double dt_total) {
     // indexes
     int iR, iP;
 
@@ -116,10 +116,6 @@ bool Convection_2D(
                 PSD_PR.ySlice(PSD_P, iR);
                 P.ySlice(P_P, iR);
                 VP.ySlice(VP_P, iR);
-                // Speedup: if PSD~=0 or V~=0, skip the thing
-                //if (PSD_P.max() < min_PSD || VP_P.maxabs() < min_V)
-                if (PSD_P.max() < min_PSD)
-                    continue;
 
                 Convection_1D_ULTIMATE_QUICKEST6(
                     PSD_P, P_P, P_size,
@@ -142,11 +138,6 @@ bool Convection_2D(
                 PSD_PR_G.xSlice(PSD_R, iP);
                 R.xSlice(R_R, iP);
                 VR.xSlice(VR_R, iP);
-
-                // Speedup: if PSD~=0 or V~=0, skip the thing
-                //if (PSD_R.max() < min_PSD || VR_R.maxabs() < min_V)  // XXX: 1e-21 should be a parameter, based on the minimum of the initial PSD or something
-                if (PSD_R.max() < min_PSD)
-                    continue;
 
                 Convection_1D_ULTIMATE_QUICKEST6(
                     PSD_R, R_R, R_size,

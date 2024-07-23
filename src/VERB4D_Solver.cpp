@@ -673,7 +673,7 @@ int main(int argc, char *argv[])
                             Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type,
                             vp_slice, vr_slice,
                             lossconv_slice,
-                            dt, min_PSD, min_V);
+                            dt);
 
                         // copy results back into PSD adding the 2d list PSD_PR for all values of iV,iK
                         for (int iP = 0; iP < P_size; iP++)

@@ -335,7 +335,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                     Logger::error << "CONV_1D_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
             }
             
-            double psd_face_left = 0.0, psd_face_right = 0.0, courant_left = 0.0, courant_right = 0.0;
+            double psd_face_left = 0.0, courant_left = 0.0, courant_right = 0.0;
             for (int ix = 0; ix <= x_size - 1; ix++) 
             {
                 if (ix == 0) {                           // special case
@@ -350,7 +350,6 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                     // CourNum_f = CourNum[ix];
                 }
                 
-                const double courant_squared = courant_right * courant_right;
                 const double courant_abs = std::fabs(courant_right);
                 
                 // PSD down-wind, center, and up-wind

@@ -27,7 +27,7 @@ CustomDate::CustomDate(double matlabd) {
     gmtime_r(&unix_seconds, &datetime);
 }
 
-CustomDate::CustomDate(const CustomDate& rhs) : unix_seconds(rhs.unix_seconds), datetime(rhs.datetime) {}
+CustomDate::CustomDate(const CustomDate& rhs) : datetime(rhs.datetime), unix_seconds(rhs.unix_seconds) {}
 
 CustomDate& CustomDate::operator=(const CustomDate& rhs) {
     unix_seconds = rhs.unix_seconds;
