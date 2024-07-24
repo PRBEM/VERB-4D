@@ -45,6 +45,20 @@ using namespace std;
  * @param min_PSD - minimum value from the PSD matrix
  * @param min_V - minimum value for V from the
  */
+#ifdef SAVE_PSD_LOST_CONV
+bool Convection_2D(
+    Matrix2D<double>& PSD_PR,
+    Matrix2D<double>& PSD_lost_PR,
+    const Matrix2D<double>& P, const Matrix2D<double>& R,
+    int P_size, int R_size,
+    const Matrix1D<double>& P_LBC, const Matrix1D<double>& P_UBC,
+    const Matrix1D<double>& R_LBC, const Matrix1D<double>& R_UBC,
+    BoundaryConditionType P_LBC_type, BoundaryConditionType P_UBC_type,
+    BoundaryConditionType R_LBC_type, BoundaryConditionType R_UBC_type,
+    const Matrix2D<double>& VP, const Matrix2D<double>& VR,
+    const Matrix2D<double>& Sources, const Matrix2D<double>& Losses,
+    double dt_total) {
+#else
 bool Convection_2D(
     Matrix2D<double>& PSD_PR,
     const Matrix2D<double>& P, const Matrix2D<double>& R,
@@ -56,7 +70,7 @@ bool Convection_2D(
     const Matrix2D<double>& VP, const Matrix2D<double>& VR,
     const Matrix2D<double>& Sources, const Matrix2D<double>& Losses,
     double dt_total) {
-
+#endif
     // indexes
     int iR, iP;
 
@@ -160,7 +174,13 @@ bool Convection_2D(
         // Losses
         for (iP = 0; iP < P_size; iP++) {
             for (iR = 0; iR < R_size; iR++) {
+#ifdef SAVE_PSD_LOST_CONV
+                double PSD_tmp = PSD_PR[iP][iR];
                 PSD_PR[iP][iR] = PSD_PR[iP][iR] * losses_exp[iP][iR];
+                PSD_lost_PR[iP][iR] += (PSD_tmp - PSD_PR[iP][iR]);
+#else
+                PSD_PR[iP][iR] = PSD_PR[iP][iR] * losses_exp[iP][iR];
+#endif
             }
         }
 

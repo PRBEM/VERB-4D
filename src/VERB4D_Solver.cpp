@@ -303,6 +303,11 @@ int main(int argc, char *argv[])
         "parameters_da.ini", time_first, time_first + time_total, V.wxSlice(0, 0), K.wxSlice(0, 0), P_size, R_size, outputFolder};
 #endif
 
+#ifdef SAVE_PSD_LOST_CONV
+    Matrix4D<double> PSD_lost_conv;
+    PSD_lost_conv.AllocateMemory(P_size, R_size, V_size, K_size);
+#endif
+
     // Copy L-star so we can later interpolate PSD to a new L-star,
     // to account for adiabatic transport if L-star changes
     L_copy = L;
@@ -536,6 +541,11 @@ int main(int argc, char *argv[])
             PSD.max_of(1e-21);
         }
 
+#ifdef SAVE_PSD_LOST_CONV
+        // Reset loss
+        PSD_lost_conv = 0;
+#endif
+
         // Update convection velocities VP and VR and log the maximum absolute values
         if ((3 < P_size || 3 < R_size) && run_convection)
         {
@@ -754,6 +764,10 @@ int main(int argc, char *argv[])
                 Matrix2D<double> lossconv_slice(P_size, R_size);
                 Matrix2D<double> sources_slice(P_size, R_size);
 
+#ifdef SAVE_PSD_LOST_CONV
+                Matrix2D<double> PSD_lost_PR(P_size, R_size);
+#endif
+
                 // Looping it backward allows to speed-up the multithread simulation
                 // due to the highest energies being the slowest to calculate - calculating highest energy first
 
@@ -792,6 +806,18 @@ int main(int argc, char *argv[])
                         Sources.yzSlice(sources_slice, iV, iK);
                         PSD.yzSlice(PSD_PR, iV, iK);
 
+#ifdef SAVE_PSD_LOST_CONV
+                        PSD_lost_conv.yzSlice(PSD_lost_PR, iV, iK);
+
+                        Convection_2D(
+                            PSD_PR, PSD_lost_PR, pgrid_slice, rgrid_slice, P_size, R_size,
+                            plow_boundary_slice, pup_boundary_slice,
+                            rlow_boundary_slice, rup_boundary_slice,
+                            Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type,
+                            vp_slice, vr_slice,
+                            sources_slice, lossconv_slice,
+                            dt);
+#else
                         Convection_2D(
                             PSD_PR, pgrid_slice, rgrid_slice, P_size, R_size,
                             plow_boundary_slice, pup_boundary_slice,
@@ -800,13 +826,16 @@ int main(int argc, char *argv[])
                             vp_slice, vr_slice,
                             sources_slice, lossconv_slice,
                             dt);
+#endif
 
                         // copy results back into PSD adding the 2d list PSD_PR for all values of iV,iK
-                        for (int iP = 0; iP < P_size; iP++)
-                        {
-                            for (int iR = 0; iR < R_size; iR++)
-                            {
+                        for (int iP = 0; iP < P_size; iP++) {
+                            for (int iR = 0; iR < R_size; iR++) {
                                 PSD[iP][iR][iV][iK] = PSD_PR[iP][iR];
+#ifdef SAVE_PSD_LOST_CONV
+                                PSD_lost_conv[iP][iR][iV][iK] = PSD_lost_PR[iP][iR];
+
+#endif
                             }
                         }
 
@@ -1075,7 +1104,20 @@ int main(int argc, char *argv[])
                             << "Writing results: " << PSD_filename.str() << std::endl;
 
             output_writer = std::async(std::launch::async, write_PSD_output, io_method, PSD_filename.str(), time_current, PSD, PSD_time_to_lst, outputFolder);
+
+#ifdef SAVE_PSD_LOST_CONV
+            std::ostringstream PSD_lost_filename, time_string;
+            time_string.str("");
+            time_string << time_current;
+
+            PSD_lost_filename.str("");
+            PSD_lost_filename << outputFolder << "lost_conv_PSD_" << std::setw(5) << std::setfill('0') << int(it / output_step);
+            Logger::message << std::endl
+                            << "Writing results: " << PSD_lost_filename.str() << std::endl;
+            PSD_lost_conv.writeToAnyFile(PSD_lost_filename.str(), io_method, time_string.str());
+#endif
         }
+
     }
 #ifdef MKL_FOUND
     for(auto& csr_handle : sparse_matrix_handles)

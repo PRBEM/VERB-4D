@@ -175,3 +175,9 @@ if (${PYTHON_BINDINGS})
     target_link_libraries(verb4d_solver PUBLIC ${DEPLIBS})
 endif()
 unset(PYTHON_BINDINGS CACHE)
+
+# save lost PSD during Convection_2D
+if(${SAVE_PSD_LOST_CONV})
+    add_definitions(-DSAVE_PSD_LOST_CONV)
+endif()
+unset(SAVE_PSD_LOST CACHE)

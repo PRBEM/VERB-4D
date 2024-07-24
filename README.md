@@ -132,6 +132,7 @@ The executable `VERB4D_Solver.exe` can be found in `.\build\Release`.
 | -DDATA_ASSIMILATION_DEBUG | Bool whether the data assimilation debug output will be saved (!huge file sizes!) | True, False |
 | -DFAST_CONVECTION | Bool to decide convection step size in Convection_2D | True, False |
 | -DPYTHON_BINDINGS | Bool whether the python-bindings-library will be compiled | True, False |
+| -DSAVE_PSD_LOST_CONV | Bool whether the lost PSD during Convection_2d will be saved | True, False |
 
 ### Use the VERB-4D solver
 

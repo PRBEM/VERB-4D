@@ -13,8 +13,7 @@
  *      Author: subbotin
  */
 
-#ifndef CONVECTION_2D_ULTIMATE_QUICKEST_H_
-#define CONVECTION_2D_ULTIMATE_QUICKEST_H_
+#pragma once
 
 #include "Convection_1D_ULTIMATE_QUICKEST6.h"
 #include "Matrix.h"
@@ -26,6 +25,21 @@
 /**
 * Function that creates a 2D Convection matrix and returns a bool upon completion
 */
+
+#ifdef SAVE_PSD_LOST_CONV
+bool Convection_2D(
+    Matrix2D<double>& PSD_PR,
+    Matrix2D<double>& PSD_lost_PR,
+    const Matrix2D<double>& P, const Matrix2D<double>& R,
+    int P_size, int R_size,
+    const Matrix1D<double>& P_LBC, const Matrix1D<double>& P_UBC,
+    const Matrix1D<double>& R_LBC, const Matrix1D<double>& R_UBC,
+    BoundaryConditionType P_LBC_type, BoundaryConditionType P_UBC_type,
+    BoundaryConditionType R_LBC_type, BoundaryConditionType R_UBC_type,
+    const Matrix2D<double>& VP, const Matrix2D<double>& VR,
+    const Matrix2D<double>& Sources, const Matrix2D<double>& Losses,
+    double dt_total);
+#else
 bool Convection_2D( 
 	Matrix2D<double>& PSD_PR,
 	const Matrix2D<double>& P, const Matrix2D<double>& R,
@@ -36,7 +50,6 @@ bool Convection_2D(
 	BoundaryConditionType R_LBC_type, BoundaryConditionType R_UBC_type,
 	const Matrix2D<double>& VP, const Matrix2D<double>& VR,
 	const Matrix2D<double>& Sources, const Matrix2D<double>& Losses,
-	double dt_total
-);
-
+	double dt_total);
 #endif
+
