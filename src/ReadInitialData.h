@@ -35,7 +35,7 @@ bool ReadInitialData(std::string &InputFolder, std::string &OutputFolder, int ar
 	double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
 	InversionMethod &inversion_method, IOMethod &io_method, IOMethod &PSD0_io_method, DensitySaturation &density_saturation,
 	bool &include_boundary, bool &Vl_BC_from_convection, bool &Vu_BC_from_convection, bool &run_remapping,
-	bool &run_convection, bool &run_radial_diffusion, bool &run_local_diffusion, bool &positive_PSD, bool &PSD_time_to_lst,
+	bool &run_convection, bool &run_radial_diffusion, bool &run_local_diffusion, bool &run_coulomb_collision, bool &positive_PSD, bool &PSD_time_to_lst,
 	Matrix4D<double> &PSD,
 	Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V, Matrix4D<double> &K, UpdatableMatrix < Matrix4D<double> > &L,
 	int &P_size, int &R_size, int &V_size, int &K_size, int &L_size,

@@ -502,6 +502,19 @@ inline Matrix1D<T> Matrix1D<T>::divide (const Matrix1D<T> &M) const {
 }
 
 /**
+* Square root of vector
+*/
+template<class T>
+inline Matrix1D<T> Matrix1D<T>::sqrt () const {
+	Matrix1D<T> Tmp(size_q1);
+	for (size_t i1 = 0; i1 < size_q1; i1++) {
+		Tmp[i1] = std::sqrt(matrix_array[i1]);
+	}
+	return Tmp;
+}
+
+
+/**
 * Norm of vector
 */
 template<class T>
@@ -510,7 +523,7 @@ inline T Matrix1D<T>::norm() const {
 	for (size_t i1 = 0; i1 < size_q1; i1++) {
 		res += matrix_array[i1] * matrix_array[i1];
 	}
-	return sqrt(res);
+	return std::sqrt(res);
 }
 
 /*
@@ -2847,6 +2860,18 @@ inline Matrix3D<T>& Matrix3D<T>::divide_equal (const Matrix3D<T> &M) {
 }
 
 /**
+* Square root of matrix
+*/
+template<class T>
+inline Matrix3D<T> Matrix3D<T>::sqrt () const {
+	Matrix3D<T> Tmp(size_q1, size_q2, size_q3);
+	for (size_t i = 0; i < num_elements; i++) {
+		Tmp.plane_array[i] = std::sqrt(plane_array[i]);
+	}
+	return Tmp;
+}
+
+/**
 * Add each element of the matrix to corresponds element of matrix M.
 */
 template<class T>
@@ -3876,6 +3901,19 @@ T Matrix3D<T>::maxabs() const {
 	for(size_t  i = 0; i < num_elements; i++)
 	{
 		tmp = std::max(tmp, std::abs(plane_array[i]));
+	}
+	return tmp;
+}
+
+/**
+* Return exp(matrix*multiplicator) of the 3d matrix.
+*/
+template<class T>
+Matrix3D<T> Matrix3D<T>::exp(double multiplicator) const {
+	Matrix3D<T> tmp(size_q1, size_q2, size_q3);
+	for(size_t i = 0; i < num_elements; i++)
+	{
+		tmp.plane_array[i] = std::exp(plane_array[i]*multiplicator);
 	}
 	return tmp;
 }

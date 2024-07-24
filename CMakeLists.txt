@@ -21,7 +21,9 @@ file(GLOB_RECURSE VERB4D_HEADERS *.h)
 set(VERB4D_SOURCES
     src/VERB4D_Solver.cpp
     src/Convection_1D_ULTIMATE_QUICKEST6.cpp
+    src/Convection_1D_2ndORDER_NONUNIFORM_GRID.cpp
     src/Convection_2D.cpp
+    src/Convection_3D.cpp
     src/Diffusion_1D.cpp
     src/Diffusion_2D.cpp
     src/Diffusion_2D_MKL.cpp

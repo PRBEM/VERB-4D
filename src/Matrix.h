@@ -108,6 +108,7 @@ public:
 
 	Matrix1D times (const Matrix1D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
 	Matrix1D divide (const Matrix1D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
+	Matrix1D sqrt () const; 	                    				///< Arraywise square root sqrt(A), stores result in a new matrix
 
 	T dot (const Matrix1D<T> &M) const; 					///< Dot product
 	T norm () const; 					///< Norm
@@ -308,6 +309,7 @@ public:
 
 	Matrix3D times (const Matrix3D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
 	Matrix3D divide (const Matrix3D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
+	Matrix3D sqrt () const; 	                    				///< Arraywise square root sqrt(A), stores result in a new matrix
 
 	// Saving (loading) of a matrix into (from) file
 	virtual void writeToFile(const std::string& filename, const std::string& info = "") const; 										///< Save matrix to a file
@@ -335,6 +337,7 @@ public:
 	T max() const;
 	T maxabs() const;
 	Matrix3D<T> abs() const;
+	Matrix3D<T> exp(double multiplicator=1) const;
 	Matrix3D<T>& max_of(T val);
 
 	// slices - get 2D slice from 3D array

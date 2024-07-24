@@ -122,6 +122,7 @@
 #include <thread>
 
 #include "Convection_2D.h"
+#include "Convection_3D.h"
 #include "Diffusion_1D.h"
 #include "Diffusion_2D.h"    // Different solution methods for 2D diffusion
 #include "Diffusion_2D_MKL.hpp"    // Intel MKL sparse solve 
@@ -215,7 +216,7 @@ int main(int argc, char *argv[])
     UpdatableListMatrix<Matrix4D<double>> DLL, DVV, DKK, DVK;
 
     // Convection (advection) velocities, 4D arrays
-    UpdatableMatrix<Matrix4D<double>> VR, VP;
+    UpdatableMatrix<Matrix4D<double>> VR, VP, VV;
 
     // Additional sources and losses
     UpdatableListMatrix<Matrix4D<double>> Sources, Losses, Losses_conv;
@@ -270,6 +271,7 @@ int main(int argc, char *argv[])
     bool Vu_BC_from_convection = false;
     bool run_remapping = true;
     bool run_convection = true;
+    bool run_coulomb_collision = false;
     bool run_radial_diffusion = true;
     bool run_local_diffusion = true;
     bool positive_PSD = false;
@@ -282,7 +284,7 @@ int main(int argc, char *argv[])
     initialLoad = ReadInitialData(
         inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
         inversion_method, io_method, PSD0_io_method, density_saturation, include_boundary, Vl_BC_from_convection, Vu_BC_from_convection, run_remapping, run_convection,
-        run_radial_diffusion, run_local_diffusion, positive_PSD, PSD_time_to_lst,
+        run_radial_diffusion, run_local_diffusion, run_coulomb_collision, positive_PSD, PSD_time_to_lst,
         PSD, P, R, V, K, L,
         P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
         Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
@@ -543,6 +545,13 @@ int main(int argc, char *argv[])
             Logger::message << "max(VR) = " << VR.maxabs() << std::endl;
         }
 
+        // Update convection velocities VV and log the maximum absolute values
+        if ((3 < V_size) && run_coulomb_collision)
+        {
+            VV.update(time_current, P, R, V, K);
+            Logger::message << "max(VV) = " << VV.maxabs() << std::endl;
+        }
+
         // Diffusion coefficients
         if ((3 < L_size) && (run_radial_diffusion))
         {
@@ -636,9 +645,94 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
+    // ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// COLOUMB CONVECTION WITH CONVECTION IN P, R and V
+    if ( (3 < P_size && 3 < R_size && 3 < V_size) && run_convection && run_coulomb_collision ) {
+            progress_count = 0;
+            progress_total = K_size;
+            Logger::message << "3D Convection (P,R,V):" << endl;
+            cout << "           ";  
+
+#pragma omp parallel shared(progress_total, progress_count) 
+        {
+            // define the slices needed for convection
+            Matrix3D<double> PSD_PRV(P_size, R_size, V_size);
+            Matrix2D<double> plow_boundary_slice(R_size, V_size);
+            Matrix2D<double> pup_boundary_slice(R_size, V_size);
+            Matrix2D<double> rlow_boundary_slice(P_size, V_size);
+            Matrix2D<double> rup_boundary_slice(P_size, V_size);
+            Matrix2D<double> vlow_boundary_slice(P_size, R_size);
+            Matrix2D<double> vup_boundary_slice(P_size, R_size);
+
+            Matrix3D<double> pgrid_slice(P_size, R_size, V_size);
+            Matrix3D<double> rgrid_slice(P_size, R_size, V_size);
+            Matrix3D<double> vgrid_slice(P_size, R_size, V_size);
+            Matrix3D<double> vp_slice(P_size, R_size, V_size);
+            Matrix3D<double> vr_slice(P_size, R_size, V_size);
+            Matrix3D<double> vv_slice(P_size, R_size, V_size);
+            Matrix3D<double> lossconv_slice(P_size, R_size, V_size);
+
+            // sources are set to zero and not updated during the loop
+            Matrix3D<double> source_slice = Sources.zSlice(0) * 0.0;
+
+#pragma omp for schedule(dynamic,1)
+             for (int iK = 0; iK < K_size; iK++) {
+
+                // Output current progress percentage when number of threads = 0
+                if (omp_get_thread_num() == 0) {
+                    cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
+                         << (int) ((double) progress_count / progress_total * 100) << "%" << flush;
+                }
+
+                // update all slices for convection
+                Pl_BC.zSlice(plow_boundary_slice, iK);
+                Pu_BC.zSlice(pup_boundary_slice, iK);
+                Rl_BC.zSlice(rlow_boundary_slice, iK);
+                Ru_BC.zSlice(rup_boundary_slice, iK);
+                Vl_BC.zSlice(vlow_boundary_slice, iK);
+                Vu_BC.zSlice(vup_boundary_slice, iK);
+
+                P.zSlice(pgrid_slice, iK);
+                R.zSlice(rgrid_slice, iK);
+                V.zSlice(vgrid_slice, iK);
+                VP.zSlice(vp_slice, iK);
+                VR.zSlice(vr_slice, iK);
+                VV.zSlice(vv_slice, iK);
+                Losses_conv.zSlice(lossconv_slice, iK);
+                PSD.zSlice(PSD_PRV, iK);
+
+                Convection_3D(
+                    PSD_PRV, pgrid_slice, rgrid_slice, vgrid_slice, P_size, R_size, V_size,
+                    plow_boundary_slice, pup_boundary_slice,
+                    rlow_boundary_slice, rup_boundary_slice,
+                    vlow_boundary_slice, vup_boundary_slice,
+                    Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type, Vu_BC_type,
+                    vp_slice, vr_slice, vv_slice, 
+                    source_slice, lossconv_slice,
+                    dt);     
+
+                // copy results back into PSD adding the 2d list PSD_PR for all values of iV,iK
+                for (int iP = 0; iP < P_size; iP++) {
+                    for (int iR = 0; iR < R_size; iR++) {
+                        for (int iV = V_size - 1; iV >= 0; iV--) {
+                            PSD[iP][iR][iV][iK] = PSD_PRV[iP][iR][iV];
+                        }
+                    }
+                }
+            }
+
+#pragma omp critical
+            progress_count += 1;
+        }
+            // Output final progress (it should be 100%)
+            cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "%" << endl;
+#pragma omp master
+            {
+            }
+	}
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Convection, for each V and K (therefore for each mu and J)
-        if ((3 < P_size || 3 < R_size) && run_convection)
+        if ((3 < P_size || 3 < R_size) && run_convection && not run_coulomb_collision)
         {
             progress_count = 0;
             progress_total = V_size * K_size;

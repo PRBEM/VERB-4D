@@ -144,7 +144,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
 	InversionMethod &inversion_method, IOMethod &io_method, IOMethod &PSD0_io_method, DensitySaturation &density_saturation,
 	bool &include_boundary, bool &Vl_BC_from_convection, bool &Vu_BC_from_convection, bool &run_remapping,
-	bool &run_convection, bool &run_radial_diffusion, bool &run_local_diffusion, bool &positive_PSD, bool &PSD_time_to_lst,
+	bool &run_convection, bool &run_radial_diffusion, bool &run_local_diffusion, bool &run_coulomb_collision, bool &positive_PSD, bool &PSD_time_to_lst,
 	Matrix4D<double> &PSD,
 	Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V, Matrix4D<double> &K, UpdatableMatrix < Matrix4D<double> > &L,
 	int &P_size, int &R_size, int &V_size, int &K_size, int &L_size,
@@ -190,6 +190,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	parameters.getParameter("run_convection", run_convection);
 	parameters.getParameter("run_radial_diffusion", run_radial_diffusion);
 	parameters.getParameter("run_local_diffusion", run_local_diffusion);
+	parameters.getParameter("run_coulomb_collision", run_coulomb_collision);
     parameters.getParameter("positive_PSD", positive_PSD);
 
 	parameters.getParameter("PSD0_io_method", PSD0_io_method);	
