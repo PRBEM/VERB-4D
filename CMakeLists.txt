@@ -19,10 +19,7 @@ file(GLOB_RECURSE VERB4D_HEADERS *.h)
 
 # Add new source files here and re-run cmake
 set(VERB4D_SOURCES
-    src/VERB4D_Solver.cpp)
-
-set(VERB4D_SOURCES
-    ${VERB4D_SOURCES}
+    src/VERB4D_Solver.cpp
     src/Convection_1D_ULTIMATE_QUICKEST6.cpp
     src/Convection_2D.cpp
     src/Diffusion_1D.cpp
@@ -167,3 +164,12 @@ if(${FAST_CONVECTION})
     add_definitions(-DFAST_CONVECTION)
 endif()
 unset(FAST_CONVECTION CACHE)
+
+# Python bindings
+if (${PYTHON_BINDINGS})
+    include_directories(${PROJECT_SOURCE_DIR}/extern/pybind11/include ${PROJECT_SOURCE_DIR}/src/python_bindings ${PROJECT_SOURCE_DIR}/src)
+    add_subdirectory(extern/pybind11)
+    pybind11_add_module(verb4d_solver src/python_bindings/Define_python_modules.cpp ${VERB4D_SOURCES})
+    target_link_libraries(verb4d_solver PUBLIC ${DEPLIBS})
+endif()
+unset(PYTHON_BINDINGS CACHE)

@@ -1,8 +1,9 @@
-#ifndef BOUNDARY_CONDITION_TYPE_H_
-#define BOUNDARY_CONDITION_TYPE_H_
+#pragma once
 
-#include <string>
+#include <iostream>
+#include <sstream>
 #include <stdexcept>
+#include <string>
 
 enum class BoundaryConditionType { Periodic, ConstantValue, ConstantDerivative };
 constexpr char PERIODIC_STR[]         = "BCT_PERIODIC";
@@ -39,4 +40,3 @@ inline std::stringstream& operator>>(std::stringstream& ss, BoundaryConditionTyp
     else throw(std::invalid_argument("Encountered invalid BoundaryConditionType!"));
     return ss;
 }
-#endif

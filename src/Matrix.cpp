@@ -231,6 +231,16 @@ Matrix1D<T>::Matrix1D( const Matrix1D<T> &M ) {
 	this->operator = (M);
 }
 
+template <class T>
+Matrix1D<T>::Matrix1D(size_t size_q1, const T *data) {
+    this->size_q1 = size_q1;
+    this->AllocateMemory(this->size_q1);
+
+    // fast values copying as a memory range
+    memcpy(matrix_array, data, this->size_q1 * sizeof(T));
+}
+
+
 /**
 * Destructor. Destruct the class.
 */
@@ -1405,6 +1415,16 @@ template<class T>
 Matrix2D<T>::Matrix2D( const Matrix2D<T> &M ) {
 	initialized = false;
 	this->operator = (M);
+}
+
+template <class T>
+Matrix2D<T>::Matrix2D(const ssize_t *sizes, const T *data) {
+    size_q1 = sizes[0];
+    size_q2 = sizes[1];
+    AllocateMemory(size_q1, size_q2);
+
+    // fast values copying as a memory range
+    memcpy(plane_array, data, size_q2 * size_q1 * sizeof(T));
 }
 
 /**

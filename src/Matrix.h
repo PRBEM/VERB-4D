@@ -48,10 +48,9 @@
 template <typename T>
 class Matrix1D {
 private:
-	T *plane_array = nullptr;
 	size_t num_elements = 0;
 public:
-
+	T *plane_array = nullptr;
 	T *matrix_array = nullptr;						///< Array to keep the values
 	bool initialized = false;						///< Flag, equal true if initialized
 	size_t size_q1 = 0;								///< size x
@@ -61,8 +60,9 @@ public:
 	Matrix1D() = default;
 	Matrix1D( size_t size_q1);
 	Matrix1D( const Matrix1D<T> &M );
+    Matrix1D<T>(size_t size_q1, const T* data);     // pybind is using this constructor
 	~Matrix1D();
-
+	
 	virtual void AllocateMemory( size_t size_q1 );
 
 	// Operators
@@ -143,11 +143,11 @@ private:
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y] can be used.
 	/// Also, all rows saved in the memory one after another as a big array. So Matrix[x+x_size*y] can be also used.
 	T **matrix_array = nullptr;
-	T *plane_array = nullptr;
 	size_t num_elements = 0;
 public:
 	// const static int N_of_dimentions2 = 2;									///< Not used anywhere
 
+	T *plane_array = nullptr;
 	bool initialized = false;														///< Flag, equal true if initialized
 	size_t size_q1 = 0;															///< size x
 	size_t size_q2 = 0;															 ///< size_y
@@ -157,6 +157,7 @@ public:
 	Matrix2D() = default;
 	Matrix2D( const Matrix2D<T> &M );
 	Matrix2D( size_t size_q1, size_t size_q2 );
+    Matrix2D(const ssize_t* sizes, const T* data); 	// pybind is using this constructor
 	~Matrix2D();
 
 	virtual void AllocateMemory(size_t size_q1, size_t size_q2);
@@ -245,11 +246,11 @@ template <typename T>
 class Matrix3D {
 private:
 	/// Plane array of values. All rows saved in the memory one after anouther as a big array.
-	T *plane_array = nullptr;
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y][z] can be used.
 	T ***matrix_array = nullptr;
 	size_t num_elements = 0;
 public:
+	T *plane_array = nullptr;
 	bool initialized = false;														///< Flag, equal true if initialized
 	size_t size_q1 = 0;															///< size x
 	size_t size_q2 = 0;															///< size y
@@ -369,11 +370,11 @@ public:
 template <typename T> class Matrix4D {
 private:
 	/// Plane array of values. All rows saved in the memory one after anouther as a big array.
-	T *plane_array = nullptr;
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[w][x][y][z] can be used.
 	T ****matrix_array = nullptr;
 	size_t num_elements = 0;
 public:
+	T *plane_array = nullptr;
 	bool initialized = false;														///< Flag, equal true if initialized
 	size_t size_w = 0;																///< size w
 	size_t size_x = 0;																///< size x
