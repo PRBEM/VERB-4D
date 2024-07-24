@@ -142,7 +142,7 @@ void ReadBoundaryCondition(
 */
 bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* argv[],
 	double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
-	string &inversion_method, string &io_method, string &PSD0_io_method,
+	InversionMethod &inversion_method, IOMethod &io_method, IOMethod &PSD0_io_method,
 	bool &include_boundary, bool &Vl_BC_from_convection, bool &Vu_BC_from_convection, bool &run_remapping,
 	bool &run_convection, bool &run_radial_diffusion, bool &run_local_diffusion, bool &positive_PSD, bool &PSD_time_to_lst,
 	Matrix4D<double> &PSD,
@@ -162,8 +162,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	UpdatableListMatrix<Matrix4D<double>> &DKK, UpdatableListMatrix<Matrix4D<double>> &DVK,
 	UpdatableMatrix<Matrix4D<double>> &VP, UpdatableMatrix<Matrix4D<double>> &VL,
 	UpdatableMatrix<Matrix4D<double>> &G_local, UpdatableMatrix<Matrix4D<double>> &G_radial,
-	UpdatableListMatrix<Matrix4D<double>> &Sources, 
-	UpdatableListMatrix<Matrix4D<double>> &Losses, 
+	UpdatableListMatrix<Matrix4D<double>> &Sources, UpdatableListMatrix<Matrix4D<double>> &Losses, 
 	UpdatableListMatrix<Matrix4D<double>> &Losses_conv
 ) {
 	Parameters parameters("parameters.ini", argc, argv);
@@ -200,16 +199,16 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
     parameters.findParameter("initial_PSD", "PSD0") >> initial_PSD;
 
     // NOTE: this option is left only for backward compatibility of the code and is excessive
-    string use_matlab = "false";
+    bool use_matlab = false;
     parameters.getParameter("use_matlab", use_matlab);
 
-    if (use_matlab == "true"){
-        io_method = "matlab";
+    if (use_matlab){
+        io_method = IOMethod::Matlab;
     }
 
 #if !(MATLAB_CAPABLE)
 {
-	if (io_method.compare("matlab") == 0){
+	if (io_method == IOMethod::Matlab){
         printf("Error! Trying to use matlab files but the executable was compiled without matlab capabilities.");
         exit(EXIT_FAILURE);
 	}
@@ -320,10 +319,10 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	L.update(time_first, P, R, V, K); // Load L-star so it'll be available
 	
-	std::string psd0_format = "ascii";
+	IOMethod psd0_format = IOMethod::ASCII;
     if(std::filesystem::exists(InputFolder + initial_PSD + ".pltb"))
 	{
-		psd0_format = "binary";
+		psd0_format = IOMethod::Binary;
 	}
     PSD.readFromAnyFile(InputFolder + initial_PSD, psd0_format);
 

@@ -7,20 +7,21 @@
  *      Author: dimath
  */
 
-#ifndef PARAMETERS_H_
-#define PARAMETERS_H_
+#pragma once
 
 #include <string>
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <vector>
+#include <cctype>
+#include <algorithm>
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdexcept>
 
 #include "Logger.h"
-
 
 /**
 @brief Holds the parameters along with their corresponding file and arguments 
@@ -49,4 +50,9 @@ public:
 };
 
 
-#endif /* PARAMETERS_H_ */
+template <typename T>
+void stringToValue(const std::string& parameter_value_string, T& variable);
+
+enum class IOMethod {ASCII, Binary, Matlab};
+enum class InversionMethod {ADI, ADI1, ADI2, MKL, Lapack};
+enum class DensitySaturation {Off, WithTimescale, WithoutTimescale, LimitSource};

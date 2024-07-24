@@ -128,7 +128,7 @@ void Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 
 		// if argument is empty or commented out, save the default value
 		if (line.size() == 0 || line[0] == '#') {
-			Logger::message << parameterName << " = " << variable << " (default value)" << std::endl;
+			//Logger::message << parameterName << " = " << variable << " (default value)" << std::endl;
 			continue;
 		}
 
@@ -137,9 +137,7 @@ void Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 		if (line.find(parameterName) != std::string::npos) {
 			parameterValue = line.substr(line.find("=") + 1);
 			Logger::message << parameterName << " = " << parameterValue << std::endl;
-					// stringstream(parameterValue) >> variable;
-			std::stringstream tmp(parameterValue);
-			tmp >> std::boolalpha >> variable;
+			stringToValue(parameterValue, variable);
 			return;
 		}
 	}
@@ -155,12 +153,9 @@ void Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 		// set the parameter value if it can find its name in the current line
 		// log the value and store the value into variable
 		if (line.find(parameterName) != std::string::npos) {
-			parameterValue = line.substr(line.find("=") + 1);
+			parameterValue = line.substr(line.find("=") + 2); // +2 strips of the whitespace
 			Logger::message << parameterName << " = " << parameterValue << std::endl;
-			// stringstream(parameterValue) >> variable;
-			std::stringstream tmp(parameterValue);
-			tmp >> std::boolalpha >> variable;
-			Logger::message << variable << std::endl;
+			stringToValue(parameterValue, variable);
 			return;
 		}
 	}
@@ -186,3 +181,96 @@ template void Parameters::getParameter(std::string, long&, bool);
 template void Parameters::getParameter(std::string, bool&, bool);
 template void Parameters::getParameter(std::string, std::string&, bool);
 template void Parameters::getParameter(std::string, BoundaryConditionType&, bool);
+template void Parameters::getParameter(std::string, IOMethod&, bool);
+template void Parameters::getParameter(std::string, InversionMethod&, bool);
+
+
+// helper functions to insensitive case compare two strings
+bool ichar_equals(char a, char b)
+{
+    return std::tolower(static_cast<unsigned char>(a)) ==
+           std::tolower(static_cast<unsigned char>(b));
+}
+bool iequals(const std::string& a, const std::string& b)
+{
+    return std::equal(a.begin(), a.end(), b.begin(), b.end(), ichar_equals);
+}
+
+// helper functions to convert paramter strings into values
+template <typename T>
+void stringToValue(const std::string& parameter_value_string, T& variable) {
+	std::stringstream tmp(parameter_value_string);
+	tmp >> variable;
+}
+
+template <>
+void stringToValue(const std::string& parameter_value_string, bool& variable) {
+	if (iequals(parameter_value_string, "true")) {
+		variable = true;
+	} else if (iequals(parameter_value_string, "false")) {
+		variable = false;
+	} else {
+		printf("Encountered invalid value for boolean parameter:%s\n", parameter_value_string.c_str());
+		exit(EXIT_FAILURE);
+	}
+}
+
+template <>
+void stringToValue(const std::string& parameter_value_string, DensitySaturation& density_saturation) {
+	if (iequals(parameter_value_string, "off")) {
+		density_saturation = DensitySaturation::Off;
+		return;
+	}
+	if (iequals(parameter_value_string, "with_timescale")) {
+		density_saturation = DensitySaturation::WithTimescale;
+		return;
+	}
+	if (iequals(parameter_value_string, "without_timescale")) {
+		density_saturation = DensitySaturation::WithoutTimescale;
+		return;
+	}
+	if (iequals(parameter_value_string, "limit_source")) {
+		density_saturation = DensitySaturation::LimitSource;
+		return;
+	}
+}
+
+template <>
+void stringToValue(const std::string& parameter_value_string, IOMethod& io_method) {
+	if (iequals(parameter_value_string, "matlab")) {
+		io_method = IOMethod::Matlab;
+		return;
+	}
+	if (iequals(parameter_value_string, "binary")) {
+		io_method = IOMethod::Binary;
+		return;
+	}
+	if (iequals(parameter_value_string, "ascii")) {
+		io_method = IOMethod::ASCII;
+		return;
+	}
+}
+
+template <>
+void stringToValue(const std::string& parameter_value_string, InversionMethod& inversion_method) {
+	if (iequals(parameter_value_string, "ADI")) {
+		inversion_method = InversionMethod::ADI;
+		return;
+	}
+	if (iequals(parameter_value_string, "ADI1")) {
+		inversion_method = InversionMethod::ADI1;
+		return;
+	}
+	if (iequals(parameter_value_string, "ADI2")) {
+		inversion_method = InversionMethod::ADI2;
+		return;
+	}
+		if (iequals(parameter_value_string, "Lapack")) {
+		inversion_method = InversionMethod::Lapack;
+		return;
+	}
+	if (iequals(parameter_value_string, "MKL")) {
+		inversion_method = InversionMethod::MKL;
+		return;
+	}
+}

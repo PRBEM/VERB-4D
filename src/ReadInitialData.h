@@ -33,7 +33,7 @@
 //		long int &it_total, double &dt, double &output_time, double &total_time, int &output_step);
 bool ReadInitialData(std::string &InputFolder, std::string &OutputFolder, int argc, char* argv[],
 	double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
-	std::string &inversion_method, std::string &io_method, std::string &PSD0_io_method,
+	InversionMethod &inversion_method, IOMethod &io_method, IOMethod &PSD0_io_method,
 	bool &include_boundary, bool &Vl_BC_from_convection, bool &Vu_BC_from_convection, bool &run_remapping,
 	bool &run_convection, bool &run_radial_diffusion, bool &run_local_diffusion, bool &positive_PSD, bool &PSD_time_to_lst,
 	Matrix4D<double> &PSD,
@@ -53,8 +53,7 @@ bool ReadInitialData(std::string &InputFolder, std::string &OutputFolder, int ar
 	UpdatableListMatrix<Matrix4D<double>> &DKK, UpdatableListMatrix<Matrix4D<double>> &DVK,
 	UpdatableMatrix<Matrix4D<double>> &VP, UpdatableMatrix<Matrix4D<double>> &VL,
 	UpdatableMatrix<Matrix4D<double>> &G_local, UpdatableMatrix<Matrix4D<double>> &G_radial,
-	UpdatableListMatrix<Matrix4D<double>> &Sources, 
-	UpdatableListMatrix<Matrix4D<double>> &Losses, 
+	UpdatableListMatrix<Matrix4D<double>> &Sources, UpdatableListMatrix<Matrix4D<double>> &Losses, 
 	UpdatableListMatrix<Matrix4D<double>> &Losses_conv
 );
 

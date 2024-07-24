@@ -3767,15 +3767,15 @@ void Matrix3D<T>::readFromBinaryFile(const std::string& filename) {
 * WARNING: writing to 3D matlab array is not available at the moment
 */
 template<class T>
-void Matrix3D<T>::writeToAnyFile(const std::string& filename, const std::string& io_method, const std::string& info) const {
+void Matrix3D<T>::writeToAnyFile(const std::string& filename, const IOMethod& io_method, const std::string& info) const {
     std::string ext;
-    if (io_method.compare("ascii") == 0){
+    if (io_method == IOMethod::ASCII){
         ext = ".plt";
         writeToFile(filename + ext, info);
-    } else if (io_method.compare("binary") == 0) {
+    } else if (io_method == IOMethod::Binary) {
         ext = ".pltb";
         writeToBinaryFile(filename + ext);
-    } else if (io_method.compare("matlab") == 0) {
+    } else if (io_method == IOMethod::Matlab) {
         printf("Writing to 3D arrays to MATLAB filse is not available in the moment");
         //ext = ".mat";
         //writeToMatlabFile(filename + ext);
@@ -3789,15 +3789,15 @@ void Matrix3D<T>::writeToAnyFile(const std::string& filename, const std::string&
 * Read 3D data from .plt, .pltb or .mat files containing only one column
 */
 template<class T>
-void Matrix3D<T>::readFromAnyFile(const std::string& filename, const std::string& io_method) {
+void Matrix3D<T>::readFromAnyFile(const std::string& filename, const IOMethod& io_method) {
     std::string ext;
-    if (io_method.compare("ascii") == 0){
+    if (io_method == IOMethod::ASCII){
         ext = ".plt";
         readFromFile(filename + ext, 1);
-    } else if (io_method.compare("binary") == 0){
+    } else if (io_method == IOMethod::Binary){
         ext = ".pltb";
         readFromBinaryFile(filename + ext);
-    } else if (io_method.compare("matlab") == 0){
+    } else if (io_method == IOMethod::Matlab){
         ext = ".mat";
         readFromMatlabFile(filename + ext, 1);
     } else {
@@ -3811,15 +3811,15 @@ void Matrix3D<T>::readFromAnyFile(const std::string& filename, const std::string
 * WARNING: if io_method == "binary", .pltb file does not contain grid. In this case the function works the same as Matrix3D<T>::readFromAnyFile(std::string, std::string, int)
 */
 template<class T>
-void Matrix3D<T>::readFromAnyFile(const std::string& filename, const std::string& io_method, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3){
+void Matrix3D<T>::readFromAnyFile(const std::string& filename, const IOMethod& io_method, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3){
     std::string ext;
-    if (io_method.compare("ascii") == 0){
+    if (io_method == IOMethod::ASCII){
         ext = ".plt";
         readFromFile(filename + ext, grid_q1, grid_q2, grid_q3);
-    } else if (io_method.compare("binary") == 0) {
+    } else if (io_method == IOMethod::Binary) {
         ext = ".pltb";
         readFromBinaryFile(filename + ext);
-    } else if (io_method.compare("matlab") == 0) {
+    } else if (io_method == IOMethod::Matlab) {
         ext = ".mat";
         readFromMatlabFile(filename + ext, grid_q1, grid_q2, grid_q3);
     } else {
@@ -5583,15 +5583,15 @@ void Matrix4D<T>::writeToBinaryFile(const std::string& filename) const {
 * Write 4D data to .plt, .pltb or .mat files. No info is written for .pltb file
 */
 template<class T>
-void Matrix4D<T>::writeToAnyFile(const std::string& filename, const std::string& io_method, const std::string& info) const {
+void Matrix4D<T>::writeToAnyFile(const std::string& filename, const IOMethod& io_method, const std::string& info) const {
     std::string ext;
-    if (io_method.compare("ascii") == 0){
+    if (io_method == IOMethod::ASCII){
         ext = ".plt";
         writeToFile(filename + ext, info);
-    } else if (io_method.compare("binary") == 0) {
+    } else if (io_method == IOMethod::Binary) {
         ext = ".pltb";
         writeToBinaryFile(filename + ext);
-    } else if (io_method.compare("matlab") == 0) {
+    } else if (io_method == IOMethod::Matlab) {
         ext = ".mat";
         writeToMatlabFile(filename + ext, info);
     } else {
@@ -5601,13 +5601,13 @@ void Matrix4D<T>::writeToAnyFile(const std::string& filename, const std::string&
 }
 
 template<class T>
-std::string Matrix4D<T>::getExtByIoMethod(const std::string& io_method) const {
+std::string Matrix4D<T>::getExtByIoMethod(const IOMethod& io_method) const {
 	std::string ext;
-    if (io_method.compare("ascii") == 0){
+    if (io_method == IOMethod::ASCII){
         ext = ".plt";
-    } else if (io_method.compare("binary") == 0) {
+    } else if (io_method == IOMethod::Binary) {
         ext = ".pltb";
-    } else if (io_method.compare("matlab") == 0) {
+    } else if (io_method == IOMethod::Matlab) {
         ext = ".mat";
     } else {
         printf("IO error: unknown io_method");
@@ -5617,7 +5617,7 @@ std::string Matrix4D<T>::getExtByIoMethod(const std::string& io_method) const {
 }
 
 template<class T>
-void Matrix4D<T>::writeToLstFile(const std::string& filename, const std::string& io_method, const std::string& info, const std::string& output_folder) const {
+void Matrix4D<T>::writeToLstFile(const std::string& filename, const IOMethod& io_method, const std::string& info, const std::string& output_folder) const {
 	
 	std::string ext = getExtByIoMethod(io_method);
 	std::string full_filename = filename + ext;
@@ -5678,15 +5678,15 @@ void Matrix4D<T>::readFromBinaryFile(const std::string& filename) {
 * Read 4D data from .plt, .pltb or .mat files containing only one column
 */
 template<class T>
-void Matrix4D<T>::readFromAnyFile(const std::string& filename, const std::string& io_method) {
+void Matrix4D<T>::readFromAnyFile(const std::string& filename, const IOMethod& io_method) {
     std::string ext;
-    if (io_method.compare("ascii") == 0){
+    if (io_method == IOMethod::ASCII){
         ext = ".plt";
         readFromFile(filename + ext, 1);
-    } else if (io_method.compare("binary") == 0){
+    } else if (io_method == IOMethod::Binary){
         ext = ".pltb";
         readFromBinaryFile(filename + ext);
-    } else if (io_method.compare("matlab") == 0){
+    } else if (io_method == IOMethod::Matlab){
         ext = ".mat";
         readFromMatlabFile(filename + ext, 1);
     } else {
@@ -5700,15 +5700,15 @@ void Matrix4D<T>::readFromAnyFile(const std::string& filename, const std::string
 * WARNING: if io_method == "binary", .pltb file does not contain grid. In this case the function works the same as Matrix4D<T>::readFromAnyFile(std::string, std::string, int)
 */
 template<class T>
-void Matrix4D<T>::readFromAnyFile(const std::string& filename, const std::string& io_method, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z){
+void Matrix4D<T>::readFromAnyFile(const std::string& filename, const IOMethod& io_method, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z){
     std::string ext;
-    if (io_method.compare("ascii") == 0){
+    if (io_method == IOMethod::ASCII){
         ext = ".plt";
         readFromFile(filename + ext, grid_w, grid_x, grid_y, grid_z);
-    } else if (io_method.compare("binary") == 0) {
+    } else if (io_method == IOMethod::Binary) {
         ext = ".pltb";
         readFromBinaryFile(filename + ext);
-    } else if (io_method.compare("matlab") == 0) {
+    } else if (io_method == IOMethod::Matlab) {
         ext = ".mat";
         readFromMatlabFile(filename + ext, grid_w, grid_x, grid_y, grid_z);
     } else {

@@ -164,7 +164,7 @@ using namespace std;
 #define min_V 1e-10
 #define min_Dxx 1e-10
 
-void write_PSD_output(const std::string &io_method, const std::string &PSD_filename, const double &time, const Matrix4D<double> PSD, const bool &PSD_time_to_lst, const std::string &output_folder)
+void write_PSD_output(const IOMethod &io_method, const std::string &PSD_filename, const double &time, const Matrix4D<double> PSD, const bool &PSD_time_to_lst, const std::string &output_folder)
 {
     std::ostringstream time_string;
     time_string.precision(5);
@@ -257,9 +257,9 @@ int main(int argc, char *argv[])
     // Instead ADI should be used for parallelization - It should be changed in the matlab Conv_Dif.m file if using more than 1 thread
     std::string inputFolder = "./VERB4D_input/";
     std::string outputFolder = "./VERB4D_output/";
-    std::string inversion_method = "Lapack";
-    std::string io_method = "ascii";
-    std::string PSD0_io_method = "ascii";
+    InversionMethod inversion_method = InversionMethod::Lapack;
+    IOMethod io_method = IOMethod::ASCII;
+    IOMethod PSD0_io_method = IOMethod::ASCII;
     bool include_boundary = true;
     bool Vl_BC_from_convection = false;
     bool Vu_BC_from_convection = false;
@@ -291,8 +291,6 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    exit(1);
-
 #ifdef DATA_ASSIMILATION
     da::DataAssimilationManagerConvection daManagerConvection{
         "parameters_da.ini", time_first, time_first + time_total, V.wxSlice(0, 0), K.wxSlice(0, 0), P_size, R_size, outputFolder};
@@ -314,9 +312,9 @@ int main(int argc, char *argv[])
     Logger::message << "Total time " << time_total << ". Time step " << dt << " (" << it_total << " steps)." << std::endl;
     Logger::message << "Output each " << output_step << " step. " << std::endl;
 
-    if (PSD0_io_method == "ascii")
+    if (PSD0_io_method == IOMethod::ASCII)
         PSD.writeToFile(outputFolder + "PSD0.plt", P, R, V, K);
-    else if (PSD0_io_method == "binary")
+    else if (PSD0_io_method == IOMethod::Binary)
         PSD.writeToBinaryFile(outputFolder + "PSD0.pltb");
 
     // Output zero step - writing PSD_0 file
@@ -370,7 +368,7 @@ int main(int argc, char *argv[])
     // Check time-step for ADI method - the stable time step is completely empirical (i.e. made-up)
     // This isn't really working I think.
     // Only throws error if time step is too large - else has no effect on remaining calculations
-    if (inversion_method == "ADI")
+    if (inversion_method == InversionMethod::ADI)
     {
         // This check should be included for other inversion_methods
         if (sqrt(1.0 / V.size_y) <= dt)
@@ -380,10 +378,6 @@ int main(int argc, char *argv[])
         }
         Logger::message << "Calculating with "
                         << "Diffusion_2D_ADI3" << std::endl;
-    }
-    else
-    {
-        Logger::message << inversion_method << std::endl;
     }
 
     // Indexers to keep track of P,R,V,K,L
@@ -419,7 +413,7 @@ int main(int argc, char *argv[])
     std::vector<sparse_matrix_t*> sparse_matrix_handles;
     std::vector<std::vector<int>> column_indices;
     std::vector<std::vector<int>> rows_csr;
-    if( inversion_method == "MKL" && run_local_diffusion)
+    if( inversion_method == InversionMethod::MKL && run_local_diffusion)
     {
         std::vector<double> dummy_values;
         initialize_sparse_values(
@@ -855,7 +849,7 @@ int main(int argc, char *argv[])
 
                     // 2d diffusion
                     // If parameters.ini specify "Lapack" then Lapack will be used
-                    if (inversion_method == "Lapack") {
+                    if (inversion_method == InversionMethod::Lapack) {
                         Diffusion_2D(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
                                      Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR),  // P, R, K
                                      Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
@@ -865,21 +859,21 @@ int main(int argc, char *argv[])
                     }
                     // Currently setup to calculate 2d Diffusion using Diffusion_2D_ADI3
                     // Can change to Diffusion_2D_ADI1 or Diffusion_2D_ADI2 for different methods of inversion
-                    else if (inversion_method == "ADI") {
+                    else if (inversion_method == InversionMethod::ADI) {
                         Diffusion_2D_ADI3(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
                                           Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR),  // P, R, K
                                           Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
                                           Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
                                           DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
                                           Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
-                    } else if (inversion_method == "ADI2") {
+                    } else if (inversion_method == InversionMethod::ADI2) {
                         Diffusion_2D_ADI2(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
                                           Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR),  // P, R, K
                                           Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
                                           Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
                                           DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
                                           Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
-                    } else if (inversion_method == "ADI1") {
+                    } else if (inversion_method == InversionMethod::ADI1) {
                         Diffusion_2D_ADI1(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
                                           Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR),  // P, R, K
                                           Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
@@ -887,7 +881,7 @@ int main(int argc, char *argv[])
                                           DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
                                           Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
                     } else {
-                        Logger::error << "Error: Unknown inversion method " << inversion_method << std::endl;
+                        Logger::error << "Error: Unknown inversion method!" << std::endl;
                     }
 
                     // copy results back

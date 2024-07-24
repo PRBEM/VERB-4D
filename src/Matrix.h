@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <ctime>
 #include <algorithm>
+#include "Parameters.h"
 
 // Matlab library which will have to be linked at compile time
 // Usually found in matlabroot/extern/include where matlabroot is the result of typing the matlabroot command into matlab
@@ -321,9 +322,9 @@ public:
     virtual void writeToBinaryFile(const std::string& filename) const;
     virtual void readFromBinaryFile(const std::string& filename);
 
-    virtual void writeToAnyFile(const std::string& filename, const std::string& io_method, const std::string& info) const;
-    virtual void readFromAnyFile(const std::string& filename, const std::string& io_method);
-    virtual void readFromAnyFile(const std::string& filename, const std::string& io_method, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3);
+    virtual void writeToAnyFile(const std::string& filename, const IOMethod& io_method, const std::string& info) const;
+    virtual void readFromAnyFile(const std::string& filename, const IOMethod& io_method);
+    virtual void readFromAnyFile(const std::string& filename, const IOMethod& io_method, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3);
 
 	// Some other stuff
 	std::string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
@@ -450,12 +451,12 @@ public:
     virtual void writeToBinaryFile(const std::string& filename) const;
     virtual void readFromBinaryFile(const std::string& filename);
 
-    virtual void writeToAnyFile(const std::string& filename, const std::string& io_method, const std::string& info) const;
-    virtual void readFromAnyFile(const std::string& filename, const std::string& io_method);
-    virtual void readFromAnyFile(const std::string& filename, const std::string& io_method, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z);
+    virtual void writeToAnyFile(const std::string& filename, const IOMethod& io_method, const std::string& info) const;
+    virtual void readFromAnyFile(const std::string& filename, const IOMethod& io_method);
+    virtual void readFromAnyFile(const std::string& filename, const IOMethod& io_method, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z);
 
-	virtual std::string getExtByIoMethod(const std::string& io_method) const;
-	virtual void writeToLstFile(const std::string& filename, const std::string& io_method, const std::string& info, const std::string& output_folder) const;
+	virtual std::string getExtByIoMethod(const IOMethod& io_method) const;
+	virtual void writeToLstFile(const std::string& filename, const IOMethod& io_method, const std::string& info, const std::string& output_folder) const;
 
 	// Some other stuff
 	std::string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
