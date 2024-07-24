@@ -239,6 +239,10 @@ int main(int argc, char *argv[])
     BoundaryConditionType Kl_BC_type, Ku_BC_type;
     BoundaryConditionType Ll_BC_type, Lu_BC_type;
 
+    // Matrices for plasmasphere simulations
+    Matrix4D<double> SaturationDensity;
+    Matrix4D<double> SaturationTimescale;
+
     // Parameters input
     int P_size, R_size, V_size, K_size, L_size;
 
@@ -260,6 +264,7 @@ int main(int argc, char *argv[])
     InversionMethod inversion_method = InversionMethod::Lapack;
     IOMethod io_method = IOMethod::ASCII;
     IOMethod PSD0_io_method = IOMethod::ASCII;
+    DensitySaturation density_saturation = DensitySaturation::Off;
     bool include_boundary = true;
     bool Vl_BC_from_convection = false;
     bool Vu_BC_from_convection = false;
@@ -276,13 +281,13 @@ int main(int argc, char *argv[])
     // These inputs come from the matlab files that are generated when running Conv_Dif.m examples
     initialLoad = ReadInitialData(
         inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
-        inversion_method, io_method, PSD0_io_method, include_boundary, Vl_BC_from_convection, Vu_BC_from_convection, run_remapping, run_convection,
+        inversion_method, io_method, PSD0_io_method, density_saturation, include_boundary, Vl_BC_from_convection, Vu_BC_from_convection, run_remapping, run_convection,
         run_radial_diffusion, run_local_diffusion, positive_PSD, PSD_time_to_lst,
         PSD, P, R, V, K, L,
         P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
         Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
         Vu_BC_type, Kl_BC_type, Ku_BC_type, Ll_BC_type, Lu_BC_type, DLL, DVV, DKK, DVK, VP, VR, G_local, G_radial,
-        Sources, Losses, Losses_conv);
+        Sources, Losses, Losses_conv, SaturationDensity, SaturationTimescale);
 
     // Check that all nesesarry files were loaded
     if (!initialLoad)
@@ -560,6 +565,35 @@ int main(int argc, char *argv[])
         Losses.update(time_current, P, R, V, K);
         Losses_conv.update(time_current, P, R, V, K);
 
+        if (density_saturation == DensitySaturation::WithTimescale) {
+            Sources = SaturationDensity - PSD;
+            for (int iP = 0; iP < P_size; ++iP)
+                for (int iR = 0; iR < R_size; ++iR)
+                    for (int iV = 0; iV < V_size; ++iV)
+                        for (int iK = 0; iK < K_size; ++iK) {
+                            Sources[iP][iR][iV][iK] = Sources[iP][iR][iV][iK] / SaturationTimescale[iP][iR][iV][iK];
+                            if (Sources[iP][iR][iV][iK] < 1e-21)
+                                Sources[iP][iR][iV][iK] = 1e-21;
+                        }
+        } else if (density_saturation == DensitySaturation::WithoutTimescale) {
+            for (int iP = 0; iP < P_size; ++iP)
+                for (int iR = 0; iR < R_size; ++iR)
+                    for (int iV = 0; iV < V_size; ++iV)
+                        for (int iK = 0; iK < K_size; ++iK)
+                            if (PSD[iP][iR][iV][iK] > SaturationDensity[iP][iR][iV][iK])
+                                PSD[iP][iR][iV][iK] = SaturationDensity[iP][iR][iV][iK];
+
+        } else if (density_saturation == DensitySaturation::LimitSource) {
+            for (int iP = 0; iP < P_size; ++iP)
+                for (int iR = 0; iR < R_size; ++iR)
+                    for (int iV = 0; iV < V_size; ++iV)
+                        for (int iK = 0; iK < K_size; ++iK) {
+                            if (PSD[iP][iR][iV][iK] >= SaturationDensity[iP][iR][iV][iK]) {
+                                Sources[iP][iR][iV][iK] = 1e-21;
+                            }
+                        }
+        }
+
         // Boundary conditions
         // By default - it's constant PSD
         if (R_size > 3)
@@ -624,6 +658,7 @@ int main(int argc, char *argv[])
                 Matrix2D<double> vp_slice(P_size, R_size);
                 Matrix2D<double> vr_slice(P_size, R_size);
                 Matrix2D<double> lossconv_slice(P_size, R_size);
+                Matrix2D<double> sources_slice(P_size, R_size);
 
                 // Looping it backward allows to speed-up the multithread simulation
                 // due to the highest energies being the slowest to calculate - calculating highest energy first
@@ -660,6 +695,7 @@ int main(int argc, char *argv[])
                         VP.yzSlice(vp_slice, iV, iK);
                         VR.yzSlice(vr_slice, iV, iK);
                         Losses_conv.yzSlice(lossconv_slice, iV, iK);
+                        Sources.yzSlice(sources_slice, iV, iK);
                         PSD.yzSlice(PSD_PR, iV, iK);
 
                         Convection_2D(
@@ -668,7 +704,7 @@ int main(int argc, char *argv[])
                             rlow_boundary_slice, rup_boundary_slice,
                             Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type,
                             vp_slice, vr_slice,
-                            lossconv_slice,
+                            sources_slice, lossconv_slice,
                             dt);
 
                         // copy results back into PSD adding the 2d list PSD_PR for all values of iV,iK

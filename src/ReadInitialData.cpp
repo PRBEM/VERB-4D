@@ -142,7 +142,7 @@ void ReadBoundaryCondition(
 */
 bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* argv[],
 	double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
-	InversionMethod &inversion_method, IOMethod &io_method, IOMethod &PSD0_io_method,
+	InversionMethod &inversion_method, IOMethod &io_method, IOMethod &PSD0_io_method, DensitySaturation &density_saturation,
 	bool &include_boundary, bool &Vl_BC_from_convection, bool &Vu_BC_from_convection, bool &run_remapping,
 	bool &run_convection, bool &run_radial_diffusion, bool &run_local_diffusion, bool &positive_PSD, bool &PSD_time_to_lst,
 	Matrix4D<double> &PSD,
@@ -163,7 +163,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	UpdatableMatrix<Matrix4D<double>> &VP, UpdatableMatrix<Matrix4D<double>> &VL,
 	UpdatableMatrix<Matrix4D<double>> &G_local, UpdatableMatrix<Matrix4D<double>> &G_radial,
 	UpdatableListMatrix<Matrix4D<double>> &Sources, UpdatableListMatrix<Matrix4D<double>> &Losses, 
-	UpdatableListMatrix<Matrix4D<double>> &Losses_conv
+	UpdatableListMatrix<Matrix4D<double>> &Losses_conv, Matrix4D<double> &SaturationDensity, Matrix4D<double> &SaturationTimescale
 ) {
 	Parameters parameters("parameters.ini", argc, argv);
 
@@ -194,6 +194,8 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	parameters.getParameter("PSD0_io_method", PSD0_io_method);	
 	parameters.getParameter("PSD_time_to_lst", PSD_time_to_lst);	
+
+    parameters.getParameter("density_saturation", density_saturation);
 
     string initial_PSD = "PSD0";
     parameters.findParameter("initial_PSD", "PSD0") >> initial_PSD;
@@ -363,9 +365,24 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	G_local.update(time_first, P, R, V, K);
 	G_radial.update(time_first, P, R, V, K);
 
-    if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K)){
-		Sources.readFromAnyFile(InputFolder + "Sources", io_method, P, R, V, K);
-	}
+    if (density_saturation == DensitySaturation::Off) {
+        if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K))
+            Sources.readFromAnyFile(InputFolder + "Sources", io_method, P, R, V, K);
+    } else if (density_saturation == DensitySaturation::WithTimescale) {
+        Sources = 0.;
+
+        SaturationDensity.AllocateMemory(P_size, R_size, V_size, K_size);
+        SaturationTimescale.AllocateMemory(P_size, R_size, V_size, K_size);
+
+        SaturationDensity.readFromAnyFile(InputFolder + "SaturationDensity", io_method, P, R, V, K);
+        SaturationTimescale.readFromAnyFile(InputFolder + "SaturationTimescale", io_method, P, R, V, K);
+    } else if (density_saturation == DensitySaturation::WithoutTimescale || density_saturation == DensitySaturation::LimitSource) {
+        if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K))
+            Sources.readFromAnyFile(InputFolder + "Sources", io_method, P, R, V, K);
+
+        SaturationDensity.AllocateMemory(P_size, R_size, V_size, K_size);
+        SaturationDensity.readFromAnyFile(InputFolder + "SaturationDensity", io_method, P, R, V, K);
+    }
 
     if (!Losses.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K)){
         Losses.readFromAnyFile(InputFolder + "Losses_losscone", io_method, P, R, V, K);

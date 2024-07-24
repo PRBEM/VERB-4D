@@ -35,7 +35,7 @@ bool Convection_2D(
 	BoundaryConditionType P_LBC_type, BoundaryConditionType P_UBC_type,
 	BoundaryConditionType R_LBC_type, BoundaryConditionType R_UBC_type,
 	const Matrix2D<double>& VP, const Matrix2D<double>& VR,
-	const Matrix2D<double>& Losses,
+	const Matrix2D<double>& Sources, const Matrix2D<double>& Losses,
 	double dt_total
 );
 

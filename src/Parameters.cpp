@@ -183,6 +183,7 @@ template void Parameters::getParameter(std::string, std::string&, bool);
 template void Parameters::getParameter(std::string, BoundaryConditionType&, bool);
 template void Parameters::getParameter(std::string, IOMethod&, bool);
 template void Parameters::getParameter(std::string, InversionMethod&, bool);
+template void Parameters::getParameter(std::string, DensitySaturation&, bool);
 
 
 // helper functions to insensitive case compare two strings

@@ -54,8 +54,9 @@ bool Convection_2D(
     BoundaryConditionType P_LBC_type, BoundaryConditionType P_UBC_type,
     BoundaryConditionType R_LBC_type, BoundaryConditionType R_UBC_type,
     const Matrix2D<double>& VP, const Matrix2D<double>& VR,
-    const Matrix2D<double>& Losses,
+    const Matrix2D<double>& Sources, const Matrix2D<double>& Losses,
     double dt_total) {
+
     // indexes
     int iR, iP;
 
@@ -155,9 +156,18 @@ bool Convection_2D(
                     PSD_PR[iP][iR] = PSD_R[iR] * R_R[iR] * R_R[iR];
             } 
         }
+
+        // Losses
         for (iP = 0; iP < P_size; iP++) {
             for (iR = 0; iR < R_size; iR++) {
                 PSD_PR[iP][iR] = PSD_PR[iP][iR] * losses_exp[iP][iR];
+            }
+        }
+
+        // Sources
+        for (iP = 0; iP < P_size; iP ++) {
+            for (iR = 1; iR < R_size - 1; iR++) {
+                PSD_PR[iP][iR] = PSD_PR[iP][iR] + Sources[iP][iR] * dt;
             }
         }
     }
