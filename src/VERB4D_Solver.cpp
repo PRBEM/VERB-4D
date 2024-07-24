@@ -164,7 +164,7 @@ using namespace std;
 #define min_V 1e-10
 #define min_Dxx 1e-10
 
-void write_PSD_output(const std::string &io_method, const std::string &PSD_filename, const double &time, const Matrix4D<double> PSD, const std::string &PSD_time_to_lst, const std::string &output_folder)
+void write_PSD_output(const std::string &io_method, const std::string &PSD_filename, const double &time, const Matrix4D<double> PSD, const bool &PSD_time_to_lst, const std::string &output_folder)
 {
     std::ostringstream time_string;
     time_string.precision(5);
@@ -173,7 +173,7 @@ void write_PSD_output(const std::string &io_method, const std::string &PSD_filen
     time_string << time;
 
     PSD.writeToAnyFile(PSD_filename, io_method, time_string.str());
-    if (PSD_time_to_lst == "true")
+    if (PSD_time_to_lst)
     {        
         PSD.writeToLstFile(PSD_filename, io_method, time_string.str(), output_folder);
     }
@@ -258,17 +258,17 @@ int main(int argc, char *argv[])
     std::string inputFolder = "./VERB4D_input/";
     std::string outputFolder = "./VERB4D_output/";
     std::string inversion_method = "Lapack";
-    std::string include_boundary = "true";
-    std::string Vl_BC_from_convection = "false";
-    std::string Vu_BC_from_convection = "false";
     std::string io_method = "ascii";
-    std::string run_remapping = "true";
-    std::string run_convection = "true";
-    std::string run_radial_diffusion = "true";
-    std::string run_local_diffusion = "true";
-    std::string positive_PSD = "false";
     std::string PSD0_io_method = "ascii";
-    std::string PSD_time_to_lst = "false";
+    bool include_boundary = true;
+    bool Vl_BC_from_convection = false;
+    bool Vu_BC_from_convection = false;
+    bool run_remapping = true;
+    bool run_convection = true;
+    bool run_radial_diffusion = true;
+    bool run_local_diffusion = true;
+    bool positive_PSD = false;
+    bool PSD_time_to_lst = false;
 
     bool initialLoad = false; // Check the load of the initial files
 
@@ -276,8 +276,8 @@ int main(int argc, char *argv[])
     // These inputs come from the matlab files that are generated when running Conv_Dif.m examples
     initialLoad = ReadInitialData(
         inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
-        inversion_method, include_boundary, Vl_BC_from_convection, Vu_BC_from_convection, io_method, run_remapping, run_convection,
-        run_radial_diffusion, run_local_diffusion, positive_PSD, PSD0_io_method, PSD_time_to_lst,
+        inversion_method, io_method, PSD0_io_method, include_boundary, Vl_BC_from_convection, Vu_BC_from_convection, run_remapping, run_convection,
+        run_radial_diffusion, run_local_diffusion, positive_PSD, PSD_time_to_lst,
         PSD, P, R, V, K, L,
         P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
         Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
@@ -290,6 +290,8 @@ int main(int argc, char *argv[])
         Logger::error << "Error: ReadInitialData return false. Check the initial files." << std::endl;
         exit(EXIT_FAILURE);
     }
+
+    exit(1);
 
 #ifdef DATA_ASSIMILATION
     da::DataAssimilationManagerConvection daManagerConvection{
@@ -344,7 +346,7 @@ int main(int argc, char *argv[])
     }
 
     // If local diffusion is not run, local losses should be applied at the radial diffusion step
-    if (run_local_diffusion == "false")
+    if (not run_local_diffusion)
     {
         local_losses = 0;
         radial_losses = 1;
@@ -417,7 +419,7 @@ int main(int argc, char *argv[])
     std::vector<sparse_matrix_t*> sparse_matrix_handles;
     std::vector<std::vector<int>> column_indices;
     std::vector<std::vector<int>> rows_csr;
-    if( inversion_method == "MKL" && run_local_diffusion == "true")
+    if( inversion_method == "MKL" && run_local_diffusion)
     {
         std::vector<double> dummy_values;
         initialize_sparse_values(
@@ -471,7 +473,7 @@ int main(int argc, char *argv[])
         // Update boundary conditions and diffusion coefficients
 
         // Update magnetic field (update R)
-        if (run_remapping == "true")
+        if (run_remapping)
         {
             if (L.update(time_current, P, R, V, K))
             {
@@ -528,13 +530,13 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (positive_PSD == "true")
+        if (positive_PSD)
         {
             PSD.max_of(1e-21);
         }
 
         // Update convection velocities VP and VR and log the maximum absolute values
-        if ((3 < P_size || 3 < R_size) && (run_convection == "true"))
+        if ((3 < P_size || 3 < R_size) && run_convection)
         {
             VP.update(time_current, P, R, V, K);
             Logger::message << "max(VP) = " << VP.maxabs() << std::endl;
@@ -543,13 +545,13 @@ int main(int argc, char *argv[])
         }
 
         // Diffusion coefficients
-        if ((3 < L_size) && (run_radial_diffusion == "true"))
+        if ((3 < L_size) && (run_radial_diffusion))
         {
             DLL.update(time_current, P, L, V, K);
             Logger::message << "max(DLL) = " << DLL.maxabs() << std::endl;
         }
 
-        if ((3 < V_size && 3 < K_size) && (run_local_diffusion == "true"))
+        if ((3 < V_size && 3 < K_size) && (run_local_diffusion))
         {
             DVV.update(time_current, P, R, V, K);
             Logger::message << "max(DVV) = " << DVV.maxabs() << std::endl;
@@ -608,7 +610,7 @@ int main(int argc, char *argv[])
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Convection, for each V and K (therefore for each mu and J)
-        if ((3 < P_size || 3 < R_size) && (run_convection == "true"))
+        if ((3 < P_size || 3 < R_size) && run_convection)
         {
             progress_count = 0;
             progress_total = V_size * K_size;
@@ -693,18 +695,18 @@ int main(int argc, char *argv[])
             std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8) << (int)((double)progress_count / progress_total * 100) << "%" << std::endl;
 #pragma omp master
             {
-                if (Vl_BC_from_convection == "true" && (Vl_BC_type == BoundaryConditionType::ConstantValue)) {  // rewrite boundary conditions at lower V
+                if (Vl_BC_from_convection && (Vl_BC_type == BoundaryConditionType::ConstantValue)) {  // rewrite boundary conditions at lower V
                     Vl_BC = PSD.ySlice(0);
                     std::cout << "Vl_BC from convection are used: max(Vl_BC) = " << Vl_BC.max() << std::endl;
                 }
-                if (Vu_BC_from_convection == "true" && (Vu_BC_type == BoundaryConditionType::ConstantValue)) {  // rewrite boundary conditions at lower V
+                if (Vu_BC_from_convection && (Vu_BC_type == BoundaryConditionType::ConstantValue)) {  // rewrite boundary conditions at lower V
                     Vu_BC = PSD.ySlice(V_size - 1);
                     std::cout << "Vu_BC from convection are used: max(Vu_BC) = " << Vu_BC.max() << std::endl;
                 }
             }
         }
 
-        if (positive_PSD == "true")
+        if (positive_PSD)
         {
             PSD.max_of(1e-21);
         }
@@ -714,7 +716,7 @@ int main(int argc, char *argv[])
         // ADDED FOR TESTING
         //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_before_radial.plt");
 
-        if ((L_size >= 3) && (run_radial_diffusion == "true"))
+        if ((L_size >= 3) && (run_radial_diffusion))
         {
             progress_count = 0;
             progress_total = P_size * V_size * K_size;  // total size of solution matrix
@@ -792,7 +794,7 @@ int main(int argc, char *argv[])
             //             }
         }
 
-        if (positive_PSD == "true")
+        if (positive_PSD)
         {
             PSD.max_of(1e-21);
         }
@@ -801,7 +803,7 @@ int main(int argc, char *argv[])
         //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_after_radial.plt");
 
         // LOCAL DIFFUSION
-        if ((V_size >= 3 && K_size >= 3) && (run_local_diffusion == "true"))
+        if ((V_size >= 3 && K_size >= 3) && (run_local_diffusion))
         {
             int number_of_skipped_points = 0;
             progress_count = 0;
@@ -828,7 +830,7 @@ int main(int argc, char *argv[])
                     // If we dont want to include the boundary in the L/R axis
                     // we can exclude those points by setting include_boundary
                     // to false in matlab main file or parameter.ini file
-                    if ((include_boundary == "false") && (iR == 0 || iR == R_size - 1))
+                    if ((not include_boundary) && (iR == 0 || iR == R_size - 1))
                     {
                         continue;
                     }
@@ -904,7 +906,7 @@ int main(int argc, char *argv[])
         }
 
         int number_of_negative_points = 0;
-        if (positive_PSD == "true")
+        if (positive_PSD)
         {
             PSD.max_of(1e-21);
         }
@@ -931,7 +933,7 @@ int main(int argc, char *argv[])
 
 #ifdef DATA_ASSIMILATION
         daManagerConvection.assimilate(time_current, PSD, P, R, VP, VR, Losses_conv, dt);
-        if (positive_PSD == "true") {
+        if (positive_PSD) {
             PSD.max_of(1e-21);
         }
 #endif

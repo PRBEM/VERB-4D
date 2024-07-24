@@ -262,20 +262,6 @@ data_assimilation::ObservationSpace internal::convertToObservationSpace(
     return result;
 }
 
-bool internal::str2bool(const string& str) {
-    return (str == "true" || str == "True" || str == "TRUE");
-}
-
-void internal::getParameterBool(
-    ParametersIni& parameters,
-    const string& name,
-    bool& parameter,
-    bool required) {
-    string parameterString;
-    parameters.getParameter(name, parameterString, required);
-    parameter = str2bool(parameterString);
-}
-
 data_assimilation::ProcessedMatFileData internal::readData(
     double timeStart,
     double timeEnd,

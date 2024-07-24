@@ -144,7 +144,7 @@ ReadMe - COMPILING ON MAC
 Note: All tabbed items should be executed on the command line
 
 Xcode does not come with openmp support so a different compiler is necessary.
-However you will still need Xcode for some tools in order to build the new
+However, you will still need Xcode for some tools in order to build the new
 compiler
 
 download Xcode with developer tools - located in app store (free) (developer

@@ -253,9 +253,8 @@ data_assimilation::Parameters data_assimilation::readParameters(const std::strin
     data_assimilation::Parameters result;
     ParametersIni parameters(filename);
 
-    internal::getParameterBool(parameters, "run_data_assimilation",
-                               result.runDataAssimilation, true);
-    internal::getParameterBool(parameters, "useLog", result.useLog, true);
+    parameters.getParameter("run_data_assimilation", result.runDataAssimilation, true);
+    parameters.getParameter("useLog", result.useLog, true);
     parameters.getParameter("time_step", result.timeStep, true);
     parameters.getParameter("model_error", result.modelError, true);
     parameters.getParameter("observation_error", result.observationError, true);

@@ -139,7 +139,7 @@ void Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 			Logger::message << parameterName << " = " << parameterValue << std::endl;
 					// stringstream(parameterValue) >> variable;
 			std::stringstream tmp(parameterValue);
-			tmp >> variable;
+			tmp >> std::boolalpha >> variable;
 			return;
 		}
 	}
@@ -159,7 +159,8 @@ void Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 			Logger::message << parameterName << " = " << parameterValue << std::endl;
 			// stringstream(parameterValue) >> variable;
 			std::stringstream tmp(parameterValue);
-			tmp >> variable;
+			tmp >> std::boolalpha >> variable;
+			Logger::message << variable << std::endl;
 			return;
 		}
 	}
@@ -182,6 +183,6 @@ void Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 template void Parameters::getParameter(std::string, double&, bool);
 template void Parameters::getParameter(std::string, int&, bool);
 template void Parameters::getParameter(std::string, long&, bool);
-//template void Parameters::getParameter(string, bool&, bool);
+template void Parameters::getParameter(std::string, bool&, bool);
 template void Parameters::getParameter(std::string, std::string&, bool);
 template void Parameters::getParameter(std::string, BoundaryConditionType&, bool);

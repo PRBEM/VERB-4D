@@ -49,8 +49,6 @@ namespace data_assimilation::internal {
 
     data_assimilation::ObservationSpace convertToObservationSpace(const Matrix2D<double>& data);
 
-    void getParameterBool(ParametersIni& parameters, const std::string& name, bool& parameter, bool required);
-
     data_assimilation::ProcessedMatFileData readData(double timeStart, double timeEnd, const pmf::Parameters& parameters);
 
     data_assimilation::ProcessedMatFileData cat(const std::vector<ProcessedMatFileData>& pmfDataSplit);
@@ -65,5 +63,4 @@ namespace data_assimilation::internal {
         const Matrix2D<double>& V_grid,
         const Matrix2D<double>& K_grid 
     );
-    bool str2bool(const std::string& str);
 }

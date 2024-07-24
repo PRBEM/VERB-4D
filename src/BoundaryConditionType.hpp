@@ -24,7 +24,7 @@ inline std::ostream& operator<<(std::ostream& os, const BoundaryConditionType& t
     }
 }
 
-inline std::stringstream& operator>>(std::stringstream& ss, BoundaryConditionType& type)
+inline std::basic_istream<char>& operator>>(std::basic_istream<char>& ss, BoundaryConditionType& type)
 {
     std::string s;
     ss >> s;
