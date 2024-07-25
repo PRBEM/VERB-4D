@@ -57,7 +57,7 @@ bool Convection_2D(
     BoundaryConditionType R_LBC_type, BoundaryConditionType R_UBC_type,
     const Matrix2D<double>& VP, const Matrix2D<double>& VR,
     const Matrix2D<double>& Sources, const Matrix2D<double>& Losses,
-    double dt_total) {
+    const Matrix2D<double>& G_conv, double dt_total) {
 #else
 bool Convection_2D(
     Matrix2D<double>& PSD_PR,
@@ -69,7 +69,7 @@ bool Convection_2D(
     BoundaryConditionType R_LBC_type, BoundaryConditionType R_UBC_type,
     const Matrix2D<double>& VP, const Matrix2D<double>& VR,
     const Matrix2D<double>& Sources, const Matrix2D<double>& Losses,
-    double dt_total) {
+    const Matrix2D<double>& G_conv, double dt_total) {
 #endif
     // indexes
     int iR, iP;
@@ -119,6 +119,7 @@ bool Convection_2D(
     Matrix1D<double> PSD_R(R_size);
     Matrix1D<double> R_R(R_size);
     Matrix1D<double> VR_R(R_size);
+    Matrix1D<double> G_conv_R(R_size);
 
     Matrix2D<double> PSD_PR_G;
 
@@ -144,7 +145,7 @@ bool Convection_2D(
             }
         }
 
-        PSD_PR_G = PSD_PR.divide(R).divide(R);
+        PSD_PR_G = PSD_PR.times(G_conv);
         //PSD_PR_G = PSD_PR;
 
         if (R_size >= 3) {
@@ -153,21 +154,19 @@ bool Convection_2D(
                 PSD_PR_G.xSlice(PSD_R, iP);
                 R.xSlice(R_R, iP);
                 VR.xSlice(VR_R, iP);
+                G_conv.xSlice(G_conv_R, iP);
 
                 Convection_1D_ULTIMATE_QUICKEST6(
                     PSD_R, R_R, R_size,
-                    //R_LBC[iP], 
-                    R_LBC[iP] / R_R[0] / R_R[0], 
-                    //R_UBC[iP], 
-                    R_UBC[iP] / R_R[R_size-1] / R_R[R_size-1],  
+                    R_LBC[iP] * G_conv_R[0], 
+                    R_UBC[iP] * G_conv_R[R_size-1],  
                     R_LBC_type, R_UBC_type,
-                    VR_R,
-                    dt);
+                    VR_R, dt);
 
                 // copy results back
-                for (iR = 0; iR < R_size; iR++)
-                    //PSD_PR[iP][iR] = PSD_R[iR];
-                    PSD_PR[iP][iR] = PSD_R[iR] * R_R[iR] * R_R[iR];
+                for (iR = 0; iR < R_size; iR++){
+                    PSD_PR[iP][iR] = PSD_R[iR] / G_conv_R[iR];
+                }
             } 
         }
 

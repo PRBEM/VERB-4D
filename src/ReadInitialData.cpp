@@ -35,7 +35,7 @@ void AllocateMemory(Matrix4D<double> &PSD,
 		Matrix3D<double> &P_LBC, Matrix3D<double> &P_UBC, Matrix3D<double> &R_LBC, Matrix3D<double> &R_UBC, Matrix3D<double> &V_LBC, Matrix3D<double> &V_UBC, Matrix3D<double> &K_LBC, Matrix3D<double> &K_UBC, Matrix3D<double> &L_LBC, Matrix3D<double> &L_UBC,
 		Matrix4D<double> &DLL, Matrix4D<double> &DVV, Matrix4D<double> &DVK, Matrix4D<double> &DKK,
 		Matrix4D<double> &VP, Matrix4D<double> &VL,
-		Matrix4D<double> &G_local, Matrix4D<double> &G_radial, Matrix4D<double> &Sources, Matrix4D<double> &Losses, Matrix4D<double> &Losses_conv) {
+		Matrix4D<double> &G_local, Matrix4D<double> &G_radial, Matrix4D<double> &G_conv, Matrix4D<double> &Sources, Matrix4D<double> &Losses, Matrix4D<double> &Losses_conv) {
 
 
 	// Arrays initialization (memory)
@@ -63,6 +63,7 @@ void AllocateMemory(Matrix4D<double> &PSD,
 	//G_local.AllocateMemory(I_size, K_size); // I,K grid is always the same, so Jacobian is the same
 	G_local.AllocateMemory(P_size, R_size, V_size, K_size);
 	G_radial.AllocateMemory(P_size, R_size, V_size, K_size); // L-star is different for different P, I, K
+	G_conv.AllocateMemory(P_size, R_size, V_size, K_size);
 
 	P_LBC.AllocateMemory(R_size, V_size, K_size);
 	P_UBC.AllocateMemory(R_size, V_size, K_size);
@@ -161,7 +162,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	UpdatableListMatrix<Matrix4D<double>> &DLL, UpdatableListMatrix<Matrix4D<double>> &DVV, 
 	UpdatableListMatrix<Matrix4D<double>> &DKK, UpdatableListMatrix<Matrix4D<double>> &DVK,
 	UpdatableMatrix<Matrix4D<double>> &VP, UpdatableMatrix<Matrix4D<double>> &VL,
-	UpdatableMatrix<Matrix4D<double>> &G_local, UpdatableMatrix<Matrix4D<double>> &G_radial,
+	UpdatableMatrix<Matrix4D<double>> &G_local, UpdatableMatrix<Matrix4D<double>> &G_radial, UpdatableMatrix<Matrix4D<double>> &G_conv,
 	UpdatableListMatrix<Matrix4D<double>> &Sources, UpdatableListMatrix<Matrix4D<double>> &Losses, 
 	UpdatableListMatrix<Matrix4D<double>> &Losses_conv, Matrix4D<double> &SaturationDensity, Matrix4D<double> &SaturationTimescale
 ) {
@@ -243,7 +244,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			P_size, R_size, V_size, K_size,
 			PSD_l_P, PSD_u_P, PSD_l_R, PSD_u_R, PSD_l_V, PSD_u_V, PSD_l_K, PSD_u_K, PSD_l_L, PSD_u_L,
 			DLL, DVV, DVK, DKK,	VP, VL,
-			G_local, G_radial, Sources, Losses, Losses_conv
+			G_local, G_radial, G_conv, Sources, Losses, Losses_conv
 		);
 		Logger::message << "P_size = " << P_size << ", R_size = " << R_size << ", V_size = " << V_size << ", K_size = " << K_size << endl;
 		double* grid_pointers[]{&P[0][0][0][0], &R[0][0][0][0], &V[0][0][0][0], &K[0][0][0][0]};
@@ -306,7 +307,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 				PSD_l_P, PSD_u_P, PSD_l_R, PSD_u_R, PSD_l_V, PSD_u_V, PSD_l_K, PSD_u_K, PSD_l_L, PSD_u_L,
 				DLL, DVV, DVK, DKK,
 				VP, VL,
-				G_local, G_radial, Sources, Losses, Losses_conv);
+				G_local, G_radial, G_conv, Sources, Losses, Losses_conv);
 
 		// Read grid from .plt file only
 		P.readFromFile(InputFolder + "grid.plt",  1);
@@ -363,8 +364,13 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		G_radial.readFromAnyFile(InputFolder + "G_radial", io_method, P, R, V, K);
 	}
 
+    if (!G_conv.readFromIniFile(InputFolder + "G_conv.tab", P, R, V, K)){
+		G_conv.readFromAnyFile(InputFolder + "G_conv", io_method, P, R, V, K);
+	}
+
 	G_local.update(time_first, P, R, V, K);
 	G_radial.update(time_first, P, R, V, K);
+	G_conv.update(time_first, P, R, V, K);
 
     if (density_saturation == DensitySaturation::Off) {
         if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K))

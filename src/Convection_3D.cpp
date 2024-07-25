@@ -65,7 +65,7 @@ bool Convection_3D(
 	BoundaryConditionType V_LBC_type, BoundaryConditionType V_UBC_type,
     const Matrix3D<double>& VP, const Matrix3D<double>& VR, const Matrix3D<double>& VV,
     const Matrix3D<double>& Sources, const Matrix3D<double>& Losses,
-    double dt_total) {
+    const Matrix3D<double>& G_conv, double dt_total) {
 
     // indexes
     int iR, iP, iV; 
@@ -107,20 +107,15 @@ bool Convection_3D(
     Matrix1D<double> PSD_P(P_size);
     Matrix1D<double> P_P(P_size);
     Matrix1D<double> VP_P(P_size);
-    Matrix1D<double> zero_p(P_size);
-    zero_p = 0;
 
     Matrix1D<double> PSD_R(R_size);
     Matrix1D<double> R_R(R_size);
     Matrix1D<double> VR_R(R_size);
-    Matrix1D<double> zero_r(R_size);
-    zero_r = 0;
+    Matrix1D<double> G_conv_R(R_size);
 
 	Matrix1D<double> PSD_V(V_size);
     Matrix1D<double> V_V(V_size);
     Matrix1D<double> VV_V(V_size);
-    Matrix1D<double> zero_v(V_size);
-    zero_v = 0;
 
     Matrix3D<double> PSD_PRV_GR;
 	Matrix3D<double> PSD_PRV_GV;
@@ -156,7 +151,7 @@ bool Convection_3D(
         }
     }
 
-    PSD_PRV_GR = PSD_PRV.divide(R).divide(R);
+    PSD_PRV_GR = PSD_PRV.times(G_conv);
     if (R_size >= 3) {
         for (iP = 0; iP < P_size; iP++) {
 			for (iV = V_size - 1; iV >=  0; iV--) {
@@ -167,14 +162,14 @@ bool Convection_3D(
 
 				Convection_1D_ULTIMATE_QUICKEST6(
 					PSD_R, R_R, R_size,
-					R_LBC[iP][iV] / R_R[0] / R_R[0], 
-					R_UBC[iP][iV] / R_R[R_size-1] / R_R[R_size-1],  
+					R_LBC[iP][iV] * G_conv_R[0], 
+					R_UBC[iP][iV] * G_conv_R[R_size-1],  
 					R_LBC_type, R_UBC_type,
 					VR_R, dt);
 
 				// copy results back
 				for (iR = 0; iR < R_size; iR++) {
-					PSD_PRV[iP][iR][iV] = PSD_R[iR] * R_R[iR] * R_R[iR];
+					PSD_PRV[iP][iR][iV] = PSD_R[iR] / G_conv_R[iR];
 				}
 			}
         } 

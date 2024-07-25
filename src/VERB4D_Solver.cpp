@@ -224,6 +224,7 @@ int main(int argc, char *argv[])
     // Jacobians, 4D, everything is 4D, it makes matrix operators convenient
     UpdatableMatrix<Matrix4D<double>> G_local;
     UpdatableMatrix<Matrix4D<double>> G_radial; // L-star is different for different P, I, K
+    UpdatableMatrix<Matrix4D<double>> G_conv;   // solving the convection in conservative form requires a Jacobian 
 
     // Boundary conditions
     // Pl_BC means P-direction lower boundary (i.e. first index on P-direction)
@@ -288,7 +289,7 @@ int main(int argc, char *argv[])
         PSD, P, R, V, K, L,
         P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
         Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
-        Vu_BC_type, Kl_BC_type, Ku_BC_type, Ll_BC_type, Lu_BC_type, DLL, DVV, DKK, DVK, VP, VR, G_local, G_radial,
+        Vu_BC_type, Kl_BC_type, Ku_BC_type, Ll_BC_type, Lu_BC_type, DLL, DVV, DKK, DVK, VP, VR, G_local, G_radial, G_conv,
         Sources, Losses, Losses_conv, SaturationDensity, SaturationTimescale);
 
     // Check that all nesesarry files were loaded
@@ -487,6 +488,7 @@ int main(int argc, char *argv[])
                 // XXX: Do we need to update Jacobians if we didn't update L?
                 G_local.update(time_current, P, R, V, K);
                 G_radial.update(time_current, P, R, V, K);
+                G_conv.update(time_current, P, R, V, K);
 
                 // If L was updated - interpolate PSD to new L
                 progress_count = 0;
@@ -681,6 +683,7 @@ int main(int argc, char *argv[])
             Matrix3D<double> vr_slice(P_size, R_size, V_size);
             Matrix3D<double> vv_slice(P_size, R_size, V_size);
             Matrix3D<double> lossconv_slice(P_size, R_size, V_size);
+            Matrix3D<double> G_conv_slice(P_size, R_size, V_size);
 
             // sources are set to zero and not updated during the loop
             Matrix3D<double> source_slice = Sources.zSlice(0) * 0.0;
@@ -710,6 +713,7 @@ int main(int argc, char *argv[])
                 VV.zSlice(vv_slice, iK);
                 Losses_conv.zSlice(lossconv_slice, iK);
                 PSD.zSlice(PSD_PRV, iK);
+                G_conv.zSlice(G_conv_slice, iK);
 
                 Convection_3D(
                     PSD_PRV, pgrid_slice, rgrid_slice, vgrid_slice, P_size, R_size, V_size,
@@ -719,7 +723,7 @@ int main(int argc, char *argv[])
                     Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type, Vu_BC_type,
                     vp_slice, vr_slice, vv_slice, 
                     source_slice, lossconv_slice,
-                    dt);     
+                    G_conv_slice, dt);     
 
                 // copy results back into PSD adding the 2d list PSD_PR for all values of iV,iK
                 for (int iP = 0; iP < P_size; iP++) {
@@ -763,6 +767,7 @@ int main(int argc, char *argv[])
                 Matrix2D<double> vr_slice(P_size, R_size);
                 Matrix2D<double> lossconv_slice(P_size, R_size);
                 Matrix2D<double> sources_slice(P_size, R_size);
+                Matrix2D<double> G_conv_slice(P_size, R_size);
 
 #ifdef SAVE_PSD_LOST_CONV
                 Matrix2D<double> PSD_lost_PR(P_size, R_size);
@@ -805,6 +810,7 @@ int main(int argc, char *argv[])
                         Losses_conv.yzSlice(lossconv_slice, iV, iK);
                         Sources.yzSlice(sources_slice, iV, iK);
                         PSD.yzSlice(PSD_PR, iV, iK);
+                        G_conv.yzSlice(G_conv_slice, iV, iK);
 
 #ifdef SAVE_PSD_LOST_CONV
                         PSD_lost_conv.yzSlice(PSD_lost_PR, iV, iK);
@@ -815,7 +821,7 @@ int main(int argc, char *argv[])
                             rlow_boundary_slice, rup_boundary_slice,
                             Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type,
                             vp_slice, vr_slice,
-                            sources_slice, lossconv_slice,
+                            sources_slice, lossconv_slice, G_conv_slice,
                             dt);
 #else
                         Convection_2D(
@@ -824,7 +830,7 @@ int main(int argc, char *argv[])
                             rlow_boundary_slice, rup_boundary_slice,
                             Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type,
                             vp_slice, vr_slice,
-                            sources_slice, lossconv_slice,
+                            sources_slice, lossconv_slice, G_conv_slice,
                             dt);
 #endif
 

@@ -34,7 +34,6 @@ bool Convection_3D(
 		BoundaryConditionType R_LBC_type, BoundaryConditionType R_UBC_type,
 		BoundaryConditionType V_LBC_type, BoundaryConditionType V_UBC_type,
 		const Matrix3D < double >& VP, const Matrix3D < double >& VR, const Matrix3D < double >& VV,
-		const Matrix3D < double >& Sources, 
-		const Matrix3D < double >& Losses, 
-		double dt);
+		const Matrix3D < double >& Sources, const Matrix3D < double >& Losses, 
+		const Matrix3D<double>& G_conv, double dt);
 
