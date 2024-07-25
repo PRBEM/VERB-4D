@@ -364,8 +364,13 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		G_radial.readFromAnyFile(InputFolder + "G_radial", io_method, P, R, V, K);
 	}
 
+	// G_conv file is not required to keep backwards capabilities for 3D simulations without convection
     if (!G_conv.readFromIniFile(InputFolder + "G_conv.tab", P, R, V, K)){
-		G_conv.readFromAnyFile(InputFolder + "G_conv", io_method, P, R, V, K);
+		if(std::filesystem::exists(InputFolder + "G_conv.pltb")){
+			G_conv.readFromAnyFile(InputFolder + "G_conv", io_method, P, R, V, K);
+		} else {
+			G_conv = 1;
+		}
 	}
 
 	G_local.update(time_first, P, R, V, K);
