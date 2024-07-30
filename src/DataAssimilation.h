@@ -2,10 +2,14 @@
 
 #include <string>
 #include <vector>
+#include <memory>
+#include <cmath>
 
 #include "Matrix.h"
+#include "UpdatableMatrix.h"
 #include "PMF.h"
 #include "Parameters.h"
+
 using ParametersIni = ::Parameters;
 namespace data_assimilation {
 struct Parameters {
@@ -14,6 +18,8 @@ struct Parameters {
     double timeStep;
     double modelError;
     double observationError;
+    double correlationTime = std::numeric_limits<double>::infinity();
+    DataAssimilationDataSource dataSource;
 };
 struct Observations {
     Matrix1D<double> P;
@@ -23,6 +29,42 @@ struct Observations {
 struct ObservationSpace {
     Matrix1D<double> data;
     Matrix2D<double> H;
+};
+
+class DataSource {
+public:
+
+    virtual Matrix4D<double> getObservations(
+        const double timeStart, const double timeEnd,
+        const Matrix2D<double>& P, const Matrix2D<double>& R,
+        const Matrix2D<double>& V, const Matrix2D<double>& K) = 0;
+};
+
+class DataServerDataSource : public DataSource {
+public:
+    DataServerDataSource(const std::string& satellite_lst_file);
+
+    virtual Matrix4D<double> getObservations(
+        const double timeStart, const double timeEnd,
+        const Matrix2D<double>& P, const Matrix2D<double>& R,
+        const Matrix2D<double>& V, const Matrix2D<double>& K) override;
+
+private:
+    std::vector<pmf::Parameters> _dataParameters;
+};
+
+class LocalFilesDataSource : public DataSource {
+public:
+    LocalFilesDataSource(const std::string& satellite_lst_file, 
+            int size_q1, int size_q2, int size_q3, int size_q4);
+
+    virtual Matrix4D<double> getObservations(
+        const double timeStart, const double timeEnd,
+        const Matrix2D<double>& P, const Matrix2D<double>& R,
+        const Matrix2D<double>& V, const Matrix2D<double>& K) override;
+
+private:
+    UpdatableListMatrix<Matrix4D<double>> _data;
 };
 
 struct ProcessedMatFileData {
@@ -43,19 +85,19 @@ class Convection2DAnalysisCovariances {
 };
 class DataAssimilationManagerConvection {
    public:
-    DataAssimilationManagerConvection(
-        const std::string& parametersFile,
-        double time_start, double time_end, const Matrix2D<double>& V,
-        const Matrix2D<double>& K, int P_size, int R_size, const std::string& debug_output_folder
-    );
+    DataAssimilationManagerConvection(const std::string& parametersFile,
+                                      double time_start, double time_end,
+                                      const Matrix2D<double>& P,
+                                      const Matrix2D<double>& R,
+                                      const Matrix2D<double>& V,
+                                      const Matrix2D<double>& K,
+                                      const std::string& debug_output_folder);
 
-    void assimilate(
-        double time, Matrix4D<double>& PSD,
-        const Matrix4D<double>& P, const Matrix4D<double>& R,
-        const Matrix4D<double>& VP, const Matrix4D<double>& VR,
-        const Matrix4D<double>& Loss,
-        double dt
-    );
+    void assimilate(double time, Matrix4D<double>& PSD,
+                    const Matrix4D<double>& VP, const Matrix4D<double>& VR,
+                    const bool has_VX_updated,
+                    const Matrix4D<double> &SaturationDensity,
+                    const Matrix4D<double>& Loss, double dt);
 
     Convection2DAnalysisCovariances _analysisCovarianceConvection;
 
@@ -63,14 +105,19 @@ class DataAssimilationManagerConvection {
     std::string _debug_output_folder;
     double _timeStart;
     double _timeEnd;
+    Matrix2D<double> _P;
+    Matrix2D<double> _R;
     Matrix2D<double> _V;
     Matrix2D<double> _K;
+    Matrix2D<double> _model_matrix;
+    Matrix2D<double> _Q;
 
     bool _runDataAssimilation;
     double _timePrev;
     double _timeNext;
     Parameters _assimilationParameters;
-    std::vector<pmf::Parameters> _dataParameters;
+    std::unique_ptr<DataSource> _dataSource;
+
 };
 
 Parameters readParameters(const std::string& filename);
@@ -83,7 +130,7 @@ std::vector<std::vector<Observations>> getObservations(
     const std::vector<pmf::Parameters>& parameters);
 
 struct DebugOuput2D {
-    Matrix2D<double> binned_observations;
+    Matrix2D<double> observations;
     Matrix2D<double> forecast_init;
     Matrix2D<double> forecast_result;
     Matrix2D<double> error_covariance;
@@ -91,16 +138,12 @@ struct DebugOuput2D {
 };
 
 data_assimilation::DebugOuput2D runKalmanFilterConvection2D(
-    Matrix2D<double>& forecast,
-    Matrix2D<double>& analysisErrorCovariance,
-    const Matrix2D<double>& P,
-    const Matrix2D<double>& R,
-    const Matrix2D<double>& VP,
-    const Matrix2D<double>& VR,
-    const Matrix2D<double>& Loss,
-    const Observations& observations,
-    double timeStep,
-    const Parameters& parameters);
+    Matrix2D<double>& forecast, Matrix2D<double>& analysisErrorCovariance, Matrix2D<double>& model_matrix,
+    const Matrix2D<double>& P, const Matrix2D<double>& R,
+    const Matrix2D<double>& VP, const Matrix2D<double>& VR,
+    const bool has_VR_updated, const Matrix2D<double>& Loss, const Matrix2D<bool> &saturation_map,
+    const Matrix2D<double>& observations, const Matrix2D<double>& Q, 
+    double timeStep, const Parameters& parameters);
 
 /**
  * @brief Applies the Kalman filter updating forecast and Pa
@@ -121,14 +164,14 @@ void runKalmanFilter(
 
 #ifdef DATA_ASSIMILATION_DEBUG
     struct DebugOuput4D {
-        Matrix4D<double> binned_observations;
+        Matrix4D<double> observations;
         Matrix4D<double> forecast_init;
         Matrix4D<double> forecast_result;
         Matrix4D<double> error_covariance;
         Matrix4D<double> model;
 
         DebugOuput4D(int P_size, int R_size, int V_size, int K_size) {
-            binned_observations = Matrix4D<double>(P_size, R_size, V_size, K_size);
+            observations = Matrix4D<double>(P_size, R_size, V_size, K_size);
             forecast_init = Matrix4D<double>(P_size, R_size, V_size, K_size);
             forecast_result = Matrix4D<double>(P_size, R_size, V_size, K_size);
             error_covariance = Matrix4D<double>(P_size * R_size, P_size * R_size, V_size, K_size);
@@ -136,15 +179,15 @@ void runKalmanFilter(
         };
 
         void insert_output_2d(DebugOuput2D output_2d, int iV, int iK) {
-            for (int iP = 0; iP < binned_observations.size_w; iP++) {
-                for (int iR = 0; iR < binned_observations.size_x; iR++) {
-                    binned_observations[iP][iR][iV][iK] = output_2d.binned_observations[iP][iR];
+            for (size_t iP = 0; iP < observations.size_w; iP++) {
+                for (size_t iR = 0; iR < observations.size_x; iR++) {
+                    observations[iP][iR][iV][iK] = output_2d.observations[iP][iR];
                     forecast_init[iP][iR][iV][iK] = output_2d.forecast_init[iP][iR];
                     forecast_result[iP][iR][iV][iK] = output_2d.forecast_result[iP][iR];
                 }
             }
-            for (int iP = 0; iP < error_covariance.size_w; iP++) {
-                for (int iR = 0; iR < error_covariance.size_x; iR++) {
+            for (size_t iP = 0; iP < error_covariance.size_w; iP++) {
+                for (size_t iR = 0; iR < error_covariance.size_x; iR++) {
                     error_covariance[iP][iR][iV][iK] = output_2d.error_covariance[iP][iR];
                     model[iP][iR][iV][iK] = output_2d.model[iP][iR];
                 }
@@ -152,11 +195,11 @@ void runKalmanFilter(
         };
 
         void write_files(double time_step, std::string debug_output_folder){
-            binned_observations.writeToBinaryFile(debug_output_folder + "/binned_observations_" + std::to_string(time_step) + ".pltb");
+            observations.writeToBinaryFile(debug_output_folder + "/observations" + std::to_string(time_step) + ".pltb");
             forecast_init.writeToBinaryFile(debug_output_folder + "/forecast_init_" + std::to_string(time_step) + ".pltb");
             forecast_result.writeToBinaryFile(debug_output_folder + "/forecast_result_" + std::to_string(time_step) + ".pltb");
             error_covariance.writeToBinaryFile(debug_output_folder + "/error_covariance_" + std::to_string(time_step) + ".pltb");
-            //model.writeToBinaryFile(debug_output_folder + "/model_" + std::to_string(time_step) + ".pltb");
+            model.writeToBinaryFile(debug_output_folder + "/model_" + std::to_string(time_step) + ".pltb");
         };
     };
 #endif

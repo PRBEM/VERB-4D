@@ -56,3 +56,4 @@ void stringToValue(const std::string& parameter_value_string, T& variable);
 enum class IOMethod {ASCII, Binary, Matlab};
 enum class InversionMethod {ADI, ADI1, ADI2, MKL, Lapack};
 enum class DensitySaturation {Off, WithTimescale, WithoutTimescale, LimitSource};
+enum class DataAssimilationDataSource {DataServer, LocalFiles};

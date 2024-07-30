@@ -184,6 +184,7 @@ template void Parameters::getParameter(std::string, BoundaryConditionType&, bool
 template void Parameters::getParameter(std::string, IOMethod&, bool);
 template void Parameters::getParameter(std::string, InversionMethod&, bool);
 template void Parameters::getParameter(std::string, DensitySaturation&, bool);
+template void Parameters::getParameter(std::string, DataAssimilationDataSource&, bool);
 
 
 // helper functions to insensitive case compare two strings
@@ -211,67 +212,69 @@ void stringToValue(const std::string& parameter_value_string, bool& variable) {
 	} else if (iequals(parameter_value_string, "false")) {
 		variable = false;
 	} else {
-		printf("Encountered invalid value for boolean parameter:%s\n", parameter_value_string.c_str());
+		printf("Encountered invalid value for boolean parameter: %s\n", parameter_value_string.c_str());
 		exit(EXIT_FAILURE);
 	}
 }
 
 template <>
-void stringToValue(const std::string& parameter_value_string, DensitySaturation& density_saturation) {
+void stringToValue(const std::string& parameter_value_string, DensitySaturation& variable) {
 	if (iequals(parameter_value_string, "off")) {
-		density_saturation = DensitySaturation::Off;
-		return;
-	}
-	if (iequals(parameter_value_string, "with_timescale")) {
-		density_saturation = DensitySaturation::WithTimescale;
-		return;
-	}
-	if (iequals(parameter_value_string, "without_timescale")) {
-		density_saturation = DensitySaturation::WithoutTimescale;
-		return;
-	}
-	if (iequals(parameter_value_string, "limit_source")) {
-		density_saturation = DensitySaturation::LimitSource;
-		return;
+		variable = DensitySaturation::Off;
+	} else if (iequals(parameter_value_string, "with_timescale")) {
+		variable = DensitySaturation::WithTimescale;
+	} else if (iequals(parameter_value_string, "without_timescale")) {
+		variable = DensitySaturation::WithoutTimescale;
+	} else if (iequals(parameter_value_string, "limit_source")) {
+		variable = DensitySaturation::LimitSource;
+	} else {
+		printf("Encountered invalid value for density saturation parameter: %s\n", parameter_value_string.c_str());
+		exit(EXIT_FAILURE);
 	}
 }
 
 template <>
-void stringToValue(const std::string& parameter_value_string, IOMethod& io_method) {
+void stringToValue(const std::string& parameter_value_string, IOMethod& variable) {
 	if (iequals(parameter_value_string, "matlab")) {
-		io_method = IOMethod::Matlab;
-		return;
-	}
-	if (iequals(parameter_value_string, "binary")) {
-		io_method = IOMethod::Binary;
-		return;
-	}
-	if (iequals(parameter_value_string, "ascii")) {
-		io_method = IOMethod::ASCII;
-		return;
+		variable = IOMethod::Matlab;
+	} else if (iequals(parameter_value_string, "binary")) {
+		variable = IOMethod::Binary;
+	} else if (iequals(parameter_value_string, "ascii")) {
+		variable = IOMethod::ASCII;
+	} else {
+		printf("Encountered invalid value for io method parameter: %s\n", parameter_value_string.c_str());
+		exit(EXIT_FAILURE);
 	}
 }
 
 template <>
-void stringToValue(const std::string& parameter_value_string, InversionMethod& inversion_method) {
+void stringToValue(const std::string& parameter_value_string, InversionMethod& variable) {
 	if (iequals(parameter_value_string, "ADI")) {
-		inversion_method = InversionMethod::ADI;
-		return;
+		variable = InversionMethod::ADI;
+	} else if (iequals(parameter_value_string, "ADI1")) {
+		variable = InversionMethod::ADI1;
+	} else if (iequals(parameter_value_string, "ADI2")) {
+		variable = InversionMethod::ADI2;
+	} else if (iequals(parameter_value_string, "Lapack")) {
+		variable = InversionMethod::Lapack;
+	} else if (iequals(parameter_value_string, "MKL")) {
+		variable = InversionMethod::MKL;
+	} else {
+		printf("Encountered invalid value for inversion method parameter: %s\n", parameter_value_string.c_str());
+		exit(EXIT_FAILURE);
 	}
-	if (iequals(parameter_value_string, "ADI1")) {
-		inversion_method = InversionMethod::ADI1;
-		return;
+}
+
+
+template <>
+void stringToValue(const std::string& parameter_value_string, DataAssimilationDataSource& variable) {
+	if (iequals(parameter_value_string, "data_server")) {
+		variable = DataAssimilationDataSource::DataServer;
 	}
-	if (iequals(parameter_value_string, "ADI2")) {
-		inversion_method = InversionMethod::ADI2;
-		return;
-	}
-		if (iequals(parameter_value_string, "Lapack")) {
-		inversion_method = InversionMethod::Lapack;
-		return;
-	}
-	if (iequals(parameter_value_string, "MKL")) {
-		inversion_method = InversionMethod::MKL;
-		return;
+	else if (iequals(parameter_value_string, "local_files")) {
+		variable = DataAssimilationDataSource::LocalFiles;
+	} else {
+		printf("Encountered invalid value for data assimilation data source parameter: %s\n", parameter_value_string.c_str());
+		exit(EXIT_FAILURE);
 	}
 }

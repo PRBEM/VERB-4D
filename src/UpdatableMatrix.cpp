@@ -284,6 +284,12 @@ void MatrixLimit(UpdatableMatrix< Matrix4D<double> > &M, const Matrix4D<double> 
 	}
 }
 
+
+template <typename MatrixND>
+UpdatableListMatrix<MatrixND>::UpdatableListMatrix(UpdatableListMatrix<MatrixND>::MERGE_TYPE merge_type) {
+	this->merge_type = merge_type;
+}
+
 /**
  * Read UpdatableMatrix rules from ini-file
  *
@@ -824,11 +830,29 @@ void UpdatableListMatrix<MatrixND>::update(double current_time, const MatrixND& 
 			matricesList[d_it].update(current_time, Q1, Q2, Q3, Q4);
 
 
-		// combine the UpdatableMatrices from the list together into one final updated matrix
-		for (d_it = 0; d_it < matricesList.size(); d_it++)
-			// Applying "operator+=" of the base class to each of the matrices
-			// this will add (sum) all the matrices together one by one
-			(*this) += matricesList[d_it];
+		switch (merge_type) {
+			case UpdatableListMatrix::MERGE_TYPE::SUM:
+				// combine the UpdatableMatrices from the list together into one final updated matrix
+				for (d_it = 0; d_it < matricesList.size(); d_it++) {
+					// Applying "operator+=" of the base class to each of the matrices
+					// this will add (sum) all the matrices together one by one
+					(*this) += matricesList[d_it];
+				}
+				break;
+
+			case UpdatableListMatrix::MERGE_TYPE::MEAN:
+				MatrixND num_elements(*this);
+				num_elements = 0;
+
+				for (d_it = 0; d_it < matricesList.size(); d_it++) {
+					(*this) += matricesList[d_it];
+					num_elements += matricesList[d_it].is_finite();
+				} 
+
+				(*this) = (*this).divide(num_elements);
+
+				break;
+		}
 	} else {
 		// if there is nothing in the list - leave everything the way it is
 	}

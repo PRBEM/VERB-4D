@@ -622,6 +622,29 @@ Matrix2D<double> abtrans(
     return answer;
 } 
 
+Matrix2D<bool> operator>=(
+    const Matrix2D<double>& A, const Matrix2D<double>& B) {
+    if (A.size_q1 != B.size_q1 || A.size_q2 != B.size_q2) {
+        std::cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        std::cout << "Matrix sizes are different. ";
+        std::cout << "A.size_q1 = " << A.size_q1 << ", ";
+        std::cout << "B.size_q1 = " << B.size_q1 << ", ";
+        std::cout << "A.size_q2 = " << A.size_q2 << ", ";
+        std::cout << "B.size_q2 = " << B.size_q2 << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    Matrix2D<bool> result{A.size_q1, A.size_q2};
+
+    for (size_t i = 0; i < result.size_q1; ++i) {
+        for (size_t j = 0; j < result.size_q2; ++j) {
+            result[i][j] = A[i][j] >= B[i][j];
+        }
+    }
+
+    return result;
+}
+
 Matrix2D<double> operator+(
     const Matrix2D<double>& A, const Matrix2D<double>& B) {
 

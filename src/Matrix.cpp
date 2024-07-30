@@ -360,7 +360,8 @@ inline Matrix1D<T>& Matrix1D<T>::operator= (const Matrix1D<T> &M) {
 * Matrix summation, result is stored into applied matrix (left hand side matrix)
 */
 template<class T>
-inline Matrix1D<T>& Matrix1D<T>::operator+= (const Matrix1D<T> &M) {
+template<class S>
+inline Matrix1D<T>& Matrix1D<T>::operator+= (const Matrix1D<S> &M) {
 	for (size_t i1 = 0; i1 < size_q1; i1++)
 		matrix_array[i1] += M.matrix_array[i1];
 	return *this;
@@ -513,6 +514,18 @@ inline Matrix1D<T> Matrix1D<T>::sqrt () const {
 	return Tmp;
 }
 
+/**
+ * Returns a bool matrix if an element is finite
+ */
+template <class T>
+inline Matrix1D<bool> Matrix1D<T>::is_finite() const {
+    size_t w;
+    Matrix1D<bool> Tmp(size_q1);
+    for (w = 0; w < this->size_q1; w++) {
+        Tmp[w] = std::isfinite(matrix_array[w]);
+    }
+    return Tmp;
+}
 
 /**
 * Norm of vector
@@ -616,8 +629,6 @@ void Matrix1D<T>::readFromFile(const std::string& filename) {
 		input.close();
 	}
 }
-
-
 
 /**
 * Function for reading from matlab file in 1-dimension
@@ -1364,7 +1375,7 @@ T Matrix1D<T>::max() const {
 */
 template<class T>
 T Matrix1D<T>::maxabs() const {
-	T tmp = 0;
+	T tmp = -std::numeric_limits<T>::infinity();
 	for (size_t i1 = 0; i1 < size_q1; i1++) {
 		tmp = (tmp>fabs((double)matrix_array[i1]))?tmp:fabs((double)matrix_array[i1]);
 	}
@@ -1523,7 +1534,8 @@ inline Matrix2D<T>& Matrix2D<T>::operator= (const T val) {
 * Matrix summation, result is stored into applied matrix (left hand side matrix)
 */
 template<class T>
-inline Matrix2D<T>& Matrix2D<T>::operator+= (const Matrix2D<T> &M) {
+template<class S>
+inline Matrix2D<T>& Matrix2D<T>::operator+= (const Matrix2D<S> &M) {
 	for(size_t i = 0; i < num_elements; i++)
 	{
 		plane_array[i] += M.plane_array[i];
@@ -1643,6 +1655,21 @@ inline Matrix2D<bool> Matrix2D<bool>::times (const Matrix2D<bool> &M) const {
 		Tmp.plane_array[i] = plane_array[i] && M.plane_array[i];
 	}
 	return Tmp;
+}
+
+/**
+ * Returns a bool matrix if an element is finite
+ */
+template <class T>
+inline Matrix2D<bool> Matrix2D<T>::is_finite() const {
+    size_t w, x;
+    Matrix2D<bool> Tmp(size_q1, size_q2);
+    for (w = 0; w < this->size_q1; w++) {
+        for (x = 0; x < this->size_q2; x++) {
+            Tmp[w][x] = std::isfinite(matrix_array[w][x]);
+		}
+	}
+    return Tmp;
 }
 
 /**
@@ -2767,7 +2794,8 @@ inline Matrix3D<T>& Matrix3D<T>::operator= (const T Val) {
 * Matrix summation, result is stored into applied matrix (left hand side matrix)
 */
 template<class T>
-inline Matrix3D<T>& Matrix3D<T>::operator+= (const Matrix3D<T> &M) {
+template<class S>
+inline Matrix3D<T>& Matrix3D<T>::operator+= (const Matrix3D<S> &M) {
 	for(size_t i = 0; i < num_elements; i++)
 	{
 		plane_array[i] += M.plane_array[i];
@@ -2870,6 +2898,24 @@ inline Matrix3D<T> Matrix3D<T>::sqrt () const {
 	}
 	return Tmp;
 }
+
+/**
+ * Returns a bool matrix if an element is present
+ */
+template <class T>
+inline Matrix3D<bool> Matrix3D<T>::is_finite() const {
+    size_t w, x, y;
+    Matrix3D<bool> Tmp(size_q1, size_q2, size_q3);
+    for (w = 0; w < this->size_q1; w++) {
+        for (x = 0; x < this->size_q2; x++) {
+            for (y = 0; y < this->size_q3; y++) {
+                Tmp[w][x][y] = std::isfinite(matrix_array[w][x][y]);
+            }
+        }
+    }
+    return Tmp;
+}
+
 
 /**
 * Add each element of the matrix to corresponds element of matrix M.
@@ -3408,7 +3454,7 @@ void Matrix3D<T>::readFromFile(const std::string& filename, const Matrix3D<T>& g
 						 input >> loaded_x >> loaded_y >> loaded_z;
 						 // check if grid is the same
 						 if (fabs(log10(loaded_x) - log10(grid_x[i1][i2][i3])) > err || fabs(log10(loaded_y) - log10(grid_y[i1][i2][i3])) > err || fabs(log10(loaded_z) - log10(grid_z[i1][i2][i3])) > err) {
-							printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", filename.c_str(), i1, i2, i3, loaded_x, loaded_y, loaded_z, grid_x[i1][i2][i3], grid_y[i1][i2][i3], grid_z[i1][i2][i3]);
+							printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", filename.c_str(), i1, i2, i3, loaded_x, loaded_y, loaded_z, (double) grid_x[i1][i2][i3], (double) grid_y[i1][i2][i3], (double) grid_z[i1][i2][i3]);
 							exit(EXIT_FAILURE);
 						} else {
 							input >> matrix_array[i1][i2][i3];
@@ -3701,7 +3747,7 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 		for (y = 0; y < size_q2; y++) {
 			for (z = 0; z < size_q3; z++) {
 				if (fabs(log10(PtrX[z*(size_q1 * size_q2) + y*(size_q1) +  x]) - log10(grid_x[x][y][z])) > err || fabs(log10(PtrY[z*(size_q1 * size_q2) + y*(size_q1) +  x]) - log10(grid_y[x][y][z])) > err || fabs(log10(PtrZ[z*(size_q1 * size_q2) + y*(size_q1) +  x]) - log10(grid_z[x][y][z])) > err) {
-				 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", file.c_str(), x, y, z, PtrX[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrY[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrZ[z*(size_q1 * size_q2) + y*(size_q1) +  x], grid_x[x][y][z], grid_y[x][y][z], grid_z[x][y][z]);
+				 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", file.c_str(), x, y, z, PtrX[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrY[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrZ[z*(size_q1 * size_q2) + y*(size_q1) +  x], (double) grid_x[x][y][z], (double) grid_y[x][y][z], (double) grid_z[x][y][z]);
 							//printf("grid error \n");
 							exit(EXIT_FAILURE);
 				}
@@ -4269,7 +4315,8 @@ inline Matrix4D<T>& Matrix4D<T>::operator= (const T Val) {
 * Add each element of the current matrix by the corresponding element in M and return this matrix
 */
 template<class T>
-inline Matrix4D<T>& Matrix4D<T>::operator+= (const Matrix4D<T> &M) {
+template<class S>
+inline Matrix4D<T>& Matrix4D<T>::operator+= (const Matrix4D<S> &M) {
 	for(size_t i = 0; i < num_elements; i++)
 	{
 		plane_array[i] += M.plane_array[i];
@@ -4301,6 +4348,13 @@ inline Matrix4D<T>& Matrix4D<T>::operator*= (const T Val) {
 	return *this;
 }
 
+template<>
+inline Matrix4D<bool>& Matrix4D<bool>::operator*= (const bool Val) {
+	for(size_t i = 0; i < num_elements; i++)
+		plane_array[i] = plane_array[i] && Val;
+	return *this;
+}
+
 /**
 * Divide each element of the current matrix by Val and return this matrix
 */
@@ -4312,6 +4366,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator/= (const T Val) {
 	}
 	return *this;
 }
+
 
 /**
 * Add each element of the current matrix by Val and return this matrix
@@ -4345,6 +4400,15 @@ inline Matrix4D<T>& Matrix4D<T>::times_equal (const Matrix4D<T> &M) {
 	for(size_t i = 0; i < num_elements; i++)
 	{
 		plane_array[i] *= M.plane_array[i];
+	}
+	return *this;
+}
+
+template<>
+inline Matrix4D<bool>& Matrix4D<bool>::times_equal (const Matrix4D<bool> &M) {
+	for(size_t i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = plane_array[i] && M.plane_array[i];
 	}
 	return *this;
 }
@@ -4401,6 +4465,15 @@ inline Matrix4D<T> Matrix4D<T>::operator* (const T Val) const {
 	return Tmp;
 }
 
+template<>
+inline Matrix4D<bool> Matrix4D<bool>::operator* (const bool Val) const {
+	Matrix4D<bool> Tmp(size_w, size_x, size_y, size_z);
+	for(size_t i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] && Val;
+	}
+	return Tmp;
+}
 
 /**
 * Divide each element of the matrix by Val, save result to a new matrix.
@@ -4428,6 +4501,16 @@ inline Matrix4D<T> Matrix4D<T>::times (const Matrix4D<T> &M) const {
 	return Tmp;
 }
 
+template<>
+inline Matrix4D<bool> Matrix4D<bool>::times (const Matrix4D<bool> &M) const {
+	Matrix4D<bool> Tmp(size_w, size_x, size_y, size_z);
+	for(size_t i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] && M.plane_array[i];
+	}
+	return Tmp;
+}
+
 /**
 * Divide each element of the current matrix by the corresponding element of matrix M and return new matrix
 */
@@ -4441,6 +4524,24 @@ inline Matrix4D<T> Matrix4D<T>::divide (const Matrix4D<T> &M) const {
 	return Tmp;
 }
 
+/**
+ * Returns a bool matrix if an element is present
+ */
+template <class T>
+inline Matrix4D<bool> Matrix4D<T>::is_finite() const {
+    size_t w, x, y, z;
+    Matrix4D<bool> Tmp(size_w, size_x, size_y, size_z);
+    for (w = 0; w < this->size_w; w++) {
+        for (x = 0; x < this->size_x; x++) {
+            for (y = 0; y < this->size_y; y++) {
+                for (z = 0; z < this->size_z; z++) {
+                    Tmp[w][x][y][z] = std::isfinite(matrix_array[w][x][y][z]);
+                }
+            }
+        }
+    }
+    return Tmp;
+}
 
 /**
 * Write matrix to file.
@@ -5284,7 +5385,7 @@ void Matrix4D<T>::readFromFile(const std::string& filename, const Matrix4D<T>& g
 							 input >> loaded_w >> loaded_x >> loaded_y >> loaded_z;
 							 // check if grid is the same
 							 if (fabs(log10(loaded_w) - log10(grid_w[w][x][y][z])) > err || fabs(log10(loaded_x) - log10(grid_x[w][x][y][z])) > err || fabs(log10(loaded_y) - log10(grid_y[w][x][y][z])) > err || fabs(log10(loaded_z) - log10(grid_z[w][x][y][z])) > err) {
-								printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu, %zu].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", filename.c_str(), w, x, y, z, loaded_w, loaded_x, loaded_y, loaded_z, grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
+								printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu, %zu].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", filename.c_str(), w, x, y, z, loaded_w, loaded_x, loaded_y, loaded_z, (double) grid_w[w][x][y][z], (double) grid_x[w][x][y][z], (double) grid_y[w][x][y][z], (double) grid_z[w][x][y][z]);
 								exit(EXIT_FAILURE);
 							} else {
 								input >> matrix_array[w][x][y][z];
@@ -5567,7 +5668,7 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>
 
 
 					if (fabs(log10(PtrW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_w[w][x][y][z])) > err || fabs(log10(PtrX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_x[w][x][y][z])) > err || fabs(log10(PtrY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_y[w][x][y][z])) > err || fabs(log10(PtrZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_z[w][x][y][z])) > err) {
-					 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu, %zu].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", file.c_str(), w, x, y, z, PtrW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], PtrX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
+					 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu, %zu].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", file.c_str(), w, x, y, z, PtrW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], PtrX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], (double) grid_w[w][x][y][z], (double) grid_x[w][x][y][z], (double) grid_y[w][x][y][z], (double) grid_z[w][x][y][z]);
 								exit(EXIT_FAILURE);
 					}
 					matrix_array[w][x][y][z] = PtrFinal[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w];
@@ -5801,10 +5902,20 @@ T Matrix4D<T>::max() const {
 */
 template<class T>
 T Matrix4D<T>::maxabs() const {
-	T tmp = 0;
+	T tmp = -std::numeric_limits<T>::infinity();;
 	for(size_t i = 0; i < num_elements; i++)
 	{
 		tmp = std::max(tmp, std::abs(plane_array[i]));
+	}
+	return tmp;
+}
+
+template<>
+bool Matrix4D<bool>::maxabs() const {
+	bool tmp = 0;
+	for(size_t i = 0; i < num_elements; i++)
+	{
+		tmp = std::max(tmp, plane_array[i]);
 	}
 	return tmp;
 }
@@ -6397,10 +6508,6 @@ void CalculationMatrix::writeToFile(const std::string& filename) const {
 // Implementations
 //////////////////////////////////////////
 
-
-
-
-
 template class Matrix1D<double>;
 template class Matrix2D<double>;
 template class Matrix3D<double>;
@@ -6408,6 +6515,16 @@ template class Matrix4D<double>;
 
 template class Matrix1D<bool>;
 template class Matrix2D<bool>;
+template class Matrix4D<bool>;
+
+template Matrix1D<double> &Matrix1D<double>::operator+=(const Matrix1D<double> &M);
+template Matrix1D<double> &Matrix1D<double>::operator+=(const Matrix1D<bool> &M);
+template Matrix2D<double> &Matrix2D<double>::operator+=(const Matrix2D<double> &M);
+template Matrix2D<double> &Matrix2D<double>::operator+=(const Matrix2D<bool> &M);
+template Matrix3D<double> &Matrix3D<double>::operator+=(const Matrix3D<double> &M);
+template Matrix3D<double> &Matrix3D<double>::operator+=(const Matrix3D<bool> &M);
+template Matrix4D<double> &Matrix4D<double>::operator+=(const Matrix4D<double> &M);
+template Matrix4D<double> &Matrix4D<double>::operator+=(const Matrix4D<bool> &M);
 
 #endif
 

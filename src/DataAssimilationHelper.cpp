@@ -12,18 +12,19 @@
 #include "MatrixOperations.h"
 #include "PMF.h"
 
-using std::string;
-
-extern const double FILLVAL{-1e31};
 namespace internal = data_assimilation::internal;
 
 Matrix2D<double> internal::getModelMatrixConvection2DNoStabilityCheck(
-    const Matrix2D<double>& VP,
-    const Matrix2D<double>& VR,
-    [[maybe_unused]] const Matrix2D<double>& Loss,
+    const Matrix2D<double> &VP,
+    const Matrix2D<double> &VR,
+    const Matrix2D<double> &Loss,
+    const Matrix2D<bool> &saturation_map,
     double timeStep,
     double dP,
-    double dR) {
+    double dR,
+    bool use_log,
+    double correlation_factor) {
+
     int P_size = VP.size_q1;
     int R_size = VP.size_q2;
 
@@ -32,6 +33,13 @@ Matrix2D<double> internal::getModelMatrixConvection2DNoStabilityCheck(
 
     for (auto iP = 0; iP < P_size; ++iP) {
         for (auto iR = 0; iR < R_size; ++iR) {
+
+            // just write boundary
+            if (iR == 0 || iR == R_size - 1) {
+                result[iR + iP * R_size][iR + iP * R_size] = correlation_factor;
+                continue;
+            }
+
             auto iP_c = iP;
             size_t iP_l, iP_r;
             if (iP == 0 || iP == P_size - 1) {
@@ -48,10 +56,27 @@ Matrix2D<double> internal::getModelMatrixConvection2DNoStabilityCheck(
 
             auto VP_c = VP[iP_c][iR_c];
             auto VR_c = VR[iP_c][iR_c];
+            auto Loss_c = Loss[iP_c][iR_c];
+            bool sat_c = saturation_map[iP_c][iR_c];
+            Loss_c = sat_c ? 0 : Loss_c;
 
-            double m_cc = 1. - std::abs(VP_c) * timeStep / dP - std::abs(VR_c) * timeStep / dR;
-            //auto Loss_c = Loss[iP_c][iR_c] * 0;
-            // + timeStep * Loss_c;
+            double m_cc = 0;
+
+            if (use_log) {
+                m_cc = 1. - std::abs(VP_c) * timeStep / dP - std::abs(VR_c) * timeStep / dR;
+            } else {
+                m_cc = 1. - std::abs(VP_c) * timeStep / dP - std::abs(VR_c) * timeStep / dR + timeStep * Loss_c;
+            }
+    
+            if (m_cc < 0) {
+                std::cout << "iR: " << iR << std::endl;
+                std::cout << "sat_c: " << sat_c << std::endl;
+                std::cout << "VP: " << std::abs(VP_c) * timeStep / dP << std::endl;
+                std::cout << "VR: " << std::abs(VR_c) * timeStep / dR << std::endl;
+                std::cout << "Loss: " << timeStep * Loss_c << std::endl;
+                std::cout << m_cc << std::endl;
+                throw std::exception();
+            } 
 
             double m_lc, m_rc, m_cl, m_cr;
             if (VP_c > 0.) {
@@ -75,15 +100,12 @@ Matrix2D<double> internal::getModelMatrixConvection2DNoStabilityCheck(
                 exit(EXIT_FAILURE);
             }
 
-            if (iR != 0 && iR != R_size - 1) {
-                result[iR_c + iP_c * R_size][iR_c + iP_c * R_size] = m_cc;
-                result[iR_c + iP_c * R_size][iR_c + iP_l * R_size] = m_lc;
-                result[iR_c + iP_c * R_size][iR_c + iP_r * R_size] = m_rc;
-                result[iR_c + iP_c * R_size][iR_l + iP_c * R_size] = m_cl;
-                result[iR_c + iP_c * R_size][iR_r + iP_c * R_size] = m_cr;
-            } else {
-                result[iR_c + iP_c * R_size][iR_c + iP_c * R_size] = 1.;
-            }
+            result[iR_c + iP_c * R_size][iR_c + iP_c * R_size] = m_cc;
+            result[iR_c + iP_c * R_size][iR_c + iP_l * R_size] = m_lc;
+            result[iR_c + iP_c * R_size][iR_c + iP_r * R_size] = m_rc;
+            result[iR_c + iP_c * R_size][iR_l + iP_c * R_size] = m_cl;
+            result[iR_c + iP_c * R_size][iR_r + iP_c * R_size] = m_cr;
+
         }
     }
 
@@ -114,26 +136,28 @@ std::pair<int, double> internal::splitTimeStepCourantCondition(
 }
 
 Matrix2D<double> internal::getModelMatrixConvection2D(
-    const Matrix2D<double>& VP,
-    const Matrix2D<double>& VR,
-    const Matrix2D<double>& Loss,
+    const Matrix2D<double> &VP,
+    const Matrix2D<double> &VR,
+    const Matrix2D<double> &Loss,
+    const Matrix2D<bool> &saturation_map,
     double timeStep,
     double dP,
-    double dR) {
-    const double maximumCourantNumber = 1.0;
+    double dR,
+    bool use_log,
+    double correlation_time) {
+
+    const double maximumCourantNumber = 1;
     auto stepSplit = splitTimeStepCourantCondition(
         maximumCourantNumber, timeStep,
         VP, VR, dP, dR);
-    const int& nt = stepSplit.first;
-    const double& timeStep_new = stepSplit.second;
+    int &nt = stepSplit.first;
+    const double &timeStep_new = stepSplit.second;
 
     Matrix2D<double> result_1step = getModelMatrixConvection2DNoStabilityCheck(
-        VP, VR, Loss, timeStep_new, dP, dR);
+        VP, VR, Loss, saturation_map, timeStep_new, dP, dR, use_log, exp(-timeStep_new/correlation_time));
+    
+    // std::cout << "NUMBER OF TIMESTEPS: " << nt << std::endl;
 
-    // Matrix2D<double> result = result_1step;
-    // for (auto it = 1; it < nt; ++it) {
-    //      result = result * result_1step;
-    // }
     Matrix2D<double> result = result_1step^nt;
 
     return result;
@@ -161,8 +185,7 @@ double internal::conditionalMean(
     }
 
     if (!counter) {
-        // result = FILLVAL;
-        result = NAN;  // std::nan(NULL);
+        result = NAN;
     } else {
         result /= counter;
     }
@@ -170,54 +193,68 @@ double internal::conditionalMean(
     return result;
 }
 
-Matrix2D<double> internal::bin(
-    const data_assimilation::Observations& data,
-    const Matrix2D<double>& P,
-    const Matrix2D<double>& R,
-    const string& type) {
+Matrix4D<double> internal::bin(
+    const std::vector<std::vector<data_assimilation::Observations>> &observations,
+    const Matrix2D<double> &P,
+    const Matrix2D<double> &R,
+    const std::string &type) {
+
     size_t P_size = P.size_q1;
     size_t R_size = R.size_q2;
+    size_t V_size = observations.size();
+    size_t K_size = observations[0].size();
 
-    double dP = P[1][0] - P[0][0];
-    double dR = R[0][1] - R[0][0];
+    Matrix4D<double> result{P_size, R_size, V_size, K_size};
+    result = NAN;
 
-    std::vector<Matrix1D<bool>> P_flags(P_size);
-    for (size_t iP = 1; iP < P_size - 1; ++iP) {
-        double P_c = P[iP][0];
-        P_flags[iP] = (data.P <= P_c + dP * 0.5) && (data.P >= P_c - dP * 0.5);
-    }
-    P_flags[0] = (data.P <= dP * 0.5) || (data.P >= P[P_size - 1][0] - dP * 0.5);
-    P_flags[P_size - 1] = P_flags[0];
+    auto dP = P[1][0] - P[0][0];
+    auto dR = R[0][1] - R[0][0];
 
-    // maybe? - replace boolean vectors with 1.0 - 0.0 vectors and perform dot product instead of conditional mean
-    std::vector<Matrix1D<bool>> R_flags(R_size);
-    for (size_t iR = 0; iR < R_size; ++iR) {
-        double R_c = R[0][iR];
-        R_flags[iR] = (data.R <= R_c + dR * 0.5) && (data.R >= R_c - dR * 0.5);
-    }
+    for (size_t iV = 0; iV < V_size; ++iV) {
+        for (size_t iK = 0; iK < K_size; ++iK) {
 
-    Matrix2D<double> result{P_size, R_size};
-    if (type == "linear") {
-        for (size_t iP = 0; iP < P_size; ++iP) {
-            const Matrix1D<bool>& P_flag = P_flags[iP];
+            std::vector<Matrix1D<bool>> P_flags(P_size);
+            std::vector<Matrix1D<bool>> R_flags(R_size);
+
+            Observations data = observations[iV][iK];
+
+            for (size_t iP = 1; iP < P_size - 1; ++iP) {
+                auto P_c = P[iP][0];
+                P_flags[iP] = (data.P <= P_c + dP * 0.5) && (data.P >= P_c - dP * 0.5);
+            }
+            P_flags[0] = (data.P <= dP * 0.5) || (data.P >= P[P_size - 1][0] - dP * 0.5);
+            P_flags[P_size - 1] = P_flags[0];
+
+            // maybe? - replace boolean vectors with 1.0 - 0.0 vectors and perform dot product instead of conditional mean
             for (size_t iR = 0; iR < R_size; ++iR) {
-                const Matrix1D<bool>& R_flag = R_flags[iR];
-                result[iP][iR] = conditionalMean(data.PSD, P_flag && R_flag);
+                auto R_c = R[0][iR];
+                R_flags[iR] = (data.R <= R_c + dR * 0.5) && (data.R >= R_c - dR * 0.5);
+            }
+
+            if (type == "linear") {
+                for (size_t iP = 0; iP < P_size; ++iP) {
+                    const auto &P_flag = P_flags[iP];
+                    for (size_t iR = 0; iR < R_size; ++iR) {
+                        const auto &R_flag = R_flags[iR];
+                        result[iP][iR][iV][iK] = conditionalMean(data.PSD, P_flag && R_flag);
+                    }
+                }
+            } else if (type == "log10") {
+                for (size_t iP = 0; iP < P_size; ++iP) {
+                    const auto &P_flag = P_flags[iP];
+                    for (size_t iR = 0; iR < R_size; ++iR) {
+                        const auto &R_flag = R_flags[iR];
+                        result[iP][iR][iV][iK] = std::pow(10.,
+                                                conditionalMean(log10(data.PSD), P_flag && R_flag));
+                    }
+                }
+            } else {
+                std::cout << "Unknown binning type: " << type << std::endl;
+                exit(EXIT_FAILURE);
             }
         }
-    } else if (type == "log10") {
-        for (size_t iP = 0; iP < P_size; ++iP) {
-            const Matrix1D<bool>& P_flag = P_flags[iP];
-            for (size_t iR = 0; iR < R_size; ++iR) {
-                const Matrix1D<bool>& R_flag = R_flags[iR];
-                result[iP][iR] = std::pow(10.,
-                                          conditionalMean(log10(data.PSD), P_flag && R_flag));
-            }
-        }
-    } else {
-        std::cout << "Unknown binning type: " << type << std::endl;
-        exit(EXIT_FAILURE);
     }
+
     return result;
 }
 
@@ -226,7 +263,7 @@ data_assimilation::ObservationSpace internal::convertToObservationSpace(
     size_t size{0};
     for (size_t iP = 0; iP < data.size_q1; ++iP) {
         for (size_t iR = 0; iR < data.size_q2; ++iR) {
-            if (data[iP][iR] != FILLVAL && !std::isnan(data[iP][iR])) {
+            if (std::isfinite(data[iP][iR])) {
                 ++size;
             }
         }
@@ -252,7 +289,7 @@ data_assimilation::ObservationSpace internal::convertToObservationSpace(
     for (size_t iP = 0; iP < data.size_q1; ++iP) {
         for (size_t iR = 0; iR < data.size_q2; ++iR) {
             int H_idx = iR + iP * data.size_q2;
-            if (data[iP][iR] != FILLVAL && !std::isnan(data[iP][iR])) {
+            if (std::isfinite(data[iP][iR])) {
                 result.data[counter] = data[iP][iR];
                 result.H[counter][H_idx] = 1.0;
                 ++counter;
@@ -270,8 +307,6 @@ data_assimilation::ProcessedMatFileData internal::readData(
     ProcessedMatFileData result;
     std::cout << "\tMLT ";
     result.MLT = readProcessedMatFiles1D("MLT", timeStart, timeEnd, parameters);
-    // std::cout << "xGEO ";
-    // auto xGEO = readProcessedMatFiles2D("xGEO", timeStart, timeEnd, parameters);
     std::cout << "R0 ";
     result.R = readProcessedMatFiles1D("R0", timeStart, timeEnd, parameters);
     std::cout << "InvMu ";
@@ -286,13 +321,6 @@ data_assimilation::ProcessedMatFileData internal::readData(
         return ProcessedMatFileData();
     }
 
-    // result.R.AllocateMemory(xGEO.size_q1);
-    // for (auto it = 0; it < xGEO.size_q1; ++it) {
-    //     result.R[it] = std::sqrt(
-    //         xGEO[it][0] * xGEO[it][0] +
-    //         xGEO[it][1] * xGEO[it][1] +
-    //         xGEO[it][2] * xGEO[it][2]);
-    // }
     result.V.AllocateMemory(invMu.size_q1, invMu.size_q2, invMu.size_q3);
 
     for (size_t it = 0; it < invMu.size_q1; ++it) {
@@ -300,7 +328,7 @@ data_assimilation::ProcessedMatFileData internal::readData(
             for (size_t ia = 0; ia < invMu.size_q3; ++ia) {
                 result.V[it][ie][ia] = invMu[it][ie][ia] * std::pow(result.K[it][ia] + 0.5, 2.);
                 // replace all zeros with nan's
-                if (result.PSD[it][ie][ia] < 1e-21) result.PSD[it][ie][ia] = std::log10(-1.0);
+                if (result.PSD[it][ie][ia] <= 1e-21) result.PSD[it][ie][ia] = NAN;
 
                 // unit conversion
                 result.PSD[it][ie][ia] *= 3e7;
@@ -352,7 +380,7 @@ double internal::interp2d_four_corners(
 
     double minK = K_in.min();
     double maxK = K_in.max();
-    if (K_out < minK || K_out > maxK) return std::log(-1.0);
+    if (K_out < minK || K_out > maxK) return NAN;
 
     size_t nV = V_in.size_q1;
     size_t nK = K_in.size_q2;

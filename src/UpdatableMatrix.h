@@ -111,12 +111,20 @@ private:
 
 public:
 
+	enum MERGE_TYPE{SUM, MEAN};
+
+	UpdatableListMatrix() {};
+	UpdatableListMatrix(MERGE_TYPE merge_type);
+
 	// to simplify things
 	MatrixND& operator= (const MatrixND &M);
 	MatrixND& operator= (const double Val);
 
 	bool readFromIniFile(std::string ini_filename, const MatrixND &Q1, const MatrixND &Q2, const MatrixND &Q3, const MatrixND &Q4);
 	void update(double time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
+
+private:
+	MERGE_TYPE merge_type = MERGE_TYPE::SUM;
 
 };
 

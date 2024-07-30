@@ -86,7 +86,8 @@ public:
 	// I didn't have time yet to write these functions - these are matrix opearations
 	//Matrix1D& operator*= (const Matrix1D<T> &M); 					// reserved for something good
 	//Matrix1D& operator/= (const Matrix1D<T> &M); 					// reserved for something good
-	Matrix1D& operator+= (const Matrix1D<T> &M);
+	template <class S>
+	Matrix1D& operator+= (const Matrix1D<S> &M);
 	Matrix1D& operator-= (const Matrix1D<T> &M);
 	Matrix1D& operator*= (const T Val);
 	Matrix1D& operator/= (const T Val);
@@ -109,6 +110,7 @@ public:
 	Matrix1D times (const Matrix1D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
 	Matrix1D divide (const Matrix1D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
 	Matrix1D sqrt () const; 	                    				///< Arraywise square root sqrt(A), stores result in a new matrix
+	Matrix1D<bool> is_finite () const; 							    ///< Bool matrix reflecting if a 'real' element is present (not NAN) 
 
 	T dot (const Matrix1D<T> &M) const; 					///< Dot product
 	T norm () const; 					///< Norm
@@ -182,7 +184,8 @@ public:
 
 	//Matrix2D& operator*= (const Matrix2D<T> &M); 					// reserved for something good
 	//Matrix2D& operator/= (const Matrix2D<T> &M); 					// reserved for something good
-	Matrix2D& operator+= (const Matrix2D<T> &M);
+	template <class S>
+	Matrix2D& operator+= (const Matrix2D<S> &M);
 	Matrix2D& operator-= (const Matrix2D<T> &M);
 	Matrix2D& operator*= (const T Val);
 	//Matrix2D& operator/= (const T Val);
@@ -204,6 +207,7 @@ public:
 
 	Matrix2D times (const Matrix2D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
 	Matrix2D divide (const Matrix2D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
+	Matrix2D<bool> is_finite () const; 							    ///< Bool matrix reflecting if a 'real' element is present (not NAN) 
 
 	// Return corresponding index of 1d array
 	size_t index1d(size_t q1, size_t q2) const;
@@ -287,7 +291,8 @@ public:
 
 	//Matrix3D& operator*= (const Matrix3D<T> &M); 					// reserved for something good
 	//Matrix3D& operator/= (const Matrix3D<T> &M); 					// reserved for something good
-	Matrix3D& operator+= (const Matrix3D<T> &M);
+	template <class S>
+	Matrix3D& operator+= (const Matrix3D<S> &M);
 	Matrix3D& operator-= (const Matrix3D<T> &M);
 	Matrix3D& operator*= (const T Val);
 	Matrix3D& operator/= (const T Val);
@@ -310,6 +315,7 @@ public:
 	Matrix3D times (const Matrix3D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
 	Matrix3D divide (const Matrix3D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
 	Matrix3D sqrt () const; 	                    				///< Arraywise square root sqrt(A), stores result in a new matrix
+	Matrix3D<bool> is_finite () const; 							    ///< Bool matrix reflecting if a 'real' element is present (not NAN) 
 
 	// Saving (loading) of a matrix into (from) file
 	virtual void writeToFile(const std::string& filename, const std::string& info = "") const; 										///< Save matrix to a file
@@ -412,7 +418,8 @@ public:
 
 	//Matrix4D& operator*= (const Matrix4D<T> &M); 					// reserved for something good
 	//Matrix4D& operator/= (const Matrix4D<T> &M); 					// reserved for something good
-	Matrix4D& operator+= (const Matrix4D<T> &M);
+	template <class S>
+	Matrix4D& operator+= (const Matrix4D<S> &M);
 	Matrix4D& operator-= (const Matrix4D<T> &M);
 	Matrix4D& operator*= (const T Val);
 	Matrix4D& operator/= (const T Val);
@@ -434,6 +441,7 @@ public:
 
 	Matrix4D times (const Matrix4D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
 	Matrix4D divide (const Matrix4D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
+	Matrix4D<bool> is_finite () const; 							    ///< Bool matrix reflecting if a 'real' element is present (not NAN) 
 
 	// Saving (loading) of a matrix into (from) file
 	virtual void writeToFile(const std::string& filename, const std::string& info = "") const;								///< Save matrix to a file

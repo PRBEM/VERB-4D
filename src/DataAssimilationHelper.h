@@ -10,21 +10,25 @@ extern const double FILLVAL;
 using ParametersIni=::Parameters;
 namespace data_assimilation::internal {
     Matrix2D<double> getModelMatrixConvection2D(
-        const Matrix2D<double>& VP,
-        const Matrix2D<double>& VR,
-        const Matrix2D<double>& Loss,
+        const Matrix2D<double> &VP,
+        const Matrix2D<double> &VR,
+        const Matrix2D<double> &Loss,
+        const Matrix2D<bool> &saturation_map,
         double timeStep,
         double dP,
-        double dR
-    );
+        double dR,
+        bool use_log,
+        double correlation_time);
     Matrix2D<double> getModelMatrixConvection2DNoStabilityCheck(
-        const Matrix2D<double>& VP,
-        const Matrix2D<double>& VR,
-        const Matrix2D<double>& Loss,
+        const Matrix2D<double> &VP,
+        const Matrix2D<double> &VR,
+        const Matrix2D<double> &Loss,
+        const Matrix2D<bool> &saturation_map,
         double timeStep,
         double dP,
-        double dR
-    );
+        double dR,
+        bool use_log,
+        double correlation_factor);
     std::pair<int, double> splitTimeStepCourantCondition(
         double maximumCourantNumber, double timeStep, 
         const Matrix2D<double>& VP, const Matrix2D<double>& VR, 
@@ -41,11 +45,10 @@ namespace data_assimilation::internal {
 
     double conditionalMean(const Matrix1D<double>& a, const Matrix1D<bool>& flag);
     
-    Matrix2D<double> bin(
-        const data_assimilation::Observations& data, 
-        const Matrix2D<double>& P, const Matrix2D<double>& R,
-        const std::string& type = "linear"
-    );
+    Matrix4D<double> bin(
+        const std::vector<std::vector<data_assimilation::Observations>> &observations,
+        const Matrix2D<double> &P, const Matrix2D<double> &R,
+        const std::string &type = "linear");
 
     data_assimilation::ObservationSpace convertToObservationSpace(const Matrix2D<double>& data);
 

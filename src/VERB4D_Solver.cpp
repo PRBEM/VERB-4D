@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
 
 #ifdef DATA_ASSIMILATION
     da::DataAssimilationManagerConvection daManagerConvection{
-        "parameters_da.ini", time_first, time_first + time_total, V.wxSlice(0, 0), K.wxSlice(0, 0), P_size, R_size, outputFolder};
+        "parameters_da.ini", time_first, time_first + time_total, P.yzSlice(0, 0), R.yzSlice(0, 0), V.wxSlice(0, 0), K.wxSlice(0, 0), outputFolder};
 #endif
 
 #ifdef SAVE_PSD_LOST_CONV
@@ -548,13 +548,16 @@ int main(int argc, char *argv[])
         PSD_lost_conv = 0;
 #endif
 
+        bool has_VX_updated = false;
         // Update convection velocities VP and VR and log the maximum absolute values
         if ((3 < P_size || 3 < R_size) && run_convection)
         {
-            VP.update(time_current, P, R, V, K);
+            bool has_VP_updated = VP.update(time_current, P, R, V, K);
             Logger::message << "max(VP) = " << VP.maxabs() << std::endl;
-            VR.update(time_current, P, R, V, K);
+            bool has_VR_updated = VR.update(time_current, P, R, V, K);
             Logger::message << "max(VR) = " << VR.maxabs() << std::endl;
+
+            has_VX_updated = has_VP_updated or has_VR_updated;
         }
 
         // Update convection velocities VV and log the maximum absolute values
@@ -1091,7 +1094,7 @@ int main(int argc, char *argv[])
                         << "Number of negative points: " << number_of_negative_points << " of " << P_size * R_size * V_size * K_size << std::endl;
 
 #ifdef DATA_ASSIMILATION
-        daManagerConvection.assimilate(time_current, PSD, P, R, VP, VR, Losses_conv, dt);
+        daManagerConvection.assimilate(time_current, PSD, VP, VR, has_VX_updated, Sources, SaturationDensity, dt);
         if (positive_PSD) {
             PSD.max_of(1e-21);
         }

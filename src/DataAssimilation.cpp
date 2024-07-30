@@ -10,94 +10,129 @@
 // namespace da = data_assimilation;
 
 data_assimilation::DataAssimilationManagerConvection::DataAssimilationManagerConvection(
-    const std::string& parametersFile,
-    double timeStart, double timeEnd, const Matrix2D<double>& V,
-    const Matrix2D<double>& K, int P_size, int R_size, const std::string& debug_output_folder)
-    : _analysisCovarianceConvection(P_size, R_size, V.size_q1, K.size_q2), _debug_output_folder(debug_output_folder), 
-    _timeStart(timeStart), _timeEnd(timeEnd), _V(V), _K(K)
-{
+    const std::string &parametersFile,
+    double timeStart, double timeEnd, const Matrix2D<double> &P, 
+    const Matrix2D<double> &R, const Matrix2D<double> &V, const Matrix2D<double> &K, const std::string& debug_output_folder)
+    : _analysisCovarianceConvection(P.size_q1, R.size_q2, V.size_q1, K.size_q2), _timeStart(timeStart), _timeEnd(timeEnd), _P(P), _R(R), _V(V), _K(K) {
+
     _assimilationParameters = readParameters(parametersFile);
     _runDataAssimilation = _assimilationParameters.runDataAssimilation;
     _debug_output_folder = debug_output_folder;
 
     if (_runDataAssimilation) {
-        _dataParameters = pmf::readParameters("satellite_data.list");
 
+        if (_assimilationParameters.dataSource == DataAssimilationDataSource::DataServer) {
+            _dataSource = std::make_unique<DataServerDataSource>(DataServerDataSource("satellite_data.lst"));
+        } else if (_assimilationParameters.dataSource == DataAssimilationDataSource::LocalFiles) {
+            _dataSource = std::make_unique<LocalFilesDataSource>(LocalFilesDataSource("satellite_data.lst", P.size_q1, R.size_q2, V.size_q1, K.size_q2));
+        } else {
+            throw std::invalid_argument("Encountered invalid 'data_source' argument in parameters_da.ini!");
+        }
         _timePrev = timeStart;
         _timeNext = timeStart + _assimilationParameters.timeStep;
+    }
+
+    // Calculation of Q matrix
+    double modelError = _assimilationParameters.modelError;
+    if (_assimilationParameters.useLog) {
+        modelError = log10(1.0 + modelError);
+    }
+    Matrix1D<double> D = Matrix1D<double>{P.size_q1*R.size_q2};
+    D = modelError;
+    _Q = diag(D);
+
+    double correlation_factor = exp(-_assimilationParameters.timeStep/_assimilationParameters.correlationTime);
+    Logger::message << "\tData assimilation time step: " << _assimilationParameters.timeStep << std::endl;
+    Logger::message << "\tCorrelation time: " << _assimilationParameters.correlationTime << std::endl;
+    Logger::message << "\tCorrelation factor: " << correlation_factor << std::endl;
+
+    for (size_t iP = 0; iP < _P.size_q1; iP++) {
+        _Q[_P.size_q2-1 + iP * _P.size_q2][_P.size_q2-1 + iP * _P.size_q2] = (1.-(correlation_factor*correlation_factor)) * modelError;
+        _Q[iP * _P.size_q2][iP * _P.size_q2] = (1.-(correlation_factor*correlation_factor)) * modelError;
     }
 }
 
 void data_assimilation::DataAssimilationManagerConvection::assimilate(
-    double time, Matrix4D<double>& PSD,
-    const Matrix4D<double>& P, const Matrix4D<double>& R,
-    const Matrix4D<double>& VP, const Matrix4D<double>& VR,
-    const Matrix4D<double>& Loss,
+    double time, Matrix4D<double> &PSD,
+    const Matrix4D<double> &VP, const Matrix4D<double> &VR,
+    const bool has_VX_updated,
+    const Matrix4D<double> &Loss,
+    const Matrix4D<double> &SaturationDensity,
     double dt) {
-    std::cout << std::setprecision(10) << "input: " << time << "   _timeNext: " << _timeNext << std::endl;
+
     if (_runDataAssimilation && time >= _timeNext) {
+
         size_t P_size = PSD.size_w;
         size_t R_size = PSD.size_x;
 
-        auto P2D = P.yzSlice(0, 0);
-        auto R2D = R.yzSlice(0, 0);
-
-        auto observations = getObservations(_timePrev, _timeNext, _V, _K,
-                                            _dataParameters);
-
-        if (observations.empty()) {
-            std::cout << "No data found. Skipping data assimilation...\n";
-        } else {
-            std::cout << "Done Interpolating. Applying Kalman filter...\n";
-            int progress_count = 0;
-            int progress_total = _V.size_q1 * _K.size_q2;
+        Matrix4D<double> observations = _dataSource->getObservations(_timePrev, _timeNext, _P, _R, _V, _K);
 
 #ifdef DATA_ASSIMILATION_DEBUG
-            data_assimilation::DebugOuput4D debug_output_4d(P.size_w, P.size_x, P.size_y, P.size_z);
+        data_assimilation::DebugOuput4D debug_output_4d(VP.size_w, VP.size_x, VP.size_y, VP.size_z);
 #endif
 
-#pragma omp parallel for shared(progress_total, progress_count) schedule(dynamic, 1) collapse(2)
-            for (int iV = _V.size_q1 - 1; iV >= 0; --iV) {
-                for (size_t iK = 0; iK < _K.size_q2; ++iK) {
-                    if (omp_get_thread_num() == 0) {
-                        std::cout << "\b\b\b\b\b\b\b\b\b" << '\t'
-                                  << (int)((double)progress_count / progress_total * 100) << "%" << std::flush;
-                    }
-                    // int numnan = 0;
-                    // set all observations to zero for testing
-                    // for (int l = 0; l < observations[iV][iK].PSD.size_q1; l++)
-                    //     if(isnan(observations[iV][iK].PSD[l])) numnan++;
-                    // observations[iV][iK].PSD[l] = 1e-31;
-                    // if(numnan > 0) std::cout << numnan << " of " << observations[iV][iK].PSD.size_q1 << '\n';
-                    Matrix2D<double> PSD_PR = PSD.yzSlice(iV, iK);
-                    auto debug_output = runKalmanFilterConvection2D(PSD_PR,
-                                                                    _analysisCovarianceConvection[iV][iK],
-                                                                    P2D, R2D,
-                                                                    VP.yzSlice(iV, iK), VR.yzSlice(iV, iK),
-                                                                    Loss.yzSlice(iV, iK),
-                                                                    observations[iV][iK], dt, _assimilationParameters);
-
-#ifdef DATA_ASSIMILATION_DEBUG
-                    debug_output_4d.insert_output_2d(debug_output, iV, iK);
-#endif
-
-                    for (size_t iP = 0; iP < P_size; iP++) {
-                        for (size_t iR = 0; iR < R_size; iR++) {
-                            PSD[iP][iR][iV][iK] = PSD_PR[iP][iR];
-                        }
-                    }
-                    progress_count++;
-                }
-            }
-
-#ifdef DATA_ASSIMILATION_DEBUG
-            std::cout << _debug_output_folder << std::endl;
-            debug_output_4d.write_files(_timePrev, _debug_output_folder);
-#endif
+        Logger::message << "\tDone Interpolating. Applying Kalman filter...\n";
+        if (has_VX_updated) {
+            Logger::message << "\tVelocities have changed; recomputing model matrix..." << std::endl;
         }
-        std::cout << '\n';
+
+        int progress_count = 0;
+        int progress_total = _V.size_q1 * _K.size_q2;
+
+#pragma omp parallel for schedule(dynamic, 1) collapse(2)
+        for (int iV = _V.size_q1 - 1; iV >= 0; --iV) {
+            for (size_t iK = 0; iK < _K.size_q2; ++iK) {
+
+                if (omp_get_thread_num() == 0) {
+                    std::cout << "\b\b\b\b\b\b\b\b\b" << '\t'
+                              << (int)((double)progress_count / progress_total * 100) << "%" << std::flush;
+                }
+
+                Matrix2D<double> PSD_PR = PSD.yzSlice(iV, iK);
+                Matrix2D<bool> saturation_map;
+                if (SaturationDensity.initialized) {
+                    saturation_map = PSD_PR >= SaturationDensity.yzSlice(iV, iK);
+                } else {
+                    saturation_map = Matrix2D<bool>(PSD_PR.size_q1, PSD_PR.size_q2);
+                    saturation_map = false;
+                }
+                Matrix2D<double> loss_rate = Loss.yzSlice(iV, iK).divide(PSD_PR);
+
+                data_assimilation::DebugOuput2D debug_output_2d = runKalmanFilterConvection2D(PSD_PR,
+                                            _analysisCovarianceConvection[iV][iK],
+                                            _model_matrix,
+                                            _P, _R,
+                                            VP.yzSlice(iV, iK), VR.yzSlice(iV, iK),
+                                            has_VX_updated,
+                                            loss_rate,
+                                            saturation_map,
+                                            observations.yzSlice(iV, iK), 
+                                            _Q,
+                                            dt, _assimilationParameters);
+
+#ifdef DATA_ASSIMILATION_DEBUG
+            debug_output_4d.insert_output_2d(debug_output_2d, iV, iK);
+#endif
+
+                for (size_t iP = 0; iP < P_size; iP++) {
+                    for (size_t iR = 0; iR < R_size; iR++) {
+                        PSD[iP][iR][iV][iK] = PSD_PR[iP][iR];
+                    }
+                }
+                
+                progress_count++;
+            }
+        }
+
+#ifdef DATA_ASSIMILATION_DEBUG
+        Logger::message << "Writing DA Debug output..." << std::endl;
+        debug_output_4d.write_files(_timePrev, _debug_output_folder);
+#endif
+
+        Logger::message << '\n';
         _timePrev = _timeNext;
         _timeNext += _assimilationParameters.timeStep;
+
     }
 }
 
@@ -107,6 +142,7 @@ std::vector<std::vector<data_assimilation::Observations>> data_assimilation::get
     const Matrix2D<double>& V,
     const Matrix2D<double>& K,
     const std::vector<pmf::Parameters>& parameters) {
+
     std::vector<ProcessedMatFileData> pmfDataSplit;
     for (auto par : parameters) {
         ProcessedMatFileData one_instrument = internal::readData(timeStart, timeEnd, par);
@@ -115,7 +151,7 @@ std::vector<std::vector<data_assimilation::Observations>> data_assimilation::get
             pmfDataSplit.push_back(one_instrument);
         }
     }
-    std::cout << "Done reading Data. Interpolating...\n";
+    Logger::message << "\tDone reading Data. Interpolating...\n";
     std::vector<std::vector<data_assimilation::Observations>> result;
     if (!pmfDataSplit.empty()) {
         result = internal::interpolate(pmfDataSplit, V, K);
@@ -124,35 +160,40 @@ std::vector<std::vector<data_assimilation::Observations>> data_assimilation::get
 }
 
 data_assimilation::DebugOuput2D data_assimilation::runKalmanFilterConvection2D(
-    Matrix2D<double>& forecast,
-    Matrix2D<double>& analysisErrorCovariance,
-    const Matrix2D<double>& P,
-    const Matrix2D<double>& R,
-    const Matrix2D<double>& VP,
-    const Matrix2D<double>& VR,
-    const Matrix2D<double>& Loss,
-    const Observations& observations,
+    Matrix2D<double> &forecast,
+    Matrix2D<double> &analysisErrorCovariance,
+    Matrix2D<double> &model_matrix,
+    const Matrix2D<double> &P,
+    const Matrix2D<double> &R,
+    const Matrix2D<double> &VP,
+    const Matrix2D<double> &VR,
+    const bool has_VX_updated,
+    const Matrix2D<double> &Loss,
+    const Matrix2D<bool> &saturation_map,
+    const Matrix2D<double> &observations,
+    const Matrix2D<double> &Q,
     double timeStep,
-    const Parameters& parameters) {
+    const Parameters &parameters) {
+
     auto dP = P[1][0] - P[0][0];
     auto dR = R[0][1] - R[0][0];
 
     data_assimilation::DebugOuput2D debug_output;
 
     auto forecast1D = toMatrix1D(forecast);
-    auto modelMatrix = internal::getModelMatrixConvection2D(
-        VP, VR, Loss, timeStep, dP, dR);
-
-    auto observationsBinned = internal::bin(observations, P, R, "log10");
+    if (has_VX_updated || not model_matrix.initialized) {
+        model_matrix = internal::getModelMatrixConvection2D(
+            VP, VR, Loss, saturation_map, timeStep, dP, dR, parameters.useLog, parameters.correlationTime);
+    }
 
 #ifdef DATA_ASSIMILATION_DEBUG
-    debug_output.binned_observations = observationsBinned;
+    debug_output.observations = observations;
     debug_output.forecast_init = Matrix2D<double>(forecast);
     debug_output.error_covariance = Matrix2D<double>(analysisErrorCovariance);
-    debug_output.model = Matrix2D<double>(modelMatrix);
+    debug_output.model = Matrix2D<double>(model_matrix);
 #endif
 
-    auto observationSpace = internal::convertToObservationSpace(observationsBinned);
+    auto observationSpace = internal::convertToObservationSpace(observations);
 
     double modelError = parameters.modelError;
     double observationError = parameters.observationError;
@@ -163,18 +204,19 @@ data_assimilation::DebugOuput2D data_assimilation::runKalmanFilterConvection2D(
         modelError = log10(1.0 + modelError);
         observationError = log10(1.0 + observationError);
     }
-    Matrix1D<double> D = Matrix1D<double>{forecast1D.size_q1};
-    D = modelError;
-    auto Q = parameters.useLog ? diag(D) : diag(forecast1D * modelError);
+    // Matrix1D<double> D = Matrix1D<double>{forecast1D.size_q1};
+    // D = modelError;
+    // auto Q_ = parameters.useLog ? diag(D) : diag(forecast1D * modelError);
+    //Q_ = Q + Q_;
 
-    Matrix1D<double> E = Matrix1D<double>{observationSpace.data.size_q1};
+    Matrix1D<double> E = Matrix1D<double>(observationSpace.data.size_q1);
     E = observationError;
     auto Robs = parameters.useLog ? diag(E) : diag(observationSpace.data * observationError);
 
     runKalmanFilter(
         forecast1D,
         analysisErrorCovariance,
-        modelMatrix,
+        model_matrix,
         Q,
         observationSpace.data,
         observationSpace.H,
@@ -191,15 +233,6 @@ data_assimilation::DebugOuput2D data_assimilation::runKalmanFilterConvection2D(
 #endif
     return debug_output;
 }
-
-/* class Convection2DAnalysisCovariances {
-public:
-    Convection2DAnalysisCovariances(size_t V_size, size_t K_size);
-    const std::vector<Matrix2D<double>>& operator[](size_t iV) const;
-    std::vector<Matrix2D<double>>& operator[](size_t iV);
-private:
-    std::vector<std::vector<Matrix2D<double>>> _data;
-}; */
 
 data_assimilation::Convection2DAnalysisCovariances::Convection2DAnalysisCovariances(
     size_t P_size, size_t R_size, size_t V_size, size_t K_size)
@@ -226,16 +259,11 @@ void data_assimilation::runKalmanFilter(
     const Matrix2D<double>& M, const Matrix2D<double>& Q,
     const Matrix1D<double>& obs, const Matrix2D<double>& H,
     const Matrix2D<double>& R) {
-    // auto Pf = M * Pa * transpose(M) + Q;
-
-    // if (H.maxabs() > 0) {
 
     // forecast error covariance matrix [n x n]
     Matrix2D<double> Pf = abtrans(M * Pa, M);
     Pf += Q;
-    // auto HT = transpose(H);    //transforms observations to model space [n x m]
 
-    // auto Pf_times_HT = Pf * HT;
     Matrix2D<double> Pf_times_HT = abtrans(Pf, H);
 
     // Kalman matrix [n x m], Pf_times_HT will be overwritten and referenced now as K
@@ -243,10 +271,7 @@ void data_assimilation::runKalmanFilter(
 
     forecast += K * (obs - H * forecast);
 
-    // std::cout << std::endl << "size 1: " << H.size_q1 << "    size 2: " << H.size_q2 << "       max: " << H.maxabs() << std::endl;
-
     Pa = Pf - K * H * Pf;
-    //}
 }
 
 data_assimilation::Parameters data_assimilation::readParameters(const std::string& filename) {
@@ -258,6 +283,61 @@ data_assimilation::Parameters data_assimilation::readParameters(const std::strin
     parameters.getParameter("time_step", result.timeStep, true);
     parameters.getParameter("model_error", result.modelError, true);
     parameters.getParameter("observation_error", result.observationError, true);
+    parameters.getParameter("data_source", result.dataSource, false);
+    parameters.getParameter("correlation_time", result.correlationTime, false);
 
     return result;
 }
+
+data_assimilation::DataServerDataSource::DataServerDataSource(const std::string& satellite_lst_file) {
+    _dataParameters = pmf::readParameters(satellite_lst_file);
+};
+
+Matrix4D<double> data_assimilation::DataServerDataSource::getObservations(
+        const double timeStart, const double timeEnd,
+        const Matrix2D<double>& P, const Matrix2D<double>& R,
+        const Matrix2D<double>& V, const Matrix2D<double>& K) {
+
+    std::vector<ProcessedMatFileData> pmfDataSplit;
+
+    for (auto par : _dataParameters) {
+        pmfDataSplit.push_back(internal::readData(timeStart, timeEnd, par));
+    }
+    Logger::message << "\tDone reading Data. Interpolating and binnning...\n";
+    std::vector<std::vector<data_assimilation::Observations>> observations_interpolated_V_K = internal::interpolate(pmfDataSplit, V, K);
+
+    Matrix4D<double> result = internal::bin(observations_interpolated_V_K, P, R, "log10");
+
+    return result;
+};
+
+data_assimilation::LocalFilesDataSource::LocalFilesDataSource(const std::string& satellite_lst_file,
+        int size_q1, int size_q2, int size_q3, int size_q4) {
+
+    _data = UpdatableListMatrix<Matrix4D<double>>(UpdatableListMatrix<Matrix4D<double>>::MERGE_TYPE::MEAN);
+    _data.AllocateMemory(size_q1, size_q2, size_q3, size_q4);
+    _data.readFromIniFile(satellite_lst_file, _data, _data, _data, _data);
+
+};
+
+Matrix4D<double> data_assimilation::LocalFilesDataSource::getObservations(
+        const double timeStart, [[maybe_unused]] const double timeEnd,
+        [[maybe_unused]] const Matrix2D<double>& P, [[maybe_unused]] const Matrix2D<double>& R,
+        [[maybe_unused]] const Matrix2D<double>& V, [[maybe_unused]] const Matrix2D<double>& K) {
+
+    _data.update(timeStart, _data, _data, _data, _data);
+
+    for (size_t w = 0; w < _data.size_w; w++) {
+        for (size_t x = 0; x < _data.size_x; x++) {
+            for (size_t y = 0; y < _data.size_y; y++) {
+                for (size_t z = 0; z < _data.size_z; z++) {
+                    if (_data[w][x][y][z] == 0) {
+                        _data[w][x][y][z] = NAN;
+                    }
+                }
+            }
+        }
+    }
+
+    return _data;
+};

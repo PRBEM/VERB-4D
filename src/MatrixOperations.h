@@ -34,6 +34,7 @@ Matrix2D<bool> operator>(double number, const Matrix2D<double>& A);
 Matrix2D<bool> operator>=(double number, const Matrix2D<double>& A);         
 Matrix2D<bool> operator<(double number, const Matrix2D<double>& A);         
 Matrix2D<bool> operator<=(double number, const Matrix2D<double>& A);         
+Matrix2D<bool> operator>=(const Matrix2D<double>& A, const Matrix2D<double>& B);
 Matrix2D<bool> operator&&(const Matrix2D<bool>& A, const Matrix2D<bool>& B); 
 Matrix1D<double> operator-(const Matrix1D<double>& a, const Matrix1D<double>& b); 
 /**
