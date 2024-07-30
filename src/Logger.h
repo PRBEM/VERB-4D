@@ -12,6 +12,8 @@
 #include <stdio.h> 
 #include <assert.h>
 
+static const std::string LOGGER_SEPARATOR = std::string(100, '=');
+
 /**
 * \brief Stores messages about statuses, warning, and errors when computing/solving the matrices
 */
@@ -19,6 +21,9 @@ class Logger
 {
 public:
 
+	static void writeSeparator() {
+		Logger::message << LOGGER_SEPARATOR << std::endl;
+	}
 	
 /**
 * Enum for the Debug Level that the logger is at
@@ -44,7 +49,6 @@ public:
 	static void createInstance();
 	static void deleteInstance();
 	static void setDebugLevel(DebugLevel level);
-
 
 /**
 * \brief Turns messages from the logger into streams

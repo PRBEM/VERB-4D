@@ -168,6 +168,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 ) {
 	Parameters parameters("parameters.ini", argc, argv);
 
+	Logger::message << std::endl;
+	Logger::writeSeparator();
+	Logger::message << std::setw(50) << "General Parameters" << std::endl;
+	Logger::writeSeparator();
+
 	parameters.getParameter("time_total", time_total);
 	parameters.getParameter("time_step", time_step);
 	parameters.getParameter("time_output", time_output);
@@ -316,6 +321,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		K.readFromFile(InputFolder + "grid.plt",  4);
 	}
 
+	Logger::message << std::endl;
+	Logger::writeSeparator();
+	Logger::message << std::setw(50) << "Tab and lst files" << std::endl;
+	Logger::writeSeparator();
+
     // Read from Lstar file if Lstar.tab is not present
     if (!L.readFromIniFile(InputFolder + "Lstar.tab", P, R, V, K)){
         L.readFromAnyFile(InputFolder + "Lstar", io_method, P, R, V, K);
@@ -428,6 +438,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	// store all of the boundary conditions parameters from BC.ini
 	Parameters BC_parameters(InputFolder + "BC.ini", argc, argv);
 
+	Logger::message << std::endl;
+	Logger::writeSeparator();
+	Logger::message << std::setw(50) << "Boundary conditions" << std::endl;
+	Logger::writeSeparator();
+
 	// Read BC type fro BC.ini file
 	BC_parameters.getParameter("Rl_BC_type", Rl_BC_type);
 	BC_parameters.getParameter("Ru_BC_type", Ru_BC_type);
@@ -440,6 +455,8 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	BC_parameters.getParameter("Vu_BC_type", Vu_BC_type);
 	BC_parameters.getParameter("Kl_BC_type", Kl_BC_type);
 	BC_parameters.getParameter("Ku_BC_type", Ku_BC_type);
+
+	Logger::message << std::endl;
 
 	// BC values
 	PSD_l_P = -1e99; // Not in use, periodic boundary conditions
@@ -474,6 +491,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
     }
 
 	// Log the boundary types
+	Logger::message << std::endl;
 	Logger::message << "Ll_BC = " << Ll_BC_type << "; Lu_BC = " << Lu_BC_type << ";" << endl;
 	Logger::message << "Vl_BC = " << Vl_BC_type << "; Vu_BC = " << Vu_BC_type << ";" << endl;
 	Logger::message << "Kl_BC = " << Kl_BC_type << "; Ku_BC = " << Ku_BC_type << ";" << endl;

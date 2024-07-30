@@ -322,6 +322,11 @@ int main(int argc, char *argv[])
     }
 
     // logs the timestep and output step information
+	Logger::message << std::endl;
+	Logger::writeSeparator();
+	Logger::message << std::setw(50) << "Time step info" << std::endl;
+	Logger::writeSeparator();
+
     Logger::message << "Total time " << time_total << ". Time step " << dt << " (" << it_total << " steps)." << std::endl;
     Logger::message << "Output each " << output_step << " step. " << std::endl;
 
@@ -467,7 +472,11 @@ int main(int argc, char *argv[])
     }
 #endif
     
-    
+    Logger::message << std::endl;
+	Logger::writeSeparator();
+	Logger::message << std::setw(50) << "Main loop" << std::endl;
+	Logger::writeSeparator();
+
     // Main loop
     // Start time
     for (long int it = it_first; it < it_total; it++)

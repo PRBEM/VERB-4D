@@ -278,6 +278,11 @@ data_assimilation::Parameters data_assimilation::readParameters(const std::strin
     data_assimilation::Parameters result;
     ParametersIni parameters(filename);
 
+	Logger::message << std::endl;
+	Logger::writeSeparator();
+	Logger::message << std::setw(50) << "Data assimilation" << std::endl;
+	Logger::writeSeparator();
+
     parameters.getParameter("run_data_assimilation", result.runDataAssimilation, true);
     parameters.getParameter("useLog", result.useLog, true);
     parameters.getParameter("time_step", result.timeStep, true);
