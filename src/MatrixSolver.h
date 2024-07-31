@@ -36,7 +36,7 @@ bool AddBoundaries_1D(
 );
 
 bool AddBoundaries_2D(
-	CalculationMatrix &matr_A, Matrix1D<double> &vec_C,
+	CalculationMatrix &matr_A, CalculationMatrix &matr_C,
 	const Matrix2D<double> &x, const Matrix2D<double> &y,
 	int x_size, int y_size,
 	const Matrix1D<double>& x_LBC, const Matrix1D<double>& x_UBC,
@@ -46,7 +46,14 @@ bool AddBoundaries_2D(
 	int ix, int iy, int in
 );
 
-void Lapack(const DiagMatrix &A, Matrix1D<double> &B);
+
+void Lapack(
+	const CalculationMatrix& A,
+	const CalculationMatrix& B,
+	const CalculationMatrix& C,
+	Matrix2D<double>& psd,
+	int num_substeps
+);
 
 void SecondDerivativeApproximation_1D(
 	CalculationMatrix &matr_A, int ix,
@@ -112,7 +119,8 @@ bool tridag(double a[], double b[], double c[], double r[], double u[], size_t n
 extern "C" {
 	//extern void dgesv_(int *,int *,double *,int *,int*,double *,int*,int*);
 	//extern void sgesv_(int *,int *,float *,int *,int*, float *,int*,int*);
-	extern void dgbsv_(long int *n, long int *kl, long int *ku, long int *nrhs, double *ab, long int *ldab, long int *ipiv, double *b, long int *ldb, long int *info);
+	extern void dgbtrs_(char const* trans, long* m, long* kl, long* ku, long* nrhs, double* ab, long* ldab, long* ipiv, double* b, long* ldb, long* info);
+	extern void dgbtrf_(long* m, long* n, long* kl, long* ku, double* ab , long* ldab, long* ipiv, long* info );
 };
 
 #endif

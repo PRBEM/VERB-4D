@@ -32,7 +32,7 @@
 //		int &P_size, int &R_size, int &I_size, int &K_size, int &L_size,
 //		long int &it_total, double &dt, double &output_time, double &total_time, int &output_step);
 bool ReadInitialData(std::string &InputFolder, std::string &OutputFolder, int argc, char* argv[],
-	double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
+	double &time_total, double &time_step, double &diffusion_sub_time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
 	InversionMethod &inversion_method, IOMethod &io_method, IOMethod &PSD0_io_method, DensitySaturation &density_saturation,
 	bool &include_boundary, bool &Vl_BC_from_convection, bool &Vu_BC_from_convection, bool &run_remapping,
 	bool &run_convection, bool &run_radial_diffusion, bool &run_local_diffusion, bool &run_coulomb_collision, bool &positive_PSD, bool &PSD_time_to_lst,

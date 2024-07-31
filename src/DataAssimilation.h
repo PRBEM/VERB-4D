@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <cmath>
+#include <filesystem>
 
 #include "Matrix.h"
 #include "UpdatableMatrix.h"
@@ -20,6 +21,7 @@ struct Parameters {
     double observationError;
     double correlationTime = std::numeric_limits<double>::infinity();
     DataAssimilationDataSource dataSource;
+    bool growing_Q_at_boundary = false;
 };
 struct Observations {
     Matrix1D<double> P;
@@ -109,8 +111,7 @@ class DataAssimilationManagerConvection {
     Matrix2D<double> _R;
     Matrix2D<double> _V;
     Matrix2D<double> _K;
-    Matrix2D<double> _model_matrix;
-    Matrix2D<double> _Q;
+    std::vector<std::vector<Matrix2D<double>>> _model_matrix;
 
     bool _runDataAssimilation;
     double _timePrev;
@@ -142,8 +143,7 @@ data_assimilation::DebugOuput2D runKalmanFilterConvection2D(
     const Matrix2D<double>& P, const Matrix2D<double>& R,
     const Matrix2D<double>& VP, const Matrix2D<double>& VR,
     const bool has_VR_updated, const Matrix2D<double>& Loss, const Matrix2D<bool> &saturation_map,
-    const Matrix2D<double>& observations, const Matrix2D<double>& Q, 
-    double timeStep, const Parameters& parameters);
+    const Matrix2D<double>& observations, const double timeStep, const Parameters& parameters);
 
 /**
  * @brief Applies the Kalman filter updating forecast and Pa

@@ -107,7 +107,7 @@ Parameters& Parameters::findParameter(std::string parameterName, std::string def
 * \param mustBeFound - if true and parameter not found, error is logged and function exited, default is false
 */
 template <typename T>
-void Parameters::getParameter(std::string parameterName, T &variable, bool mustBeFound) {
+bool Parameters::getParameter(std::string parameterName, T &variable, bool mustBeFound) {
 
 	this->flush();
 	this->clear();
@@ -138,7 +138,7 @@ void Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 			parameterValue = line.substr(line.find("=") + 1);
 			Logger::message << parameterName << " = " << parameterValue << std::endl;
 			stringToValue(parameterValue, variable);
-			return;
+			return true;
 		}
 	}
 
@@ -156,7 +156,7 @@ void Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 			parameterValue = line.substr(line.find("=") + 2); // +2 strips of the whitespace
 			Logger::message << parameterName << " = " << parameterValue << std::endl;
 			stringToValue(parameterValue, variable);
-			return;
+			return true;
 		}
 	}
 
@@ -167,7 +167,7 @@ void Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 	}
 
 	// return *this;
-	return;
+	return false;
 
 }
 
@@ -175,16 +175,16 @@ void Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 // Implementations
 //////////////////////////////////////////
 
-template void Parameters::getParameter(std::string, double&, bool);
-template void Parameters::getParameter(std::string, int&, bool);
-template void Parameters::getParameter(std::string, long&, bool);
-template void Parameters::getParameter(std::string, bool&, bool);
-template void Parameters::getParameter(std::string, std::string&, bool);
-template void Parameters::getParameter(std::string, BoundaryConditionType&, bool);
-template void Parameters::getParameter(std::string, IOMethod&, bool);
-template void Parameters::getParameter(std::string, InversionMethod&, bool);
-template void Parameters::getParameter(std::string, DensitySaturation&, bool);
-template void Parameters::getParameter(std::string, DataAssimilationDataSource&, bool);
+template bool Parameters::getParameter(std::string, double&, bool);
+template bool Parameters::getParameter(std::string, int&, bool);
+template bool Parameters::getParameter(std::string, long&, bool);
+template bool Parameters::getParameter(std::string, bool&, bool);
+template bool Parameters::getParameter(std::string, std::string&, bool);
+template bool Parameters::getParameter(std::string, BoundaryConditionType&, bool);
+template bool Parameters::getParameter(std::string, IOMethod&, bool);
+template bool Parameters::getParameter(std::string, InversionMethod&, bool);
+template bool Parameters::getParameter(std::string, DensitySaturation&, bool);
+template bool Parameters::getParameter(std::string, DataAssimilationDataSource&, bool);
 
 
 // helper functions to insensitive case compare two strings

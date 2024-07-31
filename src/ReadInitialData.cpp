@@ -142,7 +142,7 @@ void ReadBoundaryCondition(
 * \param Sources, Losses - matrices for calculating Sources and Losses(loss cone)
 */
 bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* argv[],
-	double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
+	double &time_total, double &time_step, double &diffusion_sub_time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
 	InversionMethod &inversion_method, IOMethod &io_method, IOMethod &PSD0_io_method, DensitySaturation &density_saturation,
 	bool &include_boundary, bool &Vl_BC_from_convection, bool &Vu_BC_from_convection, bool &run_remapping,
 	bool &run_convection, bool &run_radial_diffusion, bool &run_local_diffusion, bool &run_coulomb_collision, bool &positive_PSD, bool &PSD_time_to_lst,
@@ -175,6 +175,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	parameters.getParameter("time_total", time_total);
 	parameters.getParameter("time_step", time_step);
+	if (not parameters.getParameter("diffusion_sub_time_step", diffusion_sub_time_step)) diffusion_sub_time_step = time_step;
 	parameters.getParameter("time_output", time_output);
 	parameters.getParameter("max_threads", max_threads);
 

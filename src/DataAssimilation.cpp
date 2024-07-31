@@ -30,25 +30,8 @@ data_assimilation::DataAssimilationManagerConvection::DataAssimilationManagerCon
         }
         _timePrev = timeStart;
         _timeNext = timeStart + _assimilationParameters.timeStep;
-    }
 
-    // Calculation of Q matrix
-    double modelError = _assimilationParameters.modelError;
-    if (_assimilationParameters.useLog) {
-        modelError = log10(1.0 + modelError);
-    }
-    Matrix1D<double> D = Matrix1D<double>{P.size_q1*R.size_q2};
-    D = modelError;
-    _Q = diag(D);
-
-    double correlation_factor = exp(-_assimilationParameters.timeStep/_assimilationParameters.correlationTime);
-    Logger::message << "\tData assimilation time step: " << _assimilationParameters.timeStep << std::endl;
-    Logger::message << "\tCorrelation time: " << _assimilationParameters.correlationTime << std::endl;
-    Logger::message << "\tCorrelation factor: " << correlation_factor << std::endl;
-
-    for (size_t iP = 0; iP < _P.size_q1; iP++) {
-        _Q[_P.size_q2-1 + iP * _P.size_q2][_P.size_q2-1 + iP * _P.size_q2] = (1.-(correlation_factor*correlation_factor)) * modelError;
-        _Q[iP * _P.size_q2][iP * _P.size_q2] = (1.-(correlation_factor*correlation_factor)) * modelError;
+        _model_matrix = std::vector(V.size_q1, std::vector<Matrix2D<double>>(K.size_q2));
     }
 }
 
@@ -100,14 +83,13 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
 
                 data_assimilation::DebugOuput2D debug_output_2d = runKalmanFilterConvection2D(PSD_PR,
                                             _analysisCovarianceConvection[iV][iK],
-                                            _model_matrix,
+                                            _model_matrix[iV][iK],
                                             _P, _R,
                                             VP.yzSlice(iV, iK), VR.yzSlice(iV, iK),
                                             has_VX_updated,
                                             loss_rate,
                                             saturation_map,
                                             observations.yzSlice(iV, iK), 
-                                            _Q,
                                             dt, _assimilationParameters);
 
 #ifdef DATA_ASSIMILATION_DEBUG
@@ -151,9 +133,11 @@ std::vector<std::vector<data_assimilation::Observations>> data_assimilation::get
             pmfDataSplit.push_back(one_instrument);
         }
     }
-    Logger::message << "\tDone reading Data. Interpolating...\n";
     std::vector<std::vector<data_assimilation::Observations>> result;
-    if (!pmfDataSplit.empty()) {
+    if (pmfDataSplit.empty()) {
+        Logger::message << "\tNo data found...\n";
+    } else {
+        Logger::message << "\tDone reading Data. Interpolating...\n";
         result = internal::interpolate(pmfDataSplit, V, K);
     }
     return result;
@@ -171,8 +155,7 @@ data_assimilation::DebugOuput2D data_assimilation::runKalmanFilterConvection2D(
     const Matrix2D<double> &Loss,
     const Matrix2D<bool> &saturation_map,
     const Matrix2D<double> &observations,
-    const Matrix2D<double> &Q,
-    double timeStep,
+    const double timeStep,
     const Parameters &parameters) {
 
     auto dP = P[1][0] - P[0][0];
@@ -204,10 +187,17 @@ data_assimilation::DebugOuput2D data_assimilation::runKalmanFilterConvection2D(
         modelError = log10(1.0 + modelError);
         observationError = log10(1.0 + observationError);
     }
-    // Matrix1D<double> D = Matrix1D<double>{forecast1D.size_q1};
-    // D = modelError;
-    // auto Q_ = parameters.useLog ? diag(D) : diag(forecast1D * modelError);
-    //Q_ = Q + Q_;
+    Matrix1D<double> D = Matrix1D<double>{forecast1D.size_q1};
+    D = modelError;
+    auto Q = parameters.useLog ? diag(D) : diag(forecast1D * modelError);
+
+    if (not parameters.growing_Q_at_boundary) {
+        double correlation_factor = exp(-timeStep/parameters.correlationTime);
+        for (size_t iP = 0; iP < P.size_q1; iP++) {
+            Q[P.size_q2-1 + iP * P.size_q2][P.size_q2-1 + iP * P.size_q2] = (1.-(correlation_factor*correlation_factor)) * modelError;
+            Q[iP * P.size_q2][iP * P.size_q2] = (1.-(correlation_factor*correlation_factor)) * modelError;
+        }
+    }
 
     Matrix1D<double> E = Matrix1D<double>(observationSpace.data.size_q1);
     E = observationError;
@@ -276,20 +266,33 @@ void data_assimilation::runKalmanFilter(
 
 data_assimilation::Parameters data_assimilation::readParameters(const std::string& filename) {
     data_assimilation::Parameters result;
-    ParametersIni parameters(filename);
 
-	Logger::message << std::endl;
-	Logger::writeSeparator();
-	Logger::message << std::setw(50) << "Data assimilation" << std::endl;
-	Logger::writeSeparator();
+    if (std::filesystem::exists(filename)) {
 
-    parameters.getParameter("run_data_assimilation", result.runDataAssimilation, true);
-    parameters.getParameter("useLog", result.useLog, true);
-    parameters.getParameter("time_step", result.timeStep, true);
-    parameters.getParameter("model_error", result.modelError, true);
-    parameters.getParameter("observation_error", result.observationError, true);
-    parameters.getParameter("data_source", result.dataSource, false);
-    parameters.getParameter("correlation_time", result.correlationTime, false);
+        ParametersIni parameters(filename);
+
+        Logger::message << std::endl;
+        Logger::writeSeparator();
+        Logger::message << std::setw(50) << "Data assimilation" << std::endl;
+        Logger::writeSeparator();
+
+        parameters.getParameter("run_data_assimilation", result.runDataAssimilation, true);
+
+        if (result.runDataAssimilation) {
+            parameters.getParameter("useLog", result.useLog, true);
+            parameters.getParameter("time_step", result.timeStep, true);
+            parameters.getParameter("model_error", result.modelError, true);
+            parameters.getParameter("observation_error", result.observationError, true);
+            parameters.getParameter("data_source", result.dataSource, false);
+            parameters.getParameter("correlation_time", result.correlationTime, false);
+            parameters.getParameter("growing_Q_at_boundary", result.growing_Q_at_boundary, false);
+
+            double correlation_factor = exp(-result.timeStep/result.correlationTime);
+            Logger::message << "\tData assimilation time step: " << result.timeStep << std::endl;
+            Logger::message << "\tCorrelation time: " << result.correlationTime << std::endl;
+            Logger::message << "\tCorrelation factor: " << correlation_factor << std::endl;
+        }
+    }
 
     return result;
 }

@@ -44,7 +44,7 @@ public:
 
 	/// get the parameter value and store it into variable
 	template <typename T>
-	void getParameter(std::string parameterName, T &variable, bool mustBeFound = false);
+	bool getParameter(std::string parameterName, T &variable, bool mustBeFound = false);
 
 
 };

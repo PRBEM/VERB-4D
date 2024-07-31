@@ -9,8 +9,7 @@
  * \brief Matrix 1D, 2D, 3D and 4D and operations with them
  *
  */
-#ifndef matrix_array_MATRIX_H
-#define matrix_array_MATRIX_H
+#pragma once
 
 #include <assert.h>
 #include <string>
@@ -567,7 +566,7 @@ public:
 	void Initialize(int x_size, int y_size = 1, int z_size = 1, int n_of_diags = 1);
 
 	// Returns 1d index for multiple dimension array (2D or 3D)
-	int index1d(int x, int y = 0, int z = 0);
+	int index1d(int x, int y = 0, int z = 0) const;
 
 	// Save to a file
 	void writeToFile(const std::string& filename) const;
@@ -580,5 +579,3 @@ public:
 
 /// FUNCTION NOT IMPLEMENTED
 int index1d2(int x, int y = 0, int z = 0);
-
-#endif

@@ -6471,7 +6471,7 @@ void CalculationMatrix::Initialize(int x_size, int y_size, int z_size, int n_of_
 /**
 * Function returns 1d index for 2D-3D arrays
 */
-int CalculationMatrix::index1d(int x, int y, int z) {
+int CalculationMatrix::index1d(int x, int y, int z) const {
 	return (z*y_size + y)*x_size + x;
 }
 

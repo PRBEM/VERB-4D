@@ -743,7 +743,14 @@ Matrix2D<double>& trans_solve(const Matrix2D<double>& A, Matrix2D<double>& B) {
     int dgetri_(long *n, double *a, long *lda, long *ipiv, 
                 double *work, long *lwork, long *info); */
     dgesv_(&n, &nrhs, a, &lda, ipiv.get(), b, &ldb, &info);
-    return B;
+
+    if (info == 0) {
+        return B;
+    }
+    else {
+        Logger::message << "trans_solve returned an error; error code: " << info << std::endl;
+        exit(EXIT_FAILURE);
+    }
 }
 
 Matrix1D<double> toMatrix1D(const Matrix2D<double>& A) {

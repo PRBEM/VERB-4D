@@ -482,7 +482,7 @@ bool MakeModelMatrix_2D_ADI3_x(CalculationMatrix &matr_A, CalculationMatrix &mat
 				// if at the boundary
 				// add boundary conditions
 				AddBoundaries_2D(
-					matr_A, matr_C.at(0),
+					matr_A, matr_C,
 					x, y,
 					x_size, y_size,
 					x_LBC, x_UBC,
@@ -615,7 +615,7 @@ bool MakeModelMatrix_2D_ADI3_y(CalculationMatrix &matr_A, CalculationMatrix &mat
 				// if at the boundary
 				// add boundary conditions
 				AddBoundaries_2D(
-					matr_A, matr_C.at(0),
+					matr_A, matr_C,
 					x, y,
 					x_size, y_size,
 					//psd.xSlice(0), psd.xSlice(x.size_x-1),	//x_LBC, x_UBC,

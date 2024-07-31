@@ -253,7 +253,8 @@ int main(int argc, char *argv[])
     long int it_total, it_first = 1;
 
     double dt = 1.0 / 24;          // 1-hour time interval
-    double time_output = 1.0 / 24; // 1-hour time interval
+    double sub_dt_diffusion = 1.0 / 24;
+    double time_output = -1;       // 1-hour time interval
     double time_total = 4;         // in days
     double time_first = 0;
     int max_threads = omp_get_num_threads();
@@ -283,7 +284,7 @@ int main(int argc, char *argv[])
     // Read all the inputs - store them into variables
     // These inputs come from the matlab files that are generated when running Conv_Dif.m examples
     initialLoad = ReadInitialData(
-        inputFolder, outputFolder, argc, argv, time_total, dt, time_output, time_first, it_first, max_threads,
+        inputFolder, outputFolder, argc, argv, time_total, dt, sub_dt_diffusion, time_output, time_first, it_first, max_threads,
         inversion_method, io_method, PSD0_io_method, density_saturation, include_boundary, Vl_BC_from_convection, Vu_BC_from_convection, run_remapping, run_convection,
         run_radial_diffusion, run_local_diffusion, run_coulomb_collision, positive_PSD, PSD_time_to_lst,
         PSD, P, R, V, K, L,
@@ -292,7 +293,7 @@ int main(int argc, char *argv[])
         Vu_BC_type, Kl_BC_type, Ku_BC_type, Ll_BC_type, Lu_BC_type, DLL, DVV, DKK, DVK, VP, VR, G_local, G_radial, G_conv,
         Sources, Losses, Losses_conv, SaturationDensity, SaturationTimescale);
 
-    // Check that all nesesarry files were loaded
+    // Check that all necessary files were loaded
     if (!initialLoad)
     {
         Logger::error << "Error: ReadInitialData return false. Check the initial files." << std::endl;
@@ -1032,7 +1033,7 @@ int main(int argc, char *argv[])
                                      Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
                                      Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
                                      DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
-                                     Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+                                     Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt, sub_dt_diffusion);
                     }
                     // Currently setup to calculate 2d Diffusion using Diffusion_2D_ADI3
                     // Can change to Diffusion_2D_ADI1 or Diffusion_2D_ADI2 for different methods of inversion

@@ -26,7 +26,7 @@ bool Diffusion_2D(
 	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
 	BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
 	const Matrix2D<double>& Dxx, const Matrix2D<double>& Dyy, const Matrix2D<double>& Dxy, const Matrix2D<double>& Dyx,
-	const Matrix2D<double>& G, const Matrix2D<double>& Sources, const Matrix2D<double>& Losses, double dt
+	const Matrix2D<double>& G, const Matrix2D<double>& Sources, const Matrix2D<double>& Losses, double dt, double sub_dt
 );
 
 #endif /* DIFFUSION_2D_H_ */
