@@ -107,6 +107,24 @@ void ReadBoundaryCondition(
 
 }
 
+bool does_file_exist(std::string file_name, IOMethod io_method) {
+	
+	std::string ext;
+
+	if (io_method == IOMethod::ASCII){
+        ext = ".plt";
+    } else if (io_method == IOMethod::Binary){
+        ext = ".pltb";
+    } else if (io_method == IOMethod::Matlab){
+        ext = ".mat";
+    } else {
+        printf("IO error: unknown io_method");
+        exit(EXIT_FAILURE);
+    }
+
+	return std::filesystem::exists(file_name + ext);
+}
+
 //bool ReadInitialData(string InputFolder,
 //		int &P_size, int &R_size, int &I_size, int &K_size, int &L_size,
 //		long int &it_total, double &dt, double &output_time, double &total_time, int &output_step) {
@@ -161,7 +179,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	BoundaryConditionType &Ll_BC_type, BoundaryConditionType &Lu_BC_type,
 	UpdatableListMatrix<Matrix4D<double>> &DLL, UpdatableListMatrix<Matrix4D<double>> &DVV, 
 	UpdatableListMatrix<Matrix4D<double>> &DKK, UpdatableListMatrix<Matrix4D<double>> &DVK,
-	UpdatableMatrix<Matrix4D<double>> &VP, UpdatableMatrix<Matrix4D<double>> &VL,
+	UpdatableMatrix<Matrix4D<double>> &VP, UpdatableMatrix<Matrix4D<double>> &VL, UpdatableMatrix<Matrix4D<double>> &VV,
 	UpdatableMatrix<Matrix4D<double>> &G_local, UpdatableMatrix<Matrix4D<double>> &G_radial, UpdatableMatrix<Matrix4D<double>> &G_conv,
 	UpdatableListMatrix<Matrix4D<double>> &Sources, UpdatableListMatrix<Matrix4D<double>> &Losses, 
 	UpdatableListMatrix<Matrix4D<double>> &Losses_conv, Matrix4D<double> &SaturationDensity, Matrix4D<double> &SaturationTimescale
@@ -324,7 +342,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	Logger::message << std::endl;
 	Logger::writeSeparator();
-	Logger::message << std::setw(50) << "Tab and lst files" << std::endl;
+	Logger::message << std::setw(50) << "Lstar and diffusion coefficients" << std::endl;
 	Logger::writeSeparator();
 
     // Read from Lstar file if Lstar.tab is not present
@@ -359,6 +377,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		DVK.readFromAnyFile(InputFolder + "DVK", io_method, P, R, V, K);
 	}
 
+	Logger::message << std::endl;
+	Logger::writeSeparator();
+	Logger::message << std::setw(50) << "Velocities" << std::endl;
+	Logger::writeSeparator();
+
     if (!VP.readFromIniFile(InputFolder + "VP.tab", P, R, V, K)){
 		VP.readFromAnyFile(InputFolder + "VP", io_method, P, R, V, K);
 	}
@@ -367,17 +390,50 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		VL.readFromAnyFile(InputFolder + "VR", io_method, P, R, V, K);
 	}
 
+    if (!VV.readFromIniFile(InputFolder + "VV.tab", P, R, V, K)){
+		if(does_file_exist(InputFolder + "VV", io_method)){
+			VV.readFromAnyFile(InputFolder + "VV", io_method, P, R, V, K);
+		} else if (not run_local_diffusion){
+			Logger::message << "VV not used in this simulation." << std::endl;
+			VV = 1;
+		} else {
+			printf("VV is not provided, but is required since run_coulomb_collision=true!");
+        	exit(EXIT_FAILURE);
+		}
+	}
+
+	Logger::message << std::endl;
+	Logger::writeSeparator();
+	Logger::message << std::setw(50) << "Jacobians" << std::endl;
+	Logger::writeSeparator();
+
     if (!G_local.readFromIniFile(InputFolder + "G_local.tab", P, R, V, K)){
-		G_local.readFromAnyFile(InputFolder + "G_local", io_method, P, R, V, K);
+		if(does_file_exist(InputFolder + "G_local", io_method)){
+			G_local.readFromAnyFile(InputFolder + "G_local", io_method, P, R, V, K);
+		} else if (not run_local_diffusion){
+			Logger::message << "G_local not used in this simulation." << std::endl;
+			G_local = 1;
+		} else {
+			printf("G_local is not provided, but is required since run_local_diffusion=true!");
+        	exit(EXIT_FAILURE);
+		}
 	}
 
     if (!G_radial.readFromIniFile(InputFolder + "G_radial.tab", P, R, V, K)){
-		G_radial.readFromAnyFile(InputFolder + "G_radial", io_method, P, R, V, K);
+		if(does_file_exist(InputFolder + "G_radial", io_method)){
+			G_radial.readFromAnyFile(InputFolder + "G_radial", io_method, P, R, V, K);
+		} else if (not run_radial_diffusion){
+			Logger::message << "G_radial not used in this simulation." << std::endl;
+			G_radial = 1;
+		} else {
+			printf("G_radial is not provided, but is required since run_radial_diffusion=true!");
+        	exit(EXIT_FAILURE);
+		}
 	}
 
 	// G_conv file is not required to keep backwards capabilities for 3D simulations without convection
     if (!G_conv.readFromIniFile(InputFolder + "G_conv.tab", P, R, V, K)){
-		if(std::filesystem::exists(InputFolder + "G_conv.pltb")){
+		if(does_file_exist(InputFolder + "G_conv", io_method)){
 			G_conv.readFromAnyFile(InputFolder + "G_conv", io_method, P, R, V, K);
 		} else {
 			G_conv = 1;
@@ -387,6 +443,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	G_local.update(time_first, P, R, V, K);
 	G_radial.update(time_first, P, R, V, K);
 	G_conv.update(time_first, P, R, V, K);
+
+	Logger::message << std::endl;
+	Logger::writeSeparator();
+	Logger::message << std::setw(50) << "Sources and losses" << std::endl;
+	Logger::writeSeparator();
 
     if (density_saturation == DensitySaturation::Off) {
         if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K))
