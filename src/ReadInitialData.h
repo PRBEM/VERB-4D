@@ -53,8 +53,9 @@ bool ReadInitialData(bool &minimal_output, std::string &InputFolder, std::string
 	UpdatableListMatrix<Matrix4D<double>> &DKK, UpdatableListMatrix<Matrix4D<double>> &DVK,
 	UpdatableMatrix<Matrix4D<double>> &VP, UpdatableMatrix<Matrix4D<double>> &VL, UpdatableMatrix<Matrix4D<double>> &VV,
 	UpdatableMatrix<Matrix4D<double>> &G_local, UpdatableMatrix<Matrix4D<double>> &G_radial, UpdatableMatrix<Matrix4D<double>> &G_conv,
-	UpdatableListMatrix<Matrix4D<double>> &Sources, UpdatableListMatrix<Matrix4D<double>> &Losses, 
-	UpdatableListMatrix<Matrix4D<double>> &Losses_conv, Matrix4D<double> &SaturationDensity, Matrix4D<double> &SaturationTimescale
+	UpdatableListMatrix<Matrix4D<double>> &Sources, UpdatableListMatrix<Matrix4D<double>> &Losses_local, 
+	UpdatableListMatrix<Matrix4D<double>> &Losses_radial, UpdatableListMatrix<Matrix4D<double>> &Losses_conv,
+	Matrix4D<double> &SaturationDensity, Matrix4D<double> &SaturationTimescale
 );
 
 

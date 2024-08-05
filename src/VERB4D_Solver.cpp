@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
     UpdatableMatrix<Matrix4D<double>> VR, VP, VV;
 
     // Additional sources and losses
-    UpdatableListMatrix<Matrix4D<double>> Sources, Losses, Losses_conv;
+    UpdatableListMatrix<Matrix4D<double>> Sources, Losses_conv, Losses_local, Losses_radial;
 
     // Jacobians, 4D, everything is 4D, it makes matrix operators convenient
     UpdatableMatrix<Matrix4D<double>> G_local;
@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
         P_size, R_size, V_size, K_size, L_size, Pl_BC, Pu_BC, Rl_BC, Ru_BC,
         Vl_BC, Vu_BC, Kl_BC, Ku_BC, Ll_BC, Lu_BC, Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type,
         Vu_BC_type, Kl_BC_type, Ku_BC_type, Ll_BC_type, Lu_BC_type, DLL, DVV, DKK, DVK, VP, VR, VV, G_local, G_radial, G_conv,
-        Sources, Losses, Losses_conv, SaturationDensity, SaturationTimescale);
+        Sources, Losses_local, Losses_radial, Losses_conv, SaturationDensity, SaturationTimescale);
 
     // Check that all necessary files were loaded
     if (!initialLoad)
@@ -330,7 +330,7 @@ int main(int argc, char *argv[])
     // logs the timestep and output step information
 	Logger::message << std::endl;
 	Logger::writeSeparator();
-	Logger::message << std::setw(50) << "Time step info" << std::endl;
+	Logger::message << std::setw(57) << "Time step info" << std::endl;
 	Logger::writeSeparator();
 
     Logger::message << "Total time " << time_total << ". Time step " << dt << " (" << it_total << " steps)." << std::endl;
@@ -355,23 +355,25 @@ int main(int argc, char *argv[])
     // When to apply loss term:
     // It's better to apply it during pitch-angle diffusion, unless we don't have any pitch-angle diffusion
     // In that case we apply it during radial diffusion
-    int radial_losses, local_losses;
-    if (V_size >= 3 && K_size >= 3)
-    {
-        radial_losses = 0;
-        local_losses = 1;
-    }
-    else
-    {
-        radial_losses = 1;
-        local_losses = 0;
+    if (not Losses_radial.initialized) { // Losses_radial.tab was not found -> using Losses_local either during radial or local diffusion
+        Losses_radial = Losses_local;
+        
+        if (run_local_diffusion and V_size >= 3 and K_size >= 3) {
+            Losses_radial = 0;
+            Losses_radial.clearMatricesList();
+        } else {
+            Losses_local = 0;
+            Losses_local.clearMatricesList();
+        }
     }
 
-    // If local diffusion is not run, local losses should be applied at the radial diffusion step
-    if (not run_local_diffusion)
-    {
-        local_losses = 0;
-        radial_losses = 1;
+    // If local diffusion is not run, sources should be applied at the radial diffusion step
+    int radial_sources = 0;
+    int local_sources = 1;
+    if (not run_local_diffusion or V_size < 3 or K_size < 3) {
+        // Apply source during radial diffusion step
+        radial_sources = 1;
+        local_sources = 0;
     }
 
     // For recording length of time for all calculations to complete
@@ -443,7 +445,7 @@ int main(int argc, char *argv[])
         initialize_sparse_values(
             V.wxSlice(0,0), K.wxSlice(0,0), Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type,
             DVV.wxSlice(0,0), DVK.wxSlice(0,0), DVK.wxSlice(0,0), DKK.wxSlice(0,0), 
-            G_local.wxSlice(0,0), Losses.wxSlice(0,0), dt, dummy_values
+            G_local.wxSlice(0,0), Losses_local.wxSlice(0,0), dt, dummy_values
         );
         matrix_descr descr{
             SPARSE_MATRIX_TYPE_GENERAL, // mkl sparse solve only avaible for general matrices; 
@@ -625,7 +627,8 @@ int main(int argc, char *argv[])
 
         // Sources and losses
         Sources.update(time_current, P, R, V, K);
-        Losses.update(time_current, P, R, V, K);
+        Losses_local.update(time_current, P, R, V, K);
+        Losses_radial.update(time_current, P, R, V, K);
         Losses_conv.update(time_current, P, R, V, K);
 
         if (density_saturation == DensitySaturation::WithTimescale) {
@@ -979,10 +982,9 @@ int main(int argc, char *argv[])
                             DLL.wyzSlice(dll_slice, iP, iV, iK);
                             Sources.wyzSlice(source_slice, iP, iV, iK);
                             G_radial.wyzSlice(gradial_slice, iP, iV, iK);
-                            Losses.wyzSlice(loss_slice, iP, iV, iK);
+                            Losses_radial.wyzSlice(loss_slice, iP, iV, iK);
 
-                            source_slice *= radial_losses;
-                            loss_slice *= radial_losses;
+                            source_slice *= radial_sources;
 
                             // 1d diffusion
                             Diffusion_1D(
@@ -1088,7 +1090,7 @@ int main(int argc, char *argv[])
                                      Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
                                      Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
                                      DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
-                                     Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt, sub_dt_diffusion);
+                                     Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt, sub_dt_diffusion);
                     }
                     // Currently setup to calculate 2d Diffusion using Diffusion_2D_ADI3
                     // Can change to Diffusion_2D_ADI1 or Diffusion_2D_ADI2 for different methods of inversion
@@ -1098,21 +1100,21 @@ int main(int argc, char *argv[])
                                           Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
                                           Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
                                           DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
-                                          Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+                                          Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt);
                     } else if (inversion_method == InversionMethod::ADI2) {
                         Diffusion_2D_ADI2(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
                                           Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR),  // P, R, K
                                           Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
                                           Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
                                           DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
-                                          Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+                                          Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt);
                     } else if (inversion_method == InversionMethod::ADI1) {
                         Diffusion_2D_ADI1(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
                                           Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR),  // P, R, K
                                           Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
                                           Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
                                           DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
-                                          Sources.wxSlice(iP, iR) * local_losses, Losses.wxSlice(iP, iR) * local_losses, dt);
+                                          Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt);
                     } else {
                         Logger::error << "Error: Unknown inversion method!" << std::endl;
                     }

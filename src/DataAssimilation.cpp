@@ -275,7 +275,7 @@ data_assimilation::Parameters data_assimilation::readParameters(const std::strin
 
         Logger::message << std::endl;
         Logger::writeSeparator();
-        Logger::message << std::setw(50) << "Data assimilation" << std::endl;
+        Logger::message << std::setw(58) << "Data assimilation" << std::endl;
         Logger::writeSeparator();
 
         parameters.getParameter("run_data_assimilation", result.runDataAssimilation, true);

@@ -429,7 +429,6 @@ Matrix2D<double> operator*(
     return answer;
 }
 
-
 Matrix2D<double> operator^(Matrix2D<double> A, const int power) {
     if (A.size_q1 != A.size_q2) {
         std::cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";

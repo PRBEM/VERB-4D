@@ -82,7 +82,6 @@ public:
 	bool readFromIniFile(const std::string& ini_filename, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
 	bool readFromString(const std::string& file_line_string, const MatrixND &Q1, const MatrixND &Q2, const MatrixND &Q3, const MatrixND &Q4);
 	bool update(double time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
-
 };
 
 /**
@@ -122,6 +121,7 @@ public:
 
 	bool readFromIniFile(std::string ini_filename, const MatrixND &Q1, const MatrixND &Q2, const MatrixND &Q3, const MatrixND &Q4);
 	void update(double time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
+	void clearMatricesList();
 
 private:
 	MERGE_TYPE merge_type = MERGE_TYPE::SUM;

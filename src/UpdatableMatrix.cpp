@@ -858,6 +858,10 @@ void UpdatableListMatrix<MatrixND>::update(double current_time, const MatrixND& 
 	}
 }
 
+template <typename MatrixND>
+void UpdatableListMatrix<MatrixND>::clearMatricesList() {
+	matricesList.clear();
+}
 
 /**
  * Search for current time-step in an update-file and return the corresponding value

@@ -181,14 +181,15 @@ bool ReadInitialData(bool &minimal_output, string &InputFolder, string &OutputFo
 	UpdatableListMatrix<Matrix4D<double>> &DKK, UpdatableListMatrix<Matrix4D<double>> &DVK,
 	UpdatableMatrix<Matrix4D<double>> &VP, UpdatableMatrix<Matrix4D<double>> &VL, UpdatableMatrix<Matrix4D<double>> &VV,
 	UpdatableMatrix<Matrix4D<double>> &G_local, UpdatableMatrix<Matrix4D<double>> &G_radial, UpdatableMatrix<Matrix4D<double>> &G_conv,
-	UpdatableListMatrix<Matrix4D<double>> &Sources, UpdatableListMatrix<Matrix4D<double>> &Losses, 
-	UpdatableListMatrix<Matrix4D<double>> &Losses_conv, Matrix4D<double> &SaturationDensity, Matrix4D<double> &SaturationTimescale
+	UpdatableListMatrix<Matrix4D<double>> &Sources, UpdatableListMatrix<Matrix4D<double>> &Losses_local,
+	UpdatableListMatrix<Matrix4D<double>> &Losses_radial, UpdatableListMatrix<Matrix4D<double>> &Losses_conv,
+	Matrix4D<double> &SaturationDensity, Matrix4D<double> &SaturationTimescale
 ) {
 	Parameters parameters("parameters.ini", argc, argv);
 
 	Logger::message << std::endl;
 	Logger::writeSeparator();
-	Logger::message << std::setw(50) << "General Parameters" << std::endl;
+	Logger::message << std::setw(59) << "General Parameters" << std::endl;
 	Logger::writeSeparator();
 
 	parameters.getParameter("minimal_output", minimal_output);
@@ -269,7 +270,7 @@ bool ReadInitialData(bool &minimal_output, string &InputFolder, string &OutputFo
 			P_size, R_size, V_size, K_size,
 			PSD_l_P, PSD_u_P, PSD_l_R, PSD_u_R, PSD_l_V, PSD_u_V, PSD_l_K, PSD_u_K, PSD_l_L, PSD_u_L,
 			DLL, DVV, DVK, DKK,	VP, VL,
-			G_local, G_radial, G_conv, Sources, Losses, Losses_conv
+			G_local, G_radial, G_conv, Sources, Losses_local, Losses_conv
 		);
 		Logger::message << "P_size = " << P_size << ", R_size = " << R_size << ", V_size = " << V_size << ", K_size = " << K_size << endl;
 		double* grid_pointers[]{&P[0][0][0][0], &R[0][0][0][0], &V[0][0][0][0], &K[0][0][0][0]};
@@ -330,7 +331,7 @@ bool ReadInitialData(bool &minimal_output, string &InputFolder, string &OutputFo
 				PSD_l_P, PSD_u_P, PSD_l_R, PSD_u_R, PSD_l_V, PSD_u_V, PSD_l_K, PSD_u_K, PSD_l_L, PSD_u_L,
 				DLL, DVV, DVK, DKK,
 				VP, VL,
-				G_local, G_radial, G_conv, Sources, Losses, Losses_conv);
+				G_local, G_radial, G_conv, Sources, Losses_local, Losses_conv);
 
 		// Read grid from .plt file only
 		P.readFromFile(InputFolder + "grid.plt",  1);
@@ -341,7 +342,7 @@ bool ReadInitialData(bool &minimal_output, string &InputFolder, string &OutputFo
 
 	Logger::message << std::endl;
 	Logger::writeSeparator();
-	Logger::message << std::setw(50) << "Lstar and diffusion coefficients" << std::endl;
+	Logger::message << std::setw(66) << "Lstar and diffusion coefficients" << std::endl;
 	Logger::writeSeparator();
 
     // Read from Lstar file if Lstar.tab is not present
@@ -378,7 +379,7 @@ bool ReadInitialData(bool &minimal_output, string &InputFolder, string &OutputFo
 
 	Logger::message << std::endl;
 	Logger::writeSeparator();
-	Logger::message << std::setw(50) << "Velocities" << std::endl;
+	Logger::message << std::setw(55) << "Velocities" << std::endl;
 	Logger::writeSeparator();
 
     if (!VP.readFromIniFile(InputFolder + "VP.tab", P, R, V, K)){
@@ -403,7 +404,7 @@ bool ReadInitialData(bool &minimal_output, string &InputFolder, string &OutputFo
 
 	Logger::message << std::endl;
 	Logger::writeSeparator();
-	Logger::message << std::setw(50) << "Jacobians" << std::endl;
+	Logger::message << std::setw(55) << "Jacobians" << std::endl;
 	Logger::writeSeparator();
 
     if (!G_local.readFromIniFile(InputFolder + "G_local.tab", P, R, V, K)){
@@ -445,7 +446,7 @@ bool ReadInitialData(bool &minimal_output, string &InputFolder, string &OutputFo
 
 	Logger::message << std::endl;
 	Logger::writeSeparator();
-	Logger::message << std::setw(50) << "Sources and losses" << std::endl;
+	Logger::message << std::setw(59) << "Sources and losses" << std::endl;
 	Logger::writeSeparator();
 
     if (density_saturation == DensitySaturation::Off) {
@@ -467,8 +468,17 @@ bool ReadInitialData(bool &minimal_output, string &InputFolder, string &OutputFo
         SaturationDensity.readFromAnyFile(InputFolder + "SaturationDensity", io_method, P, R, V, K);
     }
 
-    if (!Losses.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K)){
-        Losses.readFromAnyFile(InputFolder + "Losses_losscone", io_method, P, R, V, K);
+	// We are searching for Losses.tab first to keep backwards capability
+	// If it is not found we are searching next for Losses_local.tab and Losses_radialial.tab
+    if (!Losses_local.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K)){
+		if (!Losses_local.readFromIniFile(InputFolder + "Losses_local.tab", P, R, V, K)) {
+	        Losses_local.readFromAnyFile(InputFolder + "Losses_losscone", io_method, P, R, V, K);			
+		}
+		
+		if (std::filesystem::exists("Losses_radial.tab")) {
+			Losses_radial.AllocateMemory(P_size, R_size, V_size, K_size);
+			Losses_radial.readFromIniFile(InputFolder + "Losses_radial.tab", P, R, V, K);
+		}
 	}
 
     if (!Losses_conv.readFromIniFile(InputFolder + "Losses_conv.tab", P, R, V, K))
@@ -501,7 +511,7 @@ bool ReadInitialData(bool &minimal_output, string &InputFolder, string &OutputFo
 
 	Logger::message << std::endl;
 	Logger::writeSeparator();
-	Logger::message << std::setw(50) << "Boundary conditions" << std::endl;
+	Logger::message << std::setw(60) << "Boundary conditions" << std::endl;
 	Logger::writeSeparator();
 
 	// Read BC type fro BC.ini file
