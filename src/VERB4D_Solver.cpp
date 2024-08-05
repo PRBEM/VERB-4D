@@ -482,7 +482,7 @@ int main(int argc, char *argv[])
     
     Logger::message << std::endl;
 	Logger::writeSeparator();
-	Logger::message << std::setw(50) << "Main loop" << std::endl;
+	Logger::message << std::setw(55) << "Main loop" << std::endl;
 	Logger::writeSeparator();
 
     // Main loop

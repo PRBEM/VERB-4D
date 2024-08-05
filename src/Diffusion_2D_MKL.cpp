@@ -275,20 +275,20 @@ void initialize_rhs(std::vector<double>& rhs, const Matrix2D<double>& psd, const
 {
     rhs.clear();
     rhs.reserve(psd.size_q1 * psd.size_q2);
-    for(int i = 0; i < psd.size_q1; i++)
+    for(size_t i = 0; i < psd.size_q1; i++)
     {
         rhs.push_back(k_lower[i]);
     }
-    for(int j = 1; j < psd.size_q2 - 1; j++)
+    for(size_t j = 1; j < psd.size_q2 - 1; j++)
     {
         rhs.push_back(v_lower[j]);
-        for(int i = 1; i < psd.size_q1 - 1; i++)
+        for(size_t i = 1; i < psd.size_q1 - 1; i++)
         {
             rhs.push_back(psd[i][j] / dt + source[i][j]);
         }
         rhs.push_back(v_upper[j]);
     }
-    for(int i = 0; i < psd.size_q1; i++)
+    for(size_t i = 0; i < psd.size_q1; i++)
     {
         rhs.push_back(k_upper[i]);
     }
@@ -329,9 +329,9 @@ void Diffusion_2D_MKL(Matrix2D<double>& psd, const Matrix2D<double>& v_grid, con
 		std::cout << "MKL solve error " << status << '\n';
 		exit(EXIT_FAILURE);
 	}
-    for(int i = 0; i < psd.size_q1; i++)
+    for(size_t i = 0; i < psd.size_q1; i++)
     {
-        for(int j = 0; j < psd.size_q2; j++)
+        for(size_t j = 0; j < psd.size_q2; j++)
         {
             psd[i][j] = dummy[j * psd.size_q1 + i];
         }
