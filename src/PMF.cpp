@@ -42,7 +42,7 @@ class ProcessedMatFile {
     ProcessedMatFile(std::string path2file) {
         file = matOpen(path2file.c_str(), "r");
         if (file == NULL) {
-            std::cout << "In ProcessedMatFile: cannot open file \"" << path2file << "\""
+            Logger::error << "In ProcessedMatFile: cannot open file \"" << path2file << "\""
                       << "\n";
             exit(EXIT_FAILURE);
         }
@@ -82,7 +82,7 @@ class MatArray {
 MatArray::MatArray(const ProcessedMatFile& pmf, const std::string& arr_name) {
     mx_arr = matGetVariable(pmf, arr_name.c_str());
     if (mx_arr == NULL) {
-        std::cout << "In MatArray: field " << arr_name << " does not exist in processed mat file\n";
+        Logger::error << "In MatArray: field " << arr_name << " does not exist in processed mat file\n";
         exit(EXIT_FAILURE);
     } else {
         name = arr_name;
@@ -117,8 +117,8 @@ Matrix1D<double> MatArray::to_Matrix1D() const {
     if (dims.size() != 1) {
         for (size_t i = 1; i < dims.size(); ++i) {
             if (dims[i] != 1) {
-                std::cout << this->name << std::endl;
-                std::cout << "Cannot convert " << dims.size() << "D Matlab array to Matrix1D\n";
+                Logger::error << this->name << std::endl;
+                Logger::error << "Cannot convert " << dims.size() << "D Matlab array to Matrix1D\n";
                 exit(EXIT_FAILURE);
             }
         }
@@ -137,7 +137,7 @@ Matrix1D<double> MatArray::to_Matrix1D() const {
 
 Matrix2D<double> MatArray::to_Matrix2D() const {
     if (dims.size() != 2) {
-        std::cout << "Cannot convert " << dims.size() << "D Matlab array to Matrix2D\n";
+        Logger::error << "Cannot convert " << dims.size() << "D Matlab array to Matrix2D\n";
         exit(EXIT_FAILURE);
     } else {
         Matrix2D<double> matrix;
@@ -157,7 +157,7 @@ Matrix2D<double> MatArray::to_Matrix2D() const {
 
 Matrix3D<double> MatArray::to_Matrix3D() const {
     if (dims.size() != 3) {
-        std::cout << "Cannot convert " << dims.size() << "D Matlab array to Matrix2D\n";
+        Logger::error << "Cannot convert " << dims.size() << "D Matlab array to Matrix2D\n";
         exit(EXIT_FAILURE);
     } else {
         Matrix3D<double> matrix;
@@ -201,7 +201,7 @@ string generateProcessedMatFileMissionFolder(const string& mission) {
     if (missionUpper == "RBSP" || missionUpper == "ARASE") {
         return missionUpper;
     } else {
-        std::cout << "Mission " << mission << " is not supported\n";
+        Logger::error << "Mission " << mission << " is not supported\n";
         exit(EXIT_FAILURE);
     }
 }
@@ -216,10 +216,10 @@ string generateProcessedMatFileSatelliteFolder(const string& satellite) {
     } else if (satellite_upper == "ARASE") {
         return "arase";
     } else if (satellite_upper == "") {
-        std::cout << "Empty satellite name!\n";
+        Logger::error << "Empty satellite name!\n";
         exit(EXIT_FAILURE);
     } else {
-        std::cout << "Unknown satellite name: " << satellite << "\n";
+        Logger::error << "Unknown satellite name: " << satellite << "\n";
         exit(EXIT_FAILURE);
     }
 }
@@ -234,10 +234,10 @@ string generateProcessedMatFileSatelliteName(const string& satellite) {
     } else if (satellite_upper == "ARASE") {
         return "arase";
     } else if (satellite_upper == "") {
-        std::cout << "Empty satellite name!\n";
+        Logger::error << "Empty satellite name!\n";
         exit(EXIT_FAILURE);
     } else {
-        std::cout << "Unknown satellite name: " << satellite << "\n";
+        Logger::error << "Unknown satellite name: " << satellite << "\n";
         exit(EXIT_FAILURE);
     }
 }
@@ -256,10 +256,10 @@ string generateProcessedMatFileInstrumentName(const string& instrument) {
     } else if (instrument_upper == "HEP-L3L") {
         return "hep-l3l";
     } else if (instrument_upper == "") {
-        cout << "Empty instrument name!\n";
+        Logger::error << "Empty instrument name!\n";
         exit(EXIT_FAILURE);
     } else {
-        cout << "Unknown instrument " << instrument << endl;
+        Logger::error << "Unknown instrument " << instrument << endl;
         exit(EXIT_FAILURE);
     }
 }
@@ -281,7 +281,7 @@ string generateProcessedMatFileVariableSuffix(const string& name) {
     } else if (name_upper == "PSD") {
         return "psd";
     } else {
-        cout << "Error! Uknown processed mat file varible name: " << name << endl;
+        Logger::error << "Error! Unknown processed mat file variable name: " << name << endl;
         exit(EXIT_FAILURE);
     }
 }
@@ -303,7 +303,7 @@ string generateProcessedMatFileMagneticFieldModelName(pmf::MagneticFieldModel mf
         case pmf::MagneticFieldModel::TS07Dmid15:
             return "n4_4_TS07Dmid15";
         default:
-            cout << "Error in " << __FILE__ << ", line " << __LINE__ << ": "
+            Logger::error << "Error in " << __FILE__ << ", line " << __LINE__ << ": "
                  << "Magnetic field model is not supported." << endl;
             exit(EXIT_FAILURE);
     }
@@ -314,7 +314,7 @@ string generateProcessedMatFileVersionName(pmf::DataVersion version) {
         case pmf::DataVersion::v4:
             return "ver4";
         default:
-            cout << "Error in " << __FILE__ << ", line " << __LINE__ << ": "
+            Logger::error << "Error in " << __FILE__ << ", line " << __LINE__ << ": "
                  << "Magnetic field model is not supported." << endl;
             exit(EXIT_FAILURE);
     }
@@ -373,7 +373,7 @@ string generateProcessedMatFileVariableName(const string& name) {
     } else if (name_upper == "PSD") {
         return "PSD";
     } else {
-        cout << "Error! In function " << __FUNCTION__ << " file " << __FILE__
+        Logger::error << "Error! In function " << __FUNCTION__ << " file " << __FILE__
              << " line " << __LINE__
              << " Uknown processed mat file varible name: " << name << endl;
         exit(EXIT_FAILURE);
@@ -396,7 +396,7 @@ pmf::MagneticFieldModel getMagneticFieldModel(const string& name) {
     } else if (name == "n4_4_TS07Dmid15") {
         return pmf::MagneticFieldModel::TS07Dmid15;
     } else {
-        cout << "Error! In function " << __FUNCTION__ << " file " << __FILE__
+        Logger::error << "Error! In function " << __FUNCTION__ << " file " << __FILE__
              << " line " << __LINE__
              << " Unknown magnetic field model: " << name << endl;
         exit(EXIT_FAILURE);
@@ -407,7 +407,7 @@ pmf::DataVersion getPmfVersion(const string& name) {
     if (name == "ver4") {
         return pmf::DataVersion::v4;
     } else {
-        cout << "Error! In function " << __FUNCTION__ << " file " << __FILE__
+        Logger::error << "Error! In function " << __FUNCTION__ << " file " << __FILE__
              << " line " << __LINE__
              << " Unknown version of processed mat file: " << name << endl;
         exit(EXIT_FAILURE);
@@ -459,10 +459,10 @@ Matrix1D<double> limitWithTime<Matrix1D<double>>(
     CustomDate timeStart, CustomDate timeEnd, uint32_t memory_seconds) {
     timeStart = timeStart - memory_seconds;
     if (array.size_q1 != time.size_q1) {
-        cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
-        cout << "Sizes mismatch:";
-        cout << "array.size_q1 = " << array.size_q1 << ", ";
-        cout << "time.size_q1 = " << time.size_q1 << endl;
+        Logger::error << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        Logger::error << "Sizes mismatch:";
+        Logger::error << "array.size_q1 = " << array.size_q1 << ", ";
+        Logger::error << "time.size_q1 = " << time.size_q1 << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -493,10 +493,10 @@ Matrix2D<double> limitWithTime<Matrix2D<double>>(
     CustomDate timeStart, CustomDate timeEnd, uint32_t memory_seconds) {
     timeStart = timeStart - memory_seconds;
     if (array.size_q1 != time.size_q1) {
-        cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
-        cout << "Sizes mismatch:";
-        cout << "array.size_q1 = " << array.size_q1 << ", ";
-        cout << "time.size_q1 = " << time.size_q1 << endl;
+        Logger::error << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        Logger::error << "Sizes mismatch:";
+        Logger::error << "array.size_q1 = " << array.size_q1 << ", ";
+        Logger::error << "time.size_q1 = " << time.size_q1 << endl;
         exit(EXIT_FAILURE);
     }
 
@@ -529,10 +529,10 @@ Matrix3D<double> limitWithTime<Matrix3D<double>>(
     CustomDate timeStart, CustomDate timeEnd, uint32_t memory_seconds) {
     timeStart = timeStart - memory_seconds;
     if (array.size_q1 != time.size_q1) {
-        cout << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
-        cout << "Sizes mismatch:";
-        cout << "array.size_q1 = " << array.size_q1 << ", ";
-        cout << "time.size_q1 = " << time.size_q1 << endl;
+        Logger::error << "Error! In " << __FILE__ << ", line " << __LINE__ << ": ";
+        Logger::error << "Sizes mismatch:";
+        Logger::error << "array.size_q1 = " << array.size_q1 << ", ";
+        Logger::error << "time.size_q1 = " << time.size_q1 << endl;
         exit(EXIT_FAILURE);
     }
 

@@ -159,7 +159,7 @@ bool does_file_exist(std::string file_name, IOMethod io_method) {
 * \param G_local, G_radial - Jacobians for normalizing data
 * \param Sources, Losses - matrices for calculating Sources and Losses(loss cone)
 */
-bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* argv[],
+bool ReadInitialData(bool &minimal_output, string &InputFolder, string &OutputFolder, int argc, char* argv[],
 	double &time_total, double &time_step, double &diffusion_sub_time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
 	InversionMethod &inversion_method, IOMethod &io_method, IOMethod &PSD0_io_method, DensitySaturation &density_saturation,
 	bool &include_boundary, bool &Vl_BC_from_convection, bool &Vu_BC_from_convection, bool &run_remapping,
@@ -191,6 +191,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	Logger::message << std::setw(50) << "General Parameters" << std::endl;
 	Logger::writeSeparator();
 
+	parameters.getParameter("minimal_output", minimal_output);
 	parameters.getParameter("time_total", time_total);
 	parameters.getParameter("time_step", time_step);
 	if (not parameters.getParameter("diffusion_sub_time_step", diffusion_sub_time_step)) diffusion_sub_time_step = time_step;
@@ -307,8 +308,6 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		while(inBuf.substr(inBuf.size() - 1).compare("L") && !input.eof()) getline(input, inBuf, '=');
 		input >> P_size;
 
-
-
 		// If the file doesn't have data send error message
 		if (input.eof()) {
 			Logger::warning << "Grid file error." << endl;
@@ -393,7 +392,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
     if (!VV.readFromIniFile(InputFolder + "VV.tab", P, R, V, K)){
 		if(does_file_exist(InputFolder + "VV", io_method)){
 			VV.readFromAnyFile(InputFolder + "VV", io_method, P, R, V, K);
-		} else if (not run_local_diffusion){
+		} else if (not run_coulomb_collision){
 			Logger::message << "VV not used in this simulation." << std::endl;
 			VV = 1;
 		} else {

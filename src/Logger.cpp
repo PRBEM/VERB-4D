@@ -13,7 +13,7 @@ void Logger::createInstance()
 {	
 	delete sInstance;
 	sInstance = new Logger;
-	mDebugLevel = DEBUG_LEVEL_ERROR;
+	mDebugLevel = DEBUG_LEVEL_DEBUG;
 	logFile.open("log.txt");
 }
 
@@ -31,28 +31,22 @@ void Logger::setDebugLevel(Logger::DebugLevel level)
 	mDebugLevel = level;
 }
 
+Logger::DebugLevel Logger::getDebugLevel()
+{
+	return mDebugLevel;
+}
+
 /// can signify errors while writing message
 void Logger::writeError(const std::string& message)
 {
 	// if level of error is greator than set debug level
-	if (mDebugLevel >= DEBUG_LEVEL_ERROR) {
+	if (mDebugLevel <= DEBUG_LEVEL_ERROR) {
 		// type out [Error]
 		const char *type = "[Error] ";
 		std::string str = type + message;
 		// write out message
 		writeMessage(str); // Add [Error] //message = message.append("[Error]: ");....
 		exit(EXIT_FAILURE);
-	}
-	else if (mDebugLevel >= DEBUG_LEVEL_WARNING) {
-		// type out [Warning]
-		const char *type = "[Warning] ";
-		std::string str = type + message;
-		// write out message
-		writeMessage(str);
-	}
-	else if (mDebugLevel >= DEBUG_LEVEL_MESSAGE) {
-
-		writeMessage(message);
 	}
 }
 
@@ -65,7 +59,7 @@ void Logger::appendToFile(const std::string& message){
 void Logger::writeWarning(const std::string& message)
 {
 	// if level of warning is greator than set debug level
-	if (mDebugLevel >= DEBUG_LEVEL_WARNING) {
+	if (mDebugLevel <= DEBUG_LEVEL_WARNING) {
 		// type out [Error]
 		const char *type = "[Warning] ";
 		std::string str = type + message;
@@ -77,12 +71,27 @@ void Logger::writeWarning(const std::string& message)
 /// Write out message to logger with the inputted message type 
 void Logger::writeMessage(const std::string& message)
 {
-	std::string text(message);
-			//std::replace(text.begin(), text.end(), '\n', ' '); // Fix it later
-	// Send message to standard console out
-	std::cout << message;
-	// add message to end of file
-	appendToFile(text);
+	if (mDebugLevel <= DEBUG_LEVEL_MESSAGE) {
+		std::string text(message);
+				//std::replace(text.begin(), text.end(), '\n', ' '); // Fix it later
+		// Send message to standard console out
+		std::cout << message;
+		// add message to end of file
+		appendToFile(text);
+	}
+}
+
+/// Write out message to logger with the inputted message type 
+void Logger::writeDebug(const std::string& message)
+{
+	if (mDebugLevel <= DEBUG_LEVEL_DEBUG) {
+		std::string text(message);
+				//std::replace(text.begin(), text.end(), '\n', ' '); // Fix it later
+		// Send message to standard console out
+		std::cout << message;
+		// add message to end of file
+		appendToFile(text);
+	}
 }
 
 /// Constructor - must send in message type
@@ -110,6 +119,7 @@ Logger::Streamer::StringBuffer::~StringBuffer()
 }
 
 // Creates message, warning and error variables for Logger
+Logger::Streamer Logger::debug(Logger::MESSAGE_DEBUG);
 Logger::Streamer Logger::message(Logger::MESSAGE_INFO);
 Logger::Streamer Logger::warning(Logger::MESSAGE_WARNING);
 Logger::Streamer Logger::error(Logger::MESSAGE_ERROR);
@@ -126,23 +136,27 @@ int Logger::Streamer::StringBuffer::sync()
 	}
 	str("");
 	switch (mMessageType) {
-	case MESSAGE_INFO:
-		Logger::sInstance->writeMessage(text);
-		break;
+		case MESSAGE_DEBUG:
+			Logger::sInstance->writeDebug(text);
+			break;
 
-	case MESSAGE_WARNING:
-		Logger::sInstance->writeWarning(text);
-		break;
+		case MESSAGE_INFO:
+			Logger::sInstance->writeMessage(text);
+			break;
 
-	case MESSAGE_ERROR:
-		Logger::sInstance->writeError(text);
-		break;
+		case MESSAGE_WARNING:
+			Logger::sInstance->writeWarning(text);
+			break;
+
+		case MESSAGE_ERROR:
+			Logger::sInstance->writeError(text);
+			break;
 	}
 	return 0;
 };
 
 Logger* Logger::sInstance = 0;
-Logger::DebugLevel Logger::mDebugLevel = Logger::DebugLevel::DEBUG_LEVEL_DISABLED;
+Logger::DebugLevel Logger::mDebugLevel = Logger::DebugLevel::DEBUG_LEVEL_DEBUG;
 std::ofstream Logger::logFile;
 
 

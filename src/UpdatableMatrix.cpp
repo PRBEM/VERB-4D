@@ -724,7 +724,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, const MatrixND& q1, 
 	}
 
 	if (user_output.str().length() > 0) {
-		Logger::message << this->name << ": " << user_output.str() << endl;
+		Logger::debug << this->name << ": " << user_output.str() << endl;
 	}
 
 	return updated;

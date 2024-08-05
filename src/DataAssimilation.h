@@ -20,7 +20,7 @@ struct Parameters {
     double modelError;
     double observationError;
     double correlationTime = std::numeric_limits<double>::infinity();
-    DataAssimilationDataSource dataSource;
+    DataAssimilationDataSource dataSource = DataAssimilationDataSource::DataServer;
     bool growing_Q_at_boundary = false;
 };
 struct Observations {

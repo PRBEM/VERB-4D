@@ -185,6 +185,7 @@ template bool Parameters::getParameter(std::string, IOMethod&, bool);
 template bool Parameters::getParameter(std::string, InversionMethod&, bool);
 template bool Parameters::getParameter(std::string, DensitySaturation&, bool);
 template bool Parameters::getParameter(std::string, DataAssimilationDataSource&, bool);
+template bool Parameters::getParameter(std::string, Logger::DebugLevel&, bool);
 
 
 // helper functions to insensitive case compare two strings
@@ -265,7 +266,6 @@ void stringToValue(const std::string& parameter_value_string, InversionMethod& v
 	}
 }
 
-
 template <>
 void stringToValue(const std::string& parameter_value_string, DataAssimilationDataSource& variable) {
 	if (iequals(parameter_value_string, "data_server")) {
@@ -277,4 +277,18 @@ void stringToValue(const std::string& parameter_value_string, DataAssimilationDa
 		printf("Encountered invalid value for data assimilation data source parameter: %s\n", parameter_value_string.c_str());
 		exit(EXIT_FAILURE);
 	}
+}
+
+template <>
+void stringToValue(const std::string& parameter_value_string, Logger::DebugLevel& variable) {
+	int enum_int;
+	std::stringstream tmp(parameter_value_string);
+	tmp >> enum_int;
+
+	if (enum_int < 0 or enum_int > 4) {
+		printf("Encountered invalid enum value!");
+		exit(EXIT_FAILURE);
+	}
+
+	variable = static_cast<Logger::DebugLevel>(enum_int);
 }

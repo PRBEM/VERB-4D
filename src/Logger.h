@@ -30,7 +30,7 @@ public:
 */
 	enum DebugLevel
 	{
-		DEBUG_LEVEL_DISABLED = 0, /**< Disabled = 0 */
+		DEBUG_LEVEL_DEBUG = 0, /**< Debug = 0 */
 		DEBUG_LEVEL_MESSAGE = 1, /**< Message = 1 */
 		DEBUG_LEVEL_WARNING = 2, /**< Warning = 2 */
 		DEBUG_LEVEL_ERROR = 3,	/**< Error = 3 */
@@ -41,6 +41,7 @@ public:
 */
 	enum MessageType
 	{
+		MESSAGE_DEBUG = 0, /**< Debug = 1 */
 		MESSAGE_INFO = 1, /**< Info = 1 */
 		MESSAGE_WARNING = 2, /**< Warning = 2 */
 		MESSAGE_ERROR = 3, /**< Error = 3 */
@@ -49,6 +50,7 @@ public:
 	static void createInstance();
 	static void deleteInstance();
 	static void setDebugLevel(DebugLevel level);
+	static DebugLevel getDebugLevel();
 
 /**
 * \brief Turns messages from the logger into streams
@@ -73,6 +75,7 @@ public:
 		};
 	};
 
+	static Streamer debug;
 	static Streamer message;
 	static Streamer warning;
 	static Streamer error;
@@ -91,6 +94,7 @@ protected:
 
 private:
 	/// private member function here
+	void writeDebug(const std::string& message);
 	void writeMessage(const std::string& message);
 	void writeWarning(const std::string& message);
 	void writeError(const std::string& message);

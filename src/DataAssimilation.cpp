@@ -54,9 +54,9 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
         data_assimilation::DebugOuput4D debug_output_4d(VP.size_w, VP.size_x, VP.size_y, VP.size_z);
 #endif
 
-        Logger::message << "\tDone Interpolating. Applying Kalman filter...\n";
+        Logger::debug << "\tDone Interpolating. Applying Kalman filter...\n";
         if (has_VX_updated) {
-            Logger::message << "\tVelocities have changed; recomputing model matrix..." << std::endl;
+            Logger::debug << "\tVelocities have changed; recomputing model matrix..." << std::endl;
         }
 
         int progress_count = 0;
@@ -66,9 +66,11 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
         for (int iV = _V.size_q1 - 1; iV >= 0; --iV) {
             for (size_t iK = 0; iK < _K.size_q2; ++iK) {
 
-                if (omp_get_thread_num() == 0) {
-                    std::cout << "\b\b\b\b\b\b\b\b\b" << '\t'
-                              << (int)((double)progress_count / progress_total * 100) << "%" << std::flush;
+                if (Logger::getDebugLevel() == Logger::DebugLevel::DEBUG_LEVEL_DEBUG) {
+                    if (omp_get_thread_num() == 0) {
+                        std::cout << "\b\b\b\b\b\b\b\b\b" << '\t'
+                                << (int)((double)progress_count / progress_total * 100) << "%" << std::flush;
+                    }
                 }
 
                 Matrix2D<double> PSD_PR = PSD.yzSlice(iV, iK);
@@ -107,11 +109,11 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
         }
 
 #ifdef DATA_ASSIMILATION_DEBUG
-        Logger::message << "Writing DA Debug output..." << std::endl;
+        Logger::debug << "Writing DA Debug output..." << std::endl;
         debug_output_4d.write_files(_timePrev, _debug_output_folder);
 #endif
 
-        Logger::message << '\n';
+        Logger::debug << '\n';
         _timePrev = _timeNext;
         _timeNext += _assimilationParameters.timeStep;
 
@@ -135,9 +137,9 @@ std::vector<std::vector<data_assimilation::Observations>> data_assimilation::get
     }
     std::vector<std::vector<data_assimilation::Observations>> result;
     if (pmfDataSplit.empty()) {
-        Logger::message << "\tNo data found...\n";
+        Logger::debug << "\tNo data found...\n";
     } else {
-        Logger::message << "\tDone reading Data. Interpolating...\n";
+        Logger::debug << "\tDone reading Data. Interpolating...\n";
         result = internal::interpolate(pmfDataSplit, V, K);
     }
     return result;
@@ -288,9 +290,9 @@ data_assimilation::Parameters data_assimilation::readParameters(const std::strin
             parameters.getParameter("growing_Q_at_boundary", result.growing_Q_at_boundary, false);
 
             double correlation_factor = exp(-result.timeStep/result.correlationTime);
-            Logger::message << "\tData assimilation time step: " << result.timeStep << std::endl;
-            Logger::message << "\tCorrelation time: " << result.correlationTime << std::endl;
-            Logger::message << "\tCorrelation factor: " << correlation_factor << std::endl;
+            Logger::debug << "\tData assimilation time step: " << result.timeStep << std::endl;
+            Logger::debug << "\tCorrelation time: " << result.correlationTime << std::endl;
+            Logger::debug << "\tCorrelation factor: " << correlation_factor << std::endl;
         }
     }
 
@@ -311,7 +313,7 @@ Matrix4D<double> data_assimilation::DataServerDataSource::getObservations(
     for (auto par : _dataParameters) {
         pmfDataSplit.push_back(internal::readData(timeStart, timeEnd, par));
     }
-    Logger::message << "\tDone reading Data. Interpolating and binnning...\n";
+    Logger::debug << "\tDone reading Data. Interpolating and binning...\n";
     std::vector<std::vector<data_assimilation::Observations>> observations_interpolated_V_K = internal::interpolate(pmfDataSplit, V, K);
 
     Matrix4D<double> result = internal::bin(observations_interpolated_V_K, P, R, "log10");
