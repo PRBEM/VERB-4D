@@ -59,6 +59,17 @@ private:
 	/// Last line position in the matrix scaling and limiting file
 	long scale_pos=0, update_pos=0, Q1_from_pos=0, Q1_to_pos=0, Q2_from_pos=0, Q2_to_pos=0, Q3_from_pos=0, Q3_to_pos=0, Q4_from_pos=0, Q4_to_pos=0; 
 
+	// storing limiting and scale coefficients so we know if values have changed
+	double curr_scale_coefficient = NAN;
+	double curr_Q1_from = NAN;
+	double curr_Q1_to = NAN;
+	double curr_Q2_from = NAN;
+	double curr_Q2_to = NAN;
+	double curr_Q3_from = NAN;
+	double curr_Q3_to = NAN;
+	double curr_Q4_from = NAN;
+	double curr_Q4_to = NAN;
+
 public:
 	// original matrix
 	MatrixND original_arr;
@@ -120,7 +131,7 @@ public:
 	MatrixND& operator= (const double Val);
 
 	bool readFromIniFile(std::string ini_filename, const MatrixND &Q1, const MatrixND &Q2, const MatrixND &Q3, const MatrixND &Q4);
-	void update(double time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
+	bool update(double time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4 = MatrixND());
 	void clearMatricesList();
 
 private:

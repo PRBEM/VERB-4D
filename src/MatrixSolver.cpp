@@ -51,7 +51,7 @@ void AddBoundary(DiagMatrix &matr_A, BoundaryConditionType type, int in, int id1
 		matr_A[id0][in] = 1 / dh;
 		matr_A[id1][in] = -1 / dh;
 	} else {
-		std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << type << std::endl;
+		Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << type << std::endl;
 		exit(EXIT_FAILURE);
 	}
 }
@@ -89,7 +89,7 @@ bool AddBoundaries_1D(
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_LBC_type << std::endl;
+			Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_LBC_type << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -108,7 +108,7 @@ bool AddBoundaries_1D(
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
+			Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -150,7 +150,7 @@ bool AddBoundaries_2D(
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_LBC_type << std::endl;
+			Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_LBC_type << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -169,7 +169,7 @@ bool AddBoundaries_2D(
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
+			Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -188,7 +188,7 @@ bool AddBoundaries_2D(
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << y_LBC_type << std::endl;
+			Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << y_LBC_type << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -207,7 +207,7 @@ bool AddBoundaries_2D(
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << y_UBC_type << std::endl;;
+			Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << y_UBC_type << std::endl;;
 			exit(EXIT_FAILURE);
 		}
 
@@ -226,8 +226,13 @@ bool AddBoundaries_2D(
  *
  * LAPACK - Linear Algebra PACKage. For linear algebra methods. Using the lapack library from http://www.netlib.org/lapack/
  */
-void Lapack(const CalculationMatrix& A, const CalculationMatrix& B,const CalculationMatrix& C, Matrix2D<double>& psd, int num_substeps) {
-
+#ifdef LU_CACHING
+void Lapack(const CalculationMatrix& A, const CalculationMatrix& B,const CalculationMatrix& C, Matrix2D<double>& psd, int num_substeps,
+		    double* lu_cache, long* index_cache, bool recompute_lu)
+#else
+void Lapack(const CalculationMatrix& A, const CalculationMatrix& B,const CalculationMatrix& C, Matrix2D<double>& psd, int num_substeps)
+#endif
+{
 	// Save A and B to check the solution at the end
 	// Matrix1D<double> B_res;
 	// B_res = B;
@@ -245,13 +250,48 @@ void Lapack(const CalculationMatrix& A, const CalculationMatrix& B,const Calcula
 	long ldab = 2 * kl + ku + 1;
 	long ldb = m_size;
 	long info = 1;
-	long* ipiv = new long[m_size];
 	const char transpose = 'N';
 
+#ifdef LU_CACHING
+	double* matrix_lu = lu_cache;
+	long* ipiv = index_cache;
+
+	if(recompute_lu){
+		for (int i = 0; i < (kl+ku+kl+1)*m_size; i++) {
+			matrix_lu[i] = 0;
+		}
+
+		int in, j;
+		for (in = 0; in < m_size; in++) {
+			for (it = A.begin(); it != A.end(); it++) {
+				// Check if the element at line (in) and diagonal (it->first) is inside the matrix.
+				j = in + it->first; // column number
+				if (j >= 0 && j < m_size) {
+					// converting matrix, stored as diagonals, into lapack matrix (also diagonal)
+					// newmat[j][ku+kl-j+in] = it->second[in];
+					matrix_lu[j*(kl+ku+kl+1) + ku+kl-j+in] = it->second[in];
+				}
+			}
+		}
+
+		// LU decomposition
+		dgbtrf_(&m_size, &m_size, &kl, &ku, matrix_lu, &ldab, ipiv, &info );
+		if (info != 0) {
+			Logger::error << "Error computing LU decomposition\n";
+			exit(EXIT_FAILURE);
+		}
+	}
+#else
 	double *matrix_lu = new double[(kl+ku+kl+1)*m_size];
+	long* ipiv = new long[m_size];
 	double **newmat = new double*[m_size];
-	for(int i=0; i<m_size; i++){ newmat[i] = &matrix_lu[i*(kl+ku+kl+1)]; }
-	for (int i = 0; i < (kl+ku+kl+1)*m_size; i++) matrix_lu[i] = 0;
+
+	for(int i = 0; i < m_size; i++) {
+		newmat[i] = &matrix_lu[i*(kl+ku+kl+1)];
+	}
+	for (int i = 0; i < (kl+ku+kl+1)*m_size; i++) {
+		matrix_lu[i] = 0;
+	}
 
 	for (int in = 0; in < m_size; in++) {
 		for (const auto& [idx, diagonal] : A) {
@@ -263,13 +303,15 @@ void Lapack(const CalculationMatrix& A, const CalculationMatrix& B,const Calcula
 			}
 		}
 	}
-	dgbtrf_(&m_size, &m_size, &kl, &ku, matrix_lu, &ldab, ipiv, &info );
-	if (info != 0)
-	{
-		std::cout << "Error computing LU decomposition\n";
+	
+	// LU decomposition
+	dgbtrf_(&m_size, &m_size, &kl, &ku, matrix_lu, &ldab, ipiv, &info);
+	if (info != 0) {
+		Logger::error << "Error computing LU decomposition\n";
 		exit(EXIT_FAILURE);
 	}
-	
+#endif
+
 	Matrix1D<double> rhs(A.total_size);
 	for (size_t ix = 0; ix < psd.size_q1; ix++) {
 		for (size_t iy = 0; iy < psd.size_q2; iy++) {
@@ -277,15 +319,14 @@ void Lapack(const CalculationMatrix& A, const CalculationMatrix& B,const Calcula
 			rhs[in] = psd[ix][iy];
 		}
 	}
-	for(int i = 0; i < num_substeps; i++)
-	{
+	// Solving the system
+	for(int i = 0; i < num_substeps; i++) {
 		rhs.times_equal(B.at(0));
 		rhs += C.at(0);
 
 		dgbtrs_(&transpose, &m_size, &kl, &ku, &nrhs, matrix_lu, &ldab, ipiv, &rhs[0], &ldb, &info);
-		if (info != 0)
-		{
-			std::cout << "Error solving 2d diffusion system\n";
+		if (info != 0) {
+			Logger::error << "Error solving 2d diffusion system\n";
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -296,50 +337,12 @@ void Lapack(const CalculationMatrix& A, const CalculationMatrix& B,const Calcula
 			psd[ix][iy] = rhs[in];
 		}
 	}
-	/*ofstream output("Lap_mat.dat");
-	for (i = 0; i < m_size; i++) {
-		for (j = 0; j < (kl+ku+kl+1); j++) {
-			output << newmat[i][j] << "\t";
-		}
-		output << endl;
-	}
-	output.close();*/
 
-	// dgbsv_(&m_size, &kl, &ku, &NRHS, matrix_lu, &LDAB, IPIV, &B[0], &LDB, &INFO);
-
-	// if (INFO != 0) {
-	// 	printf("Lapack inversion Error!!! INFO = %ld.\n", INFO);
-	// 	exit(EXIT_FAILURE);
-	// }
-
-	// check
-	// "A*X - B" should be zero
-	// X is stored in B after Lapack solution
-	// and we stored B in B_res previousely
-	// So, it's "B_res - A*B" should be zero
-	// for (in = 0; in < m_size; in++) {
-	// 	for (it = A.begin(); it != A.end(); it++) {
-	// 		if (in + it->first >= 0 && in + it->first < m_size) {
-	// 			//cout << B_res[in] << "-=" << it->second[in] << "*" << B[in] << endl;
-	// 			B_res[in] -= it->second[in] * B[in + it->first];
-	// 		}
-	// 	}
-	// }
-
-	// // calculate max error
-	// double max = 0;
-	// for (int i = 0; i < m_size; i++) {
-	// 	max = (max > fabs(B_res(i))) ? max : B_res(i);
-	// }
-
-/*	if(max>1) {
-		printf(" Max error: %e.\n", max);
-		exit(EXIT_FAILURE);
-	}*/
-
+#ifndef LU_CACHING
 	delete[] ipiv;
 	delete[] matrix_lu;
 	delete[] newmat;
+#endif
 }
 
 

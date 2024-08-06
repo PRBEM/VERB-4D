@@ -46,7 +46,18 @@ bool AddBoundaries_2D(
 	int ix, int iy, int in
 );
 
-
+#ifdef LU_CACHING
+void Lapack(
+	const CalculationMatrix& A,
+	const CalculationMatrix& B,
+	const CalculationMatrix& C,
+	Matrix2D<double>& psd,
+	int num_substeps,
+	double* lu_cache,
+	long* index_cache,
+	bool recompute_lu
+);
+#else
 void Lapack(
 	const CalculationMatrix& A,
 	const CalculationMatrix& B,
@@ -54,6 +65,8 @@ void Lapack(
 	Matrix2D<double>& psd,
 	int num_substeps
 );
+#endif
+
 
 void SecondDerivativeApproximation_1D(
 	CalculationMatrix &matr_A, int ix,

@@ -594,7 +594,10 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, const MatrixND& q1, 
 			// Another way to do the same:
 			//this->MatrixND::operator*= (scale_coefficient);
 
-			updated = true;
+			if (curr_scale_coefficient != scale_coefficient) {
+				updated = true;
+				curr_scale_coefficient = scale_coefficient;
+			}
 		}
 	}
 
@@ -606,7 +609,6 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, const MatrixND& q1, 
 	double Q2_from = -1e99, Q2_to = 1e99;
 	double Q3_from = -1e99, Q3_to = 1e99;
 	double Q4_from = -1e99, Q4_to = 1e99;
-
 
 	// limiting coefficient, as a string
 	string limit_coefficient_string;
@@ -691,6 +693,21 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, const MatrixND& q1, 
 
 		was_limited = true;
 	}
+
+	if (curr_Q1_from != Q1_from or curr_Q1_to != Q1_to or curr_Q2_from != Q2_from or curr_Q2_to != Q2_to or
+	    curr_Q3_from != Q3_from or curr_Q3_to != Q3_to or curr_Q4_from != Q4_from or curr_Q4_to != Q4_to) {
+		
+		updated = true;
+
+		curr_Q1_from = Q1_from;
+		curr_Q1_to = Q1_to;
+		curr_Q2_from = Q2_from;
+		curr_Q2_to = Q2_to;
+		curr_Q3_from = Q3_from;
+		curr_Q3_to = Q3_to;
+		curr_Q4_from = Q4_from;
+		curr_Q4_to = Q4_to;
+		}
 
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
 	MatrixLimit(*this, q1, q2, q3, q4, Q1_from, Q1_to, Q2_from, Q2_to, Q3_from, Q3_to, Q4_from, Q4_to);
@@ -815,8 +832,10 @@ bool UpdatableListMatrix<MatrixND>::readFromIniFile(string ini_filename, const M
  * @param Q4 - corresponding grid coordinate
  */
 template <typename MatrixND>
-void UpdatableListMatrix<MatrixND>::update(double current_time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4) {
+bool UpdatableListMatrix<MatrixND>::update(double current_time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4) {
 	unsigned int d_it;
+
+	bool updated_any = false;
 
 	// check if there are any coefficients in the list at all
 	if (matricesList.size() > 0) {
@@ -824,11 +843,12 @@ void UpdatableListMatrix<MatrixND>::update(double current_time, const MatrixND& 
 
 		// set base (parent) class to be zero
 		MatrixND::operator = (0);
-
+		
 		// update each matrix in the list
-		for (d_it = 0; d_it < matricesList.size(); d_it++)
-			matricesList[d_it].update(current_time, Q1, Q2, Q3, Q4);
-
+		for (d_it = 0; d_it < matricesList.size(); d_it++) {
+			bool updated_single = matricesList[d_it].update(current_time, Q1, Q2, Q3, Q4);
+			updated_any = updated_any or updated_single;
+		}
 
 		switch (merge_type) {
 			case UpdatableListMatrix::MERGE_TYPE::SUM:
@@ -855,7 +875,10 @@ void UpdatableListMatrix<MatrixND>::update(double current_time, const MatrixND& 
 		}
 	} else {
 		// if there is nothing in the list - leave everything the way it is
+		return false;
 	}
+
+	return updated_any;
 }
 
 template <typename MatrixND>

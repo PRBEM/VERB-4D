@@ -47,6 +47,19 @@
  * @param Losses - Matrix used for Losses (loss cone)
  * @param dt - change in time of single time step
  */
+#ifdef LU_CACHING
+bool Diffusion_2D(
+		Matrix2D<double> &psd,
+		const Matrix2D<double>& x, const Matrix2D<double>& y,
+		int x_size, int y_size,
+		const Matrix1D<double>& x_LBC, const Matrix1D<double>& x_UBC,
+		const Matrix1D<double>& y_LBC, const Matrix1D<double>& y_UBC,
+		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
+		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
+		const Matrix2D<double>& Dxx, const Matrix2D<double>& Dyy, const Matrix2D<double>& Dxy, const Matrix2D<double>& Dyx,
+		const Matrix2D<double>& G, const Matrix2D<double>& Sources, const Matrix2D<double>& Losses, double dt, double sub_dt,
+		double* lu_cache, long* index_cache, bool recompute_lu) 
+#else
 bool Diffusion_2D(
 		Matrix2D<double> &psd,
 		const Matrix2D<double>& x, const Matrix2D<double>& y,
@@ -57,6 +70,7 @@ bool Diffusion_2D(
 		BoundaryConditionType y_LBC_type, BoundaryConditionType y_UBC_type,
 		const Matrix2D<double>& Dxx, const Matrix2D<double>& Dyy, const Matrix2D<double>& Dxy, const Matrix2D<double>& Dyx,
 		const Matrix2D<double>& G, const Matrix2D<double>& Sources, const Matrix2D<double>& Losses, double dt, double sub_dt) 
+#endif
 {
 
 	const int num_substeps = std::max(1, int(dt / sub_dt));
@@ -158,7 +172,11 @@ bool Diffusion_2D(
 	//matr_C.writeToFile("./Debug_output/matr_C.dat");
 
 	//RHS.writeToFile("RHS.dat");
+#ifdef LU_CACHING
+	Lapack(matr_A, matr_B, matr_C, psd, num_substeps, lu_cache, index_cache, recompute_lu);
+#else
 	Lapack(matr_A, matr_B, matr_C, psd, num_substeps);
+#endif
 	//RHS.writeToFile("result.dat");
 
 	return true;

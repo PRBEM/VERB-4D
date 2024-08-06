@@ -315,6 +315,33 @@ int main(int argc, char *argv[])
     PSD_lost_conv.AllocateMemory(P_size, R_size, V_size, K_size);
 #endif
 
+#ifdef LU_CACHING
+    CalculationMatrix dummy(V_size, K_size, 1, 1);
+    long m_size = dummy[0].size_q1;
+	long kl = -dummy.begin()->first; // first diagonal
+	long ku = dummy.rbegin()->first;
+    std::vector<std::vector<double*>> lu_cache(P_size);
+    for(auto& r_slice : lu_cache)
+    {
+        r_slice = std::vector<double*>(R_size);
+        for(auto& pr_slice : r_slice)
+        {
+            pr_slice = new double[(kl+ku+kl+1)*m_size];
+        }
+    }
+    std::vector<std::vector<long*>> index_cache(P_size);
+    for(auto& r_slice : index_cache)
+    {
+        r_slice = std::vector<long*>(R_size);
+        for(auto& pr_slice : r_slice)
+        {
+            pr_slice = new long[m_size];
+        }
+    }
+
+    bool recompute_lu_decomp = true;
+#endif
+
     // Copy L-star so we can later interpolate PSD to a new L-star,
     // to account for adiabatic transport if L-star changes
     L_copy = L;
@@ -579,7 +606,7 @@ int main(int argc, char *argv[])
         PSD_lost_conv = 0;
 #endif
 
-        bool has_VX_updated = false;
+        [[maybe_unused]] bool has_VX_updated = false;
         // Update convection velocities VP and VR and log the maximum absolute values
         if ((3 < P_size || 3 < R_size) && run_convection)
         {
@@ -612,11 +639,12 @@ int main(int argc, char *argv[])
             }
         }
 
+        [[maybe_unused]] bool updated_dvv, updated_dvk, updated_dkk, updated_local_loss;
         if ((3 < V_size && 3 < K_size) && (run_local_diffusion))
         {
-            DVV.update(time_current, P, R, V, K);
-            DVK.update(time_current, P, R, V, K);
-            DKK.update(time_current, P, R, V, K);
+            updated_dvv = DVV.update(time_current, P, R, V, K);
+            updated_dvk = DVK.update(time_current, P, R, V, K);
+            updated_dkk = DKK.update(time_current, P, R, V, K);
 
             if (not minimal_output) {
                 Logger::debug << "max(DVV) = " << DVV.maxabs() << std::endl;
@@ -627,7 +655,7 @@ int main(int argc, char *argv[])
 
         // Sources and losses
         Sources.update(time_current, P, R, V, K);
-        Losses_local.update(time_current, P, R, V, K);
+        updated_local_loss = Losses_local.update(time_current, P, R, V, K);
         Losses_radial.update(time_current, P, R, V, K);
         Losses_conv.update(time_current, P, R, V, K);
 
@@ -1038,6 +1066,13 @@ int main(int argc, char *argv[])
                 std::cout << "           ";
             }
 
+#ifdef LU_CACHING
+            recompute_lu_decomp = updated_local_loss or updated_dvv or updated_dvk or updated_dkk;
+            if (recompute_lu_decomp) {
+                Logger::debug << "Recomputing LU decomposition!" << std::endl;
+            }
+#endif
+
             Matrix2D<double> PSD_IK(V_size, K_size);
 
 #if defined _OPENMP && _OPENMP >= 200711
@@ -1085,12 +1120,22 @@ int main(int argc, char *argv[])
                     // 2d diffusion
                     // If parameters.ini specify "Lapack" then Lapack will be used
                     if (inversion_method == InversionMethod::Lapack) {
+#ifdef LU_CACHING
                         Diffusion_2D(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
-                                     Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR),  // P, R, K
-                                     Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
-                                     Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
-                                     DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
-                                     Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt, sub_dt_diffusion);
+                                    Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR),  // P, R, K
+                                    Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
+                                    Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+                                    DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+                                    Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt, sub_dt_diffusion,
+                                    lu_cache[iP][iR], index_cache[iP][iR], recompute_lu_decomp);
+#else
+                        Diffusion_2D(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
+                                    Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR),  // P, R, K
+                                    Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
+                                    Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+                                    DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+                                    Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt, sub_dt_diffusion);
+#endif
                     }
                     // Currently setup to calculate 2d Diffusion using Diffusion_2D_ADI3
                     // Can change to Diffusion_2D_ADI1 or Diffusion_2D_ADI2 for different methods of inversion
@@ -1197,6 +1242,7 @@ int main(int argc, char *argv[])
         }
 
     }
+
 #ifdef MKL_FOUND
     for(auto& csr_handle : sparse_matrix_handles)
     {
@@ -1204,8 +1250,25 @@ int main(int argc, char *argv[])
         // delete csr_handle; //mkl_sparse_destroy seems to delete the pointer
     }
 #endif
-    // logger records if everything went correctly
 
+#ifdef LU_CACHING
+    for(auto& p_slice : lu_cache)
+    {
+        for(auto& pr_slice : p_slice)
+        {
+            delete[] pr_slice;
+        }
+    }
+    for(auto& p_slice : index_cache)
+    {
+        for(auto& pr_slice : p_slice)
+        {
+            delete[] pr_slice;
+        }
+    }
+#endif
+
+    // logger records if everything went correctly
     Logger::message << "\nProgram was terminated correctly." << std::endl;
     Logger::message << "Wall-clock time: " << std::fixed << std::setprecision(2) << (omp_get_wtime() - wall_timer) << " sec; ";
     Logger::message << "CPU time: " << (float)(clock() - start_time) / CLOCKS_PER_SEC << " sec." << std::endl;

@@ -181,3 +181,9 @@ if(${SAVE_PSD_LOST_CONV})
     add_definitions(-DSAVE_PSD_LOST_CONV)
 endif()
 unset(SAVE_PSD_LOST CACHE)
+
+# cache LU decomposition during Lapack call in Diffusion_2D.cpp
+if(${LU_CACHING})
+    add_definitions(-DLU_CACHING)
+endif()
+unset(SAVE_PSD_LOST CACHE)
