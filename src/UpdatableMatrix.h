@@ -3,17 +3,23 @@
  * \brief Same functionality as matrices found in Matrix.h but can also be updated from ini-files
  */
 
-#ifndef UPDATABLEMATRIX_H_
-#define UPDATABLEMATRIX_H_
+#pragma once
 
 #include <string>
 #include <istream>
 #include <sstream>
 #include <vector>
+#include <queue>
 #include <iomanip> // std::setprecision
 
 #include "Matrix.h"
 #include "Logger.h"
+
+template <typename T>
+struct QueueElement {
+    double time;
+    T value;
+};
 
 /** @class MatrixND
  * 
@@ -55,20 +61,33 @@ private:
 	std::string Q4_to_string; /// Filename for limiting Q4 (usually it's K, upper limit)
 
 	double last_update_time; /// Indicates when the Matrix was updated last time
+	bool is_limited = false;
 
 	/// Last line position in the matrix scaling and limiting file
-	long scale_pos=0, update_pos=0, Q1_from_pos=0, Q1_to_pos=0, Q2_from_pos=0, Q2_to_pos=0, Q3_from_pos=0, Q3_to_pos=0, Q4_from_pos=0, Q4_to_pos=0; 
+	//long scale_pos=0, update_pos=0, Q1_from_pos=0, Q1_to_pos=0, Q2_from_pos=0, Q2_to_pos=0, Q3_from_pos=0, Q3_to_pos=0, Q4_from_pos=0, Q4_to_pos=0; 
 
 	// storing limiting and scale coefficients so we know if values have changed
-	double curr_scale_coefficient = NAN;
-	double curr_Q1_from = NAN;
-	double curr_Q1_to = NAN;
-	double curr_Q2_from = NAN;
-	double curr_Q2_to = NAN;
-	double curr_Q3_from = NAN;
-	double curr_Q3_to = NAN;
-	double curr_Q4_from = NAN;
-	double curr_Q4_to = NAN;
+	double latest_scale_coefficient = 1;
+	double latest_Q1_from = -1e99;
+	double latest_Q1_to = 1e99;
+	double latest_Q2_from = -1e99;
+	double latest_Q2_to = 1e99;
+	double latest_Q3_from = -1e99;
+	double latest_Q3_to = 1e99;
+	double latest_Q4_from = -1e99;
+	double latest_Q4_to = 1e99;
+
+    std::queue<QueueElement<std::string>> lst_update_queue;
+    std::queue<QueueElement<double>> scale_update_queue;
+
+    std::queue<QueueElement<double>> Q1_from_update_queue;
+    std::queue<QueueElement<double>> Q1_to_update_queue;
+    std::queue<QueueElement<double>> Q2_from_update_queue;
+    std::queue<QueueElement<double>> Q2_to_update_queue;
+    std::queue<QueueElement<double>> Q3_from_update_queue;
+    std::queue<QueueElement<double>> Q3_to_update_queue;
+    std::queue<QueueElement<double>> Q4_from_update_queue;
+    std::queue<QueueElement<double>> Q4_to_update_queue;
 
 public:
 	// original matrix
@@ -145,5 +164,3 @@ std::string GetCurrentTimeValue(const std::string &filename, long &pos, const do
 bool is_number(const std::string& s);
 /// FUNCTION NOT IMPLEMENTED
 double stringToValue(std::string string_value, double current_time);
-
-#endif /* UPDATABLEMATRIX_H_ */
