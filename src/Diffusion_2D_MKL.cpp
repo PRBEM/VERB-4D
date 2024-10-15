@@ -17,8 +17,8 @@ void initialize_sparse_values(
         const Matrix2D<double>& jacobian, const Matrix2D<double>& loss, double dt,
         std::vector<double>& values)
 {
-    int v_size = v_grid.size_q1;
-    int k_size = k_grid.size_q2;
+    size_t v_size = v_grid.size_q1;
+    size_t k_size = k_grid.size_q2;
     values.clear();
     values.reserve(
         2 * (2 * (v_size - 2)) // two blocks in the beginning and two in the end, coresponding to lower and upper K boundary
@@ -302,7 +302,7 @@ void Diffusion_2D_MKL(Matrix2D<double>& psd, const Matrix2D<double>& v_grid, con
         const Matrix2D<double>& jacobian, const Matrix2D<double>& loss, const Matrix2D<double>& source, double dt,
         sparse_matrix_t* csrA)
 {
-    int mat_size = psd.size_q1 * psd.size_q2;
+    size_t mat_size = psd.size_q1 * psd.size_q2;
     std::vector<double> sparse_values;
     initialize_sparse_values(
         v_grid, k_grid, v_lower_type, v_upper_type, k_lower_type, k_upper_type,
@@ -322,7 +322,7 @@ void Diffusion_2D_MKL(Matrix2D<double>& psd, const Matrix2D<double>& v_grid, con
     Matrix1D<double> dummy(mat_size);
     status = mkl_sparse_d_qr_solve(
         SPARSE_OPERATION_NON_TRANSPOSE, *csrA, sparse_values.data(),
-        SPARSE_LAYOUT_COLUMN_MAJOR, 1, &dummy[0], mat_size, rhs.data(), 1
+        SPARSE_LAYOUT_COLUMN_MAJOR, 1, &dummy[0], static_cast<int>(mat_size), rhs.data(), 1
     );
     if(status != SPARSE_STATUS_SUCCESS)
 	{

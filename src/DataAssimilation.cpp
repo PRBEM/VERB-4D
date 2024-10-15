@@ -65,10 +65,10 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
         }
 
         int progress_count = 0;
-        int progress_total = _V.size_q1 * _K.size_q2;
+        size_t progress_total = _V.size_q1 * _K.size_q2;
 
 #pragma omp parallel for schedule(dynamic, 1) collapse(2)
-        for (int iV = _V.size_q1 - 1; iV >= 0; --iV) {
+        for (int iV = static_cast<int>(_V.size_q1 - 1); iV >= 0; --iV) {
             for (size_t iK = 0; iK < _K.size_q2; ++iK) {
 
                 if (Logger::getDebugLevel() == Logger::DebugLevel::DEBUG_LEVEL_DEBUG) {
@@ -327,7 +327,7 @@ Matrix4D<double> data_assimilation::DataServerDataSource::getObservations(
 };
 
 data_assimilation::LocalFilesDataSource::LocalFilesDataSource(const std::string& satellite_lst_file,
-        int size_q1, int size_q2, int size_q3, int size_q4) {
+        size_t size_q1, size_t size_q2, size_t size_q3, size_t size_q4) {
 
     _data = UpdatableListMatrix<Matrix4D<double>>(UpdatableListMatrix<Matrix4D<double>>::MERGE_TYPE::MEAN);
     _data.AllocateMemory(size_q1, size_q2, size_q3, size_q4);

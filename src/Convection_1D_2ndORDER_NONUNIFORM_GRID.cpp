@@ -50,7 +50,8 @@ bool Convection_1D_2ndORDER_NONUNIFORM_GRID(
     UxOverDx = Ux.divide(dx);   
     double ux_max = UxOverDx.maxabs();
     double steps_double = (double)dt_total * ux_max / maxCourNum;
-    int num_steps = (steps_double <= 1) ? 1 : ceil(steps_double);
+    // static_cast<int> is requred because of convertion warning
+    int num_steps = (steps_double <= 1) ? 1 : static_cast<int>(ceil(steps_double));
     double dt = dt_total / num_steps;
     CourNum = UxOverDx * dt;
     const double courant_max = CourNum.maxabs();

@@ -75,7 +75,7 @@ public:
 
 	// unary
 	const Matrix1D& operator+() const { return *this; }						 ///< Return the matrix
-	const Matrix1D operator-() const { return ((*this)*(-1)); } 				///< Return the matrix with all values multiplied by -1
+	const Matrix1D operator-() const { return ((*this)*static_cast<T>(-1)); } 				///< Return the matrix with all values multiplied by -1
 
 	// The following operators modify the matrix they applied to
 	Matrix1D& operator= (const Matrix1D<T> &M);
@@ -160,7 +160,7 @@ public:
 	Matrix2D() = default;
 	Matrix2D( const Matrix2D<T> &M );
 	Matrix2D( size_t size_q1, size_t size_q2 );
-    Matrix2D(const ssize_t* sizes, const T* data); 	// pybind is using this constructor
+    Matrix2D(const size_t* sizes, const T* data); 	// pybind is using this constructor
 	~Matrix2D();
 
 	virtual void AllocateMemory(size_t size_q1, size_t size_q2);
@@ -175,7 +175,7 @@ public:
 
 	// unary
 	const Matrix2D& operator+() const { return *this; } ///< unary : return the matrix
-	const Matrix2D operator-() const { return ((*this)*(-1)); } ///< unary : return the matrix with all values multiplied by -1
+	const Matrix2D operator-() const { return ((*this)*static_cast<T>(-1)); } ///< unary : return the matrix with all values multiplied by -1
 
 	// The following operators modify the matrix they applied to
 	Matrix2D& operator= (const Matrix2D<T> &M);
@@ -413,7 +413,7 @@ public:
 
 	// unary
 	const Matrix4D& operator+() const { return *this;}  ///< unary : return the matrix
-	const Matrix4D operator-() const { return ((*this)*(-1)); } ///< unary : return the matrix with all values multiplied by -1
+	const Matrix4D operator-() const { return ((*this)*static_cast<T>(-1)); } ///< unary : return the matrix with all values multiplied by -1
 
 	//Matrix4D& operator*= (const Matrix4D<T> &M); 					// reserved for something good
 	//Matrix4D& operator/= (const Matrix4D<T> &M); 					// reserved for something good

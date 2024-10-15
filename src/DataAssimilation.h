@@ -58,7 +58,7 @@ private:
 class LocalFilesDataSource : public DataSource {
 public:
     LocalFilesDataSource(const std::string& satellite_lst_file, 
-            int size_q1, int size_q2, int size_q3, int size_q4);
+            size_t size_q1, size_t size_q2, size_t size_q3, size_t size_q4);
 
     virtual Matrix4D<double> getObservations(
         const double timeStart, const double timeEnd,
