@@ -614,7 +614,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, const MatrixND& q1, 
 	//double current_time = iteration * dt;
 
 	// A time from the scaling, limiting, and updating file, will be used later
-	double update_time;
+	double update_time = 0.0; // Assing some default value. While loop should change it.
 
 	// Check if the original array was initialized,
 	// if not - allocate memory and fill it with current array data
