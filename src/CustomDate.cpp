@@ -9,7 +9,12 @@
 #include <iomanip>
 
 #ifdef _MSC_VER
-#define gmtime_r( ARG1, ARG2 ) do{ *ARG2 = *gmtime( ARG1 ); }while(0)
+    #define _CRT_SECURE_NO_WARNINGS
+    // Define gmtime_r as gmtime_s on MSVC
+    #define gmtime_r( ARG1, ARG2 ) gmtime_s( ARG2, ARG1 )
+#else
+    // On POSIX systems (like Linux), gmtime_r already exists
+    #include <time.h>
 #endif
 
 
