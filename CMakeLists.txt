@@ -66,13 +66,12 @@ if(MSVC)
     # For MSVC, use /W4 for warnings and /WX to treat warnings as errors. 
     # /wd4804 - T should not be bool in some cases. TODO: solve later
     # /wd4996 'fpclassify': ambiguous call to overloaded function [C:/Program Files (x86)/Windows Kits/10/Include/10.0.22621.0/ucrt/corecrt_math.h"]
-    # /wd4849 OpenMP 'collapse' clause ignored in 'parallel for' directive
-    target_compile_options(VERB4D_Solver PRIVATE /W4 /WX /permissive /wd4804 /wd4996 /wd4849)
+    # /wd4849 OpenMP 'collapse' clause ignored in 'parallel for' directive    
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX /permissive /wd4804 /wd4996 /wd4849")
 else()
     # For GCC/Clang, use -Wall -Wextra -Wpedantic -Werror
-    target_compile_options(VERB4D_Solver PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror")
 endif()
-#target_compile_options(VERB4D_Solver PRIVATE -Wall -Wextra -Wpedantic -Werror)
 
 # Add directories for include files
 target_include_directories(VERB4D_Solver PUBLIC ${PROJECT_SOURCE_DIR}/src)
