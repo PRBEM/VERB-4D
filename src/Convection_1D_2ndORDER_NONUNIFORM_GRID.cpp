@@ -296,10 +296,18 @@ bool Convection_1D_2ndORDER_NONUNIFORM_GRID(
                 default:
                     Logger::error << "CONV_1D_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
             }
-            double psd_face_left = 0.0, psd_face_right = 0.0, courant_right = 0.0;
-            double velocity_right = 0.0, velocity_left = 0.0;
-            double grad_FR = 0.0, grad_R = 0.0, curv_R = 0.0;  
-            double dx_C = 0.0, dx_R = 0.0, dx_l, dx_r = 0.0, dx_fr = 0.0; 
+            // Already declared
+            // double psd_face_left = 0.0, psd_face_right = 0.0, courant_right = 0.0;
+            // double velocity_right = 0.0, velocity_left = 0.0;
+            // double grad_FR = 0.0, grad_R = 0.0, curv_R = 0.0;  
+            // double dx_C = 0.0, dx_R = 0.0, dx_l, dx_r = 0.0, dx_fr = 0.0; 
+            // double dx_ffl = 0.0, dx_fl = 0.0, dx_ffr = 0.0; 
+
+            psd_face_left = 0.0, psd_face_right = 0.0, courant_right = 0.0;
+            velocity_right = 0.0, velocity_left = 0.0;
+            grad_FR = 0.0, grad_R = 0.0, curv_R = 0.0;  
+            dx_C = 0.0, dx_R = 0.0, dx_r = 0.0, dx_fr = 0.0; 
+            double dx_l;
             double dx_ffl = 0.0, dx_fl = 0.0, dx_ffr = 0.0; 
 
             grad_FR = 1.0 / dx[0] * (PSD_unlimited_t[gst] - PSD_unlimited_t[gst-1]); 
