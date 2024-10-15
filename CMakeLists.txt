@@ -8,7 +8,7 @@ project(VERB4D C CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 # Enable/disable data assimilation
-set(DATA_ASSIMILATION ON CACHE BOOL "Enable data assimilation")
+set(DATA_ASSIMILATION FALSE CACHE BOOL "Enable data assimilation")
 
 # Math Constants are not defined in Standard C++. To use them, we must first define _USE_MATH_DEFINES
 add_compile_definitions(_USE_MATH_DEFINES)
