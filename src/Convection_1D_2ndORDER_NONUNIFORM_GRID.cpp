@@ -27,8 +27,11 @@ bool Convection_1D_2ndORDER_NONUNIFORM_GRID(
         const Matrix1D<double>& Ux,
         double dt_total)
 {
-    constexpr bool use_limiting      = false;
-    constexpr bool use_discriminator = false;
+    //constexpr bool use_limiting      = false;
+    //constexpr bool use_discriminator = false;
+    // Have to change to variable since the use_discriminator results in static evaluation. Since it is still in the code, it returns the warning. 
+    bool use_limiting      = false;
+    bool use_discriminator = false;
 
     Matrix1D<double> CourNum(x_size);   // Courant number on faces
     Matrix1D<double> dx(x_size);  	    // different spacing in log-grid
@@ -431,7 +434,8 @@ bool Convection_1D_2ndORDER_NONUNIFORM_GRID(
                 const double dif5 = (PSD_unlimited_U[2] - PSD_unlimited_U[1]) / dx_fl;
                 const double dif6 = (PSD_unlimited_U[3] - PSD_unlimited_U[2]) / dx_ffl;
                 
-                constexpr double treshhold = 0; // 1e-99;
+                //constexpr double treshhold = 0; // 1e-99;
+                const double treshhold = 0; // 1e-99;
 
                 // the discriminator - is there a realistic peak at one of the three points upwind, centre, downwind?
                 const bool peak_downwind = 
