@@ -1225,8 +1225,9 @@ int main(int argc, char *argv[])
             // Wait until the writing of the last output file is finished
             output_writer.wait();
 
-            // PSD_filename already defined
-            // std::ostringstream PSD_filename;
+            // Clear the stream
+            PSD_filename.str("");    // Clear content
+            PSD_filename.clear();    // Reset state flags
             PSD_filename << outputFolder << "PSD_" << std::setw(5) << std::setfill('0') << int(it / output_step);
 
             Logger::debug << std::endl
