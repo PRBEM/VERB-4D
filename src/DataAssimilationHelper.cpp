@@ -516,12 +516,12 @@ std::vector<std::vector<data_assimilation::Observations>> internal::interpolate(
             obs.R = R;
             obs.P = P;
             obs.PSD.AllocateMemory(nT);
-            int counter = 0;
+            int local_counter = 0;
             for (size_t instrumentIndex = 0; instrumentIndex < data.size(); instrumentIndex++) {
                 auto& instrumentData = data[instrumentIndex];
                 for (size_t it = 0; it < instrumentData.MLT.size_q1; ++it) {
                     auto PSD_in = instrumentData.PSD.xSlice(it);
-                    obs.PSD[counter++] = pow(10., interp2d_four_corners(
+                    obs.PSD[local_counter++] = pow(10., interp2d_four_corners(
                         log10(instrumentData.V.xSlice(it)),
                         K_in[instrumentIndex].xSlice(it),
                         log10(PSD_in),

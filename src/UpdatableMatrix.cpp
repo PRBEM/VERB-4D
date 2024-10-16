@@ -940,15 +940,15 @@ bool UpdatableListMatrix<MatrixND>::update(double current_time, const MatrixND& 
 				break;
 
 			case UpdatableListMatrix::MERGE_TYPE::MEAN:
-				MatrixND num_elements(*this);
-				num_elements = 0;
+				MatrixND local_num_elements(*this);
+				local_num_elements = 0;
 
 				for (d_it = 0; d_it < matricesList.size(); d_it++) {
 					(*this) += matricesList[d_it];
-					num_elements += matricesList[d_it].is_finite();
+					local_num_elements += matricesList[d_it].is_finite();
 				} 
 
-				(*this) = (*this).divide(num_elements);
+				(*this) = (*this).divide(local_num_elements);
 
 				break;
 		}
