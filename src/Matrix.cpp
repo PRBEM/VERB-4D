@@ -514,6 +514,18 @@ inline Matrix1D<T> Matrix1D<T>::sqrt () const {
 	return Tmp;
 }
 
+// Only if Matix1D is boolean, which should not be the case?
+template <>
+inline Matrix1D<bool> Matrix1D<bool>::is_finite() const {
+    size_t w;
+    Matrix1D<bool> Tmp(size_q1);
+    for (w = 0; w < this->size_q1; w++) {
+        // Boolean values are always finite, return true for all elements
+        Tmp[w] = true;
+    }
+    return Tmp;
+}
+
 /**
  * Returns a bool matrix if an element is finite
  */
@@ -1655,6 +1667,19 @@ inline Matrix2D<bool> Matrix2D<bool>::times (const Matrix2D<bool> &M) const {
 		Tmp.plane_array[i] = plane_array[i] && M.plane_array[i];
 	}
 	return Tmp;
+}
+
+// Only if Matix2D is boolean, which should not be the case?
+template <>
+inline Matrix2D<bool> Matrix2D<bool>::is_finite() const {
+    size_t w, x;
+    Matrix2D<bool> Tmp(size_q1, size_q2);
+    for (w = 0; w < this->size_q1; w++) {
+        for (x = 0; x < this->size_q2; x++) {
+            Tmp[w][x] = true;
+		}
+	}
+    return Tmp;
 }
 
 /**
@@ -4522,6 +4547,23 @@ inline Matrix4D<T> Matrix4D<T>::divide (const Matrix4D<T> &M) const {
 		Tmp.plane_array[i] = plane_array[i] / M.plane_array[i];
 	}
 	return Tmp;
+}
+
+// Only if Matix4D is boolean, which should not be the case?
+template <>
+inline Matrix4D<bool> Matrix4D<bool>::is_finite() const {
+    size_t w, x, y, z;
+    Matrix4D<bool> Tmp(size_w, size_x, size_y, size_z);
+    for (w = 0; w < this->size_w; w++) {
+        for (x = 0; x < this->size_x; x++) {
+            for (y = 0; y < this->size_y; y++) {
+                for (z = 0; z < this->size_z; z++) {
+                    Tmp[w][x][y][z] = true;
+                }
+            }
+        }
+    }
+    return Tmp;
 }
 
 /**
