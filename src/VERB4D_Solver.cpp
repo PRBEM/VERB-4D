@@ -121,6 +121,11 @@
 #include <string>
 #include <thread>
 
+// enable alternative tokens
+#ifdef _MSC_VER
+    #include<iso646.h>
+#endif
+
 #include "Convection_2D.h"
 #include "Convection_3D.h"
 #include "Diffusion_1D.h"

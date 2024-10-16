@@ -8,6 +8,11 @@
 #include "Parameters.h"
 #include "BoundaryConditionType.hpp"
 
+// enable alternative tokens
+#ifdef _MSC_VER
+    #include<iso646.h>
+#endif
+
 /** Constructor for Parameters: 
 * opens file and saves file to Parameters field 'parametersFile',
 * stores the char* arguments into a vector 'argv'

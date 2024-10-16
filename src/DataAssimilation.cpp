@@ -7,6 +7,11 @@
 #include "DataAssimilationHelper.h"
 #include "MatrixOperations.h"
 
+// enable alternative tokens
+#ifdef _MSC_VER
+    #include<iso646.h>
+#endif
+
 // namespace da = data_assimilation;
 
 data_assimilation::DataAssimilationManagerConvection::DataAssimilationManagerConvection(

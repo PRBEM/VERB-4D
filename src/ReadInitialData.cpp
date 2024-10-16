@@ -10,6 +10,12 @@
 #include "BoundaryConditionType.hpp"
 #include <filesystem>
 
+// enable alternative tokens
+#ifdef _MSC_VER
+    #include<iso646.h>
+#endif
+
+
 using namespace std;
 
 #if defined(_WIN32) || defined(_WIN64)
