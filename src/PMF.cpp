@@ -251,10 +251,10 @@ string generateProcessedMatFileInstrumentName(const string& instrument) {
         return "mageis";
     } else if (instrument_upper == "REPT") {
         return "rept";
-    } else if (instrument_upper == "RBSPICE-PROTON") {
-        return "rbspice-proton";
-    } else if (instrument_upper == "HOPE-PROTON") {
-        return "hope-proton";
+    } else if (instrument_upper == "RBSPICE-TOFXEH-L3") {
+        return "rbspice-tofxeh-l3";
+    } else if (instrument_upper == "HOPE-PROTON-L3") {
+        return "hope-proton-l3";
     } else if (instrument_upper == "MEPE-L3") {
         return "mepe-l3";
     } else if (instrument_upper == "MEPI-L3") {
