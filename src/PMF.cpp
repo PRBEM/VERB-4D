@@ -251,8 +251,16 @@ string generateProcessedMatFileInstrumentName(const string& instrument) {
         return "mageis";
     } else if (instrument_upper == "REPT") {
         return "rept";
+    } else if (instrument_upper == "RBSPICE-PROTON") {
+        return "rbspice-proton";
+    } else if (instrument_upper == "HOPE-PROTON") {
+        return "hope-proton";
     } else if (instrument_upper == "MEPE-L3") {
         return "mepe-l3";
+    } else if (instrument_upper == "MEPI-L3") {
+        return "mepi-l3";
+    } else if (instrument_upper == "LEPI-L3") {
+        return "lepi-l3";
     } else if (instrument_upper == "HEP-L3L") {
         return "hep-l3l";
     } else if (instrument_upper == "") {
@@ -566,7 +574,7 @@ MatrixType readOneProcessedMatFile(
     CustomDate timeStart, CustomDate timeEnd, const pmf::Parameters& parameters) {
     std::string filename = generateProcessedMatFileName(
         timeStart, timeEnd, parameters, name);
-
+    //std::cout << "filename: " << filename << std::endl; 
     string variableName = generateProcessedMatFileVariableName(name);
     ProcessedMatFile pmf(filename);
     MatArray array(pmf, variableName);
