@@ -184,7 +184,7 @@ void write_PSD_output(const IOMethod &io_method, const std::string &PSD_filename
         PSD.writeToLstFile(PSD_filename, io_method, time_string.str(), output_folder);
     }
 
-};
+}
 
 int main(int argc, char *argv[])
 {

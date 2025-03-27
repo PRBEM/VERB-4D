@@ -141,7 +141,7 @@ extern "C" {
 	//extern void sgesv_(int *,int *,float *,int *,int*, float *,int*,int*);
 	extern void dgbtrs_(char const* trans, long* m, long* kl, long* ku, long* nrhs, double* ab, long* ldab, long* ipiv, double* b, long* ldb, long* info);
 	extern void dgbtrf_(long* m, long* n, long* kl, long* ku, double* ab , long* ldab, long* ipiv, long* info );
-};
+}
 
 #endif
 

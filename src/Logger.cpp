@@ -158,7 +158,7 @@ int Logger::Streamer::StringBuffer::sync()
 			break;
 	}
 	return 0;
-};
+}
 
 Logger* Logger::sInstance = 0;
 Logger::DebugLevel Logger::mDebugLevel = Logger::DebugLevel::DEBUG_LEVEL_DEBUG;

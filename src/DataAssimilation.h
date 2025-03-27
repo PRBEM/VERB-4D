@@ -14,8 +14,11 @@
 
 #include "Matrix.h"
 #include "UpdatableMatrix.h"
-#include "PMF.h"
 #include "Parameters.h"
+
+#if (MATLAB_CAPABLE)
+#include "PMF.h"
+#endif
 
 using ParametersIni = ::Parameters;
 namespace data_assimilation {
@@ -48,6 +51,7 @@ public:
         const Matrix2D<double>& V, const Matrix2D<double>& K) = 0;
 };
 
+#if (MATLAB_CAPABLE)
 class DataServerDataSource : public DataSource {
 public:
     DataServerDataSource(const std::string& satellite_lst_file);
@@ -60,6 +64,7 @@ public:
 private:
     std::vector<pmf::Parameters> _dataParameters;
 };
+#endif
 
 class LocalFilesDataSource : public DataSource {
 public:
@@ -129,12 +134,12 @@ class DataAssimilationManagerConvection {
 
 Parameters readParameters(const std::string& filename);
 
-std::vector<std::vector<Observations>> getObservations(
-    double timeStart,
-    double timeEnd,
-    const Matrix2D<double>& V,
-    const Matrix2D<double>& K,
-    const std::vector<pmf::Parameters>& parameters);
+// std::vector<std::vector<Observations>> getObservations(
+//     double timeStart,
+//     double timeEnd,
+//     const Matrix2D<double>& V,
+//     const Matrix2D<double>& K,
+//     const std::vector<pmf::Parameters>& parameters);
 
 struct DebugOuput2D {
     Matrix2D<double> observations;
