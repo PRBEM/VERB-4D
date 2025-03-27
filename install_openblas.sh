@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 #openblas_branch="release-0.3.0"
 
 # create ~/.local/lib if it does not exist

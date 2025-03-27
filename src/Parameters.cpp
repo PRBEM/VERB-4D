@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2015 UCLA
+// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 /**
  * \file Parameters.cpp
  * \brief Holds the Parameters along with their corresponding file and arguments 

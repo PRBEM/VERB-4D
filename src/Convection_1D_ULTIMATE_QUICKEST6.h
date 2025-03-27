@@ -1,3 +1,10 @@
+/*
+ * SPDX-FileCopyrightText: 2015 UCLA
+ * SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 /**
 * \file Convection_1D_ULTIMATE_QUICKEST6.h
 *

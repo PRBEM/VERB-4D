@@ -1,3 +1,10 @@
+/*
+ * SPDX-FileCopyrightText: 2015 UCLA
+ * SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 /**
  * \file Interpolation.h
  * \brief Wrapper around interpolation library, interpolates values into new grid using MonotCubicInterpolator.cpp

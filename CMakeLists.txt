@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2015 UCLA
+# SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 # CMakeLists.txt
 # Buildsystem for VERB4D - See README.md for build instructions
 #

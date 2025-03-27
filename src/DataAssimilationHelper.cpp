@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 #include "DataAssimilationHelper.h"
 
 #include <algorithm>

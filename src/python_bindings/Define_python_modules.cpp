@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 #include "BoundaryConditionType.hpp"
 #include "Convection_2D.h"
 #include "Diffusion_2D.h"
