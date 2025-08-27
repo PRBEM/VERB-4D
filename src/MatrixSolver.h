@@ -31,8 +31,66 @@
 #include "Matrix.h"
 #include "BoundaryConditionType.hpp"
 
+/**
+ * @brief Adds boundary condition constraints to a diagonal matrix
+ * 
+ * @details This function modifies the coefficient matrix to enforce boundary conditions
+ * by setting appropriate matrix elements. It handles both Dirichlet (constant value)
+ * and Neumann (constant derivative) boundary conditions.
+ * 
+ * **Mathematical Implementation:**
+ * 
+ * For **ConstantValue** (Dirichlet): \f$ f_i = f_{BC} \f$
+ * - Matrix row becomes: [0, ..., 0, 1, 0, ..., 0] with 1 at position i
+ * 
+ * For **ConstantDerivative** (Neumann): \f$ \frac{\partial f}{\partial x}\big|_i = g_{BC} \f$
+ * - Finite difference: \f$ \frac{f_{i+1} - f_i}{\Delta x} = g_{BC} \f$
+ * - Matrix row becomes: [0, ..., 1/Δx, -1/Δx, 0, ...]
+ * 
+ * @param Matrix_A [in,out] Diagonal matrix to modify (coefficient matrix)
+ * @param type [in] Type of boundary condition to apply
+ * @param in [in] Matrix row index for the boundary point
+ * @param id1 [in] Relative index offset to neighboring point
+ * @param dh [in] Grid spacing for derivative calculations
+ * 
+ * @warning ConstantDerivative implementation only works correctly for zero derivative
+ */
 void AddBoundary(DiagMatrix &Matrix_A, BoundaryConditionType type, int in, int id1, double dh);
 
+/**
+ * @brief Adds boundary conditions for 1D problems
+ * 
+ * @details This function applies boundary conditions at the endpoints of a 1D domain
+ * by modifying the coefficient matrices. It handles both lower and upper boundaries
+ * and supports all boundary condition types.
+ * 
+ * **Boundary Detection:**
+ * - Lower boundary: ix == 0
+ * - Upper boundary: ix == x_size - 1
+ * - Interior points: no boundary conditions applied
+ * 
+ * **Matrix Modifications:**
+ * - **matr_A**: Coefficient matrix for implicit terms (modified for BC constraints)
+ * - **matr_C**: Constant term vector (set to boundary values)
+ * 
+ * **Mathematical Implementation:**
+ * 
+ * For each boundary point, the corresponding matrix row is replaced with
+ * the appropriate boundary condition constraint, and the RHS vector is
+ * set to the boundary value.
+ * 
+ * @param matr_A [in,out] Coefficient matrix for implicit terms
+ * @param matr_C [in,out] Constant term matrix (RHS contributions)
+ * @param x [in] Spatial coordinate array (size x_size)
+ * @param x_size [in] Number of grid points in x-direction
+ * @param x_LBC [in] Lower boundary condition value
+ * @param x_UBC [in] Upper boundary condition value
+ * @param x_LBC_type [in] Type of lower boundary condition
+ * @param x_UBC_type [in] Type of upper boundary condition
+ * @param ix [in] Current grid point index to check for boundary
+ * 
+ * @return true on successful application of boundary conditions
+ */
 bool AddBoundaries_1D(
 	CalculationMatrix &matr_A, CalculationMatrix &matr_C,
 	const Matrix1D<double> &x,
@@ -42,6 +100,52 @@ bool AddBoundaries_1D(
 	int ix
 );
 
+/**
+ * @brief Adds boundary conditions for 2D problems
+ * 
+ * @details This function applies boundary conditions at the boundaries of a 2D domain
+ * by modifying the coefficient matrices. It handles boundaries in both x and y directions
+ * and supports all boundary condition types.
+ * 
+ * **Boundary Detection:**
+ * - X-boundaries: ix == 0 (lower) or ix == x_size-1 (upper)
+ * - Y-boundaries: iy == 0 (lower) or iy == y_size-1 (upper)
+ * - Corner points: handled by the first applicable boundary condition
+ * - Interior points: no boundary conditions applied
+ * 
+ * **Matrix Modifications:**
+ * Similar to 1D case, but with 2D indexing and boundary value arrays.
+ * 
+ * **Boundary Value Arrays:**
+ * - x_LBC, x_UBC: Arrays of size y_size (values along y for x-boundaries)
+ * - y_LBC, y_UBC: Arrays of size x_size (values along x for y-boundaries)
+ * 
+ * **Mathematical Implementation:**
+ * 
+ * For 2D problems, boundary conditions are applied along entire boundary edges.
+ * The matrix row corresponding to each boundary point is replaced with the
+ * appropriate constraint equation.
+ * 
+ * @param matr_A [in,out] Coefficient matrix for implicit terms
+ * @param matr_C [in,out] Constant term matrix (RHS contributions)
+ * @param x [in] X-coordinate grid (x_size × y_size)
+ * @param y [in] Y-coordinate grid (x_size × y_size)
+ * @param x_size [in] Number of grid points in x-direction
+ * @param y_size [in] Number of grid points in y-direction
+ * @param x_LBC [in] Lower x boundary values (size y_size)
+ * @param x_UBC [in] Upper x boundary values (size y_size)
+ * @param y_LBC [in] Lower y boundary values (size x_size)
+ * @param y_UBC [in] Upper y boundary values (size x_size)
+ * @param x_LBC_type [in] Type of lower x boundary condition
+ * @param x_UBC_type [in] Type of upper x boundary condition
+ * @param y_LBC_type [in] Type of lower y boundary condition
+ * @param y_UBC_type [in] Type of upper y boundary condition
+ * @param ix [in] Current x grid index
+ * @param iy [in] Current y grid index
+ * @param in [in] Linear matrix index for point (ix, iy)
+ * 
+ * @return true on successful application of boundary conditions
+ */
 bool AddBoundaries_2D(
 	CalculationMatrix &matr_A, CalculationMatrix &matr_C,
 	const Matrix2D<double> &x, const Matrix2D<double> &y,
