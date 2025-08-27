@@ -8,6 +8,7 @@
 /out
 *.json
 /*build*
-docs/*
+docs/latex/*
+docs/html/*
 !docs/Doxyfile
 !docs/README.md
