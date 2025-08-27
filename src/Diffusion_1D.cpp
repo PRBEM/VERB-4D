@@ -14,32 +14,6 @@
 #include <iostream>
 
 
-/**
- * 1D Diffusion - returns true on successful completion
- *
- * Method:
- *
- * 1. Add boundary conditions
- *
- * 2. Add sources and losses
- *
- * 3. get the seond derivative approximation with diffusion coeficient SecondDerivativeApproximation_1D()
- *
- * 4. solve matrix with tridag()
- *
- * @param psd - phase space density
- * @param x - one dimensional slice 
- * @param x_size - size of slice
- * @param x_LBC - lower boundary condition for param x
- * @param x_UBC - upper boundary condition for param x
- * @param x_LBC_type - type of lower boundary condition for param x
- * @param x_UBC_type - type of upper boundary condition for param x
- * @param Dxx - 1D Diffusion matrix
- * @param G - 1D used for Jacobian to normalize matrix
- * @param Sources - matrix used for Sources
- * @param Losses - Matrix used for Losses (loss cone)
- * @param dt - change in time of single time step
- */
 bool Diffusion_1D(	
 		Matrix1D<double> &psd,
 		const Matrix1D<double>& x, int x_size,

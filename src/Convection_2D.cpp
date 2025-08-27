@@ -19,37 +19,6 @@
 
 using namespace std;
 
-/**
- * Calculation of 2D convection
- *
- * Uses Convection_1D_Ultimate_QUICKEST6.h for calculating P and R if either are of size > 3.
- *
- * All equations and formulas for these calculations can be found at http://www.hadian.ir/teaching/CompHydr/3.pdf .
- * Mostly coming from 3.5 Simplified Ultimate Quickest strategy from B.P Leonard the Ultimate conservative difference scheme.
- * In the source code mathematical equations are numbered corresponding to the numbering of equations found in the paper.
- * Refer to the equations/function in Convection_1D_Ultimate_QUICKEST6.h
- *
- * @param PSD_PR - Phase Space Density - P and R held constant
- * @param P - Time (magnetic local time) based on phi
- * @param R - radial distance
- * @param P_size - dimension of P
- * @param R_size - dimension of R
- * @param P_LBC - P lower boundary
- * @param P_UBC - P upper boundary
- * @param R_LBC - R lower boundary
- * @param R_UBC - R upper boundary
- * @param P_LBC_type - Type of boundary for p lower
- * @param P_UBC_type - Type of boundary for p upper
- * @param R_LBC_type - Type of boundary for r lower
- * @param R_UBC_type - Type of boundary for r upper
- * @param VP - Matrix of energy and time(phi)
- * @param VR - Matrix of energy and radial distance
- * @param Sources - Sources matrix
- * @param Losses - Losses matrix (loss cone)
- * @param dt_total - total time change
- * @param min_PSD - minimum value from the PSD matrix
- * @param min_V - minimum value for V from the
- */
 #ifdef SAVE_PSD_LOST_CONV
 bool Convection_2D(
     Matrix2D<double>& PSD_PR,
