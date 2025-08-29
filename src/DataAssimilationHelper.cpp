@@ -2,6 +2,15 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
+/**
+ * @file DataAssimilationHelper.cpp
+ * @brief Helper functions for data assimilation operations
+ * 
+ * This file contains utility functions for data assimilation including model matrix
+ * generation, data processing, interpolation, and observation space conversions.
+ */
+
+
 #include "DataAssimilationHelper.h"
 
 #include <algorithm>

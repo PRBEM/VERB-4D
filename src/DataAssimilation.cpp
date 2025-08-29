@@ -2,6 +2,10 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
+/**
+ * @file DataAssimilation.cpp
+**/
+
 #include "DataAssimilation.h"
 
 #include <omp.h>

@@ -3,6 +3,11 @@
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
+/**
+ * @file PMF.cpp
+ * @brief Processed MAT File (PMF) reader for satellite data
+ */
+
 #include "PMF.h"
 
 #include <iostream>
@@ -26,6 +31,11 @@ namespace pmf::internal {};
 using namespace pmf::internal;
 
 namespace pmf::internal {
+/**
+ * @brief Convert string to uppercase
+ * @param str Input string to convert
+ * @return Uppercase version of the input string
+ */
 string toupper(string str) {
     for (size_t i = 0; i < str.size(); ++i)
         str[i] = std::toupper(str[i]);
@@ -36,6 +46,12 @@ string toupper(string str) {
 
 namespace pmf::internal {
 
+/**
+ * @brief RAII wrapper for MATLAB MAT file operations
+ * 
+ * Provides automatic resource management for MAT file handles,
+ * ensuring proper cleanup when the object goes out of scope.
+ */
 class ProcessedMatFile {
     MATFile* file = NULL;
 
@@ -44,6 +60,10 @@ class ProcessedMatFile {
     ProcessedMatFile(const ProcessedMatFile&);
 
    public:
+    /**
+     * @brief Constructor that opens a MAT file for reading
+     * @param path2file Path to the MAT file to open
+     */
     ProcessedMatFile(std::string path2file) {
         file = matOpen(path2file.c_str(), "r");
         if (file == NULL) {
@@ -52,13 +72,26 @@ class ProcessedMatFile {
             exit(EXIT_FAILURE);
         }
     }
+    /**
+     * @brief Destructor that closes the MAT file
+     */
     ~ProcessedMatFile() {
         if (file != NULL) matClose(file);
     }
 
+    /**
+     * @brief Implicit conversion to MATFile pointer for MATLAB API calls
+     * @return Pointer to the underlying MATFile structure
+     */
     operator MATFile*() const { return file; }
 };
 
+/**
+ * @brief RAII wrapper for MATLAB mxArray operations
+ * 
+ * Provides automatic resource management for MATLAB arrays and
+ * conversion utilities to internal Matrix types.
+ */
 class MatArray {
     std::vector<mwSize> dims;
     mxArray* mx_arr = NULL;
@@ -70,17 +103,55 @@ class MatArray {
     MatArray(const MatArray&);
 
    public:
+    /**
+     * @brief Constructor that extracts array from MAT file
+     * @param pmf ProcessedMatFile containing the data
+     * @param arr_name Name of the array variable to extract
+     */
     MatArray(const ProcessedMatFile& pmf, const std::string& arr_name);
+    
+    /**
+     * @brief Destructor that cleans up MATLAB array memory
+     */
     ~MatArray() {
         if (mx_arr != NULL) mxDestroyArray(mx_arr);
     }
 
+    /**
+     * @brief Array element access operator
+     * @param i Linear index into the array
+     * @return Value at the specified index
+     */
     double operator[](int i) const { return *(elem + i); };
+    
+    /**
+     * @brief Get array dimensions
+     * @return Vector containing size of each dimension
+     */
     std::vector<int> size() const;
+    
+    /**
+     * @brief Get total number of elements
+     * @return Total array length (product of all dimensions)
+     */
     int length() const;
 
+    /**
+     * @brief Convert to 1D Matrix
+     * @return Matrix1D containing the array data
+     */
     Matrix1D<double> to_Matrix1D() const;
+    
+    /**
+     * @brief Convert to 2D Matrix
+     * @return Matrix2D containing the array data
+     */
     Matrix2D<double> to_Matrix2D() const;
+    
+    /**
+     * @brief Convert to 3D Matrix
+     * @return Matrix3D containing the array data
+     */
     Matrix3D<double> to_Matrix3D() const;
 };
 
@@ -181,18 +252,34 @@ Matrix3D<double> MatArray::to_Matrix3D() const {
     }
 }
 
+/**
+ * @brief Template function to cast MatArray to specific Matrix type
+ * @tparam MatrixType Target matrix type (Matrix1D, Matrix2D, or Matrix3D)
+ * @param array Source MatArray to convert
+ * @return Matrix of the specified type
+ */
 template <typename MatrixType>
 MatrixType cast_to(const MatArray&);
 
+/**
+ * @brief Specialization for Matrix1D conversion
+ */
 template <>
 Matrix1D<double> cast_to<Matrix1D<double>>(const MatArray& array) {
     return array.to_Matrix1D();
 }
 
+/**
+ * @brief Specialization for Matrix2D conversion
+ */
 template <>
 Matrix2D<double> cast_to<Matrix2D<double>>(const MatArray& array) {
     return array.to_Matrix2D();
 }
+
+/**
+ * @brief Specialization for Matrix3D conversion
+ */
 template <>
 Matrix3D<double> cast_to<Matrix3D<double>>(const MatArray& array) {
     return array.to_Matrix3D();
@@ -201,6 +288,11 @@ Matrix3D<double> cast_to<Matrix3D<double>>(const MatArray& array) {
 
 namespace pmf::internal {
 
+/**
+ * @brief Generate mission folder name for MAT file path
+ * @param mission Mission name (e.g., "RBSP", "ARASE")
+ * @return Uppercase mission folder name
+ */
 string generateProcessedMatFileMissionFolder(const string& mission) {
     string missionUpper = toupper(mission);
     if (missionUpper == "RBSP" || missionUpper == "ARASE") {
@@ -211,6 +303,11 @@ string generateProcessedMatFileMissionFolder(const string& mission) {
     }
 }
 
+/**
+ * @brief Generate satellite folder name for MAT file path
+ * @param satellite Satellite identifier (e.g., "RBSPA", "RBSPB", "ARASE")
+ * @return Lowercase satellite folder name
+ */
 string generateProcessedMatFileSatelliteFolder(const string& satellite) {
     string satellite_upper = toupper(satellite);
 
@@ -229,6 +326,11 @@ string generateProcessedMatFileSatelliteFolder(const string& satellite) {
     }
 }
 
+/**
+ * @brief Generate satellite name for MAT file naming
+ * @param satellite Satellite identifier (e.g., "RBSPA", "RBSPB", "ARASE")
+ * @return Lowercase satellite name for filename
+ */
 string generateProcessedMatFileSatelliteName(const string& satellite) {
     string satellite_upper = toupper(satellite);
 
@@ -247,6 +349,11 @@ string generateProcessedMatFileSatelliteName(const string& satellite) {
     }
 }
 
+/**
+ * @brief Generate instrument name for MAT file naming
+ * @param instrument Instrument identifier (e.g., "HOPE", "MAGEIS", "REPT")
+ * @return Lowercase instrument name for filename
+ */
 string generateProcessedMatFileInstrumentName(const string& instrument) {
     string instrument_upper = toupper(instrument);
 
@@ -277,6 +384,11 @@ string generateProcessedMatFileInstrumentName(const string& instrument) {
     }
 }
 
+/**
+ * @brief Generate variable suffix for MAT file naming
+ * @param name Variable name (e.g., "TIME", "MLT", "PSD")
+ * @return Appropriate suffix for the variable type
+ */
 string generateProcessedMatFileVariableSuffix(const string& name) {
     string name_upper = toupper(name);
     if (name_upper == "TIME") {
@@ -299,6 +411,11 @@ string generateProcessedMatFileVariableSuffix(const string& name) {
     }
 }
 
+/**
+ * @brief Generate magnetic field model name for MAT file naming
+ * @param mfm Magnetic field model enumeration value
+ * @return String representation of the magnetic field model
+ */
 string generateProcessedMatFileMagneticFieldModelName(pmf::MagneticFieldModel mfm) {
     switch (mfm) {
         case pmf::MagneticFieldModel::NoExtB:
@@ -322,6 +439,11 @@ string generateProcessedMatFileMagneticFieldModelName(pmf::MagneticFieldModel mf
     }
 }
 
+/**
+ * @brief Generate version name for MAT file naming
+ * @param version Data version enumeration value
+ * @return String representation of the data version
+ */
 string generateProcessedMatFileVersionName(pmf::DataVersion version) {
     switch (version) {
         case pmf::DataVersion::v4:
@@ -333,6 +455,14 @@ string generateProcessedMatFileVersionName(pmf::DataVersion version) {
     }
 }
 
+/**
+ * @brief Generate complete MAT file path
+ * @param timeStart Start time for data period
+ * @param timeEnd End time for data period
+ * @param parameters PMF parameters containing mission, satellite, instrument info
+ * @param name Variable name being requested
+ * @return Complete file path to the appropriate MAT file
+ */
 string generateProcessedMatFileName(
     CustomDate timeStart, CustomDate timeEnd, const pmf::Parameters& parameters,
     const string& name) {
@@ -369,6 +499,11 @@ string generateProcessedMatFileName(
     }
 }
 
+/**
+ * @brief Generate MATLAB variable name from request name
+ * @param name Requested variable name (e.g., "TIME", "MLT", "PSD")
+ * @return Actual variable name as stored in MAT file
+ */
 string generateProcessedMatFileVariableName(const string& name) {
     string name_upper = toupper(name);
     if (name_upper == "TIME") {
@@ -393,6 +528,11 @@ string generateProcessedMatFileVariableName(const string& name) {
     }
 }
 
+/**
+ * @brief Parse magnetic field model from string
+ * @param name String representation of magnetic field model
+ * @return MagneticFieldModel enumeration value
+ */
 pmf::MagneticFieldModel getMagneticFieldModel(const string& name) {
     if (name == "n4_4_NoExtB") {
         return pmf::MagneticFieldModel::NoExtB;
@@ -416,6 +556,11 @@ pmf::MagneticFieldModel getMagneticFieldModel(const string& name) {
     }
 }
 
+/**
+ * @brief Parse data version from string
+ * @param name String representation of data version
+ * @return DataVersion enumeration value
+ */
 pmf::DataVersion getPmfVersion(const string& name) {
     if (name == "ver4") {
         return pmf::DataVersion::v4;
@@ -427,6 +572,11 @@ pmf::DataVersion getPmfVersion(const string& name) {
     }
 }
 
+/**
+ * @brief Read PMF parameters for a single satellite from configuration file
+ * @param filename Path to parameter configuration file
+ * @return Parameters structure with satellite configuration
+ */
 pmf::Parameters readParameterOneSatellite(const string& filename) {
     pmf::Parameters result;
 
@@ -461,11 +611,24 @@ std::vector<pmf::Parameters> pmf::readParameters(const std::string& filename) {
 
 namespace pmf::internal {
 
+/**
+ * @brief Limit array data to specified time range
+ * @tparam MatrixType Type of matrix to limit (Matrix1D, Matrix2D, or Matrix3D)
+ * @param array Data array to limit
+ * @param time Time array corresponding to data
+ * @param timeStart Start time for filtering
+ * @param timeEnd End time for filtering
+ * @param memory_seconds Additional seconds to include before start time
+ * @return Matrix containing only data within the specified time range
+ */
 template <typename MatrixType>
 MatrixType limitWithTime(
     const MatrixType& array, const Matrix1D<double>& time,
     CustomDate timeStart, CustomDate timeEnd, uint32_t memory_seconds = 0);
 
+/**
+ * @brief Specialization for Matrix1D time limiting
+ */
 template <>
 Matrix1D<double> limitWithTime<Matrix1D<double>>(
     const Matrix1D<double>& array, const Matrix1D<double>& time,
@@ -500,6 +663,9 @@ Matrix1D<double> limitWithTime<Matrix1D<double>>(
     return result;
 }
 
+/**
+ * @brief Specialization for Matrix2D time limiting
+ */
 template <>
 Matrix2D<double> limitWithTime<Matrix2D<double>>(
     const Matrix2D<double>& array, const Matrix1D<double>& time,
@@ -536,6 +702,9 @@ Matrix2D<double> limitWithTime<Matrix2D<double>>(
     return result;
 }
 
+/**
+ * @brief Specialization for Matrix3D time limiting
+ */
 template <>
 Matrix3D<double> limitWithTime<Matrix3D<double>>(
     const Matrix3D<double>& array, const Matrix1D<double>& time,
@@ -573,6 +742,15 @@ Matrix3D<double> limitWithTime<Matrix3D<double>>(
     return result;
 }
 
+/**
+ * @brief Read data from a single processed MAT file
+ * @tparam MatrixType Type of matrix to return (Matrix1D, Matrix2D, or Matrix3D)
+ * @param name Variable name to read
+ * @param timeStart Start time for file selection
+ * @param timeEnd End time for file selection
+ * @param parameters PMF parameters for file path generation
+ * @return Matrix containing the requested data from the MAT file
+ */
 template <typename MatrixType>
 MatrixType readOneProcessedMatFile(
     const string& name,
@@ -587,6 +765,15 @@ MatrixType readOneProcessedMatFile(
     return result;
 }
 
+/**
+ * @brief Read data from multiple processed MAT files across time range
+ * @tparam MatrixType Type of matrix to return (Matrix1D, Matrix2D, or Matrix3D)
+ * @param name Variable name to read
+ * @param timeStart Start time for data extraction
+ * @param timeEnd End time for data extraction
+ * @param parameters PMF parameters for file path generation
+ * @return Matrix containing concatenated data from all relevant MAT files
+ */
 template <typename MatrixType>
 MatrixType readProcessedMatFiles(
     const string& name,
