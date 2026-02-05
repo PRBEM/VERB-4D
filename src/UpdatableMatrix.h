@@ -1,3 +1,10 @@
+/*
+ * SPDX-FileCopyrightText: 2015 UCLA
+ * SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 /**
  * \file UpdatableMatrix.h
  * \brief Same functionality as matrices found in Matrix.h but can also be updated from ini-files

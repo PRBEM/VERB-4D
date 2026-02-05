@@ -1,9 +1,14 @@
+// SPDX-FileCopyrightText: 2015 UCLA
+// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 /**
  * \file Parameters.cpp
- * \brief Holds the Parameters along with their corresponding file and arguments 
+ * \brief Implementation of parameter file parsing and command line argument handling
  *
- *  Created on: Nov 17, 2012
- *      Author: dimath
+ * Created on: Nov 17, 2012
+ * Author: dimath
  */
 #include "Parameters.h"
 #include "BoundaryConditionType.hpp"
@@ -34,20 +39,14 @@ Parameters::Parameters(std::string filename, int argc, char* argv[]) {
 	}
 }
 
-/// Destructor - tells this parameter to close its file
 Parameters::~Parameters() {
 	this->close();
 }
 
-/// close parameter file
 void Parameters::close() {
 	parametersFile.close();
 }
 
-/**
-* Finds the parameters with parameterName in parametersFile and saves it to argv
-* \param parameterName - name of parameter
-*/
 Parameters& Parameters::findParameter(std::string parameterName, std::string defaultValue) {
 
 	this->flush();
@@ -105,12 +104,6 @@ Parameters& Parameters::findParameter(std::string parameterName, std::string def
 }
 
 
-/**
-* Gets the value for a  parameters with parameterName and saves it into variable
-* \param parameterName - name of parameter
-* \param variable - variable for storing parameter
-* \param mustBeFound - if true and parameter not found, error is logged and function exited, default is false
-*/
 template <typename T>
 bool Parameters::getParameter(std::string parameterName, T &variable, bool mustBeFound) {
 
@@ -226,18 +219,17 @@ template bool Parameters::getParameter(std::string, DataAssimilationDataSource&,
 template bool Parameters::getParameter(std::string, Logger::DebugLevel&, bool);
 
 
-// helper functions to insensitive case compare two strings
 bool ichar_equals(char a, char b)
 {
     return std::tolower(static_cast<unsigned char>(a)) ==
            std::tolower(static_cast<unsigned char>(b));
 }
+
 bool iequals(const std::string& a, const std::string& b)
 {
     return std::equal(a.begin(), a.end(), b.begin(), b.end(), ichar_equals);
 }
 
-// helper functions to convert paramter strings into values
 template <typename T>
 void stringToValue(const std::string& parameter_value_string, T& variable) {
 	std::stringstream tmp(parameter_value_string);

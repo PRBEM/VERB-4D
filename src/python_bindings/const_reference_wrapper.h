@@ -1,3 +1,9 @@
+/*
+ * SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 #include <functional>
 
 template <typename T, typename R, typename... Args>

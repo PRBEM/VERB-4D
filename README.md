@@ -1,3 +1,10 @@
+<!--
+SPDX-FileCopyrightText: 2015 UCLA
+SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+
+SPDX-License-Identifier: BSD-3-Clause
+-->
+
 # VERB-4D solver
 Source code for the VERB-4D solver. Need to be used together with Matlab or Python setup scripts that
 create all necessary input. The main file is in `./src/VERB4D_Solver.cpp`

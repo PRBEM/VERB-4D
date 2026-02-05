@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2015 UCLA
+// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 /**
  *  \file UpdatableMatrix.cpp
  *
@@ -71,7 +76,7 @@ void MatrixAllocateMemory(Matrix4D<double> &M, int size_Q1, int size_Q2, int siz
 // Reading from a file
 
 /**
-* Reading from a file using Matrix1D::readFromFile(string filename, const Matrix1D< T > grid_x)
+* Reading from a file using `Matrix1D::readFromFile(string filename, const Matrix1D< T > grid_x)`
 *
 * Only using Q1
 */
@@ -81,7 +86,7 @@ void MatrixReadFromFile(Matrix1D<double> &M, string data_filename, const Matrix1
 	else
 		M.Matrix1D<double>::readFromFile(data_filename, Q1);
 }
-/**  Reading from a file using Matrix2D::readFromFile(string filename, const Matrix2D< T > grid_x,const Matrix2D< T > grid_y)
+/**  Reading from a file using `Matrix2D::readFromFile(string filename, const Matrix2D< T > grid_x,const Matrix2D< T > grid_y)`
 *
 * Only using Q1, Q2
 */
@@ -91,7 +96,7 @@ void MatrixReadFromFile(Matrix2D<double> &M, string data_filename, const Matrix2
 	else
 		M.Matrix2D<double>::readFromFile(data_filename, Q1, Q2);
 }
-/**  Reading from a file using Matrix3D::readFromFile(string filename, const Matrix3D< T > grid_x,const Matrix3D< T > grid_y, const Matrix3D< T > grid_z)
+/**  Reading from a file using `Matrix3D::readFromFile(string filename, const Matrix3D< T > grid_x,const Matrix3D< T > grid_y, const Matrix3D< T > grid_z)`
 *
 * Only using Q1, Q2, Q3
 */
@@ -107,7 +112,7 @@ void MatrixReadFromFile(Matrix3D<double> &M, string data_filename, const Matrix3
         exit(EXIT_FAILURE);
     }
 }
-/**  Reading from a file using Matrix4D::readFromFile(string filename, const Matrix4D< T > grid_w, const Matrix4D< T > grid_x,const Matrix4D< T > grid_y, const Matrix4D< T > grid_z)
+/**  Reading from a file using `Matrix4D::readFromFile(string filename, const Matrix4D< T > grid_w, const Matrix4D< T > grid_x,const Matrix4D< T > grid_y, const Matrix4D< T > grid_z)`
 *
 * Using Q1, Q2, Q3, Q4
 */

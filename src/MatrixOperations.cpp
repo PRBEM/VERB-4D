@@ -1,3 +1,17 @@
+// SPDX-FileCopyrightText: 2015 UCLA
+// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
+/**
+ * @file MatrixOperations.cpp
+ * @brief Matrix operations and linear algebra functions
+ * 
+ * This file provides comprehensive matrix operations including concatenation,
+ * arithmetic operations, comparison operators, logical operations, and
+ * linear algebra routines using LAPACK for high performance.
+ */
+
 #include <cmath>
 #include <functional>
 #include <iostream>

@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2015 UCLA
+// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 /**
  *
  *@mainpage Documentation for the VERB4D_SOLVER
@@ -184,7 +189,7 @@ void write_PSD_output(const IOMethod &io_method, const std::string &PSD_filename
         PSD.writeToLstFile(PSD_filename, io_method, time_string.str(), output_folder);
     }
 
-};
+}
 
 int main(int argc, char *argv[])
 {

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 # create a build folder and compile OpenBLAS
 #$openblas_branch = "release-0.3.0"
 

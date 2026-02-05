@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2015 UCLA
+// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 /**
  * \file Logger.cpp
  * \brief Logs the messages sent, including information, warnings, and errors
@@ -153,7 +158,7 @@ int Logger::Streamer::StringBuffer::sync()
 			break;
 	}
 	return 0;
-};
+}
 
 Logger* Logger::sInstance = 0;
 Logger::DebugLevel Logger::mDebugLevel = Logger::DebugLevel::DEBUG_LEVEL_DEBUG;

@@ -1,3 +1,10 @@
+/*
+ * SPDX-FileCopyrightText: 2015 UCLA
+ * SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 /** Matrix 1D, 2D, 3D and 4D and operations with them
  *
  * \file Matrix.h

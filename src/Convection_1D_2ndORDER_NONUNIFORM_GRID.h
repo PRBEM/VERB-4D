@@ -1,3 +1,10 @@
+/*
+ * SPDX-FileCopyrightText: 2015 UCLA
+ * SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 /**
 * \file Convection_1D_2ndORDER_NONUNIFORM_GRID.h
 *
@@ -26,14 +33,17 @@
 *
 * \f$ \phi_{i}^{n+1} - \phi_{i}^{n} = -c(\phi_{r}*\phi_{l}) \f$ where \f$ \phi_{r} \f$ and \f$ \phi_{l} \f$ refer to the right and left faces (between (i and i-1), and (i and i+1)) for PSD
 *
-* \param PSD - 1D matrix of phase space densities
-* \param PSDtimesLoss - 1D matrix of phase space densities times the Coulomb losses
-* \param x - matrix for determining step size dx = x[1] - x[0]
-* \param x_size - size of matrix x
-* \param x_LBC, x_UBC, _type - The upper and lower boundary conditions including the type of boundary condition
-* \param Ux - diffusion matrix
-* \param Sources - Sources matrix
-* \param Losses - Losses (loss cone)
+* @param PSD [in,out]  1D matrix of phase space densities
+* @param x [in] Const reference to the vector of grid points (non-uniform spacing allowed).
+* @param x_size [in] Number of grid points in the domain.
+* @param x_LBC [in] Value at the left boundary condition.
+* @param x_UBC [in] Value at the right boundary condition.
+* @param x_LBC_type [in] Type of boundary condition at the left boundary (e.g., Dirichlet, Neumann).
+* @param x_UBC_type [in] Type of boundary condition at the right boundary (e.g., Dirichlet, Neumann).
+* @param Ux [in] Const reference to the vector of convection velocities at each grid point.
+* @param dt_total [in] Total time step for the update.
+* 
+* @return true if the update was successful, false otherwise.
 */
 bool Convection_1D_2ndORDER_NONUNIFORM_GRID ( 
 		Matrix1D < double >& PSD,

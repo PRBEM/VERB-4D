@@ -1,3 +1,8 @@
+// SPDX-FileCopyrightText: 2015 UCLA
+// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
 /**
  * \file MatrixSolver.cpp
  *
@@ -38,8 +43,6 @@
 
 using namespace std;
 
-/** Supportive sub-function to add boundary conditions to model matrix
- */
 void AddBoundary(DiagMatrix &matr_A, BoundaryConditionType type, int in, int id1, double dh) 
 {
 	int id0 = 0;
@@ -56,11 +59,7 @@ void AddBoundary(DiagMatrix &matr_A, BoundaryConditionType type, int in, int id1
 	}
 }
 
-/**
-* Adds in the upper and lower boundaries for the 1D case when x is at first or last index
-* \param matr_A,B,C - calculation matrices
-* \param x_LBC, x_UBC, x_LBC_type, x_UBC_type  - predefined 1D boundaries/types
-*/
+
 bool AddBoundaries_1D(
 	CalculationMatrix &matr_A, CalculationMatrix &matr_C,
 	const Matrix1D<double> &x,
@@ -116,11 +115,6 @@ bool AddBoundaries_1D(
 }
 
 
-/**
-* Adds in the upper and lower boundaries for the 2D case when x or y is at first or last index
-* \param matr_A,B,C - calculation matrices
-* \param LBC, UBC for x and y - predefined 2D boundaries/types
-*/
 bool AddBoundaries_2D(
 		CalculationMatrix &matr_A, CalculationMatrix &matr_C,
 		const Matrix2D<double> &x, const Matrix2D<double> &y,

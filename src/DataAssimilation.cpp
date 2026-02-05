@@ -1,3 +1,11 @@
+// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+//
+// SPDX-License-Identifier: BSD-3-Clause
+
+/**
+ * @file DataAssimilation.cpp
+**/
+
 #include "DataAssimilation.h"
 
 #include <omp.h>
@@ -27,7 +35,11 @@ data_assimilation::DataAssimilationManagerConvection::DataAssimilationManagerCon
     if (_runDataAssimilation) {
 
         if (_assimilationParameters.dataSource == DataAssimilationDataSource::DataServer) {
+            #if (MATLAB_CAPABLE)
             _dataSource = std::make_unique<DataServerDataSource>(DataServerDataSource("satellite_data.lst"));
+            #else
+            throw std::invalid_argument("'data_source' was set to 'DataSever', but the solver is compiled without Matlab capabilities!");
+            #endif
         } else if (_assimilationParameters.dataSource == DataAssimilationDataSource::LocalFiles) {
             _dataSource = std::make_unique<LocalFilesDataSource>(LocalFilesDataSource("satellite_data.lst", P.size_q1, R.size_q2, V.size_q1, K.size_q2));
         } else {
@@ -125,30 +137,30 @@ void data_assimilation::DataAssimilationManagerConvection::assimilate(
     }
 }
 
-std::vector<std::vector<data_assimilation::Observations>> data_assimilation::getObservations(
-    double timeStart,
-    double timeEnd,
-    const Matrix2D<double>& V,
-    const Matrix2D<double>& K,
-    const std::vector<pmf::Parameters>& parameters) {
+// std::vector<std::vector<data_assimilation::Observations>> data_assimilation::getObservations(
+//     double timeStart,
+//     double timeEnd,
+//     const Matrix2D<double>& V,
+//     const Matrix2D<double>& K,
+//     const std::vector<pmf::Parameters>& parameters) {
 
-    std::vector<ProcessedMatFileData> pmfDataSplit;
-    for (auto par : parameters) {
-        ProcessedMatFileData one_instrument = internal::readData(timeStart, timeEnd, par);
-        if (one_instrument.MLT.initialized) {
-            // if MLT was initalized, all of the other variables are initialized
-            pmfDataSplit.push_back(one_instrument);
-        }
-    }
-    std::vector<std::vector<data_assimilation::Observations>> result;
-    if (pmfDataSplit.empty()) {
-        Logger::debug << "\tNo data found...\n";
-    } else {
-        Logger::debug << "\tDone reading Data. Interpolating...\n";
-        result = internal::interpolate(pmfDataSplit, V, K);
-    }
-    return result;
-}
+//     std::vector<ProcessedMatFileData> pmfDataSplit;
+//     for (auto par : parameters) {
+//         ProcessedMatFileData one_instrument = internal::readData(timeStart, timeEnd, par);
+//         if (one_instrument.MLT.initialized) {
+//             // if MLT was initalized, all of the other variables are initialized
+//             pmfDataSplit.push_back(one_instrument);
+//         }
+//     }
+//     std::vector<std::vector<data_assimilation::Observations>> result;
+//     if (pmfDataSplit.empty()) {
+//         Logger::debug << "\tNo data found...\n";
+//     } else {
+//         Logger::debug << "\tDone reading Data. Interpolating...\n";
+//         result = internal::interpolate(pmfDataSplit, V, K);
+//     }
+//     return result;
+// }
 
 data_assimilation::DebugOuput2D data_assimilation::runKalmanFilterConvection2D(
     Matrix2D<double> &forecast,
@@ -304,6 +316,8 @@ data_assimilation::Parameters data_assimilation::readParameters(const std::strin
     return result;
 }
 
+#if (MATLAB_CAPABLE)
+
 data_assimilation::DataServerDataSource::DataServerDataSource(const std::string& satellite_lst_file) {
     _dataParameters = pmf::readParameters(satellite_lst_file);
 };
@@ -325,6 +339,8 @@ Matrix4D<double> data_assimilation::DataServerDataSource::getObservations(
 
     return result;
 };
+
+#endif
 
 data_assimilation::LocalFilesDataSource::LocalFilesDataSource(const std::string& satellite_lst_file,
         size_t size_q1, size_t size_q2, size_t size_q3, size_t size_q4) {

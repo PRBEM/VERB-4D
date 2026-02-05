@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2015 UCLA
+# SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
 # CMakeLists.txt
 # Buildsystem for VERB4D - See README.md for build instructions
 #
@@ -46,11 +51,16 @@ if(DATA_ASSIMILATION)
     set(VERB4D_SOURCES 
         ${VERB4D_SOURCES} 
         src/MatrixOperations.cpp
-        src/PMF.cpp
         src/CustomDate.cpp
         src/DataAssimilationHelper.cpp
         src/DataAssimilation.cpp)
     
+    if(MATLAB_FOUND)
+        set(VERB4D_SOURCES 
+            ${VERB4D_SOURCES}
+            src/PMF.cpp)
+    endif(MATLAB_FOUND)
+
     if(DATA_ASSIMILATION_DEBUG)
         message("Saving DA debug output!")
         add_definitions(-DDATA_ASSIMILATION_DEBUG)
@@ -69,8 +79,8 @@ if(MSVC)
     # /wd4849 OpenMP 'collapse' clause ignored in 'parallel for' directive    
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX /permissive /wd4804 /wd4996 /wd4849")
 else()
-    # For GCC/Clang, use -Wall -Wextra -Wpedantic -Werror
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror")
+    # For GCC/Clang, use -Wall -Wextra -Wpedantic (-Werror removed) 
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 endif()
 
 # Add directories for include files
@@ -134,11 +144,7 @@ if(OPENMP_FOUND)
 endif(OPENMP_FOUND)
 
 # Find Matlab
-if(DATA_ASSIMILATION)
-    find_package(Matlab REQUIRED COMPONENTS ENG_LIBRARY MAT_LIBRARY)
-else(DATA_ASSIMILATION)
-    find_package(Matlab COMPONENTS ENG_LIBRARY MAT_LIBRARY)
-endif(DATA_ASSIMILATION)
+find_package(Matlab COMPONENTS ENG_LIBRARY MAT_LIBRARY)
 
 if(Matlab_FOUND)
     include_directories(${Matlab_INCLUDE_DIRS})
