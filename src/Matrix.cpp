@@ -231,6 +231,16 @@ Matrix1D<T>::Matrix1D( const Matrix1D<T> &M ) {
 	this->operator = (M);
 }
 
+template <class T>
+Matrix1D<T>::Matrix1D(size_t size_q1, const T *data) {
+    this->size_q1 = size_q1;
+    this->AllocateMemory(this->size_q1);
+
+    // fast values copying as a memory range
+    memcpy(matrix_array, data, this->size_q1 * sizeof(T));
+}
+
+
 /**
 * Destructor. Destruct the class.
 */
@@ -245,11 +255,11 @@ Matrix1D<T>::~Matrix1D() {
 * \param size_q1 - size x
 */
 template<class T>
-void Matrix1D<T>::AllocateMemory(size_t size_q1) {
-	this->size_q1 = size_q1;
-	num_elements = size_q1;
+void Matrix1D<T>::AllocateMemory(size_t local_size_q1) {
+	this->size_q1 = local_size_q1;
+	num_elements = local_size_q1;
 	// using inline template for memory allocation
-	matrix_array = matrix<T>(size_q1);
+	matrix_array = matrix<T>(local_size_q1);
 	plane_array = matrix_array;
 	initialized = true;
 }
@@ -350,7 +360,8 @@ inline Matrix1D<T>& Matrix1D<T>::operator= (const Matrix1D<T> &M) {
 * Matrix summation, result is stored into applied matrix (left hand side matrix)
 */
 template<class T>
-inline Matrix1D<T>& Matrix1D<T>::operator+= (const Matrix1D<T> &M) {
+template<class S>
+inline Matrix1D<T>& Matrix1D<T>::operator+= (const Matrix1D<S> &M) {
 	for (size_t i1 = 0; i1 < size_q1; i1++)
 		matrix_array[i1] += M.matrix_array[i1];
 	return *this;
@@ -373,6 +384,13 @@ template<class T>
 inline Matrix1D<T>& Matrix1D<T>::operator*= (const T Val) {
 	for (size_t i1 = 0; i1 < size_q1; i1++)
 		matrix_array[i1] *= Val;
+	return *this;
+}
+
+template<>
+inline Matrix1D<bool>& Matrix1D<bool>::operator*= (const bool Val) {
+	for (size_t i1 = 0; i1 < size_q1; i1++)
+		matrix_array[i1] = matrix_array[i1] && Val;
 	return *this;
 }
 
@@ -415,6 +433,14 @@ inline Matrix1D<T> Matrix1D<T>::operator* (const T Val) const {
 	return Tmp;
 }
 
+template<>
+inline Matrix1D<bool> Matrix1D<bool>::operator* (const bool Val) const {
+	Matrix1D<bool> Tmp(*this);
+	for (size_t i1 = 0; i1 < size_q1; i1++)
+		Tmp[i1] = matrix_array[i1] && Val;
+	return Tmp;
+}
+
 /**
 * Divide a matrix to a value Val.
 * Return new instance of class Matrix.#define DEBUG_MODE
@@ -442,10 +468,25 @@ inline Matrix1D<T> Matrix1D<T>::times (const Matrix1D<T> &M) const {
 	return Tmp;
 }
 
+template<>
+inline Matrix1D<bool> Matrix1D<bool>::times (const Matrix1D<bool> &M) const {
+	Matrix1D<bool> Tmp(size_q1);
+	for (size_t i1 = 0; i1 < size_q1; i1++)
+		Tmp[i1] = matrix_array[i1] && M.matrix_array[i1];
+	return Tmp;
+}
+
 template<class T>
 Matrix1D<T>& Matrix1D<T>::times_equal (const Matrix1D<T> &M) {
 	for (size_t i = 0; i < num_elements; i++)
 		plane_array[i] *= M.plane_array[i];
+	return *this;
+}
+
+template<>
+Matrix1D<bool>& Matrix1D<bool>::times_equal (const Matrix1D<bool> &M) {
+	for (size_t i = 0; i < num_elements; i++)
+		plane_array[i] = plane_array[i] && M.plane_array[i];
 	return *this;
 }
 /**
@@ -462,6 +503,43 @@ inline Matrix1D<T> Matrix1D<T>::divide (const Matrix1D<T> &M) const {
 }
 
 /**
+* Square root of vector
+*/
+template<class T>
+inline Matrix1D<T> Matrix1D<T>::sqrt () const {
+	Matrix1D<T> Tmp(size_q1);
+	for (size_t i1 = 0; i1 < size_q1; i1++) {
+		Tmp[i1] = std::sqrt(matrix_array[i1]);
+	}
+	return Tmp;
+}
+
+// Only if Matix1D is boolean, which should not be the case?
+template <>
+inline Matrix1D<bool> Matrix1D<bool>::is_finite() const {
+    size_t w;
+    Matrix1D<bool> Tmp(size_q1);
+    for (w = 0; w < this->size_q1; w++) {
+        // Boolean values are always finite, return true for all elements
+        Tmp[w] = true;
+    }
+    return Tmp;
+}
+
+/**
+ * Returns a bool matrix if an element is finite
+ */
+template <class T>
+inline Matrix1D<bool> Matrix1D<T>::is_finite() const {
+    size_t w;
+    Matrix1D<bool> Tmp(size_q1);
+    for (w = 0; w < this->size_q1; w++) {
+        Tmp[w] = std::isfinite(matrix_array[w]);
+    }
+    return Tmp;
+}
+
+/**
 * Norm of vector
 */
 template<class T>
@@ -470,7 +548,7 @@ inline T Matrix1D<T>::norm() const {
 	for (size_t i1 = 0; i1 < size_q1; i1++) {
 		res += matrix_array[i1] * matrix_array[i1];
 	}
-	return sqrt(res);
+	return std::sqrt(res);
 }
 
 /*
@@ -564,8 +642,6 @@ void Matrix1D<T>::readFromFile(const std::string& filename) {
 	}
 }
 
-
-
 /**
 * Function for reading from matlab file in 1-dimension
 * Will check the variables, order them in (P, R/L, V, K, Val) format and then set matrix_array to be the variable with the corresponding column number
@@ -597,7 +673,7 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 	const mxArray *fPtrY;    /* field pointer */
 	const mxArray *fPtrZ;    /* field pointer */
     size_t x; 			/* for index*/
-	const char* name;		/* for getting variable names */
+	const char* varname;		/* for getting variable names */
 	char nameTemp;		/* for getting variable names */
 	bool wReached = false;
 	bool xReached = false;
@@ -612,8 +688,8 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 
 	for (int i= 0; i < 3; i++)
 	{
-		aPtr = matGetNextVariableInfo(mfPtr, &name);
-		std::string temp = name;
+		aPtr = matGetNextVariableInfo(mfPtr, &varname);
+		std::string temp = varname;
 		if (temp.length() == 1)
 		{
 			nameTemp = temp[0];
@@ -641,10 +717,10 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 		{
 			case 'P':
 				wReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -664,15 +740,15 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'R':
 				xReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -692,15 +768,15 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'L':
 				xReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -721,15 +797,15 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'V':
 				yReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -749,15 +825,15 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'K':
 				zReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -777,15 +853,15 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			default:
 				defaultReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -805,7 +881,7 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 		}
@@ -912,7 +988,7 @@ void Matrix1D<T>::readFromFile(const std::string& filename, const Matrix1D<T>& g
 				input >> loaded_q1;
 				// check if grid is the same
 				if (fabs(log10(loaded_q1) - log10(grid_q1[i1])) > err) {
-					printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch.\nLoaded: %e\nGrid: %e\n", filename.c_str(), loaded_q1, grid_q1[i1]);
+					printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch.\nLoaded: %e\nGrid: %e\n", filename.c_str(), loaded_q1, (double) grid_q1[i1]);
 					exit(EXIT_FAILURE);
 				} else {
 					input >> matrix_array[i1];
@@ -965,7 +1041,7 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 	const mxArray *fPtrY;    /* field pointer */
 	const mxArray *fPtrZ;    /* field pointer */
 	size_t x;
-	const char* name;		/* for getting variable names */
+	const char* varname;		/* for getting variable names */
 	char nameTemp;		/* for getting variable names */
 	bool wReached = false;
 	[[maybe_unused]] bool xReached = false;
@@ -981,8 +1057,8 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 	for (int i= 0; i < 3; i++)
 	{
 
-		aPtr = matGetNextVariableInfo(mfPtr, &name);
-		std::string temp = name;
+		aPtr = matGetNextVariableInfo(mfPtr, &varname);
+		std::string temp = varname;
 		if (temp.length() == 1)
 		{
 			nameTemp = temp[0];
@@ -1010,10 +1086,10 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 		{
 			case 'P':
 				wReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -1033,15 +1109,15 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'R':
 				xReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -1061,15 +1137,15 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'L':
 				xReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -1090,15 +1166,15 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'V':
 				yReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -1118,15 +1194,15 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'K':
 				zReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -1146,15 +1222,15 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			default:
 				defaultReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -1174,7 +1250,7 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 		}
@@ -1200,7 +1276,7 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 	//sets the matrix array to be equal to an array of doubles
 	for (x = 0; x < size_q1; x++) {
 		if (fabs(log10(PtrX[x]) - log10(grid_x[x])) > err ) {
-		 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu].\nLoaded: %e\nGrid: %e\n", file.c_str(), x, PtrX[x], grid_x[x]);
+		 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu].\nLoaded: %e\nGrid: %e\n", file.c_str(), x, PtrX[x], (double) grid_x[x]);
 					//printf("grid error \n");
 					exit(EXIT_FAILURE);
 		}
@@ -1285,7 +1361,7 @@ void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>
 */
 template<class T>
 T Matrix1D<T>::min() const {
-	T tmp = 1e99;
+	T tmp = static_cast<T>(1e99);
 	for (size_t i1 = 0; i1 < size_q1; i1++) {
 		tmp = (tmp<matrix_array[i1])?tmp:matrix_array[i1];
 	}
@@ -1311,7 +1387,7 @@ T Matrix1D<T>::max() const {
 */
 template<class T>
 T Matrix1D<T>::maxabs() const {
-	T tmp = 0;
+	T tmp = -std::numeric_limits<T>::infinity();
 	for (size_t i1 = 0; i1 < size_q1; i1++) {
 		tmp = (tmp>fabs((double)matrix_array[i1]))?tmp:fabs((double)matrix_array[i1]);
 	}
@@ -1377,6 +1453,16 @@ Matrix2D<T>::Matrix2D( const Matrix2D<T> &M ) {
 	this->operator = (M);
 }
 
+template <class T>
+Matrix2D<T>::Matrix2D(const size_t *sizes, const T *data) {
+    size_q1 = sizes[0];
+    size_q2 = sizes[1];
+    AllocateMemory(size_q1, size_q2);
+
+    // fast values copying as a memory range
+    memcpy(plane_array, data, size_q2 * size_q1 * sizeof(T));
+}
+
 /**
 * Destructor.
 */
@@ -1392,12 +1478,12 @@ Matrix2D<T>::~Matrix2D() {
 * \param size_q2 - y size
 */
 template<class T>
-void Matrix2D<T>::AllocateMemory(size_t size_q1, size_t size_q2) {
-	this->size_q1 = size_q1;
-	this->size_q2 = size_q2;
-	num_elements = size_q1 * size_q2;
+void Matrix2D<T>::AllocateMemory(size_t local_size_q1, size_t local_size_q2) {
+	this->size_q1 = local_size_q1;
+	this->size_q2 = local_size_q2;
+	num_elements = local_size_q1 * local_size_q2;
 	// using matrix inline template to allocate memory
-	matrix_array = matrix<T>(size_q1, size_q2);
+	matrix_array = matrix<T>(local_size_q1, local_size_q2);
 	plane_array = matrix_array[0];
 	initialized = true;
 }
@@ -1460,7 +1546,8 @@ inline Matrix2D<T>& Matrix2D<T>::operator= (const T val) {
 * Matrix summation, result is stored into applied matrix (left hand side matrix)
 */
 template<class T>
-inline Matrix2D<T>& Matrix2D<T>::operator+= (const Matrix2D<T> &M) {
+template<class S>
+inline Matrix2D<T>& Matrix2D<T>::operator+= (const Matrix2D<S> &M) {
 	for(size_t i = 0; i < num_elements; i++)
 	{
 		plane_array[i] += M.plane_array[i];
@@ -1493,6 +1580,14 @@ inline Matrix2D<T>& Matrix2D<T>::operator*= (const T Val) {
 	return *this;
 }
 
+template<>
+inline Matrix2D<bool>& Matrix2D<bool>::operator*= (const bool Val) {
+	for(size_t i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = plane_array[i] && Val;
+	}
+	return *this;
+}
 
 /**
 * Multiply matrix to Val.
@@ -1505,6 +1600,16 @@ inline Matrix2D<T> Matrix2D<T>::operator* (const T Val) const {
 	for (size_t i = 0; i < num_elements; i++)
 	{
 		Tmp.plane_array[i] = plane_array[i] * Val;
+	}
+	return Tmp;
+}
+
+template<>
+inline Matrix2D<bool> Matrix2D<bool>::operator* (const bool Val) const {
+	Matrix2D<bool> Tmp(size_q1, size_q2);
+	for (size_t i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] && Val;
 	}
 	return Tmp;
 }
@@ -1554,6 +1659,43 @@ inline Matrix2D<T> Matrix2D<T>::times (const Matrix2D<T> &M) const {
 	return Tmp;
 }
 
+template<>
+inline Matrix2D<bool> Matrix2D<bool>::times (const Matrix2D<bool> &M) const {
+	Matrix2D<bool> Tmp(size_q1, size_q2);
+	for (size_t i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] && M.plane_array[i];
+	}
+	return Tmp;
+}
+
+// Only if Matix2D is boolean, which should not be the case?
+template <>
+inline Matrix2D<bool> Matrix2D<bool>::is_finite() const {
+    size_t w, x;
+    Matrix2D<bool> Tmp(size_q1, size_q2);
+    for (w = 0; w < this->size_q1; w++) {
+        for (x = 0; x < this->size_q2; x++) {
+            Tmp[w][x] = true;
+		}
+	}
+    return Tmp;
+}
+
+/**
+ * Returns a bool matrix if an element is finite
+ */
+template <class T>
+inline Matrix2D<bool> Matrix2D<T>::is_finite() const {
+    size_t w, x;
+    Matrix2D<bool> Tmp(size_q1, size_q2);
+    for (w = 0; w < this->size_q1; w++) {
+        for (x = 0; x < this->size_q2; x++) {
+            Tmp[w][x] = std::isfinite(matrix_array[w][x]);
+		}
+	}
+    return Tmp;
+}
 
 /**
 * Return maximum value of the 2d matrix.
@@ -1578,7 +1720,8 @@ T Matrix2D<T>::maxabs() const {
 	T tmp = 0;
 	for(size_t i = 0; i < num_elements; i++)
 	{
-		tmp = std::max(tmp, std::abs(plane_array[i]));
+		T current = std::abs(plane_array[i]);
+		tmp = std::max(tmp, current);
 	}
 	return tmp;
 }
@@ -1791,7 +1934,7 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file ,  int columnNumber
 	const mxArray *fPtrY;    /* field pointer */
 	const mxArray *fPtrZ;    /* field pointer */
 	size_t x, y;
-	const char* name;		/* for getting variable names */
+	const char* varname;		/* for getting variable names */
 	char nameTemp;		/* for getting variable names */
 
 	bool wReached = false;
@@ -1807,8 +1950,8 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file ,  int columnNumber
 
 	for (int i= 0; i < 3; i++)
 	{
-		aPtr = matGetNextVariableInfo(mfPtr, &name);
-		std::string temp = name;
+		aPtr = matGetNextVariableInfo(mfPtr, &varname);
+		std::string temp = varname;
 		if (temp.length() == 1)
 		{
 			nameTemp = temp[0];
@@ -1836,10 +1979,10 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file ,  int columnNumber
 		{
 			case 'P':
 				wReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -1859,15 +2002,15 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file ,  int columnNumber
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'R':
 				xReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -1887,15 +2030,15 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file ,  int columnNumber
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'L':
 				xReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -1916,15 +2059,15 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file ,  int columnNumber
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'V':
 				yReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -1944,15 +2087,15 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file ,  int columnNumber
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'K':
 				zReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -1972,15 +2115,15 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file ,  int columnNumber
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			default:
 				defaultReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -2000,7 +2143,7 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file ,  int columnNumber
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 		}
@@ -2110,7 +2253,7 @@ void Matrix2D<T>::readFromFile(const std::string& filename, const Matrix2D<T>& g
 					input >> loaded_x >> loaded_y;
 					// check if grid is the same
 					if (fabs(log10(loaded_x) - log10(grid_x[i1][i2])) > err || fabs(log10(loaded_y) - log10(grid_y[i1][i2])) > err) {
-						printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch.\nLoaded: %e, %e\nGrid: %e, %e\n", filename.c_str(), loaded_x, loaded_y, grid_x[i1][i2], grid_y[i1][i2]);
+						printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch.\nLoaded: %e, %e\nGrid: %e, %e\n", filename.c_str(), loaded_x, loaded_y, (double) grid_x[i1][i2], (double) grid_y[i1][i2]);
 						exit(EXIT_FAILURE);
 					} else {
 						input >> matrix_array[i1][i2];
@@ -2162,7 +2305,7 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 	const mxArray *fPtrY;    /* field pointer */
 	const mxArray *fPtrZ;    /* field pointer */
 	size_t x, y;
-	const char* name;		/* for getting variable names */
+	const char* varname;		/* for getting variable names */
 	char nameTemp;		/* for getting variable names */
 
 	bool wReached = false;
@@ -2179,8 +2322,8 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 	for (int i= 0; i < 3; i++)
 	{
 
-		aPtr = matGetNextVariableInfo(mfPtr, &name);
-		std::string temp = name;
+		aPtr = matGetNextVariableInfo(mfPtr, &varname);
+		std::string temp = varname;
 		if (temp.length() == 1)
 		{
 			nameTemp = temp[0];
@@ -2208,10 +2351,10 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 		{
 			case 'P':
 				wReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -2231,15 +2374,15 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'R':
 				xReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -2259,15 +2402,15 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'L':
 				xReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -2288,15 +2431,15 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'V':
 				yReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -2316,15 +2459,15 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'K':
 				zReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -2344,15 +2487,15 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			default:
 				defaultReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -2372,7 +2515,7 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 		}
@@ -2415,7 +2558,7 @@ void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>
 	for (x = 0; x < size_q1; x++) {
 		for (y = 0; y < size_q2; y++) {
 			if (fabs(log10(PtrX[y*(size_q1) +  x]) - log10(grid_x[x][y])) > err || fabs(log10(PtrY[ y*(size_q1) +  x]) - log10(grid_y[x][y])) > err) {
-			 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu].\nLoaded: %e, %e\nGrid: %e, %e\n", file.c_str(), x, y, PtrX[y*(size_q1) +  x],PtrY[ y*(size_q1) +  x], grid_x[x][y], grid_y[x][y]);
+			 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu].\nLoaded: %e, %e\nGrid: %e, %e\n", file.c_str(), x, y, PtrX[y*(size_q1) +  x],PtrY[ y*(size_q1) +  x], (double) grid_x[x][y], (double) grid_y[x][y]);
 						//printf("grid error \n");
 						exit(EXIT_FAILURE);
 			}
@@ -2542,12 +2685,12 @@ Matrix3D<T>::~Matrix3D() {
 * Allocating memory and filling it with zero-values.
 */
 template<class T>
-void Matrix3D<T>::AllocateMemory(size_t size_q1, size_t size_q2, size_t size_q3) {
-	this->size_q1 = size_q1;
-	this->size_q2 = size_q2;
-	this->size_q3 = size_q3;
-	num_elements = size_q1 * size_q2 * size_q3;
-	matrix_array = matrix<T>(size_q1, size_q2, size_q3);
+void Matrix3D<T>::AllocateMemory(size_t loca_size_q1, size_t loca_size_q2, size_t loca_size_q3) {
+	this->size_q1 = loca_size_q1;
+	this->size_q2 = loca_size_q2;
+	this->size_q3 = loca_size_q3;
+	num_elements = loca_size_q1 * loca_size_q2 * loca_size_q3;
+	matrix_array = matrix<T>(loca_size_q1, loca_size_q2, loca_size_q3);
 	plane_array = matrix_array[0][0];
 	initialized = true;
 #ifdef DEBUG_MODE
@@ -2676,7 +2819,8 @@ inline Matrix3D<T>& Matrix3D<T>::operator= (const T Val) {
 * Matrix summation, result is stored into applied matrix (left hand side matrix)
 */
 template<class T>
-inline Matrix3D<T>& Matrix3D<T>::operator+= (const Matrix3D<T> &M) {
+template<class S>
+inline Matrix3D<T>& Matrix3D<T>::operator+= (const Matrix3D<S> &M) {
 	for(size_t i = 0; i < num_elements; i++)
 	{
 		plane_array[i] += M.plane_array[i];
@@ -2767,6 +2911,36 @@ inline Matrix3D<T>& Matrix3D<T>::divide_equal (const Matrix3D<T> &M) {
 	}
 	return *this;
 }
+
+/**
+* Square root of matrix
+*/
+template<class T>
+inline Matrix3D<T> Matrix3D<T>::sqrt () const {
+	Matrix3D<T> Tmp(size_q1, size_q2, size_q3);
+	for (size_t i = 0; i < num_elements; i++) {
+		Tmp.plane_array[i] = std::sqrt(plane_array[i]);
+	}
+	return Tmp;
+}
+
+/**
+ * Returns a bool matrix if an element is present
+ */
+template <class T>
+inline Matrix3D<bool> Matrix3D<T>::is_finite() const {
+    size_t w, x, y;
+    Matrix3D<bool> Tmp(size_q1, size_q2, size_q3);
+    for (w = 0; w < this->size_q1; w++) {
+        for (x = 0; x < this->size_q2; x++) {
+            for (y = 0; y < this->size_q3; y++) {
+                Tmp[w][x][y] = std::isfinite(matrix_array[w][x][y]);
+            }
+        }
+    }
+    return Tmp;
+}
+
 
 /**
 * Add each element of the matrix to corresponds element of matrix M.
@@ -2978,7 +3152,7 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 	const mxArray *fPtrY;    /* field pointer */
 	const mxArray *fPtrZ;    /* field pointer */
     size_t x,y,z; 			/* for index*/
-	const char* name;		/* for getting variable names */
+	const char* varname;		/* for getting variable names */
 	char nameTemp;		/* for getting variable names */
 	bool wReached = false;
 	bool xReached = false;
@@ -2993,8 +3167,8 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 
 	for (int i= 0; i < 4; i++)
 	{
-		aPtr = matGetNextVariableInfo(mfPtr, &name);
-		std::string temp = name;
+		aPtr = matGetNextVariableInfo(mfPtr, &varname);
+		std::string temp = varname;
 		if (temp.length() == 1)
 		{
 			nameTemp = temp[0];
@@ -3022,10 +3196,10 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 		{
 			case 'P':
 				wReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -3045,15 +3219,15 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'R':
 				xReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -3073,15 +3247,15 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'L':
 				xReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -3102,15 +3276,15 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'V':
 				yReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -3130,15 +3304,15 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'K':
 				zReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -3158,15 +3332,15 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			default:
 				defaultReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -3186,7 +3360,7 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 		}
@@ -3305,7 +3479,7 @@ void Matrix3D<T>::readFromFile(const std::string& filename, const Matrix3D<T>& g
 						 input >> loaded_x >> loaded_y >> loaded_z;
 						 // check if grid is the same
 						 if (fabs(log10(loaded_x) - log10(grid_x[i1][i2][i3])) > err || fabs(log10(loaded_y) - log10(grid_y[i1][i2][i3])) > err || fabs(log10(loaded_z) - log10(grid_z[i1][i2][i3])) > err) {
-							printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", filename.c_str(), i1, i2, i3, loaded_x, loaded_y, loaded_z, grid_x[i1][i2][i3], grid_y[i1][i2][i3], grid_z[i1][i2][i3]);
+							printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", filename.c_str(), i1, i2, i3, loaded_x, loaded_y, loaded_z, (double) grid_x[i1][i2][i3], (double) grid_y[i1][i2][i3], (double) grid_z[i1][i2][i3]);
 							exit(EXIT_FAILURE);
 						} else {
 							input >> matrix_array[i1][i2][i3];
@@ -3361,7 +3535,7 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 	const mxArray *fPtrY;    /* field pointer */
 	const mxArray *fPtrZ;    /* field pointer */
     size_t x,y,z; 			/* for index*/
-	const char* name;		/* for getting variable names */
+	const char* varname;		/* for getting variable names */
 	char nameTemp;		/* for getting variable names */
 	[[maybe_unused]] bool wReached = false;
 	bool xReached = false;
@@ -3377,8 +3551,8 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 	for (int i= 0; i < 4; i++)
 	{
 
-		aPtr = matGetNextVariableInfo(mfPtr, &name);
-		std::string temp = name;
+		aPtr = matGetNextVariableInfo(mfPtr, &varname);
+		std::string temp = varname;
 		if (temp.length() == 1)
 		{
 			nameTemp = temp[0];
@@ -3406,10 +3580,10 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 		{
 			case 'P':
 				wReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -3429,15 +3603,15 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'R':
 				xReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -3457,15 +3631,15 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'L':
 				xReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -3486,15 +3660,15 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'V':
 				yReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -3514,15 +3688,15 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'K':
 				zReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -3542,15 +3716,15 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			default:
 				defaultReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -3570,7 +3744,7 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 		}
@@ -3598,7 +3772,7 @@ void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>
 		for (y = 0; y < size_q2; y++) {
 			for (z = 0; z < size_q3; z++) {
 				if (fabs(log10(PtrX[z*(size_q1 * size_q2) + y*(size_q1) +  x]) - log10(grid_x[x][y][z])) > err || fabs(log10(PtrY[z*(size_q1 * size_q2) + y*(size_q1) +  x]) - log10(grid_y[x][y][z])) > err || fabs(log10(PtrZ[z*(size_q1 * size_q2) + y*(size_q1) +  x]) - log10(grid_z[x][y][z])) > err) {
-				 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", file.c_str(), x, y, z, PtrX[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrY[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrZ[z*(size_q1 * size_q2) + y*(size_q1) +  x], grid_x[x][y][z], grid_y[x][y][z], grid_z[x][y][z]);
+				 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu].\nLoaded: %e, %e, %e\nGrid: %e, %e, %e\n", file.c_str(), x, y, z, PtrX[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrY[z*(size_q1 * size_q2) + y*(size_q1) +  x],PtrZ[z*(size_q1 * size_q2) + y*(size_q1) +  x], (double) grid_x[x][y][z], (double) grid_y[x][y][z], (double) grid_z[x][y][z]);
 							//printf("grid error \n");
 							exit(EXIT_FAILURE);
 				}
@@ -3689,15 +3863,15 @@ void Matrix3D<T>::readFromBinaryFile(const std::string& filename) {
 * WARNING: writing to 3D matlab array is not available at the moment
 */
 template<class T>
-void Matrix3D<T>::writeToAnyFile(const std::string& filename, const std::string& io_method, const std::string& info) const {
+void Matrix3D<T>::writeToAnyFile(const std::string& filename, const IOMethod& io_method, const std::string& info) const {
     std::string ext;
-    if (io_method.compare("ascii") == 0){
+    if (io_method == IOMethod::ASCII){
         ext = ".plt";
         writeToFile(filename + ext, info);
-    } else if (io_method.compare("binary") == 0) {
+    } else if (io_method == IOMethod::Binary) {
         ext = ".pltb";
         writeToBinaryFile(filename + ext);
-    } else if (io_method.compare("matlab") == 0) {
+    } else if (io_method == IOMethod::Matlab) {
         printf("Writing to 3D arrays to MATLAB filse is not available in the moment");
         //ext = ".mat";
         //writeToMatlabFile(filename + ext);
@@ -3711,15 +3885,15 @@ void Matrix3D<T>::writeToAnyFile(const std::string& filename, const std::string&
 * Read 3D data from .plt, .pltb or .mat files containing only one column
 */
 template<class T>
-void Matrix3D<T>::readFromAnyFile(const std::string& filename, const std::string& io_method) {
+void Matrix3D<T>::readFromAnyFile(const std::string& filename, const IOMethod& io_method) {
     std::string ext;
-    if (io_method.compare("ascii") == 0){
+    if (io_method == IOMethod::ASCII){
         ext = ".plt";
         readFromFile(filename + ext, 1);
-    } else if (io_method.compare("binary") == 0){
+    } else if (io_method == IOMethod::Binary){
         ext = ".pltb";
         readFromBinaryFile(filename + ext);
-    } else if (io_method.compare("matlab") == 0){
+    } else if (io_method == IOMethod::Matlab){
         ext = ".mat";
         readFromMatlabFile(filename + ext, 1);
     } else {
@@ -3733,15 +3907,15 @@ void Matrix3D<T>::readFromAnyFile(const std::string& filename, const std::string
 * WARNING: if io_method == "binary", .pltb file does not contain grid. In this case the function works the same as Matrix3D<T>::readFromAnyFile(std::string, std::string, int)
 */
 template<class T>
-void Matrix3D<T>::readFromAnyFile(const std::string& filename, const std::string& io_method, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3){
+void Matrix3D<T>::readFromAnyFile(const std::string& filename, const IOMethod& io_method, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3){
     std::string ext;
-    if (io_method.compare("ascii") == 0){
+    if (io_method == IOMethod::ASCII){
         ext = ".plt";
         readFromFile(filename + ext, grid_q1, grid_q2, grid_q3);
-    } else if (io_method.compare("binary") == 0) {
+    } else if (io_method == IOMethod::Binary) {
         ext = ".pltb";
         readFromBinaryFile(filename + ext);
-    } else if (io_method.compare("matlab") == 0) {
+    } else if (io_method == IOMethod::Matlab) {
         ext = ".mat";
         readFromMatlabFile(filename + ext, grid_q1, grid_q2, grid_q3);
     } else {
@@ -3798,6 +3972,19 @@ T Matrix3D<T>::maxabs() const {
 	for(size_t  i = 0; i < num_elements; i++)
 	{
 		tmp = std::max(tmp, std::abs(plane_array[i]));
+	}
+	return tmp;
+}
+
+/**
+* Return exp(matrix*multiplicator) of the 3d matrix.
+*/
+template<class T>
+Matrix3D<T> Matrix3D<T>::exp(double multiplicator) const {
+	Matrix3D<T> tmp(size_q1, size_q2, size_q3);
+	for(size_t i = 0; i < num_elements; i++)
+	{
+		tmp.plane_array[i] = std::exp(plane_array[i]*multiplicator);
 	}
 	return tmp;
 }
@@ -4153,7 +4340,8 @@ inline Matrix4D<T>& Matrix4D<T>::operator= (const T Val) {
 * Add each element of the current matrix by the corresponding element in M and return this matrix
 */
 template<class T>
-inline Matrix4D<T>& Matrix4D<T>::operator+= (const Matrix4D<T> &M) {
+template<class S>
+inline Matrix4D<T>& Matrix4D<T>::operator+= (const Matrix4D<S> &M) {
 	for(size_t i = 0; i < num_elements; i++)
 	{
 		plane_array[i] += M.plane_array[i];
@@ -4185,6 +4373,13 @@ inline Matrix4D<T>& Matrix4D<T>::operator*= (const T Val) {
 	return *this;
 }
 
+template<>
+inline Matrix4D<bool>& Matrix4D<bool>::operator*= (const bool Val) {
+	for(size_t i = 0; i < num_elements; i++)
+		plane_array[i] = plane_array[i] && Val;
+	return *this;
+}
+
 /**
 * Divide each element of the current matrix by Val and return this matrix
 */
@@ -4196,6 +4391,7 @@ inline Matrix4D<T>& Matrix4D<T>::operator/= (const T Val) {
 	}
 	return *this;
 }
+
 
 /**
 * Add each element of the current matrix by Val and return this matrix
@@ -4229,6 +4425,15 @@ inline Matrix4D<T>& Matrix4D<T>::times_equal (const Matrix4D<T> &M) {
 	for(size_t i = 0; i < num_elements; i++)
 	{
 		plane_array[i] *= M.plane_array[i];
+	}
+	return *this;
+}
+
+template<>
+inline Matrix4D<bool>& Matrix4D<bool>::times_equal (const Matrix4D<bool> &M) {
+	for(size_t i = 0; i < num_elements; i++)
+	{
+		plane_array[i] = plane_array[i] && M.plane_array[i];
 	}
 	return *this;
 }
@@ -4285,6 +4490,15 @@ inline Matrix4D<T> Matrix4D<T>::operator* (const T Val) const {
 	return Tmp;
 }
 
+template<>
+inline Matrix4D<bool> Matrix4D<bool>::operator* (const bool Val) const {
+	Matrix4D<bool> Tmp(size_w, size_x, size_y, size_z);
+	for(size_t i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] && Val;
+	}
+	return Tmp;
+}
 
 /**
 * Divide each element of the matrix by Val, save result to a new matrix.
@@ -4312,6 +4526,16 @@ inline Matrix4D<T> Matrix4D<T>::times (const Matrix4D<T> &M) const {
 	return Tmp;
 }
 
+template<>
+inline Matrix4D<bool> Matrix4D<bool>::times (const Matrix4D<bool> &M) const {
+	Matrix4D<bool> Tmp(size_w, size_x, size_y, size_z);
+	for(size_t i = 0; i < num_elements; i++)
+	{
+		Tmp.plane_array[i] = plane_array[i] && M.plane_array[i];
+	}
+	return Tmp;
+}
+
 /**
 * Divide each element of the current matrix by the corresponding element of matrix M and return new matrix
 */
@@ -4325,6 +4549,41 @@ inline Matrix4D<T> Matrix4D<T>::divide (const Matrix4D<T> &M) const {
 	return Tmp;
 }
 
+// Only if Matix4D is boolean, which should not be the case?
+template <>
+inline Matrix4D<bool> Matrix4D<bool>::is_finite() const {
+    size_t w, x, y, z;
+    Matrix4D<bool> Tmp(size_w, size_x, size_y, size_z);
+    for (w = 0; w < this->size_w; w++) {
+        for (x = 0; x < this->size_x; x++) {
+            for (y = 0; y < this->size_y; y++) {
+                for (z = 0; z < this->size_z; z++) {
+                    Tmp[w][x][y][z] = true;
+                }
+            }
+        }
+    }
+    return Tmp;
+}
+
+/**
+ * Returns a bool matrix if an element is present
+ */
+template <class T>
+inline Matrix4D<bool> Matrix4D<T>::is_finite() const {
+    size_t w, x, y, z;
+    Matrix4D<bool> Tmp(size_w, size_x, size_y, size_z);
+    for (w = 0; w < this->size_w; w++) {
+        for (x = 0; x < this->size_x; x++) {
+            for (y = 0; y < this->size_y; y++) {
+                for (z = 0; z < this->size_z; z++) {
+                    Tmp[w][x][y][z] = std::isfinite(matrix_array[w][x][y][z]);
+                }
+            }
+        }
+    }
+    return Tmp;
+}
 
 /**
 * Write matrix to file.
@@ -4776,7 +5035,7 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 	const mxArray *fPtrY;    /* field pointer */
 	const mxArray *fPtrZ;    /* field pointer */
     size_t w,x,y,z; 			/* for index*/
-	const char* name;		/* for getting variable names */
+	const char* varname;		/* for getting variable names */
 	char nameTemp;	/* for getting variable names */
 	bool wReached = false;	/* for checking which variables go to which coordinates */
 	bool xReached = false;	/* for checking which variables go to which coordinates */
@@ -4795,8 +5054,8 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 	for (int i= 0; i < 5; i++)
 	{
 		// get variable name
-		aPtr = matGetNextVariableInfo(mfPtr, &name);
-		std::string temp = name;
+		aPtr = matGetNextVariableInfo(mfPtr, &varname);
+		std::string temp = varname;
 		// If the name is one char long - match on that char
 		if (temp.length() == 1)
 	    {
@@ -4833,9 +5092,9 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				// coordinate w has been recorded
 				wReached = true;
 				// get variable
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				// if variable is matlab struct
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
@@ -4861,15 +5120,15 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'R':
 				rReached = true;
 				xReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -4888,14 +5147,14 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'L':
 				xReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -4914,14 +5173,14 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'V':
 				yReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -4940,14 +5199,14 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'K':
 				zReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -4966,14 +5225,14 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			default:
 				defaultReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -4992,7 +5251,7 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 		}
@@ -5168,7 +5427,7 @@ void Matrix4D<T>::readFromFile(const std::string& filename, const Matrix4D<T>& g
 							 input >> loaded_w >> loaded_x >> loaded_y >> loaded_z;
 							 // check if grid is the same
 							 if (fabs(log10(loaded_w) - log10(grid_w[w][x][y][z])) > err || fabs(log10(loaded_x) - log10(grid_x[w][x][y][z])) > err || fabs(log10(loaded_y) - log10(grid_y[w][x][y][z])) > err || fabs(log10(loaded_z) - log10(grid_z[w][x][y][z])) > err) {
-								printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu, %zu].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", filename.c_str(), w, x, y, z, loaded_w, loaded_x, loaded_y, loaded_z, grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
+								printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu, %zu].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", filename.c_str(), w, x, y, z, loaded_w, loaded_x, loaded_y, loaded_z, (double) grid_w[w][x][y][z], (double) grid_x[w][x][y][z], (double) grid_y[w][x][y][z], (double) grid_z[w][x][y][z]);
 								exit(EXIT_FAILURE);
 							} else {
 								input >> matrix_array[w][x][y][z];
@@ -5225,7 +5484,7 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>
 	const mxArray *fPtrY;    /* field pointer */
 	const mxArray *fPtrZ;    /* field pointer */
     size_t w,x,y,z; 			/* for index*/
-	const char* name;		/* for getting variable names */
+	const char* varname;		/* for getting variable names */
 	char nameTemp;	/* for getting variable names */
 	bool defaultReached = false;
 	bool rReached = false;
@@ -5239,8 +5498,8 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>
 
 	for (int i= 0; i < 5; i++)
 	{
-		aPtr = matGetNextVariableInfo(mfPtr, &name);
-		std::string temp = name;
+		aPtr = matGetNextVariableInfo(mfPtr, &varname);
+		std::string temp = varname;
 		if (temp.length() == 1)
 	    {
 	        nameTemp = temp[0];
@@ -5267,10 +5526,10 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>
 		switch (nameTemp)
 		{
 			case 'P':
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -5290,15 +5549,15 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'R':
 				rReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -5318,15 +5577,15 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'L':
 				lReached = true;
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -5345,14 +5604,14 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'V':
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -5372,14 +5631,14 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			case 'K':
-				aPtr = matGetVariable(mfPtr, name);
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -5399,16 +5658,16 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 			default:
 				defaultReached = true;
-				this->name = name;
-				aPtr = matGetVariable(mfPtr, name);
+				this->name = varname;
+				aPtr = matGetVariable(mfPtr, varname);
 				//printf("%s \n" , name );
 				if (aPtr == NULL) {
-  					printf("mxArray not found: %s\n", name);
+  					printf("mxArray not found: %s\n", varname);
 				}
 				if (mxGetClassID(aPtr) == mxSTRUCT_CLASS) {
 					if (mxGetFieldNumber(aPtr, field.c_str()) == -1) {
@@ -5428,7 +5687,7 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>
 				}
 				else
 				{
-					printf("%s is of unknown type\n", name);
+					printf("%s is of unknown type\n", varname);
 			    }
 				break;
 		}
@@ -5451,7 +5710,7 @@ void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>
 
 
 					if (fabs(log10(PtrW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_w[w][x][y][z])) > err || fabs(log10(PtrX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_x[w][x][y][z])) > err || fabs(log10(PtrY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_y[w][x][y][z])) > err || fabs(log10(PtrZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w]) - log10(grid_z[w][x][y][z])) > err) {
-					 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu, %zu].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", file.c_str(), w, x, y, z, PtrW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], PtrX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], grid_w[w][x][y][z], grid_x[w][x][y][z], grid_y[w][x][y][z], grid_z[w][x][y][z]);
+					 			printf("MATRIX_LOAD_GRID_ERR: Loading %s: grid mismatch [%zu, %zu, %zu, %zu].\nLoaded: %e, %e, %e, %e\nGrid: %e, %e, %e, %e\n", file.c_str(), w, x, y, z, PtrW[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], PtrX[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrY[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w],PtrZ[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w], (double) grid_w[w][x][y][z], (double) grid_x[w][x][y][z], (double) grid_y[w][x][y][z], (double) grid_z[w][x][y][z]);
 								exit(EXIT_FAILURE);
 					}
 					matrix_array[w][x][y][z] = PtrFinal[z*(size_x * size_y * size_w) + y*(size_x * size_w) +  x*(size_w) + w];
@@ -5505,15 +5764,15 @@ void Matrix4D<T>::writeToBinaryFile(const std::string& filename) const {
 * Write 4D data to .plt, .pltb or .mat files. No info is written for .pltb file
 */
 template<class T>
-void Matrix4D<T>::writeToAnyFile(const std::string& filename, const std::string& io_method, const std::string& info) const {
+void Matrix4D<T>::writeToAnyFile(const std::string& filename, const IOMethod& io_method, const std::string& info) const {
     std::string ext;
-    if (io_method.compare("ascii") == 0){
+    if (io_method == IOMethod::ASCII){
         ext = ".plt";
         writeToFile(filename + ext, info);
-    } else if (io_method.compare("binary") == 0) {
+    } else if (io_method == IOMethod::Binary) {
         ext = ".pltb";
         writeToBinaryFile(filename + ext);
-    } else if (io_method.compare("matlab") == 0) {
+    } else if (io_method == IOMethod::Matlab) {
         ext = ".mat";
         writeToMatlabFile(filename + ext, info);
     } else {
@@ -5523,13 +5782,13 @@ void Matrix4D<T>::writeToAnyFile(const std::string& filename, const std::string&
 }
 
 template<class T>
-std::string Matrix4D<T>::getExtByIoMethod(const std::string& io_method) const {
+std::string Matrix4D<T>::getExtByIoMethod(const IOMethod& io_method) const {
 	std::string ext;
-    if (io_method.compare("ascii") == 0){
+    if (io_method == IOMethod::ASCII){
         ext = ".plt";
-    } else if (io_method.compare("binary") == 0) {
+    } else if (io_method == IOMethod::Binary) {
         ext = ".pltb";
-    } else if (io_method.compare("matlab") == 0) {
+    } else if (io_method == IOMethod::Matlab) {
         ext = ".mat";
     } else {
         printf("IO error: unknown io_method");
@@ -5539,7 +5798,7 @@ std::string Matrix4D<T>::getExtByIoMethod(const std::string& io_method) const {
 }
 
 template<class T>
-void Matrix4D<T>::writeToLstFile(const std::string& filename, const std::string& io_method, const std::string& info, const std::string& output_folder) const {
+void Matrix4D<T>::writeToLstFile(const std::string& filename, const IOMethod& io_method, const std::string& info, const std::string& output_folder) const {
 	
 	std::string ext = getExtByIoMethod(io_method);
 	std::string full_filename = filename + ext;
@@ -5600,15 +5859,15 @@ void Matrix4D<T>::readFromBinaryFile(const std::string& filename) {
 * Read 4D data from .plt, .pltb or .mat files containing only one column
 */
 template<class T>
-void Matrix4D<T>::readFromAnyFile(const std::string& filename, const std::string& io_method) {
+void Matrix4D<T>::readFromAnyFile(const std::string& filename, const IOMethod& io_method) {
     std::string ext;
-    if (io_method.compare("ascii") == 0){
+    if (io_method == IOMethod::ASCII){
         ext = ".plt";
         readFromFile(filename + ext, 1);
-    } else if (io_method.compare("binary") == 0){
+    } else if (io_method == IOMethod::Binary){
         ext = ".pltb";
         readFromBinaryFile(filename + ext);
-    } else if (io_method.compare("matlab") == 0){
+    } else if (io_method == IOMethod::Matlab){
         ext = ".mat";
         readFromMatlabFile(filename + ext, 1);
     } else {
@@ -5622,15 +5881,15 @@ void Matrix4D<T>::readFromAnyFile(const std::string& filename, const std::string
 * WARNING: if io_method == "binary", .pltb file does not contain grid. In this case the function works the same as Matrix4D<T>::readFromAnyFile(std::string, std::string, int)
 */
 template<class T>
-void Matrix4D<T>::readFromAnyFile(const std::string& filename, const std::string& io_method, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z){
+void Matrix4D<T>::readFromAnyFile(const std::string& filename, const IOMethod& io_method, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z){
     std::string ext;
-    if (io_method.compare("ascii") == 0){
+    if (io_method == IOMethod::ASCII){
         ext = ".plt";
         readFromFile(filename + ext, grid_w, grid_x, grid_y, grid_z);
-    } else if (io_method.compare("binary") == 0) {
+    } else if (io_method == IOMethod::Binary) {
         ext = ".pltb";
         readFromBinaryFile(filename + ext);
-    } else if (io_method.compare("matlab") == 0) {
+    } else if (io_method == IOMethod::Matlab) {
         ext = ".mat";
         readFromMatlabFile(filename + ext, grid_w, grid_x, grid_y, grid_z);
     } else {
@@ -5685,10 +5944,20 @@ T Matrix4D<T>::max() const {
 */
 template<class T>
 T Matrix4D<T>::maxabs() const {
-	T tmp = 0;
+	T tmp = -std::numeric_limits<T>::infinity();;
 	for(size_t i = 0; i < num_elements; i++)
 	{
 		tmp = std::max(tmp, std::abs(plane_array[i]));
+	}
+	return tmp;
+}
+
+template<>
+bool Matrix4D<bool>::maxabs() const {
+	bool tmp = 0;
+	for(size_t i = 0; i < num_elements; i++)
+	{
+		tmp = std::max(tmp, plane_array[i]);
 	}
 	return tmp;
 }
@@ -6188,18 +6457,18 @@ CalculationMatrix::CalculationMatrix(int x_size, int y_size, int z_size, int n_o
 * Allocating memory for CalculationMatrix,
 * Setting the diagonals to be 0
 */
-void CalculationMatrix::Initialize(int x_size, int y_size, int z_size, int n_of_diags) {
+void CalculationMatrix::Initialize(int local_x_size, int loca_y_size, int loca_z_size, int n_of_diags) {
 	this->initialized = false;
-	this->x_size = x_size;
-	this->y_size = y_size;
-	this->total_size = x_size;
-	if (y_size > 0) this->total_size = this->total_size * y_size;
-	if (z_size > 0) this->total_size = this->total_size * z_size;
+	this->x_size = local_x_size;
+	this->y_size = loca_y_size;
+	this->total_size = local_x_size;
+	if (loca_y_size > 0) this->total_size = this->total_size * loca_y_size;
+	if (loca_z_size > 0) this->total_size = this->total_size * loca_z_size;
 
 	// initializing diagonals
 	int id;
 	// !!!	if (z_size > 0) { // means 3d
-	if (z_size > 1) { // means 3d
+	if (loca_z_size > 1) { // means 3d
 		for (int x = -n_of_diags; x <= n_of_diags; x++) {
 			for (int y = -n_of_diags; y <= n_of_diags; y++) {
 				for (int z = -n_of_diags; z <= n_of_diags; z++) {
@@ -6212,7 +6481,7 @@ void CalculationMatrix::Initialize(int x_size, int y_size, int z_size, int n_of_
 			}
 		}
 		// !!!	} else if (y_size > 0) {
-	} else if (y_size > 1) {
+	} else if (loca_y_size > 1) {
 		for (int x = -n_of_diags; x <= n_of_diags; x++) {
 			for (int y = -n_of_diags; y <= n_of_diags; y++) {
 				// calculating a diagonal number (id)
@@ -6223,7 +6492,7 @@ void CalculationMatrix::Initialize(int x_size, int y_size, int z_size, int n_of_
 			}
 		}
 		// !!!	} else if (x_size > 0) {
-	} else if (x_size > 1) {
+	} else if (local_x_size > 1) {
 		for (int x = -n_of_diags; x <= n_of_diags; x++) {
 			// calculating a diagonal number (id)
 			id = this->index1d(x);
@@ -6234,9 +6503,9 @@ void CalculationMatrix::Initialize(int x_size, int y_size, int z_size, int n_of_
 	}
 
 	// If im_size is not set, then it's 1d and ia_size should be zero for future
-	if (y_size == 0) this->x_size = 0;
+	if (loca_y_size == 0) this->x_size = 0;
 	// If il_size is not set, then it's 2d and im_size should be zero for future
-	if (z_size == 0) this->y_size = 0;
+	if (loca_z_size == 0) this->y_size = 0;
 
 	this->initialized = true;
 }
@@ -6244,7 +6513,7 @@ void CalculationMatrix::Initialize(int x_size, int y_size, int z_size, int n_of_
 /**
 * Function returns 1d index for 2D-3D arrays
 */
-int CalculationMatrix::index1d(int x, int y, int z) {
+int CalculationMatrix::index1d(int x, int y, int z) const {
 	return (z*y_size + y)*x_size + x;
 }
 
@@ -6281,14 +6550,23 @@ void CalculationMatrix::writeToFile(const std::string& filename) const {
 // Implementations
 //////////////////////////////////////////
 
-
-
-
-
 template class Matrix1D<double>;
 template class Matrix2D<double>;
 template class Matrix3D<double>;
 template class Matrix4D<double>;
+
+template class Matrix1D<bool>;
+template class Matrix2D<bool>;
+template class Matrix4D<bool>;
+
+template Matrix1D<double> &Matrix1D<double>::operator+=(const Matrix1D<double> &M);
+template Matrix1D<double> &Matrix1D<double>::operator+=(const Matrix1D<bool> &M);
+template Matrix2D<double> &Matrix2D<double>::operator+=(const Matrix2D<double> &M);
+template Matrix2D<double> &Matrix2D<double>::operator+=(const Matrix2D<bool> &M);
+template Matrix3D<double> &Matrix3D<double>::operator+=(const Matrix3D<double> &M);
+template Matrix3D<double> &Matrix3D<double>::operator+=(const Matrix3D<bool> &M);
+template Matrix4D<double> &Matrix4D<double>::operator+=(const Matrix4D<double> &M);
+template Matrix4D<double> &Matrix4D<double>::operator+=(const Matrix4D<bool> &M);
 
 #endif
 

@@ -9,8 +9,7 @@
  * \brief Matrix 1D, 2D, 3D and 4D and operations with them
  *
  */
-#ifndef matrix_array_MATRIX_H
-#define matrix_array_MATRIX_H
+#pragma once
 
 #include <assert.h>
 #include <string>
@@ -24,6 +23,7 @@
 #include <assert.h>
 #include <ctime>
 #include <algorithm>
+#include "Parameters.h"
 
 // Matlab library which will have to be linked at compile time
 // Usually found in matlabroot/extern/include where matlabroot is the result of typing the matlabroot command into matlab
@@ -48,10 +48,9 @@
 template <typename T>
 class Matrix1D {
 private:
-	T *plane_array = nullptr;
 	size_t num_elements = 0;
 public:
-
+	T *plane_array = nullptr;
 	T *matrix_array = nullptr;						///< Array to keep the values
 	bool initialized = false;						///< Flag, equal true if initialized
 	size_t size_q1 = 0;								///< size x
@@ -61,8 +60,9 @@ public:
 	Matrix1D() = default;
 	Matrix1D( size_t size_q1);
 	Matrix1D( const Matrix1D<T> &M );
+    Matrix1D<T>(size_t size_q1, const T* data);     // pybind is using this constructor
 	~Matrix1D();
-
+	
 	virtual void AllocateMemory( size_t size_q1 );
 
 	// Operators
@@ -75,7 +75,7 @@ public:
 
 	// unary
 	const Matrix1D& operator+() const { return *this; }						 ///< Return the matrix
-	const Matrix1D operator-() const { return ((*this)*(-1)); } 				///< Return the matrix with all values multiplied by -1
+	const Matrix1D operator-() const { return ((*this)*static_cast<T>(-1)); } 				///< Return the matrix with all values multiplied by -1
 
 	// The following operators modify the matrix they applied to
 	Matrix1D& operator= (const Matrix1D<T> &M);
@@ -85,7 +85,8 @@ public:
 	// I didn't have time yet to write these functions - these are matrix opearations
 	//Matrix1D& operator*= (const Matrix1D<T> &M); 					// reserved for something good
 	//Matrix1D& operator/= (const Matrix1D<T> &M); 					// reserved for something good
-	Matrix1D& operator+= (const Matrix1D<T> &M);
+	template <class S>
+	Matrix1D& operator+= (const Matrix1D<S> &M);
 	Matrix1D& operator-= (const Matrix1D<T> &M);
 	Matrix1D& operator*= (const T Val);
 	Matrix1D& operator/= (const T Val);
@@ -107,6 +108,8 @@ public:
 
 	Matrix1D times (const Matrix1D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
 	Matrix1D divide (const Matrix1D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
+	Matrix1D sqrt () const; 	                    				///< Arraywise square root sqrt(A), stores result in a new matrix
+	Matrix1D<bool> is_finite () const; 							    ///< Bool matrix reflecting if a 'real' element is present (not NAN) 
 
 	T dot (const Matrix1D<T> &M) const; 					///< Dot product
 	T norm () const; 					///< Norm
@@ -143,11 +146,11 @@ private:
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y] can be used.
 	/// Also, all rows saved in the memory one after another as a big array. So Matrix[x+x_size*y] can be also used.
 	T **matrix_array = nullptr;
-	T *plane_array = nullptr;
 	size_t num_elements = 0;
 public:
 	// const static int N_of_dimentions2 = 2;									///< Not used anywhere
 
+	T *plane_array = nullptr;
 	bool initialized = false;														///< Flag, equal true if initialized
 	size_t size_q1 = 0;															///< size x
 	size_t size_q2 = 0;															 ///< size_y
@@ -157,6 +160,7 @@ public:
 	Matrix2D() = default;
 	Matrix2D( const Matrix2D<T> &M );
 	Matrix2D( size_t size_q1, size_t size_q2 );
+    Matrix2D(const size_t* sizes, const T* data); 	// pybind is using this constructor
 	~Matrix2D();
 
 	virtual void AllocateMemory(size_t size_q1, size_t size_q2);
@@ -171,7 +175,7 @@ public:
 
 	// unary
 	const Matrix2D& operator+() const { return *this; } ///< unary : return the matrix
-	const Matrix2D operator-() const { return ((*this)*(-1)); } ///< unary : return the matrix with all values multiplied by -1
+	const Matrix2D operator-() const { return ((*this)*static_cast<T>(-1)); } ///< unary : return the matrix with all values multiplied by -1
 
 	// The following operators modify the matrix they applied to
 	Matrix2D& operator= (const Matrix2D<T> &M);
@@ -179,7 +183,8 @@ public:
 
 	//Matrix2D& operator*= (const Matrix2D<T> &M); 					// reserved for something good
 	//Matrix2D& operator/= (const Matrix2D<T> &M); 					// reserved for something good
-	Matrix2D& operator+= (const Matrix2D<T> &M);
+	template <class S>
+	Matrix2D& operator+= (const Matrix2D<S> &M);
 	Matrix2D& operator-= (const Matrix2D<T> &M);
 	Matrix2D& operator*= (const T Val);
 	//Matrix2D& operator/= (const T Val);
@@ -201,6 +206,7 @@ public:
 
 	Matrix2D times (const Matrix2D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
 	Matrix2D divide (const Matrix2D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
+	Matrix2D<bool> is_finite () const; 							    ///< Bool matrix reflecting if a 'real' element is present (not NAN) 
 
 	// Return corresponding index of 1d array
 	size_t index1d(size_t q1, size_t q2) const;
@@ -245,11 +251,11 @@ template <typename T>
 class Matrix3D {
 private:
 	/// Plane array of values. All rows saved in the memory one after anouther as a big array.
-	T *plane_array = nullptr;
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[x][y][z] can be used.
 	T ***matrix_array = nullptr;
 	size_t num_elements = 0;
 public:
+	T *plane_array = nullptr;
 	bool initialized = false;														///< Flag, equal true if initialized
 	size_t size_q1 = 0;															///< size x
 	size_t size_q2 = 0;															///< size y
@@ -284,7 +290,8 @@ public:
 
 	//Matrix3D& operator*= (const Matrix3D<T> &M); 					// reserved for something good
 	//Matrix3D& operator/= (const Matrix3D<T> &M); 					// reserved for something good
-	Matrix3D& operator+= (const Matrix3D<T> &M);
+	template <class S>
+	Matrix3D& operator+= (const Matrix3D<S> &M);
 	Matrix3D& operator-= (const Matrix3D<T> &M);
 	Matrix3D& operator*= (const T Val);
 	Matrix3D& operator/= (const T Val);
@@ -306,6 +313,8 @@ public:
 
 	Matrix3D times (const Matrix3D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
 	Matrix3D divide (const Matrix3D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
+	Matrix3D sqrt () const; 	                    				///< Arraywise square root sqrt(A), stores result in a new matrix
+	Matrix3D<bool> is_finite () const; 							    ///< Bool matrix reflecting if a 'real' element is present (not NAN) 
 
 	// Saving (loading) of a matrix into (from) file
 	virtual void writeToFile(const std::string& filename, const std::string& info = "") const; 										///< Save matrix to a file
@@ -320,9 +329,9 @@ public:
     virtual void writeToBinaryFile(const std::string& filename) const;
     virtual void readFromBinaryFile(const std::string& filename);
 
-    virtual void writeToAnyFile(const std::string& filename, const std::string& io_method, const std::string& info) const;
-    virtual void readFromAnyFile(const std::string& filename, const std::string& io_method);
-    virtual void readFromAnyFile(const std::string& filename, const std::string& io_method, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3);
+    virtual void writeToAnyFile(const std::string& filename, const IOMethod& io_method, const std::string& info) const;
+    virtual void readFromAnyFile(const std::string& filename, const IOMethod& io_method);
+    virtual void readFromAnyFile(const std::string& filename, const IOMethod& io_method, const Matrix3D<T>& grid_q1, const Matrix3D<T>& grid_q2, const Matrix3D<T>& grid_q3);
 
 	// Some other stuff
 	std::string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
@@ -333,6 +342,7 @@ public:
 	T max() const;
 	T maxabs() const;
 	Matrix3D<T> abs() const;
+	Matrix3D<T> exp(double multiplicator=1) const;
 	Matrix3D<T>& max_of(T val);
 
 	// slices - get 2D slice from 3D array
@@ -369,11 +379,11 @@ public:
 template <typename T> class Matrix4D {
 private:
 	/// Plane array of values. All rows saved in the memory one after anouther as a big array.
-	T *plane_array = nullptr;
 	/// Matrix array (array of links to other arrays). Final links pointed to the memory addresses of the plane array. Matrix[w][x][y][z] can be used.
 	T ****matrix_array = nullptr;
 	size_t num_elements = 0;
 public:
+	T *plane_array = nullptr;
 	bool initialized = false;														///< Flag, equal true if initialized
 	size_t size_w = 0;																///< size w
 	size_t size_x = 0;																///< size x
@@ -403,11 +413,12 @@ public:
 
 	// unary
 	const Matrix4D& operator+() const { return *this;}  ///< unary : return the matrix
-	const Matrix4D operator-() const { return ((*this)*(-1)); } ///< unary : return the matrix with all values multiplied by -1
+	const Matrix4D operator-() const { return ((*this)*static_cast<T>(-1)); } ///< unary : return the matrix with all values multiplied by -1
 
 	//Matrix4D& operator*= (const Matrix4D<T> &M); 					// reserved for something good
 	//Matrix4D& operator/= (const Matrix4D<T> &M); 					// reserved for something good
-	Matrix4D& operator+= (const Matrix4D<T> &M);
+	template <class S>
+	Matrix4D& operator+= (const Matrix4D<S> &M);
 	Matrix4D& operator-= (const Matrix4D<T> &M);
 	Matrix4D& operator*= (const T Val);
 	Matrix4D& operator/= (const T Val);
@@ -429,6 +440,7 @@ public:
 
 	Matrix4D times (const Matrix4D<T> &M) const; 					///< Arraywise multiplication (A.*B), stores result in a new matrix
 	Matrix4D divide (const Matrix4D<T> &M) const; 					///< Arraywise division (A./B), stores result in a new matrix
+	Matrix4D<bool> is_finite () const; 							    ///< Bool matrix reflecting if a 'real' element is present (not NAN) 
 
 	// Saving (loading) of a matrix into (from) file
 	virtual void writeToFile(const std::string& filename, const std::string& info = "") const;								///< Save matrix to a file
@@ -449,12 +461,12 @@ public:
     virtual void writeToBinaryFile(const std::string& filename) const;
     virtual void readFromBinaryFile(const std::string& filename);
 
-    virtual void writeToAnyFile(const std::string& filename, const std::string& io_method, const std::string& info) const;
-    virtual void readFromAnyFile(const std::string& filename, const std::string& io_method);
-    virtual void readFromAnyFile(const std::string& filename, const std::string& io_method, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z);
+    virtual void writeToAnyFile(const std::string& filename, const IOMethod& io_method, const std::string& info) const;
+    virtual void readFromAnyFile(const std::string& filename, const IOMethod& io_method);
+    virtual void readFromAnyFile(const std::string& filename, const IOMethod& io_method, const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z);
 
-	virtual std::string getExtByIoMethod(const std::string& io_method) const;
-	virtual void writeToLstFile(const std::string& filename, const std::string& io_method, const std::string& info, const std::string& output_folder) const;
+	virtual std::string getExtByIoMethod(const IOMethod& io_method) const;
+	virtual void writeToLstFile(const std::string& filename, const IOMethod& io_method, const std::string& info, const std::string& output_folder) const;
 
 	// Some other stuff
 	std::string change_ind;														///< Variables useful for tracking of changes (time of change can be stored here)
@@ -554,7 +566,7 @@ public:
 	void Initialize(int x_size, int y_size = 1, int z_size = 1, int n_of_diags = 1);
 
 	// Returns 1d index for multiple dimension array (2D or 3D)
-	int index1d(int x, int y = 0, int z = 0);
+	int index1d(int x, int y = 0, int z = 0) const;
 
 	// Save to a file
 	void writeToFile(const std::string& filename) const;
@@ -567,5 +579,3 @@ public:
 
 /// FUNCTION NOT IMPLEMENTED
 int index1d2(int x, int y = 0, int z = 0);
-
-#endif

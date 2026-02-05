@@ -10,6 +10,12 @@
 #include "BoundaryConditionType.hpp"
 #include <filesystem>
 
+// enable alternative tokens
+#ifdef _MSC_VER
+    #include<iso646.h>
+#endif
+
+
 using namespace std;
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -35,7 +41,7 @@ void AllocateMemory(Matrix4D<double> &PSD,
 		Matrix3D<double> &P_LBC, Matrix3D<double> &P_UBC, Matrix3D<double> &R_LBC, Matrix3D<double> &R_UBC, Matrix3D<double> &V_LBC, Matrix3D<double> &V_UBC, Matrix3D<double> &K_LBC, Matrix3D<double> &K_UBC, Matrix3D<double> &L_LBC, Matrix3D<double> &L_UBC,
 		Matrix4D<double> &DLL, Matrix4D<double> &DVV, Matrix4D<double> &DVK, Matrix4D<double> &DKK,
 		Matrix4D<double> &VP, Matrix4D<double> &VL,
-		Matrix4D<double> &G_local, Matrix4D<double> &G_radial, Matrix4D<double> &Sources, Matrix4D<double> &Losses, Matrix4D<double> &Losses_conv) {
+		Matrix4D<double> &G_local, Matrix4D<double> &G_radial, Matrix4D<double> &G_conv, Matrix4D<double> &Sources, Matrix4D<double> &Losses, Matrix4D<double> &Losses_conv) {
 
 
 	// Arrays initialization (memory)
@@ -63,6 +69,7 @@ void AllocateMemory(Matrix4D<double> &PSD,
 	//G_local.AllocateMemory(I_size, K_size); // I,K grid is always the same, so Jacobian is the same
 	G_local.AllocateMemory(P_size, R_size, V_size, K_size);
 	G_radial.AllocateMemory(P_size, R_size, V_size, K_size); // L-star is different for different P, I, K
+	G_conv.AllocateMemory(P_size, R_size, V_size, K_size);
 
 	P_LBC.AllocateMemory(R_size, V_size, K_size);
 	P_UBC.AllocateMemory(R_size, V_size, K_size);
@@ -106,6 +113,24 @@ void ReadBoundaryCondition(
 
 }
 
+bool does_file_exist(std::string file_name, IOMethod io_method) {
+	
+	std::string ext;
+
+	if (io_method == IOMethod::ASCII){
+        ext = ".plt";
+    } else if (io_method == IOMethod::Binary){
+        ext = ".pltb";
+    } else if (io_method == IOMethod::Matlab){
+        ext = ".mat";
+    } else {
+        printf("IO error: unknown io_method");
+        exit(EXIT_FAILURE);
+    }
+
+	return std::filesystem::exists(file_name + ext);
+}
+
 //bool ReadInitialData(string InputFolder,
 //		int &P_size, int &R_size, int &I_size, int &K_size, int &L_size,
 //		long int &it_total, double &dt, double &output_time, double &total_time, int &output_step) {
@@ -140,35 +165,43 @@ void ReadBoundaryCondition(
 * \param G_local, G_radial - Jacobians for normalizing data
 * \param Sources, Losses - matrices for calculating Sources and Losses(loss cone)
 */
-bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* argv[],
-		double &time_total, double &time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
-		string &inversion_method, string &include_boundary, string &Vl_BC_from_convection, string &Vu_BC_from_convection, string &io_method,
-		string &run_remapping, string &run_convection, string &run_radial_diffusion, string &run_local_diffusion, string &positive_PSD,
-		std::string &PSD0_io_method, std::string &PSD_time_to_lst,
-		Matrix4D<double> &PSD, Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V, Matrix4D<double> &K, 
-		UpdatableMatrix<Matrix4D<double>> &L, int &P_size, int &R_size, int &V_size, int &K_size, int &L_size,
-		Matrix3D<double> &PSD_l_P, Matrix3D<double> &PSD_u_P, 
-		UpdatableMatrix<Matrix3D<double>> &PSD_l_R, UpdatableMatrix<Matrix3D<double>> &PSD_u_R, 
-		UpdatableMatrix<Matrix3D<double>> &PSD_l_V, UpdatableMatrix<Matrix3D<double>> &PSD_u_V, 
-		UpdatableMatrix<Matrix3D<double>> &PSD_l_K, UpdatableMatrix<Matrix3D<double>> &PSD_u_K, 
-		UpdatableMatrix<Matrix3D<double>> &PSD_l_L, UpdatableMatrix<Matrix3D<double>> &PSD_u_L,
-		BoundaryConditionType &Pl_BC_type, BoundaryConditionType &Pu_BC_type, 
-		BoundaryConditionType &Rl_BC_type, BoundaryConditionType &Ru_BC_type, 
-		BoundaryConditionType &Vl_BC_type, BoundaryConditionType &Vu_BC_type, 
-		BoundaryConditionType &Kl_BC_type, BoundaryConditionType &Ku_BC_type, 
-		BoundaryConditionType &Ll_BC_type, BoundaryConditionType &Lu_BC_type,
-		UpdatableListMatrix<Matrix4D<double>> &DLL, UpdatableListMatrix<Matrix4D<double>> &DVV, 
-		UpdatableListMatrix<Matrix4D<double>> &DKK, UpdatableListMatrix<Matrix4D<double>> &DVK,
-		UpdatableMatrix<Matrix4D<double>> &VP, UpdatableMatrix<Matrix4D<double>> &VL,
-		UpdatableMatrix<Matrix4D<double>> &G_local, UpdatableMatrix<Matrix4D<double>> &G_radial,
-		UpdatableListMatrix<Matrix4D<double>> &Sources, 
-		UpdatableListMatrix<Matrix4D<double>> &Losses, 
-		UpdatableListMatrix<Matrix4D<double>> &Losses_conv) {
-
+bool ReadInitialData(bool &minimal_output, string &InputFolder, string &OutputFolder, int argc, char* argv[],
+	double &time_total, double &time_step, double &diffusion_sub_time_step, double &time_output, double &time_first, long int &it_first, int &max_threads,
+	InversionMethod &inversion_method, IOMethod &io_method, IOMethod &PSD0_io_method, DensitySaturation &density_saturation,
+	bool &include_boundary, bool &Vl_BC_from_convection, bool &Vu_BC_from_convection, bool &run_remapping,
+	bool &run_convection, bool &run_radial_diffusion, bool &run_local_diffusion, bool &run_coulomb_collision, bool &positive_PSD, bool &PSD_time_to_lst,
+	Matrix4D<double> &PSD,
+	Matrix4D<double> &P, Matrix4D<double> &R, Matrix4D<double> &V, Matrix4D<double> &K, UpdatableMatrix < Matrix4D<double> > &L,
+	int &P_size, int &R_size, int &V_size, int &K_size, int &L_size,
+	Matrix3D<double> &PSD_l_P, Matrix3D<double> &PSD_u_P, 
+	UpdatableMatrix<Matrix3D<double>> &PSD_l_R, UpdatableMatrix<Matrix3D<double>> &PSD_u_R, 
+	UpdatableMatrix<Matrix3D<double>> &PSD_l_V, UpdatableMatrix<Matrix3D<double>> &PSD_u_V, 
+	UpdatableMatrix<Matrix3D<double>> &PSD_l_K, UpdatableMatrix<Matrix3D<double>> &PSD_u_K, 
+	UpdatableMatrix<Matrix3D<double>> &PSD_l_L, UpdatableMatrix<Matrix3D<double>> &PSD_u_L,
+	BoundaryConditionType &Pl_BC_type, BoundaryConditionType &Pu_BC_type, 
+	BoundaryConditionType &Rl_BC_type, BoundaryConditionType &Ru_BC_type, 
+	BoundaryConditionType &Vl_BC_type, BoundaryConditionType &Vu_BC_type, 
+	BoundaryConditionType &Kl_BC_type, BoundaryConditionType &Ku_BC_type, 
+	BoundaryConditionType &Ll_BC_type, BoundaryConditionType &Lu_BC_type,
+	UpdatableListMatrix<Matrix4D<double>> &DLL, UpdatableListMatrix<Matrix4D<double>> &DVV, 
+	UpdatableListMatrix<Matrix4D<double>> &DKK, UpdatableListMatrix<Matrix4D<double>> &DVK,
+	UpdatableMatrix<Matrix4D<double>> &VP, UpdatableMatrix<Matrix4D<double>> &VL, UpdatableMatrix<Matrix4D<double>> &VV,
+	UpdatableMatrix<Matrix4D<double>> &G_local, UpdatableMatrix<Matrix4D<double>> &G_radial, UpdatableMatrix<Matrix4D<double>> &G_conv,
+	UpdatableListMatrix<Matrix4D<double>> &Sources, UpdatableListMatrix<Matrix4D<double>> &Losses_local,
+	UpdatableListMatrix<Matrix4D<double>> &Losses_radial, UpdatableListMatrix<Matrix4D<double>> &Losses_conv,
+	Matrix4D<double> &SaturationDensity, Matrix4D<double> &SaturationTimescale
+) {
 	Parameters parameters("parameters.ini", argc, argv);
 
+	Logger::message << std::endl;
+	Logger::writeSeparator();
+	Logger::message << std::setw(59) << "General Parameters" << std::endl;
+	Logger::writeSeparator();
+
+	parameters.getParameter("minimal_output", minimal_output);
 	parameters.getParameter("time_total", time_total);
 	parameters.getParameter("time_step", time_step);
+	if (not parameters.getParameter("diffusion_sub_time_step", diffusion_sub_time_step)) diffusion_sub_time_step = time_step;
 	parameters.getParameter("time_output", time_output);
 	parameters.getParameter("max_threads", max_threads);
 
@@ -190,25 +223,28 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	parameters.getParameter("run_convection", run_convection);
 	parameters.getParameter("run_radial_diffusion", run_radial_diffusion);
 	parameters.getParameter("run_local_diffusion", run_local_diffusion);
+	parameters.getParameter("run_coulomb_collision", run_coulomb_collision);
     parameters.getParameter("positive_PSD", positive_PSD);
 
 	parameters.getParameter("PSD0_io_method", PSD0_io_method);	
 	parameters.getParameter("PSD_time_to_lst", PSD_time_to_lst);	
 
+    parameters.getParameter("density_saturation", density_saturation);
+
     string initial_PSD = "PSD0";
     parameters.findParameter("initial_PSD", "PSD0") >> initial_PSD;
 
     // NOTE: this option is left only for backward compatibility of the code and is excessive
-    string use_matlab = "false";
+    bool use_matlab = false;
     parameters.getParameter("use_matlab", use_matlab);
 
-    if (use_matlab == "true"){
-        io_method = "matlab";
+    if (use_matlab){
+        io_method = IOMethod::Matlab;
     }
 
 #if !(MATLAB_CAPABLE)
 {
-	if (io_method.compare("matlab") == 0){
+	if (io_method == IOMethod::Matlab){
         printf("Error! Trying to use matlab files but the executable was compiled without matlab capabilities.");
         exit(EXIT_FAILURE);
 	}
@@ -240,7 +276,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 			P_size, R_size, V_size, K_size,
 			PSD_l_P, PSD_u_P, PSD_l_R, PSD_u_R, PSD_l_V, PSD_u_V, PSD_l_K, PSD_u_K, PSD_l_L, PSD_u_L,
 			DLL, DVV, DVK, DKK,	VP, VL,
-			G_local, G_radial, Sources, Losses, Losses_conv
+			G_local, G_radial, G_conv, Sources, Losses_local, Losses_conv
 		);
 		Logger::message << "P_size = " << P_size << ", R_size = " << R_size << ", V_size = " << V_size << ", K_size = " << K_size << endl;
 		double* grid_pointers[]{&P[0][0][0][0], &R[0][0][0][0], &V[0][0][0][0], &K[0][0][0][0]};
@@ -279,8 +315,6 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		while(inBuf.substr(inBuf.size() - 1).compare("L") && !input.eof()) getline(input, inBuf, '=');
 		input >> P_size;
 
-
-
 		// If the file doesn't have data send error message
 		if (input.eof()) {
 			Logger::warning << "Grid file error." << endl;
@@ -303,7 +337,7 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 				PSD_l_P, PSD_u_P, PSD_l_R, PSD_u_R, PSD_l_V, PSD_u_V, PSD_l_K, PSD_u_K, PSD_l_L, PSD_u_L,
 				DLL, DVV, DVK, DKK,
 				VP, VL,
-				G_local, G_radial, Sources, Losses, Losses_conv);
+				G_local, G_radial, G_conv, Sources, Losses_local, Losses_conv);
 
 		// Read grid from .plt file only
 		P.readFromFile(InputFolder + "grid.plt",  1);
@@ -312,6 +346,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		K.readFromFile(InputFolder + "grid.plt",  4);
 	}
 
+	Logger::message << std::endl;
+	Logger::writeSeparator();
+	Logger::message << std::setw(66) << "Lstar and diffusion coefficients" << std::endl;
+	Logger::writeSeparator();
+
     // Read from Lstar file if Lstar.tab is not present
     if (!L.readFromIniFile(InputFolder + "Lstar.tab", P, R, V, K)){
         L.readFromAnyFile(InputFolder + "Lstar", io_method, P, R, V, K);
@@ -319,10 +358,10 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 
 	L.update(time_first, P, R, V, K); // Load L-star so it'll be available
 	
-	std::string psd0_format = "ascii";
+	IOMethod psd0_format = IOMethod::ASCII;
     if(std::filesystem::exists(InputFolder + initial_PSD + ".pltb"))
 	{
-		psd0_format = "binary";
+		psd0_format = IOMethod::Binary;
 	}
     PSD.readFromAnyFile(InputFolder + initial_PSD, psd0_format);
 
@@ -344,6 +383,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		DVK.readFromAnyFile(InputFolder + "DVK", io_method, P, R, V, K);
 	}
 
+	Logger::message << std::endl;
+	Logger::writeSeparator();
+	Logger::message << std::setw(55) << "Velocities" << std::endl;
+	Logger::writeSeparator();
+
     if (!VP.readFromIniFile(InputFolder + "VP.tab", P, R, V, K)){
 		VP.readFromAnyFile(InputFolder + "VP", io_method, P, R, V, K);
 	}
@@ -352,23 +396,95 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 		VL.readFromAnyFile(InputFolder + "VR", io_method, P, R, V, K);
 	}
 
+    if (!VV.readFromIniFile(InputFolder + "VV.tab", P, R, V, K)){
+		if(does_file_exist(InputFolder + "VV", io_method)){
+			VV.readFromAnyFile(InputFolder + "VV", io_method, P, R, V, K);
+		} else if (not run_coulomb_collision){
+			Logger::message << "VV not used in this simulation." << std::endl;
+			VV = 1;
+		} else {
+			printf("VV is not provided, but is required since run_coulomb_collision=true!");
+        	exit(EXIT_FAILURE);
+		}
+	}
+
+	Logger::message << std::endl;
+	Logger::writeSeparator();
+	Logger::message << std::setw(55) << "Jacobians" << std::endl;
+	Logger::writeSeparator();
+
     if (!G_local.readFromIniFile(InputFolder + "G_local.tab", P, R, V, K)){
-		G_local.readFromAnyFile(InputFolder + "G_local", io_method, P, R, V, K);
+		if(does_file_exist(InputFolder + "G_local", io_method)){
+			G_local.readFromAnyFile(InputFolder + "G_local", io_method, P, R, V, K);
+		} else if (not run_local_diffusion){
+			Logger::message << "G_local not used in this simulation." << std::endl;
+			G_local = 1;
+		} else {
+			printf("G_local is not provided, but is required since run_local_diffusion=true!");
+        	exit(EXIT_FAILURE);
+		}
 	}
 
     if (!G_radial.readFromIniFile(InputFolder + "G_radial.tab", P, R, V, K)){
-		G_radial.readFromAnyFile(InputFolder + "G_radial", io_method, P, R, V, K);
+		if(does_file_exist(InputFolder + "G_radial", io_method)){
+			G_radial.readFromAnyFile(InputFolder + "G_radial", io_method, P, R, V, K);
+		} else if (not run_radial_diffusion){
+			Logger::message << "G_radial not used in this simulation." << std::endl;
+			G_radial = 1;
+		} else {
+			printf("G_radial is not provided, but is required since run_radial_diffusion=true!");
+        	exit(EXIT_FAILURE);
+		}
+	}
+
+	// G_conv file is not required to keep backwards capabilities for 3D simulations without convection
+    if (!G_conv.readFromIniFile(InputFolder + "G_conv.tab", P, R, V, K)){
+		if(does_file_exist(InputFolder + "G_conv", io_method)){
+			G_conv.readFromAnyFile(InputFolder + "G_conv", io_method, P, R, V, K);
+		} else {
+			G_conv = 1;
+		}
 	}
 
 	G_local.update(time_first, P, R, V, K);
 	G_radial.update(time_first, P, R, V, K);
+	G_conv.update(time_first, P, R, V, K);
 
-    if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K)){
-		Sources.readFromAnyFile(InputFolder + "Sources", io_method, P, R, V, K);
-	}
+	Logger::message << std::endl;
+	Logger::writeSeparator();
+	Logger::message << std::setw(59) << "Sources and losses" << std::endl;
+	Logger::writeSeparator();
 
-    if (!Losses.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K)){
-        Losses.readFromAnyFile(InputFolder + "Losses_losscone", io_method, P, R, V, K);
+    if (density_saturation == DensitySaturation::Off) {
+        if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K))
+            Sources.readFromAnyFile(InputFolder + "Sources", io_method, P, R, V, K);
+    } else if (density_saturation == DensitySaturation::WithTimescale) {
+        Sources = 0.;
+
+        SaturationDensity.AllocateMemory(P_size, R_size, V_size, K_size);
+        SaturationTimescale.AllocateMemory(P_size, R_size, V_size, K_size);
+
+        SaturationDensity.readFromAnyFile(InputFolder + "SaturationDensity", io_method, P, R, V, K);
+        SaturationTimescale.readFromAnyFile(InputFolder + "SaturationTimescale", io_method, P, R, V, K);
+    } else if (density_saturation == DensitySaturation::WithoutTimescale || density_saturation == DensitySaturation::LimitSource) {
+        if (!Sources.readFromIniFile(InputFolder + "Sources.tab", P, R, V, K))
+            Sources.readFromAnyFile(InputFolder + "Sources", io_method, P, R, V, K);
+
+        SaturationDensity.AllocateMemory(P_size, R_size, V_size, K_size);
+        SaturationDensity.readFromAnyFile(InputFolder + "SaturationDensity", io_method, P, R, V, K);
+    }
+
+	// We are searching for Losses.tab first to keep backwards capability
+	// If it is not found we are searching next for Losses_local.tab and Losses_radialial.tab
+    if (!Losses_local.readFromIniFile(InputFolder + "Losses.tab", P, R, V, K)){
+		if (!Losses_local.readFromIniFile(InputFolder + "Losses_local.tab", P, R, V, K)) {
+	        Losses_local.readFromAnyFile(InputFolder + "Losses_losscone", io_method, P, R, V, K);			
+		}
+		
+		if (std::filesystem::exists("Losses_radial.tab")) {
+			Losses_radial.AllocateMemory(P_size, R_size, V_size, K_size);
+			Losses_radial.readFromIniFile(InputFolder + "Losses_radial.tab", P, R, V, K);
+		}
 	}
 
     if (!Losses_conv.readFromIniFile(InputFolder + "Losses_conv.tab", P, R, V, K))
@@ -399,6 +515,11 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	// store all of the boundary conditions parameters from BC.ini
 	Parameters BC_parameters(InputFolder + "BC.ini", argc, argv);
 
+	Logger::message << std::endl;
+	Logger::writeSeparator();
+	Logger::message << std::setw(60) << "Boundary conditions" << std::endl;
+	Logger::writeSeparator();
+
 	// Read BC type fro BC.ini file
 	BC_parameters.getParameter("Rl_BC_type", Rl_BC_type);
 	BC_parameters.getParameter("Ru_BC_type", Ru_BC_type);
@@ -411,6 +532,8 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
 	BC_parameters.getParameter("Vu_BC_type", Vu_BC_type);
 	BC_parameters.getParameter("Kl_BC_type", Kl_BC_type);
 	BC_parameters.getParameter("Ku_BC_type", Ku_BC_type);
+
+	Logger::message << std::endl;
 
 	// BC values
 	PSD_l_P = -1e99; // Not in use, periodic boundary conditions
@@ -445,13 +568,14 @@ bool ReadInitialData(string &InputFolder, string &OutputFolder, int argc, char* 
     }
 
 	// Log the boundary types
+	Logger::message << std::endl;
 	Logger::message << "Ll_BC = " << Ll_BC_type << "; Lu_BC = " << Lu_BC_type << ";" << endl;
 	Logger::message << "Vl_BC = " << Vl_BC_type << "; Vu_BC = " << Vu_BC_type << ";" << endl;
 	Logger::message << "Kl_BC = " << Kl_BC_type << "; Ku_BC = " << Ku_BC_type << ";" << endl;
 
 	// Create new PSD.lst file if PSD_time_to_lst == "true"
 	// TODO: Add validation that the file was created
-	if (PSD_time_to_lst == "true")
+	if (PSD_time_to_lst)
 	{
 		Logger::message << "Creating new PSD.lst file" << endl;
 		std::ofstream PSD_lst_file(OutputFolder + "PSD.lst");

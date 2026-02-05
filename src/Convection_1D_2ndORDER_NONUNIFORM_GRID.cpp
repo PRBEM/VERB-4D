@@ -1,20 +1,13 @@
 /**
- * \file Convection_1D_ULTIMATE_QUICKEST6.cpp
+ * \file Convection_1D_2ndODER_NONUNIFORM_GRID.cpp
  *
- * Leonard, 1991; Leonard and Niknafs, 1991;
+ * Leonard, 1997
  *
  * Leonard BP (1988) Universal Limiter for transient interpolation modeling of the advective transport equations: the ULTIMATE conservative difference scheme, NASA technical Memorandum 100916 ICOMP-88-11
  *
- * It works somehow, edit with a great care! - edited by Hayley to correct and issue with the PSD update. Without this correction, the total PSD will gain and drop periodically with the drift
- *
- * All equations and formulas for these calculations can be found at http://www.hadian.ir/teaching/CompHydr/3.pdf .
- * Mostly coming from 3.5 Simplified Ultimate Quickest strategy from B.P Leonard the Ultimate conservative difference scheme.
- * In the source code mathematical equations are numbered corresponding to the numbering of equations found in the paper
- *
- * \brief Calculates the convection in 1D given a 1D matrix of Phase Space Densities, boundary conditions, diffusion, sources and losses
  */
 
-#include "Convection_1D_ULTIMATE_QUICKEST6.h"
+#include "Convection_1D_2ndORDER_NONUNIFORM_GRID.h"
 #include "BoundaryConditionType.hpp"
 
 /** Using the Standard namespace
@@ -23,55 +16,54 @@ using namespace std;
 
 #define gst 5
 #define uw_n 4
-#define dw_n 5
+#define dw_n 4
 
-bool Convection_1D_ULTIMATE_QUICKEST6( 
-		Matrix1D<double> &PSD, 
-		const Matrix1D<double>& x,
-		int x_size,
-		double x_LBC, double x_UBC,
-		BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
-		const Matrix1D<double>& Ux,
-		double dt_total)
+bool Convection_1D_2ndORDER_NONUNIFORM_GRID(
+        Matrix1D<double> &PSD, 
+        const Matrix1D<double>& x,
+        int x_size,
+        double x_LBC, double x_UBC,
+        BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
+        const Matrix1D<double>& Ux,
+        double dt_total)
 {
-    constexpr bool use_limiting      = true;
-    constexpr bool use_discriminator = true;
-    constexpr bool always_3rd_order  = false;
-    constexpr bool always_5rd_order  = false;
-    constexpr bool always_7rd_order  = false;
-    
-    Matrix1D<double> CourNum(x_size);  // Courant number
-    double dx = (x[1] - x[0]);  // FIXME - will work only for regular (uniform) grid
+    //constexpr bool use_limiting      = false;
+    //constexpr bool use_discriminator = false;
+    // Have to change to variable since the use_discriminator results in static evaluation. Since it is still in the code, it returns the warning. 
+    bool use_limiting      = false;
+    bool use_discriminator = false;
 
-    double maxCourNum   = 1;
-    double ux_max       = Ux.maxabs();
-    double steps_double = (double)dt_total * ux_max / dx / maxCourNum;
-    int num_steps       = (steps_double <= 1) ? 1 : (int)ceil(steps_double);
+    Matrix1D<double> CourNum(x_size);   // Courant number on faces
+    Matrix1D<double> dx(x_size);  	    // different spacing in log-grid
+    Matrix1D<double> UxOverDx(x_size); 	// velocity(iV)/dx(iV) on faces 
 
+    // Face values
+    for (int ix = 0; ix <= x_size-1; ix++) {
+       if (ix == x_size-1) {
+	       dx[ix] = (x[ix] - x[ix-1]);
+       } else {
+	       dx[ix] = (x[ix+1] - x[ix]);
+       }
+    }
+
+    double maxCourNum = 1; 
+    UxOverDx = Ux.divide(dx);   
+    double ux_max = UxOverDx.maxabs();
+    double steps_double = (double)dt_total * ux_max / maxCourNum;
+    // static_cast<int> is requred because of convertion warning
+    int num_steps = (steps_double <= 1) ? 1 : static_cast<int>(ceil(steps_double));
     double dt = dt_total / num_steps;
-
-    CourNum = Ux / dx * dt;
-    const double courant_max = std::abs(ux_max / dx * dt);
+    CourNum = UxOverDx * dt;
+    const double courant_max = CourNum.maxabs();
     if (courant_max > 1) {
         Logger::error << "max(CourNum) = " << courant_max << ", calculation can't be performed." << endl;
         exit(EXIT_FAILURE);
     }
 
-    // double THC1 = 1e6, THC2 = 1e12, THG = 1e6;        // Leonard and Niknfas, 1991
-
     if (x_size < gst * 2 + 1) {
         Logger::error << "Number of convection grid can't be smaller than " << (gst * 2 + 1) << " due to numerical method used." << endl;
         // exit(EXIT_FAILURE);
     }
-
-    // bool never_3rd_order = false
-    // bool never_5rd_order = false
-    // bool never_7rd_order = false
-
-    constexpr double three_factorial = 3 * 2 * 1;
-    constexpr double five_factorial  = 5 * 4 * three_factorial;
-    constexpr double seven_factorial = 7 * 6 * five_factorial;
-    constexpr double nine_factorial  = 9 * 8 * seven_factorial;
 
     // Temporary PSD to use during calculations, includes ghost points
     Matrix1D<double> PSD_t(x_size + gst + gst);
@@ -113,11 +105,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                 break;
             // take the derivative of each point with the previous one
             case BoundaryConditionType::ConstantDerivative:
-                dx = (x[1] - x[0]);
-                PSD_t[gst - 1] = PSD[0] - x_LBC * dx;
-                for (ig = 1; ig <= gst; ig++) {
-                    PSD_t[gst - ig] = PSD_t[gst - ig + 1] - x_LBC * dx;
-                }
+                Logger::error << "Constant derivative boundaries are not implemented yet" << std::endl;
                 break;
             default:
                 Logger::error << "CONV_1D_BOUNDARY: unknown boundary type: " << x_LBC_type << std::endl;
@@ -138,11 +126,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                 }
                 break;
             case BoundaryConditionType::ConstantDerivative:
-                dx = (x[x_size - 1] - x[x_size - 2]);
-                PSD_t[gst + (x_size - 1) + 1] = PSD[x_size - 1] + x_UBC * dx;
-                for (ig = 1; ig <= gst; ig++) {
-                    PSD_t[gst + (x_size - 1) + ig] = PSD_t[gst + (x_size - 1) + ig - 1] + x_UBC * dx;
-                }
+                Logger::error << "Constant derivative boundaries are not implemented yet" << std::endl;
                 break;
             default:
                 Logger::error << "CONV_1D_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
@@ -150,24 +134,41 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
 
         // All equations and formulas for these calculations can be found at http://www.hadian.ir/teaching/CompHydr/3.pdf
         // Start calculation
-        double psd_face_left = 0.0, psd_face_right = 0.0, courant_left = 0.0, courant_right = 0.0;
-        for (int ix = 0; ix <= x_size - 1; ix++) {
+        double psd_face_left = 0.0, psd_face_right = 0.0, courant_right = 0.0;
+        double velocity_right = 0.0, velocity_left = 0.0;
+        double grad_FR = 0.0, grad_R = 0.0, curv_R = 0.0;  
+        double dx_C = 0.0, dx_R = 0.0, dx_r = 0.0, dx_fr = 0.0; 
+
+        grad_FR = 1.0 / dx[0] * (PSD_t[gst] - PSD_t[gst-1]); 
+        dx_r  = dx[0]; 
+        dx_fr = dx[1];
+        dx_R  = 0.5*(dx_fr+dx_r);
+
+        for (int ix = 0; ix <= (x_size-1); ix++) {
             // calculate at ix = 0 if the boundary condition is periodic
             if (ix == 0) {                           // special case
                 if (x_LBC_type == BoundaryConditionType::Periodic) {  // Periodic
                     courant_right = (CourNum[x_size - 2] + CourNum[0]) / 2;
-                    // CourNum_f = CourNum[0];
+                    velocity_right = (Ux[x_size - 2] + Ux[0]) / 2;
+                } 
+                else {
+                    courant_right  = (CourNum[ix+1] + CourNum[ix]) / 2;
+                    velocity_right = (Ux[ix+1] + Ux[ix]) / 2; 
+                //    continue;  // skip to the next ix - we need to calculate at ix = 1 only for periodic conditions
+                }
+            } else if ( ix == x_size-1 ) {
+                if (x_LBC_type == BoundaryConditionType::Periodic) {  
+                    courant_right  = (CourNum[x_size - 2] + CourNum[0]) / 2;
+                    velocity_right = (Ux[x_size - 2] + Ux[0]) / 2;
                 } else {
-                    continue;  // skip to the next ix - we need to calculate at ix = 1 only for periodic conditions
+                    courant_right  = (CourNum[ix - 1] + CourNum[ix]) / 2;
+                    velocity_right = (Ux[ix - 1] + Ux[ix]) / 2; 
                 }
             } else {
-                courant_right = (CourNum[ix - 1] + CourNum[ix]) / 2;
-                // CourNum_f = CourNum[ix];
+                courant_right = (CourNum[ix + 1] + CourNum[ix]) / 2;
+                velocity_right= (Ux[ix + 1] + Ux[ix]) / 2; 
             }
             
-            const double courant_squared = courant_right * courant_right;
-            const double courant_abs = std::fabs(courant_right);
-
             // PSD down-wind, center, and up-wind
             double PSD_U[uw_n + 1], PSD_D[dw_n + 1], PSD_C;
             
@@ -181,6 +182,14 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                 for (ig = 1; ig <= dw_n; ig++)
                     PSD_D[ig] = PSD_t[gst + ix - 1 + ig];
 
+                curv_R  = 1/dx_R * (grad_FR - grad_R);
+
+                dx_C = dx_R;
+                dx_r = dx_fr;
+                dx_fr = (ix == x_size-1) ? dx[ix] : dx[ix + 1]; 
+                dx_R = 0.5*(dx_fr + dx_r);
+                grad_R = grad_FR;
+                grad_FR = 1/dx_fr * (PSD_D[2] - PSD_D[1]);
             } else {
                 for (ig = 1; ig <= dw_n; ig++)
                     PSD_D[ig] = PSD_t[gst + ix - ig];
@@ -189,77 +198,39 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
 
                 for (ig = 1; ig <= uw_n; ig++)
                     PSD_U[ig] = PSD_t[gst + ix + ig];
+
+                dx_C = dx_R;
+                dx_r = dx_fr;
+                dx_fr = (ix == x_size-1) ? dx[ix] : dx[ix + 1]; 
+                dx_R = 0.5*(dx_fr + dx_r);
+
+                grad_R = grad_FR;
+                grad_FR = 1/dx_fr * (PSD_U[1] - PSD_C);
+
+                curv_R  = 1/dx_R * (grad_FR - grad_R);
             }
 
-            // From now on, only PSD_D, PSD_U, and PSD_C are in use
-            // notes from Hayley: Because we only use PSD_D, PSD_U, and PSD_C, which we set based on the velocity direction
-            // we now no longer need to consider the sign of the velocity - the absolute value is now used.
-
-            psd_face_right = 0.5 * (PSD_C + PSD_D[1]);  // A.1
-
-            const double d1 = PSD_C - PSD_D[1];  // A.2
-            // 2 order
-            psd_face_right += 0.5 * courant_abs * d1;
-
-            // Using table A1 to get the coefficients for the odd differences and table A2 for the even differences
-            // Even is divided by 2
-            const double D2 = (PSD_U[1] - PSD_C - PSD_D[1] + PSD_D[2]) / 2;    // A.3
-            const double d3 = PSD_U[1] - 3 * PSD_C + 3 * PSD_D[1] - PSD_D[2];  //
-
-            if (always_3rd_order) {  // !never_3rd_order && (always_3rd_order || (CURVAV < THC1 && GRAD < THG))) {
-                // 3 order - QUICKEST method
-                psd_face_right += (courant_squared - 1) / three_factorial * (D2 + d3 / 2);  // A.16
-
-            } else {
-                // 4 order - PSD_f is still second order
-                psd_face_right += (courant_squared - 1) / three_factorial * (D2 + courant_abs / 4 * d3);
-
-                const double D4 = (PSD_U[2] - 3 * PSD_U[1] + 2 * PSD_C + 2 * PSD_D[1] - 3 * PSD_D[2] + PSD_D[3]) / 2;
-                const double d5 = PSD_U[2] - 5 * PSD_U[1] + 10 * PSD_C - 10 * PSD_D[1] + 5 * PSD_D[2] - PSD_D[3];
-
-                if (always_5rd_order) {  // !never_5rd_order && always_5rd_order) {
-                    // 5 order
-                    psd_face_right += (courant_squared - 1) * (courant_squared - 4) / five_factorial * (D4 + d5 / 2);
-
-                } else {
-                    // 6 order - PSD_f is still 4th order.
-                    psd_face_right += (courant_squared - 1) * (courant_squared - 4) / five_factorial * (D4 + courant_abs / 6 * d5);
-
-                    const double D6 = (PSD_U[3] - 5 * PSD_U[2] + 9 * PSD_U[1] - 5 * PSD_C - 5 * PSD_D[1] + 9 * PSD_D[2] - 5 * PSD_D[3] + PSD_D[4]) / 2;
-                    const double d7 = PSD_U[3] - 7 * PSD_U[2] + 21 * PSD_U[1] - 35 * PSD_C + 35 * PSD_D[1] - 21 * PSD_D[2] + 7 * PSD_D[3] - PSD_D[4];
-
-                    if (always_7rd_order) {  // !never_7rd_order && (always_7rd_order || (CURVAV < THC2 && GRAD < THG))) {
-                        // 7 order
-                        psd_face_right += (courant_squared - 1) * (courant_squared - 4) * (courant_squared - 9) / seven_factorial * (D6 + d7 / 2);
-                    } else {
-                        // I think there is a bug somewhere here for 8-9 orders :( <- this comment is not from hayley
-                        // 8 order
-                        psd_face_right += (courant_squared - 1) * (courant_squared - 4) * (courant_squared - 9) / seven_factorial * (D6 + courant_abs / 8 * d7);
-
-                        // 8 even:  +1 -7 +20 -28 +14  +14  -28 +20 -7 +1
-                        // 9 odd: +1 -9 +36 -84 +126 -126 +84 -36 +9 -1
-                        const double D8 = (PSD_U[4] - 7 * PSD_U[3] + 20 * PSD_U[2] - 28 * PSD_U[1] + 14 * PSD_C + 14 * PSD_D[1] - 28 * PSD_D[2] + 20 * PSD_D[3] - 7 * PSD_D[4] + PSD_D[5]) / 2;
-                        const double d9 = PSD_U[4] - 9 * PSD_U[3] + 36 * PSD_U[2] - 84 * PSD_U[1] + 126 * PSD_C - 126 * PSD_D[1] + 84 * PSD_D[2] - 36 * PSD_D[3] + 9 * PSD_D[4] - PSD_D[5];
-                        // 9 order
-                        psd_face_right += (courant_squared - 1) * (courant_squared - 4) * (courant_squared - 9) * (courant_squared - 16) / nine_factorial * (D8 + d9 / 2);
-                    }
-                }
-            }
+            // ~ 1st order upwind scheme
+            // psd_face_right = PSD_C;
+            // ~ ULTIMATE QUICKEST
+            psd_face_right = 0.5*(PSD_C + PSD_D[1]) - 0.5*courant_right*grad_R*dx_r - 0.5 * pow(dx_r,2)*1.0/3*(1-pow(courant_right,2))*curv_R; 
 
             // update PSD_out
             // courant_left, courant_right are values on left and right faces (between (i and i-1), and (i and i+1))
             if (ix > 0)  // special case
             {
-                // (7)
-                PSD_out[ix-1] = PSD[ix - 1] - (courant_right * psd_face_right - courant_left * psd_face_left);
+                PSD_out[ix - 1] = PSD[ix - 1] - dt / dx_C * (velocity_right * psd_face_right - velocity_left * psd_face_left);
             }
             if(use_limiting)
             {
                 PSD_faces[ix] = psd_face_right;
             }
             psd_face_left = psd_face_right;
-            courant_left = courant_right;
+            velocity_left= velocity_right;
+
         }
+
+
         if (x_LBC_type == BoundaryConditionType::Periodic) {  // special case
             PSD_out[x_size - 1] = PSD_out[0];        // need to update ix == x_size-1 point for periodic;
         }
@@ -267,14 +238,16 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
             PSD_out[0] = x_LBC;
         }
         else if (x_LBC_type == BoundaryConditionType::ConstantDerivative) {
-            PSD_out[0] = PSD_out[1];
+            Logger::error << "Constant derivative boundaries are not implemented yet" << std::endl;
+            break;
         }
 
         if (x_UBC_type == BoundaryConditionType::ConstantValue) {
             PSD_out[x_size - 1] = x_UBC;
         }
         else if (x_UBC_type == BoundaryConditionType::ConstantDerivative) {
-            PSD_out[x_size - 1] = PSD_out[x_size - 2];
+            Logger::error << "Constant derivative boundaries are not implemented yet" << std::endl;
+            break;
         }
         
         if(use_limiting)
@@ -290,6 +263,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                 // FYI: PSD_t[gst] = PSD[0] = PSD[x_size-1] = PSD_t[gst + x_size-1]; - this is by grid construction
                     for (ig = 1; ig <= gst; ig++) {
                         PSD_unlimited_t[gst - ig] = PSD[(x_size - 1) - ig];
+                        //////PSD_unlimited_t[gst - ig] = PSD_unlimited[(x_size - 1) - ig];
                     }
                     break;
                 // if constant value set the first gst spots to x_LBC
@@ -300,11 +274,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                     break;
                 // take the derivative of each point with the previous one
                 case BoundaryConditionType::ConstantDerivative:
-                    dx = (x[1] - x[0]);
-                    PSD_unlimited_t[gst - 1] = PSD[0] - x_LBC * dx;
-                    for (ig = 1; ig <= gst; ig++) {
-                        PSD_unlimited_t[gst - ig] = PSD_unlimited_t[gst - ig + 1] - x_LBC * dx;
-                    }
+                    Logger::error << "Constant derivative boundaries are not implemented yet" << std::endl;
                     break;
                 default:
                     Logger::error << "CONV_1D_BOUNDARY: unknown boundary type: " << x_LBC_type << std::endl;
@@ -325,30 +295,54 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                     }
                     break;
                 case BoundaryConditionType::ConstantDerivative:
-                    dx = (x[x_size - 1] - x[x_size - 2]);
-                    PSD_unlimited_t[gst + (x_size - 1) + 1] = PSD_unlimited[x_size - 1] + x_UBC * dx;
-                    for (ig = 1; ig <= gst; ig++) {
-                        PSD_unlimited_t[gst + (x_size - 1) + ig] = PSD_unlimited_t[gst + (x_size - 1) + ig - 1] + x_UBC * dx;
-                    }
+                    Logger::error << "Constant derivative boundaries are not implemented yet" << std::endl;
                     break;
                 default:
                     Logger::error << "CONV_1D_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
             }
-            
-            //double psd_face_left = 0.0, courant_left = 0.0, courant_right = 0.0; // Alreayd defined
-            psd_face_left = 0.0, courant_left = 0.0, courant_right = 0.0;
-            for (int ix = 0; ix <= x_size - 1; ix++) 
+            // Already declared
+            // double psd_face_left = 0.0, psd_face_right = 0.0, courant_right = 0.0;
+            // double velocity_right = 0.0, velocity_left = 0.0;
+            // double grad_FR = 0.0, grad_R = 0.0, curv_R = 0.0;  
+            // double dx_C = 0.0, dx_R = 0.0, dx_l, dx_r = 0.0, dx_fr = 0.0; 
+            // double dx_ffl = 0.0, dx_fl = 0.0, dx_ffr = 0.0; 
+
+            psd_face_left = 0.0, psd_face_right = 0.0, courant_right = 0.0;
+            velocity_right = 0.0, velocity_left = 0.0;
+            grad_FR = 0.0, grad_R = 0.0, curv_R = 0.0;  
+            dx_C = 0.0, dx_R = 0.0, dx_r = 0.0, dx_fr = 0.0; 
+            double dx_l;
+            double dx_ffl = 0.0, dx_fl = 0.0, dx_ffr = 0.0; 
+
+            grad_FR = 1.0 / dx[0] * (PSD_unlimited_t[gst] - PSD_unlimited_t[gst-1]); 
+            dx_ffl= dx[0]; 
+            dx_fl = dx[0]; 
+            dx_l  = dx[0]; 
+            dx_r  = dx[0]; 
+            dx_fr = dx[1];
+            dx_ffr= dx[2];
+            dx_R  = 0.5*(dx_fr+dx_r);
+
+            for (int ix = 0; ix <= x_size - 1; ix++)
             {
                 if (ix == 0) {                           // special case
                     if (x_LBC_type == BoundaryConditionType::Periodic) {  // Periodic
                         courant_right = (CourNum[x_size - 2] + CourNum[0]) / 2;
-                        // CourNum_f = CourNum[0];
+                        velocity_right= (Ux[x_size - 2] + Ux[0]) / 2;
                     } else {
                         continue;  // skip to the next ix - we need to calculate at ix = 1 only for periodic conditions
                     }
+                } else if ( ix == x_size-1 ) {
+                    if (x_LBC_type == BoundaryConditionType::Periodic) {  
+                        courant_right  = (CourNum[x_size - 2] + CourNum[0]) / 2;
+                        velocity_right = (Ux[x_size - 2] + Ux[0]) / 2;
+                    } else {
+                        courant_right  = (CourNum[ix - 1] + CourNum[ix]) / 2;
+                        velocity_right = (Ux[ix - 1] + Ux[ix]) / 2; 
+                    }
                 } else {
-                    courant_right = (CourNum[ix - 1] + CourNum[ix]) / 2;
-                    // CourNum_f = CourNum[ix];
+                    courant_right = (CourNum[ix + 1] + CourNum[ix]) / 2;
+                    velocity_right= (Ux[ix + 1] + Ux[ix]) / 2; 
                 }
                 
                 const double courant_abs = std::fabs(courant_right);
@@ -379,6 +373,18 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                     }
                     orig_downwind = PSD_t[gst + ix];
 
+                    curv_R  = 1/dx_R * (grad_FR - grad_R);
+
+                    dx_C = dx_R;
+                    dx_ffl= dx_fl;
+                    dx_fl = dx_l; 
+                    dx_l  = dx_r; 
+                    dx_r  = dx_fr;
+                    dx_fr = (ix == x_size-1) ? dx[ix] : dx[ix + 1]; 
+                    dx_ffr= (ix <= x_size-3) ? dx[ix] : dx[ix + 2]; 
+                    dx_R = 0.5*(dx_fr + dx_r);
+                    grad_R = grad_FR;
+                    grad_FR = 1/dx_fr * (PSD_unlimited_D[2] - PSD_unlimited_D[1]);
                 } else {
                     for (ig = 1; ig <= dw_n; ig++)
                     {
@@ -394,12 +400,26 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                         PSD_unlimited_U[ig] = PSD_unlimited_t[gst + ix + ig];
                     }
                     orig_upwind = PSD_t[gst + ix + 1];
+
+                    dx_C = dx_R;
+                    dx_ffl= dx_fl;
+                    dx_fl = dx_l; 
+                    dx_l = dx_r;
+                    dx_r = dx_fr;
+                    dx_fr = (ix == x_size-1) ? dx[ix] : dx[ix + 1]; 
+                    dx_ffr= (ix <= x_size-3) ? dx[ix] : dx[ix + 2]; 
+                    dx_R = 0.5*(dx_fr + dx_r);
+
+                    grad_R = grad_FR;
+                    grad_FR = 1/dx_fr * (PSD_unlimited_U[1] - PSD_unlimited_C);
+
+                    curv_R  = 1/dx_R * (grad_FR - grad_R);
                 }
             
                 // Using 3.5 Simplified Ultimate Quickest strategy from B.P Leonard the Ultimate conservative difference scheme
                 // (2) Calculate some useful parameters
-                const double DEL   = orig_downwind - orig_upwind;
-                const double CURV  = orig_downwind - 2 * orig_centre + orig_upwind;
+                const double DEL   = (orig_downwind - orig_upwind) / (dx_l + dx_r); 
+                const double CURV  = curv_R; 
                 const double ADEL  = std::fabs(DEL);
                 const double ACURV = std::fabs(CURV);
                 
@@ -408,14 +428,15 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                 // const double GRAD   = std::fabs(PSD_C - PSD_D[1]);
 
                 // the updated unlimited values are used to decide wether or not an unphysical oscillation occured
-                const double dif1 = PSD_unlimited_D[2] - PSD_unlimited_D[3];
-                const double dif2 = PSD_unlimited_D[1] - PSD_unlimited_D[2];
-                const double dif3 = PSD_unlimited_C    - PSD_unlimited_D[1];
-                const double dif4 = PSD_unlimited_U[1] - PSD_unlimited_C;
-                const double dif5 = PSD_unlimited_U[2] - PSD_unlimited_U[1];
-                const double dif6 = PSD_unlimited_U[3] - PSD_unlimited_U[2];
+                const double dif1 = (PSD_unlimited_D[2] - PSD_unlimited_D[3]) / dx_ffr;
+                const double dif2 = (PSD_unlimited_D[1] - PSD_unlimited_D[2]) / dx_fr;
+                const double dif3 = (PSD_unlimited_C    - PSD_unlimited_D[1]) / dx_r;  
+                const double dif4 = (PSD_unlimited_U[1] - PSD_unlimited_C) / dx_l;
+                const double dif5 = (PSD_unlimited_U[2] - PSD_unlimited_U[1]) / dx_fl;
+                const double dif6 = (PSD_unlimited_U[3] - PSD_unlimited_U[2]) / dx_ffl;
                 
-                constexpr double treshhold = 0; // 1e-99;
+                //constexpr double treshhold = 0; // 1e-99;
+                const double treshhold = 0; // 1e-99;
 
                 // the discriminator - is there a realistic peak at one of the three points upwind, centre, downwind?
                 const bool peak_downwind = 
@@ -430,8 +451,6 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                     dif3 > treshhold && dif4 > treshhold && dif5 < -treshhold &&
                     dif6 < -treshhold && dif4 < dif3 - treshhold && dif5 > dif6 + treshhold;
 
-                // Already defined
-                // double psd_face_right = PSD_faces[ix];
                 psd_face_right = PSD_faces[ix];
                 
                 // use the limiter only if there is no realistic peak or if the discriminator is switched off
@@ -457,10 +476,10 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                 if (ix > 0)
                 {
                     // use the limited psd_face_right to compute the final output
-                    PSD[ix - 1] -= (courant_right * psd_face_right - courant_left * psd_face_left);
+                    PSD[ix - 1] -= dt / dx_C * (velocity_right * psd_face_right - velocity_left * psd_face_left);
                 }
                 psd_face_left = psd_face_right;
-                courant_left  = courant_right;
+                velocity_left = velocity_right;
             }
             // apply boundary conditions on the results of the limiter
             if (x_LBC_type == BoundaryConditionType::Periodic) 
@@ -473,7 +492,8 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
             }
             else if (x_LBC_type == BoundaryConditionType::ConstantDerivative)
             {
-                PSD[0] = PSD[1];
+                Logger::error << "Constant derivative boundaries are not implemented yet" << std::endl;
+                break;
             }
 
             if (x_UBC_type == BoundaryConditionType::ConstantValue)
@@ -482,7 +502,8 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
             }
             else if (x_UBC_type == BoundaryConditionType::ConstantDerivative)
             {
-                PSD[x_size - 1] = PSD[x_size - 2];
+                Logger::error << "Constant derivative boundaries are not implemented yet" << std::endl;
+                break;
             }
         }
     }

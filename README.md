@@ -14,7 +14,7 @@ cmake. Use homebrew or the package manager of your choice to install them:
 * Lapack, OpenBLAS (added as a submodule) or Intel's MKL
 * MatLab (optional)
 
-A C++ compiler is necessary, a Fortran compiler (only for OpenBLAS) recomended.
+A C++ compiler is necessary, a Fortran compiler (only for OpenBLAS) recommended.
 If no Fortran compiler is installed, OpenBLAS will compile from C code instead.
 
 #### Linux
@@ -32,7 +32,7 @@ which might be less optimized than building from the Fortran source code.
 
 ##### MinGW and Ninja
 The recommended way of building OpenBLAS on Windows is by using the [Ninja](https://ninja-build.org/)
-build system instead of Visual Studio. Additionally [MSYS2](https://www.msys2.org/) is necessary
+build system instead of Visual Studio. Additionally, [MSYS2](https://www.msys2.org/) is necessary
 to install MinGW's gcc and gfortran compiler. To install both compilers, open 
 an MSYS2 MinGW terminal and run
 ```
@@ -78,7 +78,7 @@ Call the Ninja install script
 ```
 install_openblas_ninja.ps1
 ```
-Both build types compile OpenBLAS as a dynamic libray and copy the library files to `<drive>:\Users\<user>\AppData\Local\OpenBLAS\`.
+Both build types compile OpenBLAS as a dynamic library and copy the library files to `<drive>:\Users\<user>\AppData\Local\OpenBLAS\`.
 This location is automatically appended to the user's PATH environment variable, so VERB-4D can use it at runtime.
 
 ### Compile the VERB-4D solver
@@ -93,7 +93,7 @@ and call CMake for a release built and the BLAS library of your choice, either L
 cmake .. -DCMAKE_BUILD_TYPE=Release -DBLAS_TYPE=OpenBLAS
 make -j
 ```
-For the cmake call, when choosing OpenBLAS, an additional paramter `-DOPENBLAS_LIBPATH=<path to libopenblas.so>` can be specified (default `~/.local/lib/libopenblas.so`)
+For the cmake call, when choosing OpenBLAS, an additional parameter `-DOPENBLAS_LIBPATH=<path to libopenblas.so>` can be specified (default `~/.local/lib/libopenblas.so`)
 ##### Shell script
 Automatically compile the VERB-4D solver (using OpenBLAS) by calling
 ```
@@ -112,7 +112,7 @@ and call CMake for a release built and the BLAS library of your choice, either L
 cmake .. -DBLAS_TYPE=OpenBLAS
 cmake --build . -j --config Release
 ```
-For the first cmake call, when choosing OpenBLAS, an additional paramter `-DOPENBLAS_LIBPATH=<path to openblas.lib>` can be specified <br>
+For the first cmake call, when choosing OpenBLAS, an additional parameter `-DOPENBLAS_LIBPATH=<path to openblas.lib>` can be specified <br>
  (default `<drive>:\Users\<user>\AppData\Local\OpenBLAS\openblas.lib`)
 ##### PowerShell script
 Automatically compile the VERB-4D solver (using OpenBLAS) by calling
@@ -120,6 +120,20 @@ Automatically compile the VERB-4D solver (using OpenBLAS) by calling
 install_verb.ps1
 ```
 The executable `VERB4D_Solver.exe` can be found in `.\build\Release`.
+
+#### List of compilation flags
+
+| Command line argument | Description | Possible values
+| --------------------- | ----------- | -------------- |
+| -DCMAKE_BUILD_TYPE | Standard cmake option enabling debugging symbols or optimization flags | Release, Debug |
+| -DBLAS_TYPE | Library type of LAPACK and BLAS routines | LAPACK, OpenBLAS, MKL |
+| -DOPENBLAS_LIBPATH | Path towards compiled openblas.lib |  |
+| -DDATA_ASSIMILATION | Bool whether the data assimilation routines will be compiled | True, False |
+| -DDATA_ASSIMILATION_DEBUG | Bool whether the data assimilation debug output will be saved (!huge file sizes!) | True, False |
+| -DFAST_CONVECTION | Bool to decide convection step size in Convection_2D | True, False |
+| -DPYTHON_BINDINGS | Bool whether the python-bindings-library will be compiled | True, False |
+| -DSAVE_PSD_LOST_CONV | Bool whether the lost PSD during Convection_2d will be saved | True, False |
+| -DLU_CACHING | Bool whether LU caching will be used for local diffusion. It's faster, but needs more memory. | True, False |
 
 ### Use the VERB-4D solver
 
@@ -132,7 +146,7 @@ ReadMe - COMPILING ON MAC
 Note: All tabbed items should be executed on the command line
 
 Xcode does not come with openmp support so a different compiler is necessary.
-However you will still need Xcode for some tools in order to build the new
+However, you will still need Xcode for some tools in order to build the new
 compiler
 
 download Xcode with developer tools - located in app store (free) (developer

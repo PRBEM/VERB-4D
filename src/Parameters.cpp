@@ -8,6 +8,11 @@
 #include "Parameters.h"
 #include "BoundaryConditionType.hpp"
 
+// enable alternative tokens
+#ifdef _MSC_VER
+    #include<iso646.h>
+#endif
+
 /** Constructor for Parameters: 
 * opens file and saves file to Parameters field 'parametersFile',
 * stores the char* arguments into a vector 'argv'
@@ -107,7 +112,7 @@ Parameters& Parameters::findParameter(std::string parameterName, std::string def
 * \param mustBeFound - if true and parameter not found, error is logged and function exited, default is false
 */
 template <typename T>
-void Parameters::getParameter(std::string parameterName, T &variable, bool mustBeFound) {
+bool Parameters::getParameter(std::string parameterName, T &variable, bool mustBeFound) {
 
 	this->flush();
 	this->clear();
@@ -117,52 +122,81 @@ void Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 	parametersFile.clear( );
 	parametersFile.seekg( 0, std::ios::beg );
 
-	// variables to store each line and the value of the parameter
-	std::string line;
-	std::string parameterValue;
+    // Variables to store each line and the value of the parameter
+    std::string currentLine;  // Renamed from 'line' to avoid name conflict
+    std::string parameterValue;
 
-	// Read from command line arguments
-	unsigned int i;
-	for (i = 0; i < this->argv.size(); i++) {
-		line = argv[i];
+    // Read from command line arguments
+    for (const auto& argLine : this->argv) { // Renamed from 'line' to 'argLine'
+        // If argument is empty or commented out, save the default value
+        if (argLine.empty() || argLine[0] == '#') {
+            continue;
+        }
 
-		// if argument is empty or commented out, save the default value
-		if (line.size() == 0 || line[0] == '#') {
-			Logger::message << parameterName << " = " << variable << " (default value)" << std::endl;
-			continue;
-		}
+        // Check if the line contains the parameter name
+        size_t pos = argLine.find(parameterName);
+        if (pos != std::string::npos) {
+            // Extract the part after the '=' sign, and manually skip leading spaces
+            size_t equalSignPos = argLine.find("=", pos);
+            if (equalSignPos != std::string::npos) {
+                // Skip spaces after '='
+                size_t startPos = equalSignPos + 1; // Renamed 'start' to 'startPos'
+                while (startPos < argLine.size() && std::isspace(argLine[startPos])) {
+                    startPos++;
+                }
 
-		// set the parameter value if it can find its name in the current argument
-		// log the value and store the value into variable
-		if (line.find(parameterName) != std::string::npos) {
-			parameterValue = line.substr(line.find("=") + 1);
-			Logger::message << parameterName << " = " << parameterValue << std::endl;
-					// stringstream(parameterValue) >> variable;
-			std::stringstream tmp(parameterValue);
-			tmp >> variable;
-			return;
-		}
-	}
+                // Find the end of the value by skipping trailing spaces
+                size_t endPos = argLine.size(); // Renamed 'end' to 'endPos'
+                while (endPos > startPos && std::isspace(argLine[endPos - 1])) {
+                    endPos--;
+                }
 
-	// Read from parameters file - line by line
-	while (std::getline(parametersFile, line)) {
+                // Extract the cleaned parameter value
+                parameterValue = argLine.substr(startPos, endPos - startPos);
 
-		// if line is empty or commented out, go to next line
-		if (line.size() == 0 || line[0] == '#') {
-			continue;
-		}
+                // Log the value and store it into the variable
+                Logger::message << parameterName << " = " << parameterValue << std::endl;
+                stringToValue(parameterValue, variable);
+                return true;
+            }
+        }
+    }
 
-		// set the parameter value if it can find its name in the current line
-		// log the value and store the value into variable
-		if (line.find(parameterName) != std::string::npos) {
-			parameterValue = line.substr(line.find("=") + 1);
-			Logger::message << parameterName << " = " << parameterValue << std::endl;
-			// stringstream(parameterValue) >> variable;
-			std::stringstream tmp(parameterValue);
-			tmp >> variable;
-			return;
-		}
-	}
+    // Read from parameters file - line by line
+    while (std::getline(parametersFile, currentLine)) { // Renamed 'line' to 'currentLine'
+        // If line is empty or commented out, go to next line
+        if (currentLine.empty() || currentLine[0] == '#') {
+            continue;
+        }
+
+        // Check if the line contains the parameter name
+        size_t pos = currentLine.find(parameterName);
+        if (pos != std::string::npos) {
+            // Extract the part after the '=' sign, and manually skip leading spaces
+            size_t equalSignPos = currentLine.find("=", pos);
+            if (equalSignPos != std::string::npos) {
+                // Skip spaces after '='
+                size_t startPos = equalSignPos + 1; // Renamed 'start' to 'startPos'
+                while (startPos < currentLine.size() && std::isspace(currentLine[startPos])) {
+                    startPos++;
+                }
+
+                // Find the end of the value by skipping trailing spaces
+                size_t endPos = currentLine.size(); // Renamed 'end' to 'endPos'
+                while (endPos > startPos && std::isspace(currentLine[endPos - 1])) {
+                    endPos--;
+                }
+
+                // Extract the cleaned parameter value
+                parameterValue = currentLine.substr(startPos, endPos - startPos);
+
+                // Log the value and store it into the variable
+                Logger::message << parameterName << " = " << parameterValue << std::endl;
+                stringToValue(parameterValue, variable);
+                return true;
+            }
+        }
+    }
 
 	// all variables that arent found, that can't recieve a default value will log an error
 	if (mustBeFound) {
@@ -171,7 +205,7 @@ void Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 	}
 
 	// return *this;
-	return;
+	return false;
 
 }
 
@@ -179,9 +213,120 @@ void Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 // Implementations
 //////////////////////////////////////////
 
-template void Parameters::getParameter(std::string, double&, bool);
-template void Parameters::getParameter(std::string, int&, bool);
-template void Parameters::getParameter(std::string, long&, bool);
-//template void Parameters::getParameter(string, bool&, bool);
-template void Parameters::getParameter(std::string, std::string&, bool);
-template void Parameters::getParameter(std::string, BoundaryConditionType&, bool);
+template bool Parameters::getParameter(std::string, double&, bool);
+template bool Parameters::getParameter(std::string, int&, bool);
+template bool Parameters::getParameter(std::string, long&, bool);
+template bool Parameters::getParameter(std::string, bool&, bool);
+template bool Parameters::getParameter(std::string, std::string&, bool);
+template bool Parameters::getParameter(std::string, BoundaryConditionType&, bool);
+template bool Parameters::getParameter(std::string, IOMethod&, bool);
+template bool Parameters::getParameter(std::string, InversionMethod&, bool);
+template bool Parameters::getParameter(std::string, DensitySaturation&, bool);
+template bool Parameters::getParameter(std::string, DataAssimilationDataSource&, bool);
+template bool Parameters::getParameter(std::string, Logger::DebugLevel&, bool);
+
+
+// helper functions to insensitive case compare two strings
+bool ichar_equals(char a, char b)
+{
+    return std::tolower(static_cast<unsigned char>(a)) ==
+           std::tolower(static_cast<unsigned char>(b));
+}
+bool iequals(const std::string& a, const std::string& b)
+{
+    return std::equal(a.begin(), a.end(), b.begin(), b.end(), ichar_equals);
+}
+
+// helper functions to convert paramter strings into values
+template <typename T>
+void stringToValue(const std::string& parameter_value_string, T& variable) {
+	std::stringstream tmp(parameter_value_string);
+	tmp >> variable;
+}
+
+template <>
+void stringToValue(const std::string& parameter_value_string, bool& variable) {
+	if (iequals(parameter_value_string, "true")) {
+		variable = true;
+	} else if (iequals(parameter_value_string, "false")) {
+		variable = false;
+	} else {
+		printf("Encountered invalid value for boolean parameter: %s\n", parameter_value_string.c_str());
+		exit(EXIT_FAILURE);
+	}
+}
+
+template <>
+void stringToValue(const std::string& parameter_value_string, DensitySaturation& variable) {
+	if (iequals(parameter_value_string, "off")) {
+		variable = DensitySaturation::Off;
+	} else if (iequals(parameter_value_string, "with_timescale")) {
+		variable = DensitySaturation::WithTimescale;
+	} else if (iequals(parameter_value_string, "without_timescale")) {
+		variable = DensitySaturation::WithoutTimescale;
+	} else if (iequals(parameter_value_string, "limit_source")) {
+		variable = DensitySaturation::LimitSource;
+	} else {
+		printf("Encountered invalid value for density saturation parameter: %s\n", parameter_value_string.c_str());
+		exit(EXIT_FAILURE);
+	}
+}
+
+template <>
+void stringToValue(const std::string& parameter_value_string, IOMethod& variable) {
+	if (iequals(parameter_value_string, "matlab")) {
+		variable = IOMethod::Matlab;
+	} else if (iequals(parameter_value_string, "binary")) {
+		variable = IOMethod::Binary;
+	} else if (iequals(parameter_value_string, "ascii")) {
+		variable = IOMethod::ASCII;
+	} else {
+		printf("Encountered invalid value for io method parameter: %s\n", parameter_value_string.c_str());
+		exit(EXIT_FAILURE);
+	}
+}
+
+template <>
+void stringToValue(const std::string& parameter_value_string, InversionMethod& variable) {
+	if (iequals(parameter_value_string, "ADI")) {
+		variable = InversionMethod::ADI;
+	} else if (iequals(parameter_value_string, "ADI1")) {
+		variable = InversionMethod::ADI1;
+	} else if (iequals(parameter_value_string, "ADI2")) {
+		variable = InversionMethod::ADI2;
+	} else if (iequals(parameter_value_string, "Lapack")) {
+		variable = InversionMethod::Lapack;
+	} else if (iequals(parameter_value_string, "MKL")) {
+		variable = InversionMethod::MKL;
+	} else {
+		printf("Encountered invalid value for inversion method parameter: %s\n", parameter_value_string.c_str());
+		exit(EXIT_FAILURE);
+	}
+}
+
+template <>
+void stringToValue(const std::string& parameter_value_string, DataAssimilationDataSource& variable) {
+	if (iequals(parameter_value_string, "data_server")) {
+		variable = DataAssimilationDataSource::DataServer;
+	}
+	else if (iequals(parameter_value_string, "local_files")) {
+		variable = DataAssimilationDataSource::LocalFiles;
+	} else {
+		printf("Encountered invalid value for data assimilation data source parameter: %s\n", parameter_value_string.c_str());
+		exit(EXIT_FAILURE);
+	}
+}
+
+template <>
+void stringToValue(const std::string& parameter_value_string, Logger::DebugLevel& variable) {
+	int enum_int;
+	std::stringstream tmp(parameter_value_string);
+	tmp >> enum_int;
+
+	if (enum_int < 0 or enum_int > 4) {
+		printf("Encountered invalid enum value!");
+		exit(EXIT_FAILURE);
+	}
+
+	variable = static_cast<Logger::DebugLevel>(enum_int);
+}

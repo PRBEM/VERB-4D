@@ -10,6 +10,12 @@
 
 #include "UpdatableMatrix.h"
 
+// enable alternative tokens
+#ifdef _MSC_VER
+    #include<iso646.h>
+#endif
+
+
 #define UPDATE_EXT ".lst"
 
 using namespace std;
@@ -284,6 +290,12 @@ void MatrixLimit(UpdatableMatrix< Matrix4D<double> > &M, const Matrix4D<double> 
 	}
 }
 
+
+template <typename MatrixND>
+UpdatableListMatrix<MatrixND>::UpdatableListMatrix(UpdatableListMatrix<MatrixND>::MERGE_TYPE merge_type) {
+	this->merge_type = merge_type;
+}
+
 /**
  * Read UpdatableMatrix rules from ini-file
  *
@@ -331,6 +343,32 @@ bool UpdatableMatrix<MatrixND>::readFromIniFile(const string& ini_filename, cons
 	return true;
 }
 
+/**
+ * @brief read .lst update file and store the update times and file paths in the queue lst_update_queue
+ * @param file_name .lst update file, each line holds a time as a number and a file path
+ */
+template<typename T>
+void fill_queue_from_file(std::queue<QueueElement<T>>& queue, std::string filename){
+
+	std::ifstream update_file(filename);
+	std::string current_line;
+	if(update_file.is_open())
+	{
+		while(std::getline(update_file, current_line))
+		{   
+			T value;
+			std::stringstream time_and_value;
+			double time;
+
+			time_and_value << current_line;
+			time_and_value >> time;
+			time_and_value >> value;
+
+			queue.push({time, value});
+		}
+	}
+	update_file.close();
+}
 
 
 /**
@@ -371,7 +409,7 @@ bool UpdatableMatrix<MatrixND>::readFromString(const string& file_line_string, c
 			// This update-file will tell us when and how to update the array
 			this->update_filename = data_filename;
 			Logger::message << "	Update from: " << this->update_filename << endl;
-			this->update_pos = 0;
+			fill_queue_from_file(lst_update_queue, data_filename);
 
 		} else {
 			// If it's not an update-file, no updates
@@ -403,7 +441,16 @@ bool UpdatableMatrix<MatrixND>::readFromString(const string& file_line_string, c
 		// If not the end - read the next parameter, which is scaling coefficient
 		file_line_stream >> this->scale_string;
 		Logger::message << "	Scale: " << this->scale_string << endl;
-		this->scale_pos = 0;
+
+		if (this->scale_string != empty_marker) {
+			if (is_number(this->scale_string)) {
+				std::stringstream tmp(this->scale_string);
+				tmp >> this->latest_scale_coefficient;
+			} else {
+				fill_queue_from_file(scale_update_queue, this->scale_string);
+			}
+		}
+
 	} else {
 		// If there is nothing - no scaling
 		this->scale_string  = "";
@@ -416,12 +463,27 @@ bool UpdatableMatrix<MatrixND>::readFromString(const string& file_line_string, c
 		file_line_stream >> this->Q1_from_string;
 		file_line_stream >> this->Q1_to_string;
 		Logger::message << "	Limits: " << this->Q1_from_string << " to " << this->Q1_to_string << endl;
-		this->Q1_from_pos = 0;
-		this->Q1_to_pos = 0;
-	} else {
-		// If there is nothing - no limiting
-		this->Q1_from_string = "";
-		this->Q1_to_string = "";
+		
+		if (this->Q1_from_string != empty_marker) {
+			if (is_number(this->Q1_from_string)) {
+				std::stringstream tmp(this->Q1_from_string);
+				tmp >> this->latest_Q1_from;
+			} else {
+				fill_queue_from_file(Q1_from_update_queue, this->Q1_from_string);
+			}
+		}
+		
+		if (this->Q1_to_string != empty_marker) {
+			if (is_number(this->Q1_to_string)) {
+				std::stringstream tmp(this->Q1_to_string);
+				tmp >> this->latest_Q1_to;
+			} else {
+				fill_queue_from_file(Q1_to_update_queue, this->Q1_to_string);
+			}
+		}
+        
+        this->is_limited = true;
+        
 	}
 
 	// Check for the end of line
@@ -431,12 +493,27 @@ bool UpdatableMatrix<MatrixND>::readFromString(const string& file_line_string, c
 		file_line_stream >> this->Q2_from_string;
 		file_line_stream >> this->Q2_to_string;
 		Logger::message << "	Limits: " << this->Q2_from_string << " to " << this->Q2_to_string << endl;
-		this->Q2_from_pos = 0;
-		this->Q2_to_pos = 0;
-	} else {
-		// If there is nothing - no limiting
-		this->Q2_from_string = "";
-		this->Q2_to_string = "";
+
+		if (this->Q2_from_string != empty_marker) {
+			if (is_number(this->Q2_from_string)) {
+				std::stringstream tmp(this->Q2_from_string);
+				tmp >> this->latest_Q2_from;
+			} else {
+				fill_queue_from_file(Q2_from_update_queue, this->Q2_from_string);
+			}
+		}
+
+		if (this->Q2_to_string != empty_marker) {
+			if (is_number(this->Q2_to_string)) {
+				std::stringstream tmp(this->Q2_to_string);
+				tmp >> this->latest_Q2_to;
+			} else {
+				fill_queue_from_file(Q2_to_update_queue, this->Q2_to_string);
+			}
+		}
+
+        this->is_limited = true;
+        
 	}
 
 	// Check for the end of line
@@ -446,12 +523,27 @@ bool UpdatableMatrix<MatrixND>::readFromString(const string& file_line_string, c
 		file_line_stream >> this->Q3_from_string;
 		file_line_stream >> this->Q3_to_string;
 		Logger::message << "	Limits: " << this->Q3_from_string << " to " << this->Q3_to_string << endl;
-		this->Q3_from_pos = 0;
-		this->Q3_to_pos = 0;
-	} else {
-		// If there is nothing - no limiting
-		this->Q3_from_string = "";
-		this->Q3_to_string = "";
+
+		if (this->Q3_from_string != empty_marker) {
+			if (is_number(this->Q3_from_string)) {
+				std::stringstream tmp(this->Q3_from_string);
+				tmp >> this->latest_Q3_from;
+			} else {
+				fill_queue_from_file(Q3_from_update_queue, this->Q3_from_string);
+			}
+		}
+
+		if (this->Q3_to_string != empty_marker) {
+			if (is_number(this->Q3_to_string)) {
+				std::stringstream tmp(this->Q3_to_string);
+				tmp >> this->latest_Q3_to;
+			} else {
+				fill_queue_from_file(Q3_to_update_queue, this->Q3_to_string);
+			}
+		}
+
+        this->is_limited = true;
+
 	}
 
 	// Check for the end of line
@@ -461,14 +553,32 @@ bool UpdatableMatrix<MatrixND>::readFromString(const string& file_line_string, c
 		file_line_stream >> this->Q4_from_string;
 		file_line_stream >> this->Q4_to_string;
 		Logger::message << "	Limits: " << this->Q4_from_string << " to " << this->Q4_to_string << endl;
-		this->Q4_from_pos = 0;
-		this->Q4_to_pos = 0;
-	} else {
-		// If there is nothing - no limiting
-		this->Q4_from_string = "";
-		this->Q4_to_string = "";
+
+		if (this->Q4_from_string != empty_marker) {
+			if (is_number(this->Q4_from_string)) {
+				std::stringstream tmp(this->Q4_from_string);
+				tmp >> this->latest_Q4_from;
+			} else {
+				fill_queue_from_file(Q4_from_update_queue, this->Q4_from_string);
+			}
+		}
+
+		if (this->Q4_to_string != empty_marker) {
+			if (is_number(this->Q4_to_string)) {
+				std::stringstream tmp(this->Q4_to_string);
+				tmp >> this->latest_Q4_to;
+			} else {
+				fill_queue_from_file(Q4_to_update_queue, this->Q4_to_string);
+			}
+		}
+
+        this->is_limited = true;
+
 	}
 
+	// if (!scale_string.empty() and scale_string != empty_marker) {
+	// 	fill_queue_from_file(lst_update_queue, scale_string);
+	// }
 	return true;
 }
 
@@ -504,7 +614,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, const MatrixND& q1, 
 	//double current_time = iteration * dt;
 
 	// A time from the scaling, limiting, and updating file, will be used later
-	double update_time;
+	double update_time = 0.0; // Assing some default value. While loop should change it.
 
 	// Check if the original array was initialized,
 	// if not - allocate memory and fill it with current array data
@@ -527,9 +637,12 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, const MatrixND& q1, 
 		// filename for update
 		string data_filename;
 
-		// Search for current time step line (or closest to it) in the update-file,
-		// The second column will be data-filename
-		data_filename = GetCurrentTimeValue(this->update_filename, this->update_pos, current_time, update_time);
+		// Search the queue for the correct next file name according to the time list
+		while(!lst_update_queue.empty() && current_time >= lst_update_queue.front().time){
+			data_filename = lst_update_queue.front().value;
+			update_time = lst_update_queue.front().time;
+			lst_update_queue.pop();
+		}
 
 		// Check if data-filename is not an empty-file-marker
 		if (!data_filename.empty()
@@ -564,17 +677,25 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, const MatrixND& q1, 
 
 	if (!this->scale_string.empty() && this->scale_string != empty_marker) {
 		// the scaling coefficient
-		double scale_coefficient;
+		double scale_coefficient = latest_scale_coefficient;
 
 		// the scaling coefficient in the string form
 		string scale_coefficient_string;
 
 		// this->scale_string contains either filename or a coefficient itself
 		// 'GetCurrentTimeValue' will check it and return the coefficient in both cases
-		scale_coefficient_string = GetCurrentTimeValue(this->scale_string, this->scale_pos, current_time, update_time);
+		//scale_coefficient_string = GetCurrentTimeValue(this->scale_string, this->scale_pos, current_time, update_time);
+
+		while(!scale_update_queue.empty() && current_time >= scale_update_queue.front().time){
+			scale_coefficient = scale_update_queue.front().value;
+			update_time = scale_update_queue.front().time;
+			scale_update_queue.pop();
+			updated = true;
+			latest_scale_coefficient = scale_coefficient;
+		}
 
 		// convert from string value into double value
-		stringstream(scale_coefficient_string) >> scale_coefficient;
+		//stringstream(scale_coefficient_string) >> scale_coefficient;
 
 		if (scale_coefficient != 1) {
 			// Output for the user what we just did - scaled the array (array-name) by (scaling value)
@@ -587,8 +708,6 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, const MatrixND& q1, 
 			(*this) *= scale_coefficient;
 			// Another way to do the same:
 			//this->MatrixND::operator*= (scale_coefficient);
-
-			updated = true;
 		}
 	}
 
@@ -596,101 +715,84 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, const MatrixND& q1, 
 	// Limiting
 
 	// values for limiting - from, and to
-	double Q1_from = -1e99, Q1_to = 1e99;
-	double Q2_from = -1e99, Q2_to = 1e99;
-	double Q3_from = -1e99, Q3_to = 1e99;
-	double Q4_from = -1e99, Q4_to = 1e99;
-
+	double Q1_from = latest_Q1_from, Q1_to = latest_Q1_to;
+	double Q2_from = latest_Q2_from, Q2_to = latest_Q2_to;
+	double Q3_from = latest_Q3_from, Q3_to = latest_Q3_to;
+	double Q4_from = latest_Q4_from, Q4_to = latest_Q4_to;
 
 	// limiting coefficient, as a string
 	string limit_coefficient_string;
-	bool was_limited = false;
 
-	// check, if limiting rule is empty
-	if (!Q1_from_string.empty() && Q1_from_string != empty_marker) {
-		limit_coefficient_string = GetCurrentTimeValue(this->Q1_from_string, this->Q1_from_pos, current_time, update_time);
+    // Search the queue for the correct limit according to the time list
+    while(!Q1_to_update_queue.empty() && current_time >= Q1_to_update_queue.front().time){
+        Q1_to = Q1_to_update_queue.front().value;
+        update_time = Q1_to_update_queue.front().time;
+        Q1_to_update_queue.pop();
+        latest_Q1_to = Q1_to;
+        updated = true;
+    }
 
-		// convert the limiting value from string to double
-		stringstream(limit_coefficient_string) >> Q1_from;
+    while(!Q1_from_update_queue.empty() && current_time >= Q1_from_update_queue.front().time){
+        Q1_from = Q1_from_update_queue.front().value;
+        update_time = Q1_from_update_queue.front().time;
+        Q1_from_update_queue.pop();
+        latest_Q1_from = Q1_from;
+        updated = true;
+    }
 
-		was_limited = true;
-	}
-	// Exactly the same, as for limiting-from: this is limiting-to
-	if (!Q1_to_string.empty() && Q1_to_string != empty_marker) {
-		// else - get the limiting value
-		limit_coefficient_string = GetCurrentTimeValue(this->Q1_to_string, this->Q1_to_pos, current_time, update_time);
+    while(!Q2_to_update_queue.empty() && current_time >= Q2_to_update_queue.front().time){
+        Q2_to = Q2_to_update_queue.front().value;
+        update_time = Q2_to_update_queue.front().time;
+        Q2_to_update_queue.pop();
+        latest_Q2_to = Q2_to;
+        updated = true;
+    }
 
-		// convert the limiting value from string to double
-		stringstream(limit_coefficient_string) >> Q1_to;
+    while(!Q2_from_update_queue.empty() && current_time >= Q2_from_update_queue.front().time){
+        Q2_from = Q2_from_update_queue.front().value;
+        update_time = Q2_from_update_queue.front().time;
+        Q2_from_update_queue.pop();
+        latest_Q2_from = Q2_from;
+        updated = true;
+    }
 
-		was_limited = true;
-	}
+    while(!Q3_to_update_queue.empty() && current_time >= Q3_to_update_queue.front().time){
+        Q3_to = Q3_to_update_queue.front().value;
+        update_time = Q3_to_update_queue.front().time;
+        Q3_to_update_queue.pop();
+        latest_Q3_to = Q3_to;
+        updated = true;
+    }
 
-	// check, if limiting rule is empty
-	if (!Q2_from_string.empty() && Q2_from_string != empty_marker) {
-		limit_coefficient_string = GetCurrentTimeValue(this->Q2_from_string, this->Q2_from_pos, current_time, update_time);
+    while(!Q3_from_update_queue.empty() && current_time >= Q3_from_update_queue.front().time){
+        Q3_from = Q3_from_update_queue.front().value;
+        update_time = Q3_from_update_queue.front().time;
+        Q3_from_update_queue.pop();
+        latest_Q3_from = Q3_from;
+        updated = true;
+    }
 
-		// convert the limiting value from string to double
-		stringstream(limit_coefficient_string) >> Q2_from;
+    while(!Q4_to_update_queue.empty() && current_time >= Q4_to_update_queue.front().time){
+        Q4_to = Q4_to_update_queue.front().value;
+        update_time = Q4_to_update_queue.front().time;
+        Q4_to_update_queue.pop();
+        latest_Q4_to = Q4_to;
+        updated = true;
+    }
 
-		was_limited = true;
-	}
-	// Exactly the same, as for limiting-from: this is limiting-to
-	if (!Q2_to_string.empty() && Q2_to_string != empty_marker) {
-		// else - get the limiting value
-		limit_coefficient_string = GetCurrentTimeValue(this->Q2_to_string, this->Q2_to_pos, current_time, update_time);
-
-		// convert the limiting value from string to double
-		stringstream(limit_coefficient_string) >> Q2_to;
-
-		was_limited = true;
-	}
-
-	// check, if limiting rule is empty
-	if (!Q3_from_string.empty() && Q3_from_string != empty_marker) {
-		limit_coefficient_string = GetCurrentTimeValue(this->Q3_from_string, this->Q3_from_pos, current_time, update_time);
-
-		// convert the limiting value from string to double
-		stringstream(limit_coefficient_string) >> Q3_from;
-
-		was_limited = true;
-	}
-	// Exactly the same, as for limiting-from: this is limiting-to
-	if (!Q3_to_string.empty() && Q3_to_string != empty_marker) {
-		// else - get the limiting value
-		limit_coefficient_string = GetCurrentTimeValue(this->Q3_to_string, this->Q3_to_pos, current_time, update_time);
-
-		// convert the limiting value from string to double
-		stringstream(limit_coefficient_string) >> Q3_to;
-
-		was_limited = true;
-	}
-
-	// check, if limiting rule is empty
-	if (!Q4_from_string.empty() && Q4_from_string != empty_marker) {
-		limit_coefficient_string = GetCurrentTimeValue(this->Q4_from_string, this->Q4_from_pos, current_time, update_time);
-
-		// convert the limiting value from string to double
-		stringstream(limit_coefficient_string) >> Q4_from;
-
-		was_limited = true;
-	}
-	// Exactly the same, as for limiting-from: this is limiting-to
-	if (!Q4_to_string.empty() && Q4_to_string != empty_marker) {
-		// else - get the limiting value
-		limit_coefficient_string = GetCurrentTimeValue(this->Q4_to_string, this->Q4_to_pos, current_time, update_time);
-
-		// convert the limiting value from string to double
-		stringstream(limit_coefficient_string) >> Q4_to;
-
-		was_limited = true;
-	}
+    while(!Q4_from_update_queue.empty() && current_time >= Q4_from_update_queue.front().time){
+        Q4_from = Q4_from_update_queue.front().value;
+        update_time = Q4_from_update_queue.front().time;
+        Q4_from_update_queue.pop();
+        latest_Q4_from = Q4_from;
+        updated = true;
+    }
 
 	// Set zeros everywhere where we shouldn't have the values (this is the limiting)
 	MatrixLimit(*this, q1, q2, q3, q4, Q1_from, Q1_to, Q2_from, Q2_to, Q3_from, Q3_to, Q4_from, Q4_to);
 
 	// Tell user what we've done - what we have limited, from where and to where
-	if (was_limited) {
+	if (is_limited) {
 		user_output << " ";
 		//if (Q1_from > -1e99) user_output << " from " << Q1_from;
 		//if (Q1_to < 1e99) user_output << " to " << Q1_to;
@@ -718,7 +820,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, const MatrixND& q1, 
 	}
 
 	if (user_output.str().length() > 0) {
-		Logger::message << this->name << ": " << user_output.str() << endl;
+		Logger::debug << this->name << ": " << user_output.str() << endl;
 	}
 
 	return updated;
@@ -809,8 +911,10 @@ bool UpdatableListMatrix<MatrixND>::readFromIniFile(string ini_filename, const M
  * @param Q4 - corresponding grid coordinate
  */
 template <typename MatrixND>
-void UpdatableListMatrix<MatrixND>::update(double current_time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4) {
+bool UpdatableListMatrix<MatrixND>::update(double current_time, const MatrixND& Q1, const MatrixND& Q2, const MatrixND& Q3, const MatrixND& Q4) {
 	unsigned int d_it;
+
+	bool updated_any = false;
 
 	// check if there are any coefficients in the list at all
 	if (matricesList.size() > 0) {
@@ -818,22 +922,48 @@ void UpdatableListMatrix<MatrixND>::update(double current_time, const MatrixND& 
 
 		// set base (parent) class to be zero
 		MatrixND::operator = (0);
-
+		
 		// update each matrix in the list
-		for (d_it = 0; d_it < matricesList.size(); d_it++)
-			matricesList[d_it].update(current_time, Q1, Q2, Q3, Q4);
+		for (d_it = 0; d_it < matricesList.size(); d_it++) {
+			bool updated_single = matricesList[d_it].update(current_time, Q1, Q2, Q3, Q4);
+			updated_any = updated_any or updated_single;
+		}
 
+		switch (merge_type) {
+			case UpdatableListMatrix::MERGE_TYPE::SUM:
+				// combine the UpdatableMatrices from the list together into one final updated matrix
+				for (d_it = 0; d_it < matricesList.size(); d_it++) {
+					// Applying "operator+=" of the base class to each of the matrices
+					// this will add (sum) all the matrices together one by one
+					(*this) += matricesList[d_it];
+				}
+				break;
 
-		// combine the UpdatableMatrices from the list together into one final updated matrix
-		for (d_it = 0; d_it < matricesList.size(); d_it++)
-			// Applying "operator+=" of the base class to each of the matrices
-			// this will add (sum) all the matrices together one by one
-			(*this) += matricesList[d_it];
+			case UpdatableListMatrix::MERGE_TYPE::MEAN:
+				MatrixND local_num_elements(*this);
+				local_num_elements = 0;
+
+				for (d_it = 0; d_it < matricesList.size(); d_it++) {
+					(*this) += matricesList[d_it];
+					local_num_elements += matricesList[d_it].is_finite();
+				} 
+
+				(*this) = (*this).divide(local_num_elements);
+
+				break;
+		}
 	} else {
 		// if there is nothing in the list - leave everything the way it is
+		return false;
 	}
+
+	return updated_any;
 }
 
+template <typename MatrixND>
+void UpdatableListMatrix<MatrixND>::clearMatricesList() {
+	matricesList.clear();
+}
 
 /**
  * Search for current time-step in an update-file and return the corresponding value

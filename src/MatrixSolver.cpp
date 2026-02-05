@@ -51,7 +51,7 @@ void AddBoundary(DiagMatrix &matr_A, BoundaryConditionType type, int in, int id1
 		matr_A[id0][in] = 1 / dh;
 		matr_A[id1][in] = -1 / dh;
 	} else {
-		std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << type << std::endl;
+		Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << type << std::endl;
 		exit(EXIT_FAILURE);
 	}
 }
@@ -89,7 +89,7 @@ bool AddBoundaries_1D(
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_LBC_type << std::endl;
+			Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_LBC_type << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -108,7 +108,7 @@ bool AddBoundaries_1D(
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
+			Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -122,7 +122,7 @@ bool AddBoundaries_1D(
 * \param LBC, UBC for x and y - predefined 2D boundaries/types
 */
 bool AddBoundaries_2D(
-		CalculationMatrix &matr_A, Matrix1D<double> &vec_C,
+		CalculationMatrix &matr_A, CalculationMatrix &matr_C,
 		const Matrix2D<double> &x, const Matrix2D<double> &y,
 		int x_size, int y_size,
 		const Matrix1D<double>& x_LBC, const Matrix1D<double>& x_UBC,
@@ -137,7 +137,7 @@ bool AddBoundaries_2D(
 	// Boundary conditions
 	if (ix == 0 && x_size >= 3) {
 
-		vec_C[in] = x_LBC[iy];
+		matr_C[0][in] = x_LBC[iy];
 		id1 = matr_A.index1d(ix + 1, iy) - in;
 		dh = x[ix + 1][iy] - x[ix][iy];
 		//AddBoundary(matr_A, x_LBC_type, in, id, dh);
@@ -150,13 +150,13 @@ bool AddBoundaries_2D(
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_LBC_type << std::endl;
+			Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_LBC_type << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
 	} else if (ix == x_size - 1 && x_size >= 3) {
 
-		vec_C[in] = x_UBC[iy];
+		matr_C[0][in] = x_UBC[iy];
 		id1 = matr_A.index1d(ix - 1, iy) - in;
 		dh = x[ix][iy] - x[ix - 1][iy];
 		//AddBoundary(matr_A, x_UBC_type, in, id, dh);
@@ -169,13 +169,13 @@ bool AddBoundaries_2D(
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
+			Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
 	} else if (iy == 0 && y_size >= 3) {
 
-		vec_C[in] = y_LBC[ix];
+		matr_C[0][in] = y_LBC[ix];
 		id1 = matr_A.index1d(ix, iy + 1) - in;
 		dh = y[ix][iy + 1] - y[ix][iy];
 		//AddBoundary(matr_A, y_LBC_type, in, id, dh);
@@ -188,13 +188,13 @@ bool AddBoundaries_2D(
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << y_LBC_type << std::endl;
+			Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << y_LBC_type << std::endl;
 			exit(EXIT_FAILURE);
 		}
 
 	} else if (iy == y_size - 1 && y_size >= 3) {
 
-		vec_C[in] = y_UBC[ix];
+		matr_C[0][in] = y_UBC[ix];
 		id1 = matr_A.index1d(ix, iy - 1) - in;
 		dh = y[ix][iy] - y[ix][iy - 1];
 		//AddBoundary(matr_A, y_UBC_type, in, id, dh);
@@ -207,7 +207,7 @@ bool AddBoundaries_2D(
 			matr_A[id0][in] = 1 / dh;
 			matr_A[id1][in] = -1 / dh;
 		} else {
-			std::cout << "2D_DIFF_BOUNDARY: unknown boundary type: " << y_UBC_type << std::endl;;
+			Logger::error << "2D_DIFF_BOUNDARY: unknown boundary type: " << y_UBC_type << std::endl;;
 			exit(EXIT_FAILURE);
 		}
 
@@ -218,63 +218,133 @@ bool AddBoundaries_2D(
 	return true;
 }
 
-/**
- * Lapack solver for general banded matrix equations A * x = rhs
- * \param A Matrix A as DiagMatrix
- * \param rhs right-hand side vector, overwritten with solution
- */
-void Lapack(const DiagMatrix &A, Matrix1D<double> &rhs) {
 
-	long mat_rows = (long)A.at(0).size_q1;
-	long rhs_rows = (long)rhs.size_q1;
-	if(mat_rows != rhs_rows) {
-		std::cerr << "Number of rows in matrix A must be equal to elements of rhs, but was " << mat_rows << " and " << rhs_rows << "!\n";
+/**
+ * Lapack inversion.
+ *
+ * A * X = B - equation
+ *
+ * LAPACK - Linear Algebra PACKage. For linear algebra methods. Using the lapack library from http://www.netlib.org/lapack/
+ */
+#ifdef LU_CACHING
+void Lapack(const CalculationMatrix& A, const CalculationMatrix& B,const CalculationMatrix& C, Matrix2D<double>& psd, int num_substeps,
+		    double* lu_cache, long* index_cache, bool recompute_lu)
+#else
+void Lapack(const CalculationMatrix& A, const CalculationMatrix& B,const CalculationMatrix& C, Matrix2D<double>& psd, int num_substeps)
+#endif
+{
+	// Save A and B to check the solution at the end
+	// Matrix1D<double> B_res;
+	// B_res = B;
+
+	// iterator for diagonals of the diagonal matrix
+
+	// make RHS = B*f + C
+	long m_size = static_cast<long>(A.total_size);
+	DiagMatrix::const_iterator it = A.cbegin();
+	long kl = -it->first; // first diagonal
+	it = A.cend();
+	it--;
+	long ku = it->first; // last diagonal
+	long nrhs = 1;
+	long ldab = 2 * kl + ku + 1;
+	long ldb = m_size;
+	long info = 1;
+	const char transpose = 'N';
+
+#ifdef LU_CACHING
+	double* matrix_lu = lu_cache;
+	long* ipiv = index_cache;
+
+	if(recompute_lu){
+		for (int i = 0; i < (kl+ku+kl+1)*m_size; i++) {
+			matrix_lu[i] = 0;
+		}
+
+		int in, j;
+		for (in = 0; in < m_size; in++) {
+			for (it = A.begin(); it != A.end(); it++) {
+				// Check if the element at line (in) and diagonal (it->first) is inside the matrix.
+				j = in + it->first; // column number
+				if (j >= 0 && j < m_size) {
+					// converting matrix, stored as diagonals, into lapack matrix (also diagonal)
+					// newmat[j][ku+kl-j+in] = it->second[in];
+					matrix_lu[j*(kl+ku+kl+1) + ku+kl-j+in] = it->second[in];
+				}
+			}
+		}
+
+		// LU decomposition
+		dgbtrf_(&m_size, &m_size, &kl, &ku, matrix_lu, &ldab, ipiv, &info );
+		if (info != 0) {
+			Logger::error << "Error computing LU decomposition\n";
+			exit(EXIT_FAILURE);
+		}
+	}
+#else
+	double *matrix_lu = new double[(kl+ku+kl+1)*m_size];
+	long* ipiv = new long[m_size];
+	double **newmat = new double*[m_size];
+
+	for(int i = 0; i < m_size; i++) {
+		newmat[i] = &matrix_lu[i*(kl+ku+kl+1)];
+	}
+	for (int i = 0; i < (kl+ku+kl+1)*m_size; i++) {
+		matrix_lu[i] = 0;
+	}
+
+	for (int in = 0; in < m_size; in++) {
+		for (const auto& [idx, diagonal] : A) {
+			// Check if the element at line (in) and diagonal is inside the matrix.
+			int col = in + idx; // column number
+			if (col >= 0 && col < m_size) {
+				// converting matrix, stored as diagonals, into lapack matrix (also diagonal)
+				newmat[col][ku+kl-idx] = diagonal[in];
+			}
+		}
+	}
+	
+	// LU decomposition
+	dgbtrf_(&m_size, &m_size, &kl, &ku, matrix_lu, &ldab, ipiv, &info);
+	if (info != 0) {
+		Logger::error << "Error computing LU decomposition\n";
 		exit(EXIT_FAILURE);
 	}
+#endif
 
-	long kl = (long)(-A.cbegin()->first); // (absolute value of) lowest off-diagonal index
-	long ku = (long)(A.crbegin()->first); // highest off-diagonal index
-	long mat_cols = 2 * kl + ku + 1;
-	long rhs_cols = 1;
-	
-	long* ipiv = new long[mat_rows]; // lapack array to store permutation indices
-	long info = 1; // lapack error code
-
-	double *flat_matrix = new double[mat_cols * mat_rows];
-	for (int i = 0; i < mat_cols * mat_rows; i++) {
-		flat_matrix[i] = 0;
+	Matrix1D<double> rhs(A.total_size);
+	for (size_t ix = 0; ix < psd.size_q1; ix++) {
+		for (size_t iy = 0; iy < psd.size_q2; iy++) {
+			int in = B.index1d(static_cast<int>(ix), static_cast<int>(iy));
+			rhs[in] = psd[ix][iy];
+		}
 	}
+	// Solving the system
+	for(int i = 0; i < num_substeps; i++) {
+		rhs.times_equal(B.at(0));
+		rhs += C.at(0);
 
-	// rearrange CalculationMatrix A to Lapack's general banded matrix format 
-	for (const auto& [idx, diagonal] : A) {
-		int diag_start = std::max(0, -idx);
-		int diag_end = std::min(mat_rows, mat_rows - idx);
-		int offset = ku + kl + idx * (mat_cols - 1);
-		for (int in = diag_start; in < diag_end; in++) {
-			flat_matrix[in * mat_cols + offset] = diagonal[in];
+		dgbtrs_(&transpose, &m_size, &kl, &ku, &nrhs, matrix_lu, &ldab, ipiv, &rhs[0], &ldb, &info);
+		if (info != 0) {
+			Logger::error << "Error solving 2d diffusion system\n";
+			exit(EXIT_FAILURE);
+		}
+	}
+	// copy back
+	for (size_t ix = 0; ix < psd.size_q1; ix++) {
+		for (size_t iy = 0; iy < psd.size_q2; iy++) {
+			int in = B.index1d(static_cast<int>(ix), static_cast<int>(iy));
+			psd[ix][iy] = rhs[in];
 		}
 	}
 
-	// std::ofstream output("Lap_mat.dat");
-	// for (int i = 0; i < mat_rows; i++) {
-	// 	for (int j = 0; j < mat_cols; j++) {
-	// 		output << flat_matrix[i * mat_cols + j] << '\t';
-	// 	}
-	// 	output << std::endl;
-	// }
-	// output.close();
-	
-	// Lapack's double-precision general banded (dgb) matrix solver
-	dgbsv_(&mat_rows, &kl, &ku, &rhs_cols, flat_matrix, &mat_cols, ipiv, &rhs[0], &rhs_rows, &info);
-
-	if (info != 0) {
-		printf("Lapack inversion Error! INFO = %ld.\n", info);
-		exit(EXIT_FAILURE);
-	}
-
+#ifndef LU_CACHING
 	delete[] ipiv;
-	delete[] flat_matrix;
+	delete[] matrix_lu;
+	delete[] newmat;
+#endif
 }
+
 
 /**
 * numerical derivative approximation of a matrix in 1D
