@@ -42,13 +42,13 @@ Logger::DebugLevel Logger::getDebugLevel()
 }
 
 /// can signify errors while writing message
-void Logger::writeError(const std::string& message)
+void Logger::writeError(const std::string& msg)
 {
 	// if level of error is greator than set debug level
 	if (mDebugLevel <= DEBUG_LEVEL_ERROR) {
 		// type out [Error]
 		const char *type = "[Error] ";
-		std::string str = type + message;
+		std::string str = type + msg;
 		// write out message
 		writeMessage(str); // Add [Error] //message = message.append("[Error]: ");....
 		exit(EXIT_FAILURE);
@@ -56,44 +56,44 @@ void Logger::writeError(const std::string& message)
 }
 
 /// Add message directly to the end of a file
-void Logger::appendToFile(const std::string& message){
-	logFile << message << std::flush;
+void Logger::appendToFile(const std::string& msg){
+	logFile << msg << std::flush;
 }
 
 /// can signify warning while writing message
-void Logger::writeWarning(const std::string& message)
+void Logger::writeWarning(const std::string& msg)
 {
 	// if level of warning is greator than set debug level
 	if (mDebugLevel <= DEBUG_LEVEL_WARNING) {
 		// type out [Error]
 		const char *type = "[Warning] ";
-		std::string str = type + message;
+		std::string str = type + msg;
 		// write out message
 		writeMessage(str);
 	}
 }
 
 /// Write out message to logger with the inputted message type 
-void Logger::writeMessage(const std::string& message)
+void Logger::writeMessage(const std::string& msg)
 {
 	if (mDebugLevel <= DEBUG_LEVEL_MESSAGE) {
-		std::string text(message);
+		std::string text(msg);
 				//std::replace(text.begin(), text.end(), '\n', ' '); // Fix it later
 		// Send message to standard console out
-		std::cout << message;
+		std::cout << msg;
 		// add message to end of file
 		appendToFile(text);
 	}
 }
 
 /// Write out message to logger with the inputted message type 
-void Logger::writeDebug(const std::string& message)
+void Logger::writeDebug(const std::string& msg)
 {
 	if (mDebugLevel <= DEBUG_LEVEL_DEBUG) {
-		std::string text(message);
+		std::string text(msg);
 				//std::replace(text.begin(), text.end(), '\n', ' '); // Fix it later
 		// Send message to standard console out
-		std::cout << message;
+		std::cout << msg;
 		// add message to end of file
 		appendToFile(text);
 	}

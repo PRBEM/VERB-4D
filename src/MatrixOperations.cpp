@@ -18,6 +18,11 @@
 #include <memory>
 #include "MatrixOperations.h"
 
+// enable alternative tokens
+#ifdef _MSC_VER
+    #include<iso646.h>
+#endif
+
 extern "C" {
 
 int dgemv_(char *trans, long *m, long *n, double *alpha, 

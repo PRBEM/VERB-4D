@@ -126,6 +126,11 @@
 #include <string>
 #include <thread>
 
+// enable alternative tokens
+#ifdef _MSC_VER
+    #include<iso646.h>
+#endif
+
 #include "Convection_2D.h"
 #include "Convection_3D.h"
 #include "Diffusion_1D.h"
@@ -1225,7 +1230,9 @@ int main(int argc, char *argv[])
             // Wait until the writing of the last output file is finished
             output_writer.wait();
 
-            std::ostringstream PSD_filename;
+            // Clear the stream
+            PSD_filename.str("");    // Clear content
+            PSD_filename.clear();    // Reset state flags
             PSD_filename << outputFolder << "PSD_" << std::setw(5) << std::setfill('0') << int(it / output_step);
 
             Logger::debug << std::endl

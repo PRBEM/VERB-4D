@@ -38,7 +38,8 @@ namespace pmf::internal {
  */
 string toupper(string str) {
     for (size_t i = 0; i < str.size(); ++i)
-        str[i] = std::toupper(str[i]);
+        // Cast to unsigned char for toupper, then cast result back to char
+        str[i] = static_cast<char>(std::toupper(static_cast<unsigned char>(str[i])));
 
     return str;
 }
@@ -223,7 +224,7 @@ Matrix2D<double> MatArray::to_Matrix2D() const {
         int lin_idx;
         for (size_t ix = 0; ix < dims[0]; ++ix)
             for (size_t iy = 0; iy < dims[1]; ++iy) {
-                lin_idx = ix + iy * dims[0];
+                lin_idx = static_cast<int>(ix + iy * dims[0]);
                 matrix[ix][iy] = *(elem + lin_idx);
             }
 
@@ -244,7 +245,7 @@ Matrix3D<double> MatArray::to_Matrix3D() const {
         for (size_t ix = 0; ix < dims[0]; ++ix)
             for (size_t iy = 0; iy < dims[1]; ++iy)
                 for (size_t iz = 0; iz < dims[2]; ++iz) {
-                    lin_idx = ix + iy * dims[0] + iz * dims[0] * dims[1];
+                    lin_idx = static_cast<int>(ix + iy * dims[0] + iz * dims[0] * dims[1]);
                     matrix[ix][iy][iz] = *(elem + lin_idx);
                 }
 
@@ -603,8 +604,8 @@ pmf::Parameters readParameterOneSatellite(const string& filename) {
 std::vector<pmf::Parameters> pmf::readParameters(const std::string& filename) {
     std::fstream filestream(filename);
     std::vector<pmf::Parameters> result;
-    for (std::string filename; std::getline(filestream, filename);) {
-        result.push_back(readParameterOneSatellite(filename));
+    for (std::string loca_filename; std::getline(filestream, loca_filename);) {
+        result.push_back(readParameterOneSatellite(loca_filename));
     }
     return result;
 }

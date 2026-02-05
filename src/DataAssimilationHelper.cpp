@@ -38,8 +38,8 @@ Matrix2D<double> internal::getModelMatrixConvection2DNoStabilityCheck(
     bool use_log,
     double correlation_factor) {
 
-    int P_size = VP.size_q1;
-    int R_size = VP.size_q2;
+    size_t P_size = VP.size_q1;
+    size_t R_size = VP.size_q2;
 
     Matrix2D<double> result(P_size * R_size, P_size * R_size);
     result = 0.;
@@ -141,7 +141,7 @@ std::pair<int, double> internal::splitTimeStepCourantCondition(
 
     int nt = (cour_num <= maximumCourantNumber)
                  ? 1
-                 : std::ceil(cour_num / maximumCourantNumber);
+                 : static_cast<int>(std::ceil(cour_num / maximumCourantNumber));
 
     double timeStep_new = timeStep / static_cast<double>(nt);
 
@@ -301,7 +301,7 @@ data_assimilation::ObservationSpace internal::convertToObservationSpace(
     int counter{0};
     for (size_t iP = 0; iP < data.size_q1; ++iP) {
         for (size_t iR = 0; iR < data.size_q2; ++iR) {
-            int H_idx = iR + iP * data.size_q2;
+            size_t H_idx = iR + iP * data.size_q2;
             if (std::isfinite(data[iP][iR])) {
                 result.data[counter] = data[iP][iR];
                 result.H[counter][H_idx] = 1.0;
@@ -411,7 +411,7 @@ double internal::interp2d_four_corners(
         {
             if (K_in[iV][iK] <= K_out && K_in[iV][iK] > k_lower) {
                 k_lower = K_in[iV][iK];
-                lower_k_neighbour = iK;
+                lower_k_neighbour = static_cast<int>(iK);
                 break;
             }
         }
@@ -419,7 +419,7 @@ double internal::interp2d_four_corners(
         {
             if (K_in[iV][iK] >= K_out && K_in[iV][iK] < k_upper) {
                 k_upper = K_in[iV][iK];
-                upper_k_neighbour = iK;
+                upper_k_neighbour = static_cast<int>(iK);
                 break;
             }
         }
@@ -446,11 +446,11 @@ double internal::interp2d_four_corners(
     for (size_t iV = 0; iV < nV; iV++) {
         if (V_in[iV][lower_k_neighbour] <= V_out && V_in[iV][lower_k_neighbour] > v_lower) {
             v_lower = V_in[iV][lower_k_neighbour];
-            lower_v_neighbour = iV;
+            lower_v_neighbour = static_cast<int>(iV);
         }
         if (V_in[iV][lower_k_neighbour] >= V_out && V_in[iV][lower_k_neighbour] < v_upper) {
             v_upper = V_in[iV][lower_k_neighbour];
-            upper_v_neighbour = iV;
+            upper_v_neighbour = static_cast<int>(iV);
         }
     }
     if (lower_v_neighbour < 0 || upper_v_neighbour < 0) return std::log(-1);
@@ -470,11 +470,11 @@ double internal::interp2d_four_corners(
     for (size_t iV = 0; iV < nV; iV++) {
         if (V_in[iV][upper_k_neighbour] <= V_out && V_in[iV][upper_k_neighbour] > v_lower) {
             v_lower = V_in[iV][upper_k_neighbour];
-            lower_v_neighbour = iV;
+            lower_v_neighbour = static_cast<int>(iV);
         }
         if (V_in[iV][upper_k_neighbour] >= V_out && V_in[iV][upper_k_neighbour] < v_upper) {
             v_upper = V_in[iV][upper_k_neighbour];
-            upper_v_neighbour = iV;
+            upper_v_neighbour = static_cast<int>(iV);
         }
     }
     if (lower_v_neighbour < 0 || upper_v_neighbour < 0) return std::log(-1);
@@ -500,7 +500,7 @@ std::vector<std::vector<data_assimilation::Observations>> internal::interpolate(
     size_t V_size = V_grid.size_q1;
     size_t K_size = K_grid.size_q2;
 
-    int nT = 0;
+    size_t nT = 0;
     for (auto& instrumentData : data) nT += instrumentData.MLT.size_q1;
     Matrix1D<double> R(nT);
     Matrix1D<double> P(nT);
@@ -523,18 +523,18 @@ std::vector<std::vector<data_assimilation::Observations>> internal::interpolate(
     std::vector<std::vector<Observations>> result(V_size, std::vector<Observations>(K_size));
     // int counter = 0;
 #pragma omp parallel for schedule(dynamic, 1) collapse(2)
-    for (size_t iV = 0; iV < V_size; ++iV) {
+    for (int iV = 0; static_cast<int>(iV) < V_size; ++iV) {
         for (size_t iK = 0; iK < K_size; ++iK) {
             Observations& obs = result[iV][iK];
             obs.R = R;
             obs.P = P;
             obs.PSD.AllocateMemory(nT);
-            int counter = 0;
+            int local_counter = 0;
             for (size_t instrumentIndex = 0; instrumentIndex < data.size(); instrumentIndex++) {
                 auto& instrumentData = data[instrumentIndex];
                 for (size_t it = 0; it < instrumentData.MLT.size_q1; ++it) {
                     auto PSD_in = instrumentData.PSD.xSlice(it);
-                    obs.PSD[counter++] = pow(10., interp2d_four_corners(
+                    obs.PSD[local_counter++] = pow(10., interp2d_four_corners(
                         log10(instrumentData.V.xSlice(it)),
                         K_in[instrumentIndex].xSlice(it),
                         log10(PSD_in),
