@@ -237,8 +237,8 @@ Matrix1D<T>::Matrix1D( const Matrix1D<T> &M ) {
 }
 
 template <class T>
-Matrix1D<T>::Matrix1D(size_t size_q1, const T *data) {
-    this->size_q1 = size_q1;
+Matrix1D<T>::Matrix1D(long int size_q1, const T *data) {
+    this->size_q1 = static_cast<size_t>(size_q1);
     this->AllocateMemory(this->size_q1);
 
     // fast values copying as a memory range
@@ -653,7 +653,7 @@ void Matrix1D<T>::readFromFile(const std::string& filename) {
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix1D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
+void Matrix1D<T>::readFromMatlabFile([[maybe_unused]] const std::string& file, [[maybe_unused]] int columnNumber)
 {
 #if (MATLAB_CAPABLE)
 
@@ -1021,7 +1021,7 @@ void Matrix1D<T>::readFromFile(const std::string& filename, const Matrix1D<T>& g
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix1D<T>::readFromMatlabFile(const std::string& file , const Matrix1D<T>& grid_x)
+void Matrix1D<T>::readFromMatlabFile([[maybe_unused]] const std::string& file, [[maybe_unused]] const Matrix1D<T>& grid_x)
 {
 
 #if (MATLAB_CAPABLE)
@@ -1459,7 +1459,7 @@ Matrix2D<T>::Matrix2D( const Matrix2D<T> &M ) {
 }
 
 template <class T>
-Matrix2D<T>::Matrix2D(const size_t *sizes, const T *data) {
+Matrix2D<T>::Matrix2D(const long int *sizes, const T *data) {
     size_q1 = sizes[0];
     size_q2 = sizes[1];
     AllocateMemory(size_q1, size_q2);
@@ -1913,7 +1913,7 @@ void Matrix2D<T>::readFromFile(const std::string& filename, int read_column) {
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix2D<T>::readFromMatlabFile(const std::string& file ,  int columnNumber)
+void Matrix2D<T>::readFromMatlabFile([[maybe_unused]] const std::string& file, [[maybe_unused]] int columnNumber)
 {
 
 #if (MATLAB_CAPABLE)
@@ -2285,7 +2285,7 @@ void Matrix2D<T>::readFromFile(const std::string& filename, const Matrix2D<T>& g
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix2D<T>::readFromMatlabFile(const std::string& file , const Matrix2D<T>& grid_x, const Matrix2D<T>& grid_y)
+void Matrix2D<T>::readFromMatlabFile([[maybe_unused]] const std::string& file, [[maybe_unused]] const Matrix2D<T>& grid_x, [[maybe_unused]] const Matrix2D<T>& grid_y)
 {
 
 #if (MATLAB_CAPABLE)
@@ -3131,7 +3131,7 @@ void Matrix3D<T>::readFromFile(const std::string& filename, int read_column) {
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix3D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
+void Matrix3D<T>::readFromMatlabFile([[maybe_unused]]const std::string& file, [[maybe_unused]] int columnNumber)
 {
 
 #if (MATLAB_CAPABLE)
@@ -3515,7 +3515,7 @@ void Matrix3D<T>::readFromFile(const std::string& filename, const Matrix3D<T>& g
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix3D<T>::readFromMatlabFile(const std::string& file , const Matrix3D<T>& grid_x, const Matrix3D<T>& grid_y, const Matrix3D<T>& grid_z)
+void Matrix3D<T>::readFromMatlabFile([[maybe_unused]]const std::string& file, [[maybe_unused]] const Matrix3D<T>& grid_x, [[maybe_unused]] const Matrix3D<T>& grid_y, [[maybe_unused]] const Matrix3D<T>& grid_z)
 {
 
 #if (MATLAB_CAPABLE)
@@ -4738,7 +4738,7 @@ mxArray* Matrix4D<T>::createStructMatrix(const std::string& info) const
 * Struct has 7 fields in including - arr time size, size1, size2, size3, size4
 */
 template<class T>
-void Matrix4D<T>::writeToMatlabFile(const std::string& filename, const std::string& info) const {
+void Matrix4D<T>::writeToMatlabFile([[maybe_unused]] const std::string& filename, [[maybe_unused]] const std::string& info) const {
 
 #if (MATLAB_CAPABLE)
 
@@ -4901,7 +4901,7 @@ void Matrix4D<T>::writeToFile(const std::string& filename, const Matrix4D<T> &gr
 * Uses the createStructMatrix() function to pack all the grid dimensions into seperate variables and then combines these variables into a single matlab structure to save in .mat
 */
 template<class T>
-void Matrix4D<T>::writeToMatlabFile(const std::string& file, const Matrix4D<T> &grid_w, const Matrix4D<T> &grid_x, const Matrix4D<T> &grid_y, const Matrix4D<T> &grid_z) const {
+void Matrix4D<T>::writeToMatlabFile([[maybe_unused]] const std::string& file, [[maybe_unused]] const Matrix4D<T> &grid_w, [[maybe_unused]] const Matrix4D<T> &grid_x, [[maybe_unused]] const Matrix4D<T> &grid_y, [[maybe_unused]] const Matrix4D<T> &grid_z) const {
 
 #if (MATLAB_CAPABLE)
 
@@ -5013,7 +5013,7 @@ void Matrix4D<T>::readFromFile(const std::string& filename, int read_column) {
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix4D<T>::readFromMatlabFile(const std::string& file , int columnNumber)
+void Matrix4D<T>::readFromMatlabFile([[maybe_unused]]const std::string& file, [[maybe_unused]] int columnNumber)
 {
 
 #if (MATLAB_CAPABLE)
@@ -5464,7 +5464,7 @@ void Matrix4D<T>::readFromFile(const std::string& filename, const Matrix4D<T>& g
 * This is the same as the readFromFile() function although only compatible with .mat files instead of .plt or other text files
 */
 template<class T>
-void Matrix4D<T>::readFromMatlabFile(const std::string& file , const Matrix4D<T>& grid_w, const Matrix4D<T>& grid_x, const Matrix4D<T>& grid_y, const Matrix4D<T>& grid_z)
+void Matrix4D<T>::readFromMatlabFile([[maybe_unused]] const std::string& file , [[maybe_unused]] const Matrix4D<T>& grid_w, [[maybe_unused]] const Matrix4D<T>& grid_x, [[maybe_unused]] const Matrix4D<T>& grid_y, [[maybe_unused]] const Matrix4D<T>& grid_z)
 {
 #if (MATLAB_CAPABLE)
 
