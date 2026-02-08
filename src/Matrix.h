@@ -67,7 +67,7 @@ public:
 	Matrix1D() = default;
 	Matrix1D( size_t size_q1);
 	Matrix1D( const Matrix1D<T> &M );
-    Matrix1D<T>(size_t size_q1, const T* data);     // pybind is using this constructor
+    Matrix1D<T>(long int size_q1, const T* data);     // pybind is using this constructor
 	~Matrix1D();
 	
 	virtual void AllocateMemory( size_t size_q1 );
@@ -167,7 +167,7 @@ public:
 	Matrix2D() = default;
 	Matrix2D( const Matrix2D<T> &M );
 	Matrix2D( size_t size_q1, size_t size_q2 );
-    Matrix2D(const size_t* sizes, const T* data); 	// pybind is using this constructor
+    Matrix2D(const long int* sizes, const T* data); 	// pybind is using this constructor
 	~Matrix2D();
 
 	virtual void AllocateMemory(size_t size_q1, size_t size_q2);

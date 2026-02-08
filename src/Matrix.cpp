@@ -237,8 +237,8 @@ Matrix1D<T>::Matrix1D( const Matrix1D<T> &M ) {
 }
 
 template <class T>
-Matrix1D<T>::Matrix1D(size_t size_q1, const T *data) {
-    this->size_q1 = size_q1;
+Matrix1D<T>::Matrix1D(long int size_q1, const T *data) {
+    this->size_q1 = static_cast<size_t>(size_q1);
     this->AllocateMemory(this->size_q1);
 
     // fast values copying as a memory range
@@ -1459,7 +1459,7 @@ Matrix2D<T>::Matrix2D( const Matrix2D<T> &M ) {
 }
 
 template <class T>
-Matrix2D<T>::Matrix2D(const size_t *sizes, const T *data) {
+Matrix2D<T>::Matrix2D(const long int *sizes, const T *data) {
     size_q1 = sizes[0];
     size_q2 = sizes[1];
     AllocateMemory(size_q1, size_q2);
