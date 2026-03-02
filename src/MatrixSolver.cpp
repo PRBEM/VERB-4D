@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2015 UCLA
-// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+// SPDX-FileCopyrightText: 2025 GFZ Helmholtz Centre for Geosciences
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -309,7 +309,7 @@ void Lapack(const CalculationMatrix& A, const CalculationMatrix& B,const Calcula
 	Matrix1D<double> rhs(A.total_size);
 	for (size_t ix = 0; ix < psd.size_q1; ix++) {
 		for (size_t iy = 0; iy < psd.size_q2; iy++) {
-			int in = B.index1d(static_cast<int>(ix), static_cast<int>(iy));
+			int in = B.index1d(ix, iy);
 			rhs[in] = psd[ix][iy];
 		}
 	}
@@ -327,7 +327,7 @@ void Lapack(const CalculationMatrix& A, const CalculationMatrix& B,const Calcula
 	// copy back
 	for (size_t ix = 0; ix < psd.size_q1; ix++) {
 		for (size_t iy = 0; iy < psd.size_q2; iy++) {
-			int in = B.index1d(static_cast<int>(ix), static_cast<int>(iy));
+			int in = B.index1d(ix, iy);
 			psd[ix][iy] = rhs[in];
 		}
 	}

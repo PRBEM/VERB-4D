@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+// SPDX-FileCopyrightText: 2025 GFZ Helmholtz Centre for Geosciences
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -7,6 +7,10 @@
 #include "Diffusion_2D.h"
 #include "Matrix_conversion.h"
 #include "const_reference_wrapper.h"
+
+#ifdef USE_PPFV
+    #include "Diffusion_2D_PPFV.h"
+#endif
 
 namespace py = pybind11;
 
@@ -22,4 +26,8 @@ PYBIND11_MODULE(verb4d_solver, m) {
     m.def("Convection_1D", const_reference_wrapper(&Convection_1D_ULTIMATE_QUICKEST6));
     m.def("Convection_2D", const_reference_wrapper(&Convection_2D));
     m.def("Diffusion_2D", const_reference_wrapper(&Diffusion_2D));
+
+#ifdef USE_PPFV
+    m.def("Diffusion_2D_PPFV", const_reference_wrapper(&Diffusion_2D_PPFV));
+#endif
 }

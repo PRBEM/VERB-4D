@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2015 UCLA
-// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+// SPDX-FileCopyrightText: 2025 GFZ Helmholtz Centre for Geosciences
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -14,12 +14,6 @@
  */
 
 #include "UpdatableMatrix.h"
-
-// enable alternative tokens
-#ifdef _MSC_VER
-    #include<iso646.h>
-#endif
-
 
 #define UPDATE_EXT ".lst"
 
@@ -619,7 +613,7 @@ bool UpdatableMatrix<MatrixND>::update(double current_time, const MatrixND& q1, 
 	//double current_time = iteration * dt;
 
 	// A time from the scaling, limiting, and updating file, will be used later
-	double update_time = 0.0; // Assing some default value. While loop should change it.
+	double update_time;
 
 	// Check if the original array was initialized,
 	// if not - allocate memory and fill it with current array data
@@ -945,15 +939,15 @@ bool UpdatableListMatrix<MatrixND>::update(double current_time, const MatrixND& 
 				break;
 
 			case UpdatableListMatrix::MERGE_TYPE::MEAN:
-				MatrixND local_num_elements(*this);
-				local_num_elements = 0;
+				MatrixND num_elements(*this);
+				num_elements = 0;
 
 				for (d_it = 0; d_it < matricesList.size(); d_it++) {
 					(*this) += matricesList[d_it];
-					local_num_elements += matricesList[d_it].is_finite();
+					num_elements += matricesList[d_it].is_finite();
 				} 
 
-				(*this) = (*this).divide(local_num_elements);
+				(*this) = (*this).divide(num_elements);
 
 				break;
 		}

@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2015 UCLA
-// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+// SPDX-FileCopyrightText: 2025 GFZ Helmholtz Centre for Geosciences
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -14,12 +14,7 @@
 #include <iomanip>
 
 #ifdef _MSC_VER
-    #define _CRT_SECURE_NO_WARNINGS
-    // Define gmtime_r as gmtime_s on MSVC
-    #define gmtime_r( ARG1, ARG2 ) gmtime_s( ARG2, ARG1 )
-#else
-    // On POSIX systems (like Linux), gmtime_r already exists
-    #include <time.h>
+#define gmtime_r( ARG1, ARG2 ) do{ *ARG2 = *gmtime( ARG1 ); }while(0)
 #endif
 
 

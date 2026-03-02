@@ -1,6 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2015 UCLA
- * SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+ * SPDX-FileCopyrightText: 2025 GFZ Helmholtz Centre for Geosciences
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -74,6 +74,16 @@ bool Diffusion_1D(
 	const Matrix1D<double>& Dxx, const Matrix1D<double>& G,
 	const Matrix1D<double>& Sources, const Matrix1D<double>& Losses,
 	double dt
+);
+
+std::tuple<CalculationMatrix, CalculationMatrix, CalculationMatrix> getCalculationMatrix1DDiffusion(
+	const Matrix1D<double>& x, int x_size,
+	double x_LBC, double x_UBC,
+	BoundaryConditionType x_LBC_type, BoundaryConditionType x_UBC_type,
+	const Matrix1D<double>& Dxx, const Matrix1D<double>& G,
+	const Matrix1D<double>& Sources, const Matrix1D<double>& Losses,
+	double dt
+
 );
 
 #endif /* DIFFUSION_1D_H_ */

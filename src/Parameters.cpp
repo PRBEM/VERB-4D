@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2015 UCLA
-// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+// SPDX-FileCopyrightText: 2025 GFZ Helmholtz Centre for Geosciences
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -13,15 +13,6 @@
 #include "Parameters.h"
 #include "BoundaryConditionType.hpp"
 
-// enable alternative tokens
-#ifdef _MSC_VER
-    #include<iso646.h>
-#endif
-
-/** Constructor for Parameters: 
-* opens file and saves file to Parameters field 'parametersFile',
-* stores the char* arguments into a vector 'argv'
-*/
 Parameters::Parameters(std::string filename, int argc, char* argv[]) {
 
 	// open the parameter file
@@ -115,81 +106,48 @@ bool Parameters::getParameter(std::string parameterName, T &variable, bool mustB
 	parametersFile.clear( );
 	parametersFile.seekg( 0, std::ios::beg );
 
-    // Variables to store each line and the value of the parameter
-    std::string currentLine;  // Renamed from 'line' to avoid name conflict
-    std::string parameterValue;
+	// variables to store each line and the value of the parameter
+	std::string line;
+	std::string parameterValue;
 
-    // Read from command line arguments
-    for (const auto& argLine : this->argv) { // Renamed from 'line' to 'argLine'
-        // If argument is empty or commented out, save the default value
-        if (argLine.empty() || argLine[0] == '#') {
-            continue;
-        }
+	// Read from command line arguments
+	unsigned int i;
+	for (i = 0; i < this->argv.size(); i++) {
+		line = argv[i];
 
-        // Check if the line contains the parameter name
-        size_t pos = argLine.find(parameterName);
-        if (pos != std::string::npos) {
-            // Extract the part after the '=' sign, and manually skip leading spaces
-            size_t equalSignPos = argLine.find("=", pos);
-            if (equalSignPos != std::string::npos) {
-                // Skip spaces after '='
-                size_t startPos = equalSignPos + 1; // Renamed 'start' to 'startPos'
-                while (startPos < argLine.size() && std::isspace(argLine[startPos])) {
-                    startPos++;
-                }
+		// if argument is empty or commented out, save the default value
+		if (line.size() == 0 || line[0] == '#') {
+			//Logger::message << parameterName << " = " << variable << " (default value)" << std::endl;
+			continue;
+		}
 
-                // Find the end of the value by skipping trailing spaces
-                size_t endPos = argLine.size(); // Renamed 'end' to 'endPos'
-                while (endPos > startPos && std::isspace(argLine[endPos - 1])) {
-                    endPos--;
-                }
+		// set the parameter value if it can find its name in the current argument
+		// log the value and store the value into variable
+		if (line.find(parameterName) != std::string::npos) {
+			parameterValue = line.substr(line.find("=") + 1);
+			Logger::message << parameterName << " = " << parameterValue << std::endl;
+			stringToValue(parameterValue, variable);
+			return true;
+		}
+	}
 
-                // Extract the cleaned parameter value
-                parameterValue = argLine.substr(startPos, endPos - startPos);
+	// Read from parameters file - line by line
+	while (std::getline(parametersFile, line)) {
 
-                // Log the value and store it into the variable
-                Logger::message << parameterName << " = " << parameterValue << std::endl;
-                stringToValue(parameterValue, variable);
-                return true;
-            }
-        }
-    }
+		// if line is empty or commented out, go to next line
+		if (line.size() == 0 || line[0] == '#') {
+			continue;
+		}
 
-    // Read from parameters file - line by line
-    while (std::getline(parametersFile, currentLine)) { // Renamed 'line' to 'currentLine'
-        // If line is empty or commented out, go to next line
-        if (currentLine.empty() || currentLine[0] == '#') {
-            continue;
-        }
-
-        // Check if the line contains the parameter name
-        size_t pos = currentLine.find(parameterName);
-        if (pos != std::string::npos) {
-            // Extract the part after the '=' sign, and manually skip leading spaces
-            size_t equalSignPos = currentLine.find("=", pos);
-            if (equalSignPos != std::string::npos) {
-                // Skip spaces after '='
-                size_t startPos = equalSignPos + 1; // Renamed 'start' to 'startPos'
-                while (startPos < currentLine.size() && std::isspace(currentLine[startPos])) {
-                    startPos++;
-                }
-
-                // Find the end of the value by skipping trailing spaces
-                size_t endPos = currentLine.size(); // Renamed 'end' to 'endPos'
-                while (endPos > startPos && std::isspace(currentLine[endPos - 1])) {
-                    endPos--;
-                }
-
-                // Extract the cleaned parameter value
-                parameterValue = currentLine.substr(startPos, endPos - startPos);
-
-                // Log the value and store it into the variable
-                Logger::message << parameterName << " = " << parameterValue << std::endl;
-                stringToValue(parameterValue, variable);
-                return true;
-            }
-        }
-    }
+		// set the parameter value if it can find its name in the current line
+		// log the value and store the value into variable
+		if (line.find(parameterName) != std::string::npos) {
+			parameterValue = line.substr(line.find("=") + 2); // +2 strips of the whitespace
+			Logger::message << parameterName << " = " << parameterValue << std::endl;
+			stringToValue(parameterValue, variable);
+			return true;
+		}
+	}
 
 	// all variables that arent found, that can't recieve a default value will log an error
 	if (mustBeFound) {

@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2015 UCLA
-// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+// SPDX-FileCopyrightText: 2025 GFZ Helmholtz Centre for Geosciences
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -32,11 +32,8 @@ bool Convection_1D_2ndORDER_NONUNIFORM_GRID(
         const Matrix1D<double>& Ux,
         double dt_total)
 {
-    //constexpr bool use_limiting      = false;
-    //constexpr bool use_discriminator = false;
-    // Have to change to variable since the use_discriminator results in static evaluation. Since it is still in the code, it returns the warning. 
-    bool use_limiting      = false;
-    bool use_discriminator = false;
+    constexpr bool use_limiting      = false;
+    constexpr bool use_discriminator = false;
 
     Matrix1D<double> CourNum(x_size);   // Courant number on faces
     Matrix1D<double> dx(x_size);  	    // different spacing in log-grid
@@ -55,8 +52,7 @@ bool Convection_1D_2ndORDER_NONUNIFORM_GRID(
     UxOverDx = Ux.divide(dx);   
     double ux_max = UxOverDx.maxabs();
     double steps_double = (double)dt_total * ux_max / maxCourNum;
-    // static_cast<int> is requred because of convertion warning
-    int num_steps = (steps_double <= 1) ? 1 : static_cast<int>(ceil(steps_double));
+    int num_steps = (steps_double <= 1) ? 1 : ceil(steps_double);
     double dt = dt_total / num_steps;
     CourNum = UxOverDx * dt;
     const double courant_max = CourNum.maxabs();
@@ -305,18 +301,10 @@ bool Convection_1D_2ndORDER_NONUNIFORM_GRID(
                 default:
                     Logger::error << "CONV_1D_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
             }
-            // Already declared
-            // double psd_face_left = 0.0, psd_face_right = 0.0, courant_right = 0.0;
-            // double velocity_right = 0.0, velocity_left = 0.0;
-            // double grad_FR = 0.0, grad_R = 0.0, curv_R = 0.0;  
-            // double dx_C = 0.0, dx_R = 0.0, dx_l, dx_r = 0.0, dx_fr = 0.0; 
-            // double dx_ffl = 0.0, dx_fl = 0.0, dx_ffr = 0.0; 
-
-            psd_face_left = 0.0, psd_face_right = 0.0, courant_right = 0.0;
-            velocity_right = 0.0, velocity_left = 0.0;
-            grad_FR = 0.0, grad_R = 0.0, curv_R = 0.0;  
-            dx_C = 0.0, dx_R = 0.0, dx_r = 0.0, dx_fr = 0.0; 
-            double dx_l;
+            double psd_face_left = 0.0, psd_face_right = 0.0, courant_right = 0.0;
+            double velocity_right = 0.0, velocity_left = 0.0;
+            double grad_FR = 0.0, grad_R = 0.0, curv_R = 0.0;  
+            double dx_C = 0.0, dx_R = 0.0, dx_l, dx_r = 0.0, dx_fr = 0.0; 
             double dx_ffl = 0.0, dx_fl = 0.0, dx_ffr = 0.0; 
 
             grad_FR = 1.0 / dx[0] * (PSD_unlimited_t[gst] - PSD_unlimited_t[gst-1]); 
@@ -440,8 +428,7 @@ bool Convection_1D_2ndORDER_NONUNIFORM_GRID(
                 const double dif5 = (PSD_unlimited_U[2] - PSD_unlimited_U[1]) / dx_fl;
                 const double dif6 = (PSD_unlimited_U[3] - PSD_unlimited_U[2]) / dx_ffl;
                 
-                //constexpr double treshhold = 0; // 1e-99;
-                const double treshhold = 0; // 1e-99;
+                constexpr double treshhold = 0; // 1e-99;
 
                 // the discriminator - is there a realistic peak at one of the three points upwind, centre, downwind?
                 const bool peak_downwind = 

@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2015 UCLA
-// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+// SPDX-FileCopyrightText: 2025 GFZ Helmholtz Centre for Geosciences
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -17,11 +17,6 @@
 #include <iostream>
 #include <memory>
 #include "MatrixOperations.h"
-
-// enable alternative tokens
-#ifdef _MSC_VER
-    #include<iso646.h>
-#endif
 
 extern "C" {
 
@@ -139,6 +134,26 @@ Matrix2D<double> transpose(const Matrix2D<double>& A) {
     for (size_t i = 0; i < result.size_q1; ++i) {
         for (size_t j = 0; j < result.size_q2; ++j) {
             result[i][j] = A[j][i];
+        }
+    }
+    return result;
+}
+
+Matrix1D<double> log(const Matrix1D<double>& A) {
+   Matrix1D<double> result {A.size_q1};
+   for (size_t i = 0; i < result.size_q1; ++i) {
+       if (A[i] < 1e-31) result[i] = -31;
+       else result[i] = std::log(A[i]);
+   }
+   return result;
+}
+
+Matrix2D<double> log(const Matrix2D<double>& A) {
+   Matrix2D<double> result {A.size_q1, A.size_q2};
+    for (size_t i = 0; i < result.size_q1; ++i) {
+        for (size_t j = 0; j < result.size_q2; ++j) {
+            if (A[i][j] < 1e-31) result[i][j] = -31;
+            else result[i][j] = std::log(A[i][j]);
         }
     }
     return result;
