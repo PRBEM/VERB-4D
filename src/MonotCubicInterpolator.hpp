@@ -10,7 +10,7 @@
 
 // Copyright (C) 2006 Statoil ASA
 // SPDX-FileCopyrightText: 2015 UCLA
-// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+// SPDX-FileCopyrightText: 2025 GFZ Helmholtz Centre for Geosciences
 //
 // SPDX-License-Identifier: BSD-3-Clause
 

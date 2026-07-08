@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2015 UCLA
-// SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+// SPDX-FileCopyrightText: 2025 GFZ Helmholtz Centre for Geosciences
 //
 // SPDX-License-Identifier: BSD-3-Clause
 
@@ -329,8 +329,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                     Logger::error << "CONV_1D_BOUNDARY: unknown boundary type: " << x_UBC_type << std::endl;
             }
             
-            //double psd_face_left = 0.0, courant_left = 0.0, courant_right = 0.0; // Alreayd defined
-            psd_face_left = 0.0, courant_left = 0.0, courant_right = 0.0;
+            double psd_face_left = 0.0, courant_left = 0.0, courant_right = 0.0;
             for (int ix = 0; ix <= x_size - 1; ix++) 
             {
                 if (ix == 0) {                           // special case
@@ -424,9 +423,7 @@ bool Convection_1D_ULTIMATE_QUICKEST6(
                     dif3 > treshhold && dif4 > treshhold && dif5 < -treshhold &&
                     dif6 < -treshhold && dif4 < dif3 - treshhold && dif5 > dif6 + treshhold;
 
-                // Already defined
-                // double psd_face_right = PSD_faces[ix];
-                psd_face_right = PSD_faces[ix];
+                double psd_face_right = PSD_faces[ix];
                 
                 // use the limiter only if there is no realistic peak or if the discriminator is switched off
                 if (!use_discriminator || !(peak_downwind || peak_centre || peak_upwind))

@@ -1,6 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2015 UCLA
- * SPDX-FileCopyrightText: 2025 Bernhard Haas (GFZ)
+ * SPDX-FileCopyrightText: 2025 GFZ Helmholtz Centre for Geosciences
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -49,6 +49,20 @@ Matrix3D<double> cat(const Matrix3D<double>& a, const Matrix3D<double>& b);
  * @return Transposed matrix where A[i][j] becomes result[j][i]
  */
 Matrix2D<double> transpose(const Matrix2D<double>& A);
+
+/**
+ * @brief Compute element-wise natural logarithm of 1D matrix
+ * @param A Input matrix
+ * @return Matrix with log10 of each element (minimum value clamped to -31)
+ */
+Matrix1D<double> log(const Matrix1D<double>& A);
+
+/**
+ * @brief Compute element-wise natural logarithm of 2D matrix
+ * @param A Input matrix
+ * @return Matrix with log10 of each element (minimum value clamped to -31)
+ */
+Matrix2D<double> log(const Matrix2D<double>& A);
 
 /**
  * @brief Compute element-wise base-10 logarithm of 1D matrix
