@@ -6,8 +6,7 @@ SPDX-License-Identifier: BSD-3-Clause
 -->
 
 # VERB-4D solver
-Source code for the VERB-4D solver. Need to be used together with Matlab or Python setup scripts that
-create all necessary input. The main file is in `./src/VERB4D_Solver.cpp`
+Source code for the VERB-4D solver. We recommend to use the [verb4d_py](https://git.gfz-potsdam.de/spsw/verb/verb4d/verb4dpy) package to create all necessary inputs for the solver. The main file is in `./src/VERB4D_Solver.cpp`.
 
 ## Requirements
 Download cmake 3.14 or above. Note that any new source files should be added to
