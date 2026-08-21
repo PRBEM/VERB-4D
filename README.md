@@ -5,8 +5,13 @@ SPDX-FileCopyrightText: 2025 GFZ Helmholtz Centre for Geosciences
 SPDX-License-Identifier: BSD-3-Clause
 -->
 
-# VERB-4D solver
-Source code for the VERB-4D solver. We recommend to use the [verb4d_py](https://git.gfz-potsdam.de/spsw/verb/verb4d/verb4dpy) package to create all necessary inputs for the solver. The main file is in `./src/VERB4D_Solver.cpp`.
+# VERB-4D
+
+**Versatile Electron Radiation Belt in 4D (VERB-4D)** is a computational solver that models radiation belt, ring current, and plasmasphere dynamics in Earth's magnetosphere.
+
+We recommend to use the [verb4d_py](https://git.gfz-potsdam.de/spsw/verb/verb4d/verb4dpy) package to create all necessary inputs for the solver.
+
+For questions, please contact <yshprits@gfz.de> or <bhaas@gfz.de>.
 
 ## Requirements
 Download cmake 3.14 or above. Note that any new source files should be added to
@@ -95,8 +100,38 @@ Build the shared OpenBLAS library and install it to `~/.local/lib` by calling
 #### Windows
 *coming soon*
 
-## Contributors and Acknowledgements
 
-We thank all the contributors of the VERB-4D Solver.
+## Development History
+- **Originally developed**: 2015 at UCLA (University of California, Los Angeles)
+- **Principal Investigator**: Yuri Shprits
+- **Key developers**: Dmitri Subbotin, Alexander Drozdov, Adam Kellerman
+- **License**: BSD-3-Clause
+
+## Contributors (Alphabetically Sorted)
+
+- Josh Adler
+- Hayley Allison
+- Nikita Aseev
+- Alexander Drozdov
+- Bernhard Haas
+- Julia Himmelsbach
+- Alec Jen
+- Adam Kellerman
+- Kyung-Chan Kim
+- Joseph Lin
+- Anthony Miyaguchi
+- Derek Nguyen
+- Maxim Rakhuba
+- Anthony Saikin
+- Yuri Shprits
+- Dmitri Subbotin
+- Derek Nguyen
+- Dedong Wang
+- Michael Wutzig
+- Irina Zhelavskaya
+
+## Acknowledgments
 
 We acknowledge Xin Tao and all developers of the [Sayram code](https://github.com/xtaohub/Sayram-2D/) for providing the C++ code for the positive-preserving finite volume scheme.
+
+We also acknowledge indirect contributors from the scientific community for their helpful discussions and contributions to the development of VERB-4D.
