@@ -8,6 +8,8 @@ stages:
 pages:
   stage: docs
   image: debian:bookworm
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
   before_script:
     - apt-get update
     - apt-get install -y --no-install-recommends doxygen
