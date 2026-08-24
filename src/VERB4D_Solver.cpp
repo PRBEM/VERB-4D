@@ -5,7 +5,7 @@
 
 /**
  *
- *@mainpage Documentation for the VERB4D_SOLVER
+ *@page verb4d_solver_docs Documentation for VERB-4D Solver
  * Includes classes, namespaces, and files
  *
  * For use in conjunction with Matlab in order to solve for Phase Space Density, Diffusion, Convection etc.
@@ -129,11 +129,11 @@
 #include "Convection_2D.h"
 #include "Convection_3D.h"
 #include "Diffusion_1D.h"
-#include "Diffusion_2D.h"    // Different solution methods for 2D diffusion
-#include "Diffusion_2D_MKL.hpp"    // Intel MKL sparse solve 
-#include "Diffusion_ADI1.h"  // Straightforward ADI
-#include "Diffusion_ADI2.h"  // Fuliang Xiao's ADI
-#include "Diffusion_ADI3.h"  // Jihye Shin and Sungsoo S. Kim (2008)'s ADI - most stable
+#include "Diffusion_2D.h"       // Different solution methods for 2D diffusion
+#include "Diffusion_2D_MKL.hpp" // Intel MKL sparse solve
+#include "Diffusion_ADI1.h"     // Straightforward ADI
+#include "Diffusion_ADI2.h"     // Fuliang Xiao's ADI
+#include "Diffusion_ADI3.h"     // Jihye Shin and Sungsoo S. Kim (2008)'s ADI - most stable
 #include "Interpolation.h"
 #include "Logger.h"
 #include "Matrix.h"
@@ -154,7 +154,7 @@ using namespace std;
 
 #ifdef DATA_ASSIMILATION
 namespace da = data_assimilation;
-#endif 
+#endif
 #ifdef MKL_FOUND
 #include "mkl_sparse_qr.h"
 #endif
@@ -185,10 +185,9 @@ void write_PSD_output(const IOMethod &io_method, const std::string &PSD_filename
 
     PSD.writeToAnyFile(PSD_filename, io_method, time_string.str());
     if (PSD_time_to_lst)
-    {        
+    {
         PSD.writeToLstFile(PSD_filename, io_method, time_string.str(), output_folder);
     }
-
 }
 
 int main(int argc, char *argv[])
@@ -234,7 +233,7 @@ int main(int argc, char *argv[])
     // Jacobians, 4D, everything is 4D, it makes matrix operators convenient
     UpdatableMatrix<Matrix4D<double>> G_local;
     UpdatableMatrix<Matrix4D<double>> G_radial; // L-star is different for different P, I, K
-    UpdatableMatrix<Matrix4D<double>> G_conv;   // solving the convection in conservative form requires a Jacobian 
+    UpdatableMatrix<Matrix4D<double>> G_conv;   // solving the convection in conservative form requires a Jacobian
 
     // Boundary conditions
     // Pl_BC means P-direction lower boundary (i.e. first index on P-direction)
@@ -262,10 +261,10 @@ int main(int argc, char *argv[])
     int output_step;
     long int it_total, it_first = 1;
 
-    double dt = 1.0 / 24;          // 1-hour time interval
+    double dt = 1.0 / 24; // 1-hour time interval
     double sub_dt_diffusion = 1.0 / 24;
-    double time_output = -1;       // 1-hour time interval
-    double time_total = 4;         // in days
+    double time_output = -1; // 1-hour time interval
+    double time_total = 4;   // in days
     double time_first = 0;
     int max_threads = omp_get_num_threads();
     bool minimal_output = false;
@@ -311,8 +310,9 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    if (minimal_output) {
-    	Logger::setDebugLevel(Logger::DebugLevel::DEBUG_LEVEL_MESSAGE);
+    if (minimal_output)
+    {
+        Logger::setDebugLevel(Logger::DebugLevel::DEBUG_LEVEL_MESSAGE);
     }
 
 #ifdef DATA_ASSIMILATION
@@ -320,11 +320,14 @@ int main(int argc, char *argv[])
     da::DataAssimilationManagerConvection daManagerConvection;
     da::DataAssimilationManagerDiffusion daManagerDiffusion;
 
-    if (run_convection) {
+    if (run_convection)
+    {
         Logger::debug << "Setting up Data Assimilation Manager for Convection..." << std::endl;
         daManagerConvection = da::DataAssimilationManagerConvection(
             "parameters_da.ini", P.yzSlice(0, 0), R.yzSlice(0, 0), V.wxSlice(0, 0), K.wxSlice(0, 0), outputFolder);
-    } else {
+    }
+    else
+    {
         Logger::debug << "Setting up Data Assimilation Manager for Radial Diffusion..." << std::endl;
         daManagerDiffusion = da::DataAssimilationManagerDiffusion(
             "parameters_da.ini", R.wyzSlice(0, 0, 0), V.wxSlice(0, 0), K.wxSlice(0, 0), outputFolder);
@@ -340,22 +343,22 @@ int main(int argc, char *argv[])
 #ifdef LU_CACHING
     CalculationMatrix dummy(V_size, K_size, 1, 1);
     long m_size = dummy[0].size_q1;
-	long kl = -dummy.begin()->first; // first diagonal
-	long ku = dummy.rbegin()->first;
-    std::vector<std::vector<double*>> lu_cache(P_size);
-    for(auto& r_slice : lu_cache)
+    long kl = -dummy.begin()->first; // first diagonal
+    long ku = dummy.rbegin()->first;
+    std::vector<std::vector<double *>> lu_cache(P_size);
+    for (auto &r_slice : lu_cache)
     {
-        r_slice = std::vector<double*>(R_size);
-        for(auto& pr_slice : r_slice)
+        r_slice = std::vector<double *>(R_size);
+        for (auto &pr_slice : r_slice)
         {
-            pr_slice = new double[(kl+ku+kl+1)*m_size];
+            pr_slice = new double[(kl + ku + kl + 1) * m_size];
         }
     }
-    std::vector<std::vector<long*>> index_cache(P_size);
-    for(auto& r_slice : index_cache)
+    std::vector<std::vector<long *>> index_cache(P_size);
+    for (auto &r_slice : index_cache)
     {
-        r_slice = std::vector<long*>(R_size);
-        for(auto& pr_slice : r_slice)
+        r_slice = std::vector<long *>(R_size);
+        for (auto &pr_slice : r_slice)
         {
             pr_slice = new long[m_size];
         }
@@ -377,10 +380,10 @@ int main(int argc, char *argv[])
     }
 
     // logs the timestep and output step information
-	Logger::message << std::endl;
-	Logger::writeSeparator();
-	Logger::message << std::setw(57) << "Time step info" << std::endl;
-	Logger::writeSeparator();
+    Logger::message << std::endl;
+    Logger::writeSeparator();
+    Logger::message << std::setw(57) << "Time step info" << std::endl;
+    Logger::writeSeparator();
 
     Logger::message << "Total time " << time_total << ". Time step " << dt << " (" << it_total << " steps)." << std::endl;
     Logger::message << "Output each " << output_step << " step. " << std::endl;
@@ -404,13 +407,17 @@ int main(int argc, char *argv[])
     // When to apply loss term:
     // It's better to apply it during pitch-angle diffusion, unless we don't have any pitch-angle diffusion
     // In that case we apply it during radial diffusion
-    if (not Losses_radial.initialized) { // Losses_radial.tab was not found -> using Losses_local either during radial or local diffusion
+    if (not Losses_radial.initialized)
+    { // Losses_radial.tab was not found -> using Losses_local either during radial or local diffusion
         Losses_radial = Losses_local;
-        
-        if (run_local_diffusion and V_size >= 3 and K_size >= 3) {
+
+        if (run_local_diffusion and V_size >= 3 and K_size >= 3)
+        {
             Losses_radial = 0;
             Losses_radial.clearMatricesList();
-        } else {
+        }
+        else
+        {
             Losses_local = 0;
             Losses_local.clearMatricesList();
         }
@@ -419,7 +426,8 @@ int main(int argc, char *argv[])
     // If local diffusion is not run, sources should be applied at the radial diffusion step
     int radial_sources = 0;
     int local_sources = 1;
-    if (not run_local_diffusion or V_size < 3 or K_size < 3) {
+    if (not run_local_diffusion or V_size < 3 or K_size < 3)
+    {
         // Apply source during radial diffusion step
         radial_sources = 1;
         local_sources = 0;
@@ -452,7 +460,7 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
         Logger::debug << "Calculating with "
-                        << "Diffusion_2D_ADI3" << std::endl;
+                      << "Diffusion_2D_ADI3" << std::endl;
     }
 
     // Indexers to keep track of P,R,V,K,L
@@ -482,26 +490,25 @@ int main(int argc, char *argv[])
     Matrix3D<double> R_upperK = R.zSlice(K.size_z - 1);
     Matrix3D<double> V_upperK = V.zSlice(K.size_z - 1);
 
-#ifdef MKL_FOUND  
+#ifdef MKL_FOUND
     // initiliaze sparse column indices, row indices and matrix handles
     // for MKL sparse solver for local diffusion
-    std::vector<sparse_matrix_t*> sparse_matrix_handles;
+    std::vector<sparse_matrix_t *> sparse_matrix_handles;
     std::vector<std::vector<int>> column_indices;
     std::vector<std::vector<int>> rows_csr;
-    if( inversion_method == InversionMethod::MKL && run_local_diffusion)
+    if (inversion_method == InversionMethod::MKL && run_local_diffusion)
     {
         std::vector<double> dummy_values;
         initialize_sparse_values(
-            V.wxSlice(0,0), K.wxSlice(0,0), Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type,
-            DVV.wxSlice(0,0), DVK.wxSlice(0,0), DVK.wxSlice(0,0), DKK.wxSlice(0,0), 
-            G_local.wxSlice(0,0), Losses_local.wxSlice(0,0), dt, dummy_values
-        );
+            V.wxSlice(0, 0), K.wxSlice(0, 0), Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type,
+            DVV.wxSlice(0, 0), DVK.wxSlice(0, 0), DVK.wxSlice(0, 0), DKK.wxSlice(0, 0),
+            G_local.wxSlice(0, 0), Losses_local.wxSlice(0, 0), dt, dummy_values);
         matrix_descr descr{
-            SPARSE_MATRIX_TYPE_GENERAL, // mkl sparse solve only avaible for general matrices; 
-            SPARSE_FILL_MODE_UPPER, // fill mode and unit diagonal have to be set but 
-            SPARSE_DIAG_NON_UNIT // are not important for non-triangular matrix types
+            SPARSE_MATRIX_TYPE_GENERAL, // mkl sparse solve only avaible for general matrices;
+            SPARSE_FILL_MODE_UPPER,     // fill mode and unit diagonal have to be set but
+            SPARSE_DIAG_NON_UNIT        // are not important for non-triangular matrix types
         };
-        for(int j = 0; j < num_threads; j++)
+        for (int j = 0; j < num_threads; j++)
         {
             column_indices.push_back(std::vector<int>());
             rows_csr.push_back(std::vector<int>());
@@ -512,15 +519,14 @@ int main(int argc, char *argv[])
                 sparse_matrix_handles[j], SPARSE_INDEX_BASE_ZERO,
                 V_size * K_size, V_size * K_size,
                 rows_csr[j].data(), rows_csr[j].data() + 1,
-                column_indices[j].data(), dummy_values.data()
-            );
-            if(status != SPARSE_STATUS_SUCCESS)
+                column_indices[j].data(), dummy_values.data());
+            if (status != SPARSE_STATUS_SUCCESS)
             {
                 std::cout << "MKL create csr error " << status << '\n';
                 exit(EXIT_FAILURE);
             }
             status = mkl_sparse_qr_reorder(*sparse_matrix_handles[j], descr);
-            if(status != SPARSE_STATUS_SUCCESS)
+            if (status != SPARSE_STATUS_SUCCESS)
             {
                 std::cout << "MKL reorder error " << status << '\n';
                 exit(EXIT_FAILURE);
@@ -528,11 +534,11 @@ int main(int argc, char *argv[])
         }
     }
 #endif
-    
+
     Logger::message << std::endl;
-	Logger::writeSeparator();
-	Logger::message << std::setw(55) << "Main loop" << std::endl;
-	Logger::writeSeparator();
+    Logger::writeSeparator();
+    Logger::message << std::setw(55) << "Main loop" << std::endl;
+    Logger::writeSeparator();
 
     // Main loop
     // Start time
@@ -541,12 +547,16 @@ int main(int argc, char *argv[])
         // update time by dt every iteration
         time_current = time_first + it * dt;
 
-        if (minimal_output) {
-            if (it != it_first) {
+        if (minimal_output)
+        {
+            if (it != it_first)
+            {
                 std::cout << "\r";
             }
             std::cout << std::fixed << std::setprecision(6) << std::setw(30) << "Time[" << it << "/" << it_total << "]: " << time_current << " (days)" << std::flush;
-        } else {
+        }
+        else
+        {
             Logger::message << std::endl
                             << std::setprecision(15) << "Time[" << it << "/" << it_total << "]: " << time_current << " (days)" << std::endl;
         }
@@ -568,23 +578,30 @@ int main(int argc, char *argv[])
                 progress_count = 0;
                 progress_total = P_size * V_size * K_size; // total size of solution matrix
                 Logger::debug << "Interpolation to new L (adiabatic transport): ";
-                if (not minimal_output) {
+                if (not minimal_output)
+                {
                     std::cout << "           ";
                 }
 
                 Matrix1D<double> old_L_1d(L_size), PSD_L(L_size), new_L_1d(L_size);
                 // Apparently it's not thread-safe
                 // #pragma omp parallel for private(iP, iR, iV, iK, iL, PSD_L) shared(progress_total, progress_count) schedule(dynamic,1) collapse(3)
-                for (int iP = 0; iP < P_size; iP++) {
-                    for (int iV = 0; iV < V_size; iV++) {
-                        for (int iK = 0; iK < K_size; iK++) {
+                for (int iP = 0; iP < P_size; iP++)
+                {
+                    for (int iV = 0; iV < V_size; iV++)
+                    {
+                        for (int iK = 0; iK < K_size; iK++)
+                        {
                             // show progress % if 0 threads
-                            if (not minimal_output) {
+                            if (not minimal_output)
+                            {
                                 if (omp_get_thread_num() == 0)
                                 {
                                     std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8)
-                                            << (int)((double)progress_count / progress_total * 100) << "%" << std::flush;
-                                } else {
+                                              << (int)((double)progress_count / progress_total * 100) << "%" << std::flush;
+                                }
+                                else
+                                {
                                     std::cout << "thread" << omp_get_thread_num();
                                 }
                             }
@@ -609,7 +626,8 @@ int main(int argc, char *argv[])
                         }
                     }
                 }
-                if (not minimal_output) {
+                if (not minimal_output)
+                {
                     std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8) << (int)((double)progress_count / progress_total * 100) << "%" << std::endl;
                 }
 
@@ -635,7 +653,8 @@ int main(int argc, char *argv[])
             bool has_VP_updated = VP.update(time_current, P, R, V, K);
             bool has_VR_updated = VR.update(time_current, P, R, V, K);
 
-            if (not minimal_output) {
+            if (not minimal_output)
+            {
                 Logger::debug << "max(VP) = " << VP.maxabs() << std::endl;
                 Logger::debug << "max(VR) = " << VR.maxabs() << std::endl;
             }
@@ -647,7 +666,8 @@ int main(int argc, char *argv[])
         if ((3 < V_size) && run_coulomb_collision)
         {
             VV.update(time_current, P, R, V, K);
-            if (not minimal_output) {
+            if (not minimal_output)
+            {
                 Logger::debug << "max(VV) = " << VV.maxabs() << std::endl;
             }
         }
@@ -656,7 +676,8 @@ int main(int argc, char *argv[])
         if ((3 < L_size) && (run_radial_diffusion))
         {
             DLL.update(time_current, P, L, V, K);
-            if (not minimal_output) {
+            if (not minimal_output)
+            {
                 Logger::debug << "max(DLL) = " << DLL.maxabs() << std::endl;
             }
         }
@@ -668,7 +689,8 @@ int main(int argc, char *argv[])
             updated_dvk = DVK.update(time_current, P, R, V, K);
             updated_dkk = DKK.update(time_current, P, R, V, K);
 
-            if (not minimal_output) {
+            if (not minimal_output)
+            {
                 Logger::debug << "max(DVV) = " << DVV.maxabs() << std::endl;
                 Logger::debug << "max(DVK) = " << DVK.maxabs() << std::endl;
                 Logger::debug << "max(DKK) = " << DKK.maxabs() << std::endl;
@@ -681,30 +703,37 @@ int main(int argc, char *argv[])
         Losses_radial.update(time_current, P, R, V, K);
         Losses_conv.update(time_current, P, R, V, K);
 
-        if (density_saturation == DensitySaturation::WithTimescale) {
+        if (density_saturation == DensitySaturation::WithTimescale)
+        {
             Sources = SaturationDensity - PSD;
             for (int iP = 0; iP < P_size; ++iP)
                 for (int iR = 0; iR < R_size; ++iR)
                     for (int iV = 0; iV < V_size; ++iV)
-                        for (int iK = 0; iK < K_size; ++iK) {
+                        for (int iK = 0; iK < K_size; ++iK)
+                        {
                             Sources[iP][iR][iV][iK] = Sources[iP][iR][iV][iK] / SaturationTimescale[iP][iR][iV][iK];
                             if (Sources[iP][iR][iV][iK] < 1e-21)
                                 Sources[iP][iR][iV][iK] = 1e-21;
                         }
-        } else if (density_saturation == DensitySaturation::WithoutTimescale) {
+        }
+        else if (density_saturation == DensitySaturation::WithoutTimescale)
+        {
             for (int iP = 0; iP < P_size; ++iP)
                 for (int iR = 0; iR < R_size; ++iR)
                     for (int iV = 0; iV < V_size; ++iV)
                         for (int iK = 0; iK < K_size; ++iK)
                             if (PSD[iP][iR][iV][iK] > SaturationDensity[iP][iR][iV][iK])
                                 PSD[iP][iR][iV][iK] = SaturationDensity[iP][iR][iV][iK];
-
-        } else if (density_saturation == DensitySaturation::LimitSource) {
+        }
+        else if (density_saturation == DensitySaturation::LimitSource)
+        {
             for (int iP = 0; iP < P_size; ++iP)
                 for (int iR = 0; iR < R_size; ++iR)
                     for (int iV = 0; iV < V_size; ++iV)
-                        for (int iK = 0; iK < K_size; ++iK) {
-                            if (PSD[iP][iR][iV][iK] >= SaturationDensity[iP][iR][iV][iK]) {
+                        for (int iK = 0; iK < K_size; ++iK)
+                        {
+                            if (PSD[iP][iR][iV][iK] >= SaturationDensity[iP][iR][iV][iK])
+                            {
                                 Sources[iP][iR][iV][iK] = 1e-21;
                             }
                         }
@@ -720,19 +749,22 @@ int main(int argc, char *argv[])
             // R_UBC.original_arr =(PSD.xSlice(PSD.size_x - 1));
             Ru_BC.update(time_current, P_upperR, V_upperR, K_upperR);
         }
-        if (L_size > 3) {
+        if (L_size > 3)
+        {
             // L_LBC.original_arr =(PSD.xSlice(0));
             Ll_BC.update(time_current, P_lowerR, V_lowerR, K_lowerR);
             // L_UBC.original_arr =(PSD.xSlice(PSD.size_x - 1));
             Lu_BC.update(time_current, P_upperR, V_upperR, K_upperR);
         }
-        if (V_size > 3) {
+        if (V_size > 3)
+        {
             // V_LBC.original_arr =(PSD.ySlice(0));
             Vl_BC.update(time_current, P_lowerV, R_lowerV, K_lowerV);
             // V_UBC.original_arr =(PSD.ySlice(PSD.size_y - 1));
             Vu_BC.update(time_current, P_upperV, R_upperV, K_upperV);
         }
-        if (K_size > 3) {
+        if (K_size > 3)
+        {
             // K_LBC.original_arr =(PSD.zSlice(0));
             Kl_BC.update(time_current, P_lowerK, R_lowerK, V_lowerK);
             // K_UBC.original_arr =(PSD.zSlice(PSD.size_z - 1));
@@ -752,100 +784,109 @@ int main(int argc, char *argv[])
             exit(EXIT_FAILURE);
         }
 
-    // ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// COLOUMB CONVECTION WITH CONVECTION IN P, R and V
-    if ( (3 < P_size && 3 < R_size && 3 < V_size) && run_convection && run_coulomb_collision ) {
+        // ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // COLOUMB CONVECTION WITH CONVECTION IN P, R and V
+        if ((3 < P_size && 3 < R_size && 3 < V_size) && run_convection && run_coulomb_collision)
+        {
             progress_count = 0;
             progress_total = K_size;
             Logger::debug << "3D Convection (P,R,V):" << endl;
-    
-            if (not minimal_output) {
+
+            if (not minimal_output)
+            {
                 cout << "           ";
             }
 
-#pragma omp parallel shared(progress_total, progress_count) 
-        {
-            // define the slices needed for convection
-            Matrix3D<double> PSD_PRV(P_size, R_size, V_size);
-            Matrix2D<double> plow_boundary_slice(R_size, V_size);
-            Matrix2D<double> pup_boundary_slice(R_size, V_size);
-            Matrix2D<double> rlow_boundary_slice(P_size, V_size);
-            Matrix2D<double> rup_boundary_slice(P_size, V_size);
-            Matrix2D<double> vlow_boundary_slice(P_size, R_size);
-            Matrix2D<double> vup_boundary_slice(P_size, R_size);
+#pragma omp parallel shared(progress_total, progress_count)
+            {
+                // define the slices needed for convection
+                Matrix3D<double> PSD_PRV(P_size, R_size, V_size);
+                Matrix2D<double> plow_boundary_slice(R_size, V_size);
+                Matrix2D<double> pup_boundary_slice(R_size, V_size);
+                Matrix2D<double> rlow_boundary_slice(P_size, V_size);
+                Matrix2D<double> rup_boundary_slice(P_size, V_size);
+                Matrix2D<double> vlow_boundary_slice(P_size, R_size);
+                Matrix2D<double> vup_boundary_slice(P_size, R_size);
 
-            Matrix3D<double> pgrid_slice(P_size, R_size, V_size);
-            Matrix3D<double> rgrid_slice(P_size, R_size, V_size);
-            Matrix3D<double> vgrid_slice(P_size, R_size, V_size);
-            Matrix3D<double> vp_slice(P_size, R_size, V_size);
-            Matrix3D<double> vr_slice(P_size, R_size, V_size);
-            Matrix3D<double> vv_slice(P_size, R_size, V_size);
-            Matrix3D<double> lossconv_slice(P_size, R_size, V_size);
-            Matrix3D<double> G_conv_slice(P_size, R_size, V_size);
+                Matrix3D<double> pgrid_slice(P_size, R_size, V_size);
+                Matrix3D<double> rgrid_slice(P_size, R_size, V_size);
+                Matrix3D<double> vgrid_slice(P_size, R_size, V_size);
+                Matrix3D<double> vp_slice(P_size, R_size, V_size);
+                Matrix3D<double> vr_slice(P_size, R_size, V_size);
+                Matrix3D<double> vv_slice(P_size, R_size, V_size);
+                Matrix3D<double> lossconv_slice(P_size, R_size, V_size);
+                Matrix3D<double> G_conv_slice(P_size, R_size, V_size);
 
-            // sources are set to zero and not updated during the loop
-            Matrix3D<double> source_slice = Sources.zSlice(0) * 0.0;
+                // sources are set to zero and not updated during the loop
+                Matrix3D<double> source_slice = Sources.zSlice(0) * 0.0;
 
-#pragma omp for schedule(dynamic,1)
-             for (int iK = 0; iK < K_size; iK++) {
+#pragma omp for schedule(dynamic, 1)
+                for (int iK = 0; iK < K_size; iK++)
+                {
 
-                // Output current progress percentage when number of threads = 0
-                if (not minimal_output) {
-                    if (omp_get_thread_num() == 0) {
-                        cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
-                            << (int) ((double) progress_count / progress_total * 100) << "%" << flush;
+                    // Output current progress percentage when number of threads = 0
+                    if (not minimal_output)
+                    {
+                        if (omp_get_thread_num() == 0)
+                        {
+                            cout << "\b\b\b\b\b\b\b\b\b" << setw(8)
+                                 << (int)((double)progress_count / progress_total * 100) << "%" << flush;
+                        }
                     }
-                }
 
-                // update all slices for convection
-                Pl_BC.zSlice(plow_boundary_slice, iK);
-                Pu_BC.zSlice(pup_boundary_slice, iK);
-                Rl_BC.zSlice(rlow_boundary_slice, iK);
-                Ru_BC.zSlice(rup_boundary_slice, iK);
-                Vl_BC.zSlice(vlow_boundary_slice, iK);
-                Vu_BC.zSlice(vup_boundary_slice, iK);
+                    // update all slices for convection
+                    Pl_BC.zSlice(plow_boundary_slice, iK);
+                    Pu_BC.zSlice(pup_boundary_slice, iK);
+                    Rl_BC.zSlice(rlow_boundary_slice, iK);
+                    Ru_BC.zSlice(rup_boundary_slice, iK);
+                    Vl_BC.zSlice(vlow_boundary_slice, iK);
+                    Vu_BC.zSlice(vup_boundary_slice, iK);
 
-                P.zSlice(pgrid_slice, iK);
-                R.zSlice(rgrid_slice, iK);
-                V.zSlice(vgrid_slice, iK);
-                VP.zSlice(vp_slice, iK);
-                VR.zSlice(vr_slice, iK);
-                VV.zSlice(vv_slice, iK);
-                Losses_conv.zSlice(lossconv_slice, iK);
-                PSD.zSlice(PSD_PRV, iK);
-                G_conv.zSlice(G_conv_slice, iK);
+                    P.zSlice(pgrid_slice, iK);
+                    R.zSlice(rgrid_slice, iK);
+                    V.zSlice(vgrid_slice, iK);
+                    VP.zSlice(vp_slice, iK);
+                    VR.zSlice(vr_slice, iK);
+                    VV.zSlice(vv_slice, iK);
+                    Losses_conv.zSlice(lossconv_slice, iK);
+                    PSD.zSlice(PSD_PRV, iK);
+                    G_conv.zSlice(G_conv_slice, iK);
 
-                Convection_3D(
-                    PSD_PRV, pgrid_slice, rgrid_slice, vgrid_slice, P_size, R_size, V_size,
-                    plow_boundary_slice, pup_boundary_slice,
-                    rlow_boundary_slice, rup_boundary_slice,
-                    vlow_boundary_slice, vup_boundary_slice,
-                    Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type, Vu_BC_type,
-                    vp_slice, vr_slice, vv_slice, 
-                    source_slice, lossconv_slice,
-                    G_conv_slice, dt);     
+                    Convection_3D(
+                        PSD_PRV, pgrid_slice, rgrid_slice, vgrid_slice, P_size, R_size, V_size,
+                        plow_boundary_slice, pup_boundary_slice,
+                        rlow_boundary_slice, rup_boundary_slice,
+                        vlow_boundary_slice, vup_boundary_slice,
+                        Pl_BC_type, Pu_BC_type, Rl_BC_type, Ru_BC_type, Vl_BC_type, Vu_BC_type,
+                        vp_slice, vr_slice, vv_slice,
+                        source_slice, lossconv_slice,
+                        G_conv_slice, dt);
 
-                // copy results back into PSD adding the 2d list PSD_PR for all values of iV,iK
-                for (int iP = 0; iP < P_size; iP++) {
-                    for (int iR = 0; iR < R_size; iR++) {
-                        for (int iV = V_size - 1; iV >= 0; iV--) {
-                            PSD[iP][iR][iV][iK] = PSD_PRV[iP][iR][iV];
+                    // copy results back into PSD adding the 2d list PSD_PR for all values of iV,iK
+                    for (int iP = 0; iP < P_size; iP++)
+                    {
+                        for (int iR = 0; iR < R_size; iR++)
+                        {
+                            for (int iV = V_size - 1; iV >= 0; iV--)
+                            {
+                                PSD[iP][iR][iV][iK] = PSD_PRV[iP][iR][iV];
+                            }
                         }
                     }
                 }
-            }
 
 #pragma omp critical
-            progress_count += 1;
-        }
+                progress_count += 1;
+            }
             // Output final progress (it should be 100%)
-            if (not minimal_output) {
-                cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int) ((double) progress_count / progress_total * 100) << "%" << endl;
+            if (not minimal_output)
+            {
+                cout << "\b\b\b\b\b\b\b\b\b" << setw(8) << (int)((double)progress_count / progress_total * 100) << "%" << endl;
             }
 #pragma omp master
             {
             }
-	}
+        }
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Convection, for each V and K (therefore for each mu and J)
         if ((3 < P_size || 3 < R_size) && run_convection && not run_coulomb_collision)
@@ -853,7 +894,8 @@ int main(int argc, char *argv[])
             progress_count = 0;
             progress_total = V_size * K_size;
             Logger::debug << "Convection:" << std::endl;
-            if (not minimal_output) {
+            if (not minimal_output)
+            {
                 std::cout << "           ";
             }
 
@@ -889,17 +931,20 @@ int main(int argc, char *argv[])
                     {
 #else
 #pragma omp for schedule(dynamic, 1)
-                for (long index = (V_size * K_size) - 1; index >= 0; index--) {
-                    {  // Double brackes are needed for compatability with OPENMP 3.0 code.
+                for (long index = (V_size * K_size) - 1; index >= 0; index--)
+                {
+                    { // Double brackes are needed for compatability with OPENMP 3.0 code.
                         // Manually collapsing into a single for loop in order to optimize
                         int iV = index % V_size;
                         int iK = (K_size - 1) - (index / V_size);
 #endif
                         // Output current progress percentage when number of threads = 0
-                        if (not minimal_output) {
-                            if (omp_get_thread_num() == 0) {
+                        if (not minimal_output)
+                        {
+                            if (omp_get_thread_num() == 0)
+                            {
                                 std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8)
-                                        << (int)((double)progress_count / progress_total * 100) << "%" << std::flush;
+                                          << (int)((double)progress_count / progress_total * 100) << "%" << std::flush;
                             }
                         }
 
@@ -941,8 +986,10 @@ int main(int argc, char *argv[])
 #endif
 
                         // copy results back into PSD adding the 2d list PSD_PR for all values of iV,iK
-                        for (int iP = 0; iP < P_size; iP++) {
-                            for (int iR = 0; iR < R_size; iR++) {
+                        for (int iP = 0; iP < P_size; iP++)
+                        {
+                            for (int iR = 0; iR < R_size; iR++)
+                            {
                                 PSD[iP][iR][iV][iK] = PSD_PR[iP][iR];
 #ifdef SAVE_PSD_LOST_CONV
                                 PSD_lost_conv[iP][iR][iV][iK] = PSD_lost_PR[iP][iR];
@@ -957,20 +1004,25 @@ int main(int argc, char *argv[])
                 }
             }
             // Output final progress (it should be 100%)
-            if (not minimal_output) {
+            if (not minimal_output)
+            {
                 std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8) << (int)((double)progress_count / progress_total * 100) << "%" << std::endl;
             }
 #pragma omp master
             {
-                if (Vl_BC_from_convection && (Vl_BC_type == BoundaryConditionType::ConstantValue)) {  // rewrite boundary conditions at lower V
+                if (Vl_BC_from_convection && (Vl_BC_type == BoundaryConditionType::ConstantValue))
+                { // rewrite boundary conditions at lower V
                     Vl_BC = PSD.ySlice(0);
-                    if (not minimal_output) {
+                    if (not minimal_output)
+                    {
                         Logger::debug << "Vl_BC from convection are used: max(Vl_BC) = " << Vl_BC.max() << std::endl;
                     }
                 }
-                if (Vu_BC_from_convection && (Vu_BC_type == BoundaryConditionType::ConstantValue)) {  // rewrite boundary conditions at lower V
+                if (Vu_BC_from_convection && (Vu_BC_type == BoundaryConditionType::ConstantValue))
+                { // rewrite boundary conditions at lower V
                     Vu_BC = PSD.ySlice(V_size - 1);
-                    if (not minimal_output) {
+                    if (not minimal_output)
+                    {
                         Logger::debug << "Vu_BC from convection are used: max(Vu_BC) = " << Vu_BC.max() << std::endl;
                     }
                 }
@@ -990,9 +1042,10 @@ int main(int argc, char *argv[])
         if ((L_size >= 3) && (run_radial_diffusion))
         {
             progress_count = 0;
-            progress_total = P_size * V_size * K_size;  // total size of solution matrix
+            progress_total = P_size * V_size * K_size; // total size of solution matrix
             Logger::debug << "Radial diffusion:" << std::endl;
-            if (not minimal_output) {
+            if (not minimal_output)
+            {
                 std::cout << "           ";
             }
 
@@ -1007,12 +1060,16 @@ int main(int argc, char *argv[])
 
 #if defined _OPENMP && _OPENMP >= 200711
 #pragma omp for schedule(dynamic, 1) collapse(3)
-                for (int iP = 0; iP < P_size; iP++) {
-                    for (int iV = 0; iV < V_size; iV++) {
-                        for (int iK = 0; iK < K_size; iK++) {
+                for (int iP = 0; iP < P_size; iP++)
+                {
+                    for (int iV = 0; iV < V_size; iV++)
+                    {
+                        for (int iK = 0; iK < K_size; iK++)
+                        {
 #else
 #pragma omp for schedule(dynamic, 1)
-                for (long index = 0; index < P_size * V_size * K_size; index++) {
+                for (long index = 0; index < P_size * V_size * K_size; index++)
+                {
                     {
                         {
                             int iP = index / (V_size * K_size);
@@ -1020,8 +1077,10 @@ int main(int argc, char *argv[])
                             int iK = index % K_size;
 #endif
                             // print percentage done
-                            if (not minimal_output) {
-                                if (omp_get_thread_num() == 0) {
+                            if (not minimal_output)
+                            {
+                                if (omp_get_thread_num() == 0)
+                                {
                                     std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8) << (int)((double)progress_count / progress_total * 100) << "%" << std::flush;
                                 }
                             }
@@ -1043,7 +1102,8 @@ int main(int argc, char *argv[])
                                 source_slice, loss_slice, dt);
 
                             // copy results back
-                            for (int iL = 0; iL < L_size; iL++) {
+                            for (int iL = 0; iL < L_size; iL++)
+                            {
                                 PSD[iP][iL][iV][iK] = PSD_L[iL];
                             }
 
@@ -1055,7 +1115,8 @@ int main(int argc, char *argv[])
             }
             // ADDED FOR TESTING
             //  PSD.writeToFile(to_string(int(it / output_step)) +  "PSD_after_radial.plt");
-            if (not minimal_output) {
+            if (not minimal_output)
+            {
                 std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8) << (int)((double)progress_count / progress_total * 100) << "%" << std::endl;
             }
             // #pragma omp master
@@ -1084,13 +1145,15 @@ int main(int argc, char *argv[])
             progress_count = 0;
             progress_total = P_size * R_size;
             Logger::debug << "Local diffusion: " << std::endl;
-            if (not minimal_output) {
+            if (not minimal_output)
+            {
                 std::cout << "           ";
             }
 
 #ifdef LU_CACHING
             recompute_lu_decomp = updated_local_loss or updated_dvv or updated_dvk or updated_dkk;
-            if (recompute_lu_decomp) {
+            if (recompute_lu_decomp)
+            {
                 Logger::debug << "Recomputing LU decomposition!" << std::endl;
             }
 #endif
@@ -1119,10 +1182,12 @@ int main(int argc, char *argv[])
                         continue;
                     }
 
-                    if (not minimal_output) {
-                        if (omp_get_thread_num() == 0) {
+                    if (not minimal_output)
+                    {
+                        if (omp_get_thread_num() == 0)
+                        {
                             std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8)
-                                    << (int)((double)progress_count / progress_total * 100) << "%" << std::flush;
+                                      << (int)((double)progress_count / progress_total * 100) << "%" << std::flush;
                         }
                     }
 
@@ -1141,60 +1206,70 @@ int main(int argc, char *argv[])
 
                     // 2d diffusion
                     // If parameters.ini specify "Lapack" then Lapack will be used
-                    if (inversion_method == InversionMethod::Lapack) {
+                    if (inversion_method == InversionMethod::Lapack)
+                    {
 #ifdef LU_CACHING
                         Diffusion_2D(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
-                                    Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR),  // P, R, K
-                                    Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
-                                    Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
-                                    DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
-                                    Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt, sub_dt_diffusion,
-                                    lu_cache[iP][iR], index_cache[iP][iR], recompute_lu_decomp);
+                                     Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+                                     Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+                                     Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+                                     DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+                                     Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt, sub_dt_diffusion,
+                                     lu_cache[iP][iR], index_cache[iP][iR], recompute_lu_decomp);
 #else
                         Diffusion_2D(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
-                                    Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR),  // P, R, K
-                                    Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
-                                    Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
-                                    DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
-                                    Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt, sub_dt_diffusion);
+                                     Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+                                     Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+                                     Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+                                     DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+                                     Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt, sub_dt_diffusion);
 #endif
                     }
                     // Currently setup to calculate 2d Diffusion using Diffusion_2D_ADI3
                     // Can change to Diffusion_2D_ADI1 or Diffusion_2D_ADI2 for different methods of inversion
-                    else if (inversion_method == InversionMethod::ADI) {
+                    else if (inversion_method == InversionMethod::ADI)
+                    {
                         Diffusion_2D_ADI3(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
-                                          Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR),  // P, R, K
-                                          Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
+                                          Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+                                          Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
                                           Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
                                           DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
                                           Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt);
-                    } else if (inversion_method == InversionMethod::ADI2) {
+                    }
+                    else if (inversion_method == InversionMethod::ADI2)
+                    {
                         Diffusion_2D_ADI2(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
-                                          Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR),  // P, R, K
-                                          Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
+                                          Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+                                          Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
                                           Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
                                           DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
                                           Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt);
-                    } else if (inversion_method == InversionMethod::ADI1) {
+                    }
+                    else if (inversion_method == InversionMethod::ADI1)
+                    {
                         Diffusion_2D_ADI1(PSD_IK, V.wxSlice(iP, iR), K.wxSlice(iP, iR), V_size, K_size,
-                                          Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR),  // P, R, K
-                                          Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
+                                          Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+                                          Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
                                           Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
                                           DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
                                           Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt);
-                    } else if (inversion_method == InversionMethod::PPFV) {
+                    }
+                    else if (inversion_method == InversionMethod::PPFV)
+                    {
 #ifdef USE_PPFV
                         Diffusion_2D_PPFV(PSD_IK, V.wxzSlice(iP, iR, 0), K.wxySlice(iP, iR, 0), V_size, K_size,
-                            Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR),  // P, R, K
-                            Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR),  // P, R, I
-                            Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
-                            DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
-                            Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt, sub_dt_diffusion);
+                                          Vl_BC.xySlice(iP, iR), Vu_BC.xySlice(iP, iR), // P, R, K
+                                          Kl_BC.xySlice(iP, iR), Ku_BC.xySlice(iP, iR), // P, R, I
+                                          Vl_BC_type, Vu_BC_type, Kl_BC_type, Ku_BC_type, DVV.wxSlice(iP, iR),
+                                          DKK.wxSlice(iP, iR), DVK.wxSlice(iP, iR), G_local.wxSlice(iP, iR),
+                                          Sources.wxSlice(iP, iR) * local_sources, Losses_local.wxSlice(iP, iR), dt, sub_dt_diffusion);
 #else
                         Logger::error << "Error: PPFV method is not available, please recompile with PPFV option!" << std::endl;
                         exit(EXIT_FAILURE);
 #endif
-                        } else {
+                    }
+                    else
+                    {
                         Logger::error << "Error: Unknown inversion method!" << std::endl;
                     }
 
@@ -1209,7 +1284,8 @@ int main(int argc, char *argv[])
                 }
             }
 
-            if (not minimal_output) {
+            if (not minimal_output)
+            {
                 std::cout << "\b\b\b\b\b\b\b\b\b" << std::setw(8) << (int)((double)progress_count / progress_total * 100) << "%" << std::endl;
                 std::cout << "Number of skipped points: " << (int)((double)number_of_skipped_points / progress_total * 100) << "%" << std::endl;
             }
@@ -1239,15 +1315,19 @@ int main(int argc, char *argv[])
         }
         // std::cout << "Number of negative points: " << number_of_negative_points << endl;
         Logger::debug << std::endl
-                        << "Number of negative points: " << number_of_negative_points << " of " << P_size * R_size * V_size * K_size << std::endl;
+                      << "Number of negative points: " << number_of_negative_points << " of " << P_size * R_size * V_size * K_size << std::endl;
 
 #ifdef DATA_ASSIMILATION
-        if (run_convection) {
-            daManagerConvection.assimilate(time_current, time_current+dt, PSD, VP, VR, has_VX_updated, Sources, SaturationDensity, dt);
-        } else {
-            daManagerDiffusion.assimilate(time_current, time_current+dt, PSD, DLL, G_radial, Ll_BC, Lu_BC, Ll_BC_type, Lu_BC_type, dt);
+        if (run_convection)
+        {
+            daManagerConvection.assimilate(time_current, time_current + dt, PSD, VP, VR, has_VX_updated, Sources, SaturationDensity, dt);
         }
-        if (positive_PSD) {
+        else
+        {
+            daManagerDiffusion.assimilate(time_current, time_current + dt, PSD, DLL, G_radial, Ll_BC, Lu_BC, Ll_BC_type, Lu_BC_type, dt);
+        }
+        if (positive_PSD)
+        {
             PSD.max_of(1e-21);
         }
 #endif
@@ -1262,7 +1342,7 @@ int main(int argc, char *argv[])
             PSD_filename << outputFolder << "PSD_" << std::setw(5) << std::setfill('0') << int(it / output_step);
 
             Logger::debug << std::endl
-                            << "Writing results: " << PSD_filename.str() << std::endl;
+                          << "Writing results: " << PSD_filename.str() << std::endl;
 
             output_writer = std::async(std::launch::async, write_PSD_output, io_method, PSD_filename.str(), time_current, PSD, PSD_time_to_lst, outputFolder);
 
@@ -1274,15 +1354,14 @@ int main(int argc, char *argv[])
             PSD_lost_filename.str("");
             PSD_lost_filename << outputFolder << "lost_conv_PSD_" << std::setw(5) << std::setfill('0') << int(it / output_step);
             Logger::debug << std::endl
-                            << "Writing results: " << PSD_lost_filename.str() << std::endl;
+                          << "Writing results: " << PSD_lost_filename.str() << std::endl;
             PSD_lost_conv.writeToAnyFile(PSD_lost_filename.str(), io_method, time_string.str());
 #endif
         }
-
     }
 
 #ifdef MKL_FOUND
-    for(auto& csr_handle : sparse_matrix_handles)
+    for (auto &csr_handle : sparse_matrix_handles)
     {
         mkl_sparse_destroy(*csr_handle);
         // delete csr_handle; //mkl_sparse_destroy seems to delete the pointer
@@ -1290,16 +1369,16 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef LU_CACHING
-    for(auto& p_slice : lu_cache)
+    for (auto &p_slice : lu_cache)
     {
-        for(auto& pr_slice : p_slice)
+        for (auto &pr_slice : p_slice)
         {
             delete[] pr_slice;
         }
     }
-    for(auto& p_slice : index_cache)
+    for (auto &p_slice : index_cache)
     {
-        for(auto& pr_slice : p_slice)
+        for (auto &pr_slice : p_slice)
         {
             delete[] pr_slice;
         }
