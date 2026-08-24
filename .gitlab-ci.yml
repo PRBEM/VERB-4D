@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2026 GFZ Helmholtz Centre for Geosciences
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+stages:
+  - docs
+
+pages:
+  stage: docs
+  image: debian:bookworm
+  before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends doxygen
+  script:
+    - cd docs
+    - doxygen Doxyfile
+    - cd ..
+    - rm -rf public
+    - mv docs/html public
+  artifacts:
+    paths:
+      - public
