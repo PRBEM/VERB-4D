@@ -50,7 +50,8 @@ class Equation{
 
     // pure virtual functions to be defined by the CASE of interest. 
     virtual double init_PSD(const Ind& ind) const = 0;
-    virtual void apply_bcs(Xtensor2d* vertex_fp) const = 0;
+    // set the vertices on the boundary; cell_f is the current cell-centered PSD
+    virtual void apply_bcs(Xtensor2d* vertex_fp, const Xtensor2d& cell_f) const = 0;
     virtual BoundaryConditionType get_x_LBC_type() const = 0;
     virtual BoundaryConditionType get_x_UBC_type() const = 0;
     virtual BoundaryConditionType get_y_LBC_type() const = 0;

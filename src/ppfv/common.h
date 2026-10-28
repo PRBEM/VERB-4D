@@ -48,6 +48,11 @@ struct Loc{
 
 // constants
 const double gEPS = std::numeric_limits<double>::epsilon();
+
+// Picard iteration of the nonlinear coefficients within each time step (Solver::update)
+const int gPICARD_MAX_ITER = 100;        // iterations per step (at most)
+const double gPICARD_RTOL = 1e-6;        // stop when max |f_new - f_old| / (|f_new| + floor) falls below
+const double gPICARD_FLOOR_REL = 1e-12;  // floor of that measure, relative to max |f|
 const double gPI = 3.141592653589793238462;
 const double gD2R = gPI / 180.0; // convert degree to radian
 const double gC = 1;
