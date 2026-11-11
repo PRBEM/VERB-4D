@@ -14,7 +14,12 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(verb4d_solver, m) {
+#ifndef VERB4D_PYTHON_MODULE_NAME
+    #define VERB4D_PYTHON_MODULE_NAME verb4d_solver
+#endif
+
+// verb4d_solver._core in the pip package, the top-level module verb4d_solver in a plain CMake build
+PYBIND11_MODULE(VERB4D_PYTHON_MODULE_NAME, m) {
     py::enum_<BoundaryConditionType>(m, "BoundaryConditionType", py::arithmetic(), "Boundary condition type for diffusion and convection.")
         .value("Periodic", BoundaryConditionType::Periodic, "Periodic boundary condition")
         .value("ConstantValue", BoundaryConditionType::ConstantValue, "Constant value boundary condition")

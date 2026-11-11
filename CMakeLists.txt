@@ -135,9 +135,22 @@ endif()
 # --- Python Bindings ---
 if(PYTHON_BINDINGS)
     message(STATUS "Building Python bindings with pybind11...")
-    add_subdirectory(extern/pybind11)
+    # pip (scikit-build-core) provides pybind11 as a build requirement; a plain build uses the submodule.
+    find_package(pybind11 CONFIG QUIET)
+    if(NOT pybind11_FOUND)
+        add_subdirectory(extern/pybind11)
+    endif()
+
+    # In the pip package the module is verb4d_solver._core; a plain build keeps the top-level module verb4d_solver.
+    if(SKBUILD)
+        set(VERB4D_PYTHON_MODULE_NAME _core)
+    else()
+        set(VERB4D_PYTHON_MODULE_NAME verb4d_solver)
+    endif()
 
     pybind11_add_module(verb4d_solver src/python_bindings/Define_python_modules.cpp ${VERB4D_SOURCES})
+    set_target_properties(verb4d_solver PROPERTIES OUTPUT_NAME ${VERB4D_PYTHON_MODULE_NAME})
+    target_compile_definitions(verb4d_solver PRIVATE VERB4D_PYTHON_MODULE_NAME=${VERB4D_PYTHON_MODULE_NAME})
     target_link_libraries(verb4d_solver PUBLIC OpenMP::OpenMP_CXX ${BLAS_LIBRARIES_TO_LINK})
     include_directories(${PROJECT_SOURCE_DIR}/src/python_bindings ${PROJECT_SOURCE_DIR}/src)
 
@@ -145,4 +158,42 @@ if(PYTHON_BINDINGS)
         target_compile_definitions(verb4d_solver PRIVATE USE_PPFV)
         target_link_libraries(verb4d_solver PUBLIC ppfv)
     endif()
+endif()
+
+# --- Install rules of the pip package (scikit-build-core) ---
+# The solver, the bindings and libppfv go into the package folder verb4d_solver/ (the install prefix is the
+# platlib folder). A plain CMake build has no install rules.
+if(SKBUILD)
+    set(VERB4D_PACKAGE_DIR verb4d_solver)
+
+    # Build options of this package, read by verb4d_solver.build_options
+    foreach(option_name FAST_CONVECTION USE_PPFV DATA_ASSIMILATION DATA_ASSIMILATION_DEBUG LU_CACHING SAVE_PSD_LOST_CONV)
+        if(${option_name})
+            set(${option_name}_PY True)
+        else()
+            set(${option_name}_PY False)
+        endif()
+    endforeach()
+    configure_file(python/verb4d_solver/_build_options.py.in ${CMAKE_CURRENT_BINARY_DIR}/_build_options.py @ONLY)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_build_options.py DESTINATION ${VERB4D_PACKAGE_DIR})
+
+    # libppfv is found next to the solver and the bindings
+    set(VERB4D_INSTALL_TARGETS VERB4D_Solver)
+    if(PYTHON_BINDINGS)
+        list(APPEND VERB4D_INSTALL_TARGETS verb4d_solver)
+    endif()
+    if(USE_PPFV)
+        list(APPEND VERB4D_INSTALL_TARGETS ppfv)
+    endif()
+    if(APPLE)
+        set(VERB4D_RPATH "@loader_path")
+    else()
+        set(VERB4D_RPATH "$ORIGIN")
+    endif()
+    set_target_properties(${VERB4D_INSTALL_TARGETS} PROPERTIES INSTALL_RPATH "${VERB4D_RPATH}")
+    install(
+        TARGETS ${VERB4D_INSTALL_TARGETS}
+        RUNTIME DESTINATION ${VERB4D_PACKAGE_DIR}
+        LIBRARY DESTINATION ${VERB4D_PACKAGE_DIR}
+    )
 endif()

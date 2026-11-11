@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2026 GFZ Helmholtz Centre for Geosciences
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Written by CMake (configure_file) when the package is built.
+
+BUILD_OPTIONS = {
+    "FAST_CONVECTION": @FAST_CONVECTION_PY@,
+    "USE_PPFV": @USE_PPFV_PY@,
+    "DATA_ASSIMILATION": @DATA_ASSIMILATION_PY@,
+    "DATA_ASSIMILATION_DEBUG": @DATA_ASSIMILATION_DEBUG_PY@,
+    "LU_CACHING": @LU_CACHING_PY@,
+    "SAVE_PSD_LOST_CONV": @SAVE_PSD_LOST_CONV_PY@,
+    "BLAS_TYPE": "@BLAS_TYPE@",
+}
