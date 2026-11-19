@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2026 GFZ Helmholtz Centre for Geosciences
+# SPDX-FileContributor: Sahil Jhawar
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+sphinx
+breathe
+exhale
+myst-parser
+pydata-sphinx-theme
