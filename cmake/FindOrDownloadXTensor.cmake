@@ -3,6 +3,10 @@ include(FetchContent)
 find_package(xtensor QUIET)
 
 if(NOT xtensor_FOUND)
+    # xtl/xtensor's pinned tags predate CMake 4's removal of pre-3.5 policy
+    # support. Relax the minimum only for these fetched subprojects.
+    set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+
     FetchContent_Declare(xtl GIT_REPOSITORY https://github.com/xtensor-stack/xtl.git GIT_TAG 0.7.6)
     FetchContent_MakeAvailable(xtl)
 
@@ -15,4 +19,5 @@ if(NOT xtensor_FOUND)
         )
     FetchContent_MakeAvailable(xtensor)
 
+    unset(CMAKE_POLICY_VERSION_MINIMUM)
 endif()

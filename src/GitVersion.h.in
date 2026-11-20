@@ -1,0 +1,13 @@
+/*
+ * SPDX-FileCopyrightText: 2026 GFZ Helmholtz Centre Potsdam
+ *
+ * SPDX-FileContributor: Sahil Jhawar
+ *
+ * SPDX-License-Identifier: BSD-3
+ */
+
+// Generated at build time by cmake/GenerateGitVersion.cmake. Do not edit directly,
+// and do not commit the generated header (see build/ in .gitignore).
+#pragma once
+
+#define GIT_COMMIT_HASH "@GIT_COMMIT_HASH@"
