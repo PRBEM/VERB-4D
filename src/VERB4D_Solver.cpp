@@ -126,6 +126,7 @@
 #include <string>
 #include <thread>
 
+#include "BuildInfo.h"
 #include "Convection_2D.h"
 #include "Convection_3D.h"
 #include "Diffusion_1D.h"
@@ -192,6 +193,23 @@ void write_PSD_output(const IOMethod &io_method, const std::string &PSD_filename
 
 int main(int argc, char *argv[])
 {
+    // Handle informational/diagnostic flags before touching parameters.ini or any
+    // other generated input, so they work in a bare checkout right after compiling.
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+        if (arg == "-h" || arg == "--help") {
+            printUsage(argv[0]);
+            return EXIT_SUCCESS;
+        }
+        if (arg == "--version") {
+            printBuildInfo(std::cout);
+            return EXIT_SUCCESS;
+        }
+        if (arg == "--check") {
+            return runSelfCheck() ? EXIT_SUCCESS : EXIT_FAILURE;
+        }
+    }
+
     Logger::createInstance();
     std::string compile_type = "Debug";
     std::string fast_convection = "";

@@ -12,3 +12,14 @@ docs/latex/*
 docs/html/*
 !docs/Doxyfile
 !docs/README.md
+test/build_test_*
+test/test_build_*
+test/logs*
+
+**/__pycache__
+
+# Sphinx
+docs/_build/
+docs/_doxygen/
+docs/api/
+

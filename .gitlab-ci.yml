@@ -1,13 +1,57 @@
 # SPDX-FileCopyrightText: 2026 GFZ Helmholtz Centre for Geosciences
+# SPDX-FileContributor: Sahil Jhawar
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
 stages:
+  - test
   - docs
+  - build
+
+variables:
+  SIF_IMAGE: ${CI_REGISTRY_IMAGE}/verb4d
+  GIT_SUBMODULE_STRATEGY: recursive
+
+test_build_matrix:
+  stage: test
+  image: debian:bookworm
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    OPENBLAS_CACHE_DIR: "${CI_PROJECT_DIR}/.cache/openblas"
+  cache:
+    key: openblas
+    paths:
+      - .cache/openblas/
+  before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends
+      build-essential gfortran cmake git ca-certificates curl
+      liblapack-dev libblas-dev
+    - curl -LsSf https://astral.sh/uv/install.sh | sh
+    - export PATH="$HOME/.local/bin:$PATH"
+    - mkdir -p "$HOME/.local/lib" "$OPENBLAS_CACHE_DIR"
+    - OPENBLAS_SHA=$(git -C OpenBLAS rev-parse HEAD)
+    - |
+      if [ "$(cat "$OPENBLAS_CACHE_DIR/commit" 2>/dev/null)" = "$OPENBLAS_SHA" ] && [ -f "$OPENBLAS_CACHE_DIR/libopenblas.so" ]; then
+        echo "Using cached OpenBLAS build ($OPENBLAS_SHA)"
+        cp "$OPENBLAS_CACHE_DIR"/libopenblas.so* "$HOME/.local/lib/"
+      else
+        echo "Building OpenBLAS ($OPENBLAS_SHA)"
+        ./install_openblas.sh
+        cp "$HOME/.local/lib"/libopenblas.so* "$OPENBLAS_CACHE_DIR/"
+        echo "$OPENBLAS_SHA" > "$OPENBLAS_CACHE_DIR/commit"
+      fi
+  script:
+    - uv run test/test_builds.py
+  artifacts:
+    when: always
+    paths:
+      - test/logs/
+    expire_in: 1 week
 
 pages:
   stage: docs
-  image: debian:bookworm
+  image: ghcr.io/astral-sh/uv:python3.12-bookworm
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
   before_script:
@@ -15,10 +59,57 @@ pages:
     - apt-get install -y --no-install-recommends doxygen
   script:
     - cd docs
-    - doxygen Doxyfile
+    - uv run --no-project --with-requirements requirements.txt sphinx-build -b html . _build/html
     - cd ..
     - rm -rf public
-    - mv docs/html public
+    - mv docs/_build/html public
   artifacts:
     paths:
       - public
+
+build-sif:
+  stage: build
+  needs: []
+  image:
+    name: kaczmarj/apptainer:latest
+    entrypoint: [""]
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - verb4d.def
+        - src/**/*
+        - cmake/**/*
+        - extern/**/*
+        - CMakeLists.txt
+        - install_verb.sh
+        - install_openblas.sh
+        - OpenBLAS
+    - when: manual
+      allow_failure: true
+  variables:
+    APPTAINER_CACHEDIR: ${CI_PROJECT_DIR}/.apptainer-cache
+    APPTAINER_TMPDIR: ${CI_PROJECT_DIR}/.apptainer-tmp
+  before_script:
+    - mkdir -p "$APPTAINER_CACHEDIR" "$APPTAINER_TMPDIR"
+  script:
+    - apptainer build --build-arg GIT_COMMIT=${CI_COMMIT_SHORT_SHA} verb4d.sif verb4d.def
+    - export APPTAINER_DOCKER_USERNAME=${CI_REGISTRY_USER}
+    - export APPTAINER_DOCKER_PASSWORD=${CI_REGISTRY_PASSWORD}
+    - apptainer push verb4d.sif "oras://${SIF_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+    - |
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        apptainer push verb4d.sif "oras://${SIF_IMAGE}:${CI_COMMIT_TAG}"
+      fi
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "$CI_DEFAULT_BRANCH" ]; then
+        apptainer push verb4d.sif "oras://${SIF_IMAGE}:latest"
+      fi
+  artifacts:
+    paths:
+      - verb4d.sif
+    expire_in: 1 week
+  cache:
+    key: apptainer
+    paths:
+      - .apptainer-cache/

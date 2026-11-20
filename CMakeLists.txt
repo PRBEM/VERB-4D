@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.0...4.0)
 project(VERB4D LANGUAGES C CXX)
 
 # --- Project Settings ---
@@ -35,6 +35,7 @@ file(GLOB_RECURSE VERB4D_HEADERS src/*.h)
 
 set(VERB4D_SOURCES
     src/VERB4D_Solver.cpp
+    src/BuildInfo.cpp
     src/Convection_1D_ULTIMATE_QUICKEST6.cpp
     src/Convection_1D_2ndORDER_NONUNIFORM_GRID.cpp
     src/Convection_2D.cpp
@@ -55,6 +56,24 @@ set(VERB4D_SOURCES
     src/UpdatableMatrix.cpp
 )
 
+# sets git commit hash in the --version
+set(GIT_COMMIT_HASH "" CACHE STRING "Git commit hash to embed, bypassing 'git rev-parse' (for container builds without .git/git)")
+
+set(GENERATED_DIR "${CMAKE_BINARY_DIR}/generated")
+set(GIT_VERSION_HEADER "${GENERATED_DIR}/GitVersion.h")
+add_custom_target(GitVersionHeader ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${GENERATED_DIR}
+    COMMAND ${CMAKE_COMMAND}
+        -DSRC=${CMAKE_SOURCE_DIR}/src/GitVersion.h.in
+        -DDST=${GIT_VERSION_HEADER}
+        -DSRC_DIR=${CMAKE_SOURCE_DIR}
+        -DOVERRIDE=${GIT_COMMIT_HASH}
+        -P ${CMAKE_SOURCE_DIR}/cmake/GenerateGitVersion.cmake
+    BYPRODUCTS ${GIT_VERSION_HEADER}
+    COMMENT "Updating git commit hash"
+    VERBATIM
+)
+
 if(DATA_ASSIMILATION)
     message(STATUS "Data Assimilation enabled")
     list(APPEND VERB4D_SOURCES 
@@ -73,9 +92,10 @@ endif()
 
 # --- Main Executable Target ---
 add_executable(VERB4D_Solver ${VERB4D_SOURCES} ${VERB4D_HEADERS})
+add_dependencies(VERB4D_Solver GitVersionHeader)
 
 # --- Compiler Definitions and Options ---
-target_compile_definitions(VERB4D_Solver PRIVATE 
+target_compile_definitions(VERB4D_Solver PRIVATE
     _USE_MATH_DEFINES
     $<$<BOOL:${DATA_ASSIMILATION}>:DATA_ASSIMILATION>
     $<$<BOOL:${DATA_ASSIMILATION_DEBUG}>:DATA_ASSIMILATION_DEBUG>
@@ -84,6 +104,7 @@ target_compile_definitions(VERB4D_Solver PRIVATE
     $<$<BOOL:${SAVE_PSD_LOST_CONV}>:SAVE_PSD_LOST_CONV>
     $<$<BOOL:${LU_CACHING}>:LU_CACHING>
     $<$<CONFIG:Release>:RELEASE>
+    BLAS_TYPE_STRING="${BLAS_TYPE}"
 )
 
 if(MSVC)
@@ -94,6 +115,7 @@ endif()
 
 # --- Include Directories ---
 target_include_directories(VERB4D_Solver PUBLIC src)
+target_include_directories(VERB4D_Solver PRIVATE ${GENERATED_DIR})
 if(BLAS_INCLUDE_DIRS)
     target_include_directories(VERB4D_Solver PRIVATE ${BLAS_INCLUDE_DIRS})
 endif()
@@ -151,8 +173,9 @@ if(PYTHON_BINDINGS)
     pybind11_add_module(verb4d_solver src/python_bindings/Define_python_modules.cpp ${VERB4D_SOURCES})
     set_target_properties(verb4d_solver PROPERTIES OUTPUT_NAME ${VERB4D_PYTHON_MODULE_NAME})
     target_compile_definitions(verb4d_solver PRIVATE VERB4D_PYTHON_MODULE_NAME=${VERB4D_PYTHON_MODULE_NAME})
+    add_dependencies(verb4d_solver GitVersionHeader)
     target_link_libraries(verb4d_solver PUBLIC OpenMP::OpenMP_CXX ${BLAS_LIBRARIES_TO_LINK})
-    include_directories(${PROJECT_SOURCE_DIR}/src/python_bindings ${PROJECT_SOURCE_DIR}/src)
+    include_directories(${PROJECT_SOURCE_DIR}/src/python_bindings ${PROJECT_SOURCE_DIR}/src ${GENERATED_DIR})
 
     if(USE_PPFV)
         target_compile_definitions(verb4d_solver PRIVATE USE_PPFV)

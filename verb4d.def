@@ -1,0 +1,44 @@
+Bootstrap: docker
+From: astral/uv:python3.12-bookworm-slim
+
+%arguments
+    GIT_COMMIT=unknown
+
+%labels
+    Author Sahil Jhawar
+    Description VERB4D (VERB4D_Solver + OpenBLAS built from source)
+
+%files
+    cmake /opt/verb4d_solver_src/
+    extern /opt/verb4d_solver_src/
+    src /opt/verb4d_solver_src/
+    OpenBLAS /opt/verb4d_solver_src/
+    install_verb.sh /opt/verb4d_solver_src/
+    install_openblas.sh /opt/verb4d_solver_src/
+    CMakeLists.txt /opt/verb4d_solver_src/
+
+%environment
+    export PATH="/opt/verb4d_solver/build:$PATH"
+    export LD_LIBRARY_PATH="/opt/verb4d_solver/lib:$LD_LIBRARY_PATH"
+
+%post
+    export PATH="/root/.local/bin:$PATH"
+    export GIT_COMMIT={{ GIT_COMMIT }}
+
+    apt-get update
+    apt-get install -y --no-install-recommends curl ca-certificates build-essential git gfortran cmake                                                                                                   
+    rm -rf /var/lib/apt/lists/*         
+
+    # Build OpenBLAS and VERB4D_Solver from source using the repo's own install
+    # scripts, entirely with the container's own toolchain, so the resulting
+    # binary never links against host-specific libraries (e.g. Cray libsci/MPI,
+    # which the solver does not use).
+    cd /opt/verb4d_solver_src
+    rm -rf build OpenBLAS/build
+    bash install_openblas.sh
+    bash install_verb.sh
+    mkdir -p /opt/verb4d_solver/build /opt/verb4d_solver/lib
+    cp build/VERB4D_Solver /opt/verb4d_solver/build/
+    cp /root/.local/lib/libopenblas.so* /opt/verb4d_solver/lib/
+    cd /
+    rm -rf /opt/verb4d_solver_src
