@@ -1,0 +1,39 @@
+# SPDX-FileCopyrightText: 2026 GFZ Helmholtz Centre for Geosciences
+#
+# SPDX-License-Identifier: BSD-3-Clause
+
+[build-system]
+requires = ["scikit-build-core>=0.10", "pybind11>=2.12"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "verb4d-solver"
+version = "1.0.0"
+description = "The VERB-4D solver (radiation belts, ring current, plasmasphere) with its Python bindings and verb4dpy"
+readme = "README.md"
+license = "BSD-3-Clause"
+requires-python = ">=3.12"
+dependencies = [
+    "verb4dpy @ git+https://git.gfz-potsdam.de/spsw/verb/verb4d/verb4dpy.git@v1.0.1",
+]
+
+[project.urls]
+Repository = "https://git.gfz-potsdam.de/spsw/verb/verb4d/verb-4d"
+
+[tool.scikit-build]
+minimum-version = "build-system.requires"
+cmake.version = ">=3.15"
+cmake.build-type = "Release"
+wheel.packages = ["python/verb4d_solver"]
+wheel.exclude = ["**/*.py.in"]
+sdist.exclude = ["OpenBLAS", "lib", "docs", "build", "out"]
+
+# Defaults; change one with e.g. pip install . -Ccmake.define.FAST_CONVECTION=ON
+[tool.scikit-build.cmake.define]
+PYTHON_BINDINGS = "ON"
+BLAS_TYPE = "LAPACK"
+FAST_CONVECTION = "ON"
+USE_PPFV = "OFF"
+DATA_ASSIMILATION = "OFF"
+LU_CACHING = "OFF"
+SAVE_PSD_LOST_CONV = "OFF"
