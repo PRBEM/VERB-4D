@@ -67,6 +67,9 @@ The package is built with these [compilation flags](#list-of-compilation-flags):
 | `FAST_CONVECTION` | `ON` (unlike the plain CMake build, where it is `OFF`) |
 | `USE_PPFV`, `DATA_ASSIMILATION`, `LU_CACHING`, `SAVE_PSD_LOST_CONV` | `OFF` |
 
+Change one with `-C` (pip takes the same option):
+```
+uv pip install . -Ccmake.define.FAST_CONVECTION=OFF -Ccmake.define.USE_PPFV=ON
 ```
 In Python:
 ```python
@@ -139,6 +142,10 @@ It expects the OpenBLAS library in `~/.local/lib` (see below).
 Once built, check that the executable and its BLAS/LAPACK and OpenMP dependencies were linked correctly, without needing any `parameters.ini` or input files:
 ```
 ./build/VERB4D_Solver --check
+```
+For the package installed with uv or pip:
+```
+"$(python -c 'import verb4d_solver; print(verb4d_solver.executable_path())')" --check
 ```
 `--version` prints build info (BLAS backend, enabled compile options, OpenMP thread count, commit hash if available) and `--help` prints usage. Running the solver itself additionally requires a `parameters.ini` file and associated input files in the working directory.
 
