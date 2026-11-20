@@ -36,14 +36,16 @@ private:
   const Mesh &m;
 
   Equation &eq;
-  bool already_factorized_ = false;
+  bool pattern_analyzed_ = false;  // the sparsity pattern of M is fixed; its values change every assembly
 
   // M f = R
   Eigen::SparseLU<SpMat, Eigen::COLAMDOrdering<int>> solver;
   SpMat M_;
   std::vector<T> M_coeffs_;
 
-  Xtensor2d PSD_;
+  Xtensor2d PSD_;      // current Picard iterate; the coefficients of M are built from it
+  Xtensor2d PSD_old_;  // PSD at the start of the time step, for R
+  double f_eps_ = gEPS; // gEPS * max |PSD_|: keeps B / (f + f_eps_) finite independently of the units of f
   Eigen::VectorXd R_;
   Eigen::VectorXd ftmp_; // used to store results from the Eigen Solver.
 
@@ -75,10 +77,18 @@ private:
 
   void calculate_mu(double a_sigma_K, double a_sigma_L, double *mu_Kp, double *mu_Lp)
   {
-    double denom = std::abs(a_sigma_K) + std::abs(a_sigma_L) + 2 * gEPS;
-    (*mu_Kp) = (std::abs(a_sigma_L) + gEPS) / denom;
+    // relative to the a_sigma themselves, so that the weights do not depend on the units of f and D
+    double denom = std::abs(a_sigma_K) + std::abs(a_sigma_L);
+    if (denom <= std::numeric_limits<double>::min()) {
+      (*mu_Kp) = 0.5;
+    } else {
+      (*mu_Kp) = std::abs(a_sigma_L) / denom;
+    }
     (*mu_Lp) = 1 - (*mu_Kp);
   }
+
+  // solve M f = R once with the coefficients of the current iterate; returns the Picard change measure
+  double picard_iteration();
 
   void init();
 };

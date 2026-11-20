@@ -13,6 +13,7 @@
 #include "Solver.h"
 #include <iostream>
 #include <iomanip> // for setw
+#include <stdexcept>
 #include "../BoundaryConditionType.hpp"
 
 Solver::Solver(const Mesh &m_in, Equation *eqp)
@@ -25,6 +26,7 @@ Solver::Solver(const Mesh &m_in, Equation *eqp)
   M_.resize(nx * ny, nx * ny);
 
   PSD_.resize({nx, ny});
+  PSD_old_.resize({nx, ny});
 
   R_.resize(nx * ny);
   ftmp_.resize(nx * ny);
@@ -173,8 +175,8 @@ void Solver::update_coeff_inner_pair(const Ind &ind, int inbr)
   B_sigma_plus = (B_sigma_abs + B_sigma) / 2.0;
   B_sigma_minus = (B_sigma_abs - B_sigma) / 2.0;
 
-  A_K = mu_K * (a_sigma_i_K[0] + a_sigma_i_K[1]) + B_sigma_plus / (PSD(ind) + gEPS);
-  A_L = mu_L * (a_sigma_i_L[0] + a_sigma_i_L[1]) + B_sigma_minus / (PSD(nbr_ind) + gEPS);
+  A_K = mu_K * (a_sigma_i_K[0] + a_sigma_i_K[1]) + B_sigma_plus / (PSD(ind) + f_eps_);
+  A_L = mu_L * (a_sigma_i_L[0] + a_sigma_i_L[1]) + B_sigma_minus / (PSD(nbr_ind) + f_eps_);
 
   if (std::isnan(A_K) || std::isnan(A_L)) {
     exit(-1);
@@ -205,7 +207,7 @@ void Solver::update_coeff_dirbc(const Ind &ind, int inbr)
   B_sigma_plus = (B_sigma_abs + B_sigma) / 2.0;
   B_sigma_minus = (B_sigma_abs - B_sigma) / 2.0;
 
-  A_K = a_sigma_i_K[0] + a_sigma_i_K[1] + B_sigma_plus / (PSD(ind) + gEPS);
+  A_K = a_sigma_i_K[0] + a_sigma_i_K[1] + B_sigma_plus / (PSD(ind) + f_eps_);
 
   size_t K = m.flatten_index(ind);
   M_coeffs_.push_back(T(K, K, A_K));
@@ -273,45 +275,70 @@ void Solver::assemble()
 
       // M_(K, K) += UKK;
       UKK = eq.G({i, j}) * m.cell_area_dt(i,j);
-      R_(K) += UKK * PSD_(i, j);
+      R_(K) += UKK * PSD_old_(i, j);
     }
   }
 
   M_.setFromTriplets(M_coeffs_.begin(), M_coeffs_.end());
 }
 
-void Solver::update()
+double Solver::picard_iteration()
 {
+  // keeps B / (f + f_eps_) finite for f = 0, relative to the PSD so that the scheme does not depend on its units
+  double psd_max = 0;
+  for (size_t i = 0; i < m.nx(); ++i)
+    for (size_t j = 0; j < m.ny(); ++j)
+      psd_max = std::max(psd_max, std::abs(PSD_(i, j)));
+  f_eps_ = gEPS * std::max(psd_max, std::numeric_limits<double>::min());
+
   R_.setZero();
   M_coeffs_.clear();
 
   assemble();
 
-  // iterSolver.compute(M_);
-  // ftmp_ = iterSolver.solve(R_);
-
-  if (!already_factorized_) {
+  // the coefficients of M depend on the iterate, so M is factorized again for every solve
+  if (!pattern_analyzed_) {
     solver.analyzePattern(M_);
-    solver.factorize(M_);
-    already_factorized_ = true;
+    pattern_analyzed_ = true;
+  }
+  solver.factorize(M_);
+  if (solver.info() != Eigen::Success) {
+    throw std::runtime_error("PPFV: factorization of the diffusion matrix failed");
   }
 
   ftmp_ = solver.solve(R_);
 
-  // cout << "iterSolver.info() = " << solver.info() << endl;
+  double f_max = 0;
+  for (Eigen::Index k = 0; k < ftmp_.size(); ++k) f_max = std::max(f_max, std::abs(ftmp_(k)));
+  const double floor = gPICARD_FLOOR_REL * f_max + std::numeric_limits<double>::min();
 
+  double change = 0;
   for (size_t i = 0; i < m.nx(); ++i)
   {
     for (size_t j = 0; j < m.ny(); ++j)
     {
-      PSD_(i, j) = ftmp_(m.flatten_index({i, j}));
+      const double f_new = ftmp_(m.flatten_index({i, j}));
+      change = std::max(change, std::abs(f_new - PSD_(i, j)) / (std::abs(f_new) + floor));
+      PSD_(i, j) = f_new;
     }
   }
 
-  update_Lambda();
   update_vertex_f();
+  return change;
+}
 
-  // print_vertex_matrix(vertex_f_, "vertex_f_");
+void Solver::update()
+{
+  // Backward Euler step with the nonlinear (Picard) iteration of the coefficients. The coefficients of M
+  // depend on f through the vertex values and through B / f; built from the old f alone, a cell that is
+  // empty at the start of the step (e.g. inside the loss cone) gets B / (f + eps) -> large and stays empty,
+  // since the new f is then proportional to the old one. Iterating lets it fill within the step.
+  PSD_old_ = PSD_;
+
+  for (int iter = 0; iter < gPICARD_MAX_ITER; ++iter)
+  {
+    if (picard_iteration() < gPICARD_RTOL) break;
+  }
 }
 
 void Solver::update_vertex_f()
@@ -325,5 +352,5 @@ void Solver::update_vertex_f()
     }
   }
 
-  eq.apply_bcs(&vertex_f_);
+  eq.apply_bcs(&vertex_f_, PSD_);
 }
