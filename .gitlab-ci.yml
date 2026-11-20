@@ -4,12 +4,50 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 stages:
+  - test
   - docs
   - build
 
 variables:
   SIF_IMAGE: ${CI_REGISTRY_IMAGE}/verb4d
   GIT_SUBMODULE_STRATEGY: recursive
+
+test_build_matrix:
+  stage: test
+  image: debian:bookworm
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+    OPENBLAS_CACHE_DIR: "${CI_PROJECT_DIR}/.cache/openblas"
+  cache:
+    key: openblas
+    paths:
+      - .cache/openblas/
+  before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends
+      build-essential gfortran cmake git ca-certificates curl
+      liblapack-dev libblas-dev
+    - curl -LsSf https://astral.sh/uv/install.sh | sh
+    - export PATH="$HOME/.local/bin:$PATH"
+    - mkdir -p "$HOME/.local/lib" "$OPENBLAS_CACHE_DIR"
+    - OPENBLAS_SHA=$(git -C OpenBLAS rev-parse HEAD)
+    - |
+      if [ "$(cat "$OPENBLAS_CACHE_DIR/commit" 2>/dev/null)" = "$OPENBLAS_SHA" ] && [ -f "$OPENBLAS_CACHE_DIR/libopenblas.so" ]; then
+        echo "Using cached OpenBLAS build ($OPENBLAS_SHA)"
+        cp "$OPENBLAS_CACHE_DIR"/libopenblas.so* "$HOME/.local/lib/"
+      else
+        echo "Building OpenBLAS ($OPENBLAS_SHA)"
+        ./install_openblas.sh
+        cp "$HOME/.local/lib"/libopenblas.so* "$OPENBLAS_CACHE_DIR/"
+        echo "$OPENBLAS_SHA" > "$OPENBLAS_CACHE_DIR/commit"
+      fi
+  script:
+    - uv run test/test_builds.py
+  artifacts:
+    when: always
+    paths:
+      - test/logs/
+    expire_in: 1 week
 
 pages:
   stage: docs

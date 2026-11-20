@@ -91,6 +91,13 @@ The executable `VERB4D_Solver` can be found in `./build`.
 ##### CMake (PowerShell)
 *coming soon*
 
+### Verify the installation
+Once built, check that the executable and its BLAS/LAPACK and OpenMP dependencies were linked correctly, without needing any `parameters.ini` or input files:
+```
+./build/VERB4D_Solver --check
+```
+`--version` prints build info (BLAS backend, enabled compile options, OpenMP thread count, commit hash if available) and `--help` prints usage. Running the solver itself additionally requires a `parameters.ini` file and associated input files in the working directory.
+
 ### Compile and install the OpenBLAS library (optional)
 #### Linux / OSX
 Build the shared OpenBLAS library and install it to `~/.local/lib` by calling

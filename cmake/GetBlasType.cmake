@@ -17,6 +17,11 @@ if(${BLAS_TYPE} STREQUAL "LAPACK")
         set(F2C_LIBRARIES    ${CMAKE_SOURCE_DIR}/lib/libf2c.lib)
         list(APPEND BLAS_LIBRARIES_TO_LINK ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${F2C_LIBRARIES})
     else()
+        # Debian/Ubuntu ship only the SONAME-versioned libblas.so.<major>/
+        # liblapack.so.<major> unless the -dev packages (with the unversioned
+        # .so symlink) are installed. Let find_library() match those directly.
+        set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES} .so.3)
+
         # Installed by distribution's package manager
         find_package(LAPACK REQUIRED QUIET)
         list(APPEND BLAS_LIBRARIES_TO_LINK ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES})
