@@ -77,7 +77,7 @@ bool Diffusion_2D_PPFV(
 
     const int num_substeps = std::max(1, int(total_time / dt));
     dt = total_time / num_substeps;
-    bool success;
+    bool success = true;
 
     Mesh mesh(x_fvm, y_fvm, dt);
     VERB_ppfv2d eq(mesh, PSD0_fvm, Dxx_fvm, Dxy_fvm, Dyy_fvm, xlbc_fvm, xubc_fvm, ylbc_fvm, yubc_fvm, G_fvm, x_LBC_type, x_UBC_type, y_LBC_type, y_UBC_type, Losses_fvm);

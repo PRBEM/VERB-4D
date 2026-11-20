@@ -248,6 +248,8 @@ void stringToValue(const std::string& parameter_value_string, InversionMethod& v
 		variable = InversionMethod::Lapack;
 	} else if (iequals(parameter_value_string, "MKL")) {
 		variable = InversionMethod::MKL;
+	} else if (iequals(parameter_value_string, "PPFV")) {
+		variable = InversionMethod::PPFV;
 	} else {
 		printf("Encountered invalid value for inversion method parameter: %s\n", parameter_value_string.c_str());
 		exit(EXIT_FAILURE);

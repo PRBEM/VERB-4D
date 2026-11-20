@@ -65,28 +65,45 @@ BoundaryConditionType VERB_ppfv2d::get_y_UBC_type() const
   return y_UBC_type;
 }
 
-void VERB_ppfv2d::apply_bcs(Xtensor2d *vertex_fp) const
+void VERB_ppfv2d::apply_bcs(Xtensor2d *vertex_fp, const Xtensor2d &cell_f) const
 {
   Xtensor2d &vertex_f = *vertex_fp;
+  const std::size_t nx = m.nx(), ny = m.ny();
+
+  // A boundary vertex takes the mean over the (one or two) boundary cells it touches: of the current PSD
+  // for a zero normal derivative, of the boundary values (one per cell) for a constant value. The vertex
+  // index j (i) runs to ny (nx), the cell index only to ny - 1 (nx - 1).
+  auto along_x_edge = [&](std::size_t i_cell, std::size_t j) {
+    const std::size_t j0 = j == 0 ? 0 : j - 1, j1 = j == ny ? ny - 1 : j;
+    return (cell_f(i_cell, j0) + cell_f(i_cell, j1)) / 2.0;
+  };
+  auto along_y_edge = [&](std::size_t i, std::size_t j_cell) {
+    const std::size_t i0 = i == 0 ? 0 : i - 1, i1 = i == nx ? nx - 1 : i;
+    return (cell_f(i0, j_cell) + cell_f(i1, j_cell)) / 2.0;
+  };
+  auto boundary_mean = [](const Eigen::VectorXd &values, std::size_t vertex, std::size_t n_cells) {
+    const std::size_t c0 = vertex == 0 ? 0 : vertex - 1, c1 = vertex == n_cells ? n_cells - 1 : vertex;
+    return (values(c0) + values(c1)) / 2.0;
+  };
 
   // i == 0 and m.nx() boundary condition case
-  for (std::size_t j = 0; j < m.ny() + 1; ++j)
-  { 
-    if (x_LBC_type == BoundaryConditionType::ConstantValue) vertex_f(0, j) = x_LBC_(j);
-    else if (x_LBC_type == BoundaryConditionType::ConstantDerivative) vertex_f(0, j) = PSD(0, j);
+  for (std::size_t j = 0; j < ny + 1; ++j)
+  {
+    if (x_LBC_type == BoundaryConditionType::ConstantValue) vertex_f(0, j) = boundary_mean(x_LBC_, j, ny);
+    else if (x_LBC_type == BoundaryConditionType::ConstantDerivative) vertex_f(0, j) = along_x_edge(0, j);
 
-    if (x_UBC_type == BoundaryConditionType::ConstantValue) vertex_f(m.nx(), j) = x_UBC_(j);
-    else if (x_UBC_type == BoundaryConditionType::ConstantDerivative)  vertex_f(m.nx(), j) = PSD(m.nx()-1, j);
-
-  }
-    // j == 0 and j == m.ny() boundary
-    for (std::size_t i = 0; i < m.nx() + 1; ++i)
-    {
-      if (y_LBC_type == BoundaryConditionType::ConstantValue) vertex_f(i, 0) = y_LBC_(i);
-      else if (y_LBC_type == BoundaryConditionType::ConstantDerivative) vertex_f(i, 0) = PSD(i, 0);
-      if (y_UBC_type == BoundaryConditionType::ConstantValue) vertex_f(i, m.ny()) = y_UBC_(i);
-      else if (y_UBC_type == BoundaryConditionType::ConstantDerivative)  vertex_f(i, m.ny()) = PSD(i, m.ny()-1);
+    if (x_UBC_type == BoundaryConditionType::ConstantValue) vertex_f(nx, j) = boundary_mean(x_UBC_, j, ny);
+    else if (x_UBC_type == BoundaryConditionType::ConstantDerivative) vertex_f(nx, j) = along_x_edge(nx - 1, j);
   }
 
+  // j == 0 and j == m.ny() boundary
+  for (std::size_t i = 0; i < nx + 1; ++i)
+  {
+    if (y_LBC_type == BoundaryConditionType::ConstantValue) vertex_f(i, 0) = boundary_mean(y_LBC_, i, nx);
+    else if (y_LBC_type == BoundaryConditionType::ConstantDerivative) vertex_f(i, 0) = along_y_edge(i, 0);
+
+    if (y_UBC_type == BoundaryConditionType::ConstantValue) vertex_f(i, ny) = boundary_mean(y_UBC_, i, nx);
+    else if (y_UBC_type == BoundaryConditionType::ConstantDerivative) vertex_f(i, ny) = along_y_edge(i, ny - 1);
+  }
 }
 

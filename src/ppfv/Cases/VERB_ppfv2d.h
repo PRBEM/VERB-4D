@@ -36,7 +36,7 @@ public:
              const Xtensor2d &Losses);
 
   double init_PSD(const Ind &ind) const;
-  void apply_bcs(Xtensor2d *vertex_fp) const;
+  void apply_bcs(Xtensor2d *vertex_fp, const Xtensor2d &cell_f) const;
   BoundaryConditionType x_LBC_type;
   BoundaryConditionType x_UBC_type;
   BoundaryConditionType y_LBC_type;

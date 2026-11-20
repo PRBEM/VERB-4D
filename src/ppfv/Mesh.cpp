@@ -24,22 +24,22 @@ Mesh::Mesh(const Eigen::VectorXd& x, const Eigen::VectorXd& y,
   dx_.resize(nx_);
   dy_.resize(ny_);
 
-  calculate_mesh_spacing();
-
-  xO_ = x_centers_(0) - dx(0)/2.0;
-  yO_ = y_centers_(0) - dy(0)/2.0;
-
+  // Vertices at the mid-points between the centers; the outer cells reach as far outward as inward.
   x_vertices_ = Eigen::VectorXd::Zero(nx()+1);
   y_vertices_ = Eigen::VectorXd::Zero(ny()+1);
 
-  x_vertices_(0) = xO(); 
-  y_vertices_(0) = yO(); 
+  for (std::size_t i=1; i<nx(); ++i) x_vertices_(i) = (x_centers_(i-1) + x_centers_(i)) / 2.0;
+  for (std::size_t j=1; j<ny(); ++j) y_vertices_(j) = (y_centers_(j-1) + y_centers_(j)) / 2.0;
 
-  for (std::size_t i=1; i<nx(); ++i) x_vertices_(i) = (x_centers_(i-1) + x_centers_(i)) / 2.0; 
-  for (std::size_t j=1; j<ny(); ++j) y_vertices_(j) = (y_centers_(j-1) + y_centers_(j)) / 2.0; 
+  x_vertices_(0) = x_centers_(0) - (x_centers_(1) - x_centers_(0)) / 2.0;
+  y_vertices_(0) = y_centers_(0) - (y_centers_(1) - y_centers_(0)) / 2.0;
+  x_vertices_(nx()) = x_centers_(nx()-1) + (x_centers_(nx()-1) - x_centers_(nx()-2)) / 2.0;
+  y_vertices_(ny()) = y_centers_(ny()-1) + (y_centers_(ny()-1) - y_centers_(ny()-2)) / 2.0;
 
-  x_vertices_(nx()) = x_vertices_(nx()-1) + dx(nx()-1);
-  y_vertices_(ny()) = y_vertices_(ny()-1) + dy(ny()-1);
+  xO_ = x_vertices_(0);
+  yO_ = y_vertices_(0);
+
+  calculate_mesh_spacing();
 
   nbr_inds.resize({nx(), ny(), nnbrs()});
   edges.resize({nx(), ny(), nnbrs()});
@@ -57,29 +57,10 @@ Mesh::Mesh(const Eigen::VectorXd& x, const Eigen::VectorXd& y,
 
 void Mesh::calculate_mesh_spacing()
 {
-  // Calculate individual dx for each cell
-
-  // Calculate individual dy for each cell
-  for (std::size_t i = 0; i < nx_; ++i) {
-    if (i == 0) {
-      dx_(i) = x_centers_[1] - x_centers_[0];
-    } else if (i == nx_ - 1) {
-      dx_(i) = x_centers_[i] - x_centers_[i-1];
-    } else {
-      dx_(i) = (x_centers_[i + 1] - x_centers_[i]);
-    }
-  }
-
-  // Calculate individual dy for each cell
-  for (std::size_t j = 0; j < ny_; ++j) {
-    if (j == 0) {
-      dy_(j) = y_centers_[1] - y_centers_[0];
-    } else if (j == ny_ - 1) {
-      dy_(j) = y_centers_[j] - y_centers_[j-1];
-    } else {
-      dy_(j) = (y_centers_[j + 1] - y_centers_[j]);
-    }
-  }
+  // Cell widths between the cell's own vertices, so that the cell volume matches its faces
+  // (a forward difference of the centers does not on non-uniform grids). Negative for descending grids.
+  for (std::size_t i = 0; i < nx_; ++i) dx_(i) = x_vertices_(i + 1) - x_vertices_(i);
+  for (std::size_t j = 0; j < ny_; ++j) dy_(j) = y_vertices_(j + 1) - y_vertices_(j);
 }
 
 void Mesh::build_connectivity() {
